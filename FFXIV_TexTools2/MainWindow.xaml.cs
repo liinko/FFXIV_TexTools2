@@ -459,10 +459,6 @@ namespace FFXIV_TexTools2
                     importButton.IsEnabled = false;
                 }
 
-                Console.WriteLine("index2 " + FFCRC.GetHash(fullPath));
-
-
-
                 fullPathLabel.Document = new FlowDocument(paragraph);
 
                 if (offset == 0)
