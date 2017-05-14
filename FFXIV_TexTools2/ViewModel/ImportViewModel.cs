@@ -31,6 +31,7 @@ namespace FFXIV_TexTools2.ViewModel
 
         private bool canExecute = true;
         TexInfo texInfo;
+        MTRLInfo mtrlInfo;
         string path, fPath;
 
         public bool CanExecute
@@ -68,6 +69,15 @@ namespace FFXIV_TexTools2.ViewModel
             importCommand = new RelayCommand(Import);
         }
 
+        public ImportViewModel(MTRLInfo info, string category, string item)
+        {
+            mtrlInfo = info;
+            fPath = info.MTRLPath;
+            path = Properties.Settings.Default.Save_Directory + "/" + category + "/" + item + "/" + Path.GetFileNameWithoutExtension(info.MTRLPath) + ".dds";
+
+            importCommand = new RelayCommand(ImportColor);
+        }
+
 
         public void Import(object obj)
         {
@@ -97,6 +107,11 @@ namespace FFXIV_TexTools2.ViewModel
                         {
                             bw.BaseStream.Seek(0, SeekOrigin.End);
 
+                            if ((bw.BaseStream.Position & 0xff) != 0)
+                            {
+                                bw.Write((byte)0);
+                            }
+
                             int eof = (int)bw.BaseStream.Position + fullImport.Count;
 
                             while((eof & 0xFF) != 0)
@@ -122,6 +137,112 @@ namespace FFXIV_TexTools2.ViewModel
             else
             {
                 MessageBox.Show("Could not find file \n" + path, "File read Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        public void ImportColor(Object obj)
+        {
+            if (File.Exists(path))
+            {
+                List<byte> mtrlBytes = new List<byte>();
+                List<byte> complete = new List<byte>();
+
+                int offset = mtrlInfo.MTRLOffset;
+                long newOffset;
+                short fileSize;
+
+                int datNum = ((offset / 8) & 0x000f) / 2;
+
+                using (BinaryReader br = new BinaryReader(new MemoryStream(Helper.GetDecompressedIMCBytes(offset, datNum))))
+                {
+                    br.BaseStream.Seek(4, SeekOrigin.Begin);
+                    fileSize = br.ReadInt16();
+                    short clrSize = br.ReadInt16();
+                    short texNameSize = br.ReadInt16();
+                    br.ReadBytes(2);
+                    byte texNum = br.ReadByte();
+                    byte mapNum = br.ReadByte();
+                    byte clrNum = br.ReadByte();
+                    byte unkNum = br.ReadByte();
+
+                    int headerEnd = 16 + ((texNum + mapNum + clrNum) * 4);
+
+                    br.BaseStream.Seek(0, SeekOrigin.Begin);
+
+                    mtrlBytes.AddRange(br.ReadBytes(headerEnd));
+                    mtrlBytes.AddRange(br.ReadBytes(texNameSize + 4));
+                    br.ReadBytes(clrSize);
+
+                    if(clrSize == 544)
+                    {
+                        using (BinaryReader br1 = new BinaryReader(File.OpenRead(path)))
+                        {
+                            br1.BaseStream.Seek(128, SeekOrigin.Begin);
+
+                            mtrlBytes.AddRange(br1.ReadBytes(clrSize - 32));
+                        }
+
+                        string flagsPath = Path.Combine(Path.GetDirectoryName(path), (Path.GetFileNameWithoutExtension(path) + ".dat"));
+
+                        using (BinaryReader br1 = new BinaryReader(File.OpenRead(flagsPath)))
+                        {
+                            br1.BaseStream.Seek(0, SeekOrigin.Begin);
+
+                            mtrlBytes.AddRange(br1.ReadBytes(32));
+                        }
+                    }
+                    else
+                    {
+                        using (BinaryReader br1 = new BinaryReader(File.OpenRead(path)))
+                        {
+                            br1.BaseStream.Seek(128, SeekOrigin.Begin);
+
+                            mtrlBytes.AddRange(br1.ReadBytes(clrSize));
+                        }
+                    }
+
+                    mtrlBytes.AddRange(br.ReadBytes(fileSize - (int)br.BaseStream.Position));
+                }
+
+                var compressed = Compressor(mtrlBytes.ToArray());
+                int padding = 128 - (compressed.Length % 128);
+
+                complete.AddRange(MakeMTRLHeader(fileSize, compressed.Length + padding));
+                complete.AddRange(BitConverter.GetBytes(16));
+                complete.AddRange(BitConverter.GetBytes(0));
+                complete.AddRange(BitConverter.GetBytes(compressed.Length));
+                complete.AddRange(BitConverter.GetBytes((int)fileSize));
+                complete.AddRange(compressed);
+                complete.AddRange(new byte[padding]);
+
+                using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(Properties.Settings.Default.FFXIV_Directory + "/040000.win32.dat3")))
+                {
+                    bw.BaseStream.Seek(0, SeekOrigin.End);
+
+                    if((bw.BaseStream.Position & 0xff) != 0)
+                    {
+                        bw.Write((byte)0);
+                    }
+
+                    int eof = (int)bw.BaseStream.Position + complete.Count;
+
+                    while ((eof & 0xFF) != 0)
+                    {
+                        complete.AddRange(new byte[16]);
+                        eof = eof + 16;
+                    }
+
+                    newOffset = bw.BaseStream.Position + 48;
+
+                    bw.Write(complete.ToArray());
+                }
+
+                UpdateIndex(newOffset);
+                UpdateIndex2(newOffset);
+            }
+            else
+            {
+
             }
         }
 
@@ -329,6 +450,24 @@ namespace FFXIV_TexTools2.ViewModel
             return header;
         }
 
+        private List<byte> MakeMTRLHeader(short fileSize, int paddedSize)
+        {
+            List<byte> header = new List<byte>();
+
+            header.AddRange(BitConverter.GetBytes(128));
+            header.AddRange(BitConverter.GetBytes(2));
+            header.AddRange(BitConverter.GetBytes((int)fileSize));
+            header.AddRange(BitConverter.GetBytes(4));
+            header.AddRange(BitConverter.GetBytes(3));
+            header.AddRange(BitConverter.GetBytes(1));
+            header.AddRange(BitConverter.GetBytes(0));
+            header.AddRange(BitConverter.GetBytes((short)paddedSize));
+            header.AddRange(BitConverter.GetBytes(fileSize));
+            header.AddRange(new byte[96]);
+
+            return header;
+        }
+
         private void UpdateIndex(long offset)
         {
             var index = File.Open(Info.indexDir, FileMode.Open);
@@ -373,7 +512,7 @@ namespace FFXIV_TexTools2.ViewModel
 
         private void UpdateIndex2(long offset)
         {
-            var index = File.Open(Info.indexDir, FileMode.Open);
+            var index = File.Open(Info.index2Dir, FileMode.Open);
             var pathHash = FFCRC.GetHash(fPath);
 
             using (BinaryReader br = new BinaryReader(index))
@@ -391,7 +530,7 @@ namespace FFXIV_TexTools2.ViewModel
                         if (tempOffset == pathHash)
                         {
                             bw.BaseStream.Seek(br.BaseStream.Position, SeekOrigin.Begin);
-                            bw.Write(offset / 8);
+                            bw.Write((int)(offset / 8));
                             break;
                         }
                         else

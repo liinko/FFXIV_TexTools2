@@ -407,12 +407,14 @@ namespace FFXIV_TexTools2.Material
                     p = 2;
                 }
 
-                MTRLFolder = String.Format(Strings.MonsterMtrlFolder, Info.petID[item.itemName], p.ToString().PadLeft(4, '0')) + IMCVersion.PadLeft(4, '0');
+                MTRLFolder = String.Format(Strings.MonsterMtrlFolder, Info.petID[item.itemName], p.ToString().PadLeft(4, '0')) + part.PadLeft(4, '0');
                 MTRLFile = String.Format(Strings.MonsterMtrlFile, Info.petID[item.itemName], p.ToString().PadLeft(4, '0'), "a");
 
                 offset = Helper.GetOffset(FFCRC.GetHash(MTRLFolder), FFCRC.GetHash(MTRLFile));
 
                 mtrlInfo = GetTEXFromMTRL(offset, false);
+                mtrlInfo.MTRLPath = MTRLFolder + "/" + MTRLFile;
+                mtrlInfo.MTRLOffset = offset;
 
                 info = new Tuple<MTRLInfo, List<ComboBoxInfo>>(mtrlInfo, mtrlInfo.TextureMaps);
             }
@@ -441,6 +443,8 @@ namespace FFXIV_TexTools2.Material
                     MTRLFile = String.Format(Strings.MonsterMtrlFile, item.itemID.PadLeft(4, '0'), item.weaponBody.PadLeft(4, '0'), part);
                     offset = Helper.GetOffset(FFCRC.GetHash(item.mtrlFolder + IMCVersion), FFCRC.GetHash(MTRLFile));
                     mtrlInfo = GetTEXFromMTRL(offset, false);
+                    mtrlInfo.MTRLPath = item.mtrlFolder + IMCVersion + "/" + MTRLFile;
+                    mtrlInfo.MTRLOffset = offset;
 
                     info = new Tuple<MTRLInfo, List<ComboBoxInfo>>(mtrlInfo, mtrlInfo.TextureMaps);
                 }
@@ -450,6 +454,8 @@ namespace FFXIV_TexTools2.Material
                 MTRLFile = String.Format(Strings.MonsterMtrlFile, item.itemID.PadLeft(4, '0'), item.weaponBody.PadLeft(4, '0'), part);
                 offset = Helper.GetOffset(FFCRC.GetHash(item.mtrlFolder + IMCVersion), FFCRC.GetHash(MTRLFile));
                 mtrlInfo = GetTEXFromMTRL(offset, false);
+                mtrlInfo.MTRLPath = item.mtrlFolder + IMCVersion + "/" + MTRLFile;
+                mtrlInfo.MTRLOffset = offset;
 
                 info = new Tuple<MTRLInfo, List<ComboBoxInfo>>(mtrlInfo, mtrlInfo.TextureMaps);
             }
@@ -486,6 +492,8 @@ namespace FFXIV_TexTools2.Material
                 offset = Helper.GetOffset(FFCRC.GetHash(MTRLFolder + imcVersion), FFCRC.GetHash(MTRLFile));
 
                 mtrlInfo = GetTEXFromMTRL(offset, false);
+                mtrlInfo.MTRLPath = MTRLFolder + imcVersion + "/" + MTRLFile;
+                mtrlInfo.MTRLOffset = offset;
 
                 info = new Tuple<MTRLInfo, List<ComboBoxInfo>>(mtrlInfo, mtrlInfo.TextureMaps);
             }
@@ -496,6 +504,7 @@ namespace FFXIV_TexTools2.Material
         public static Tuple<MTRLInfo, List<ComboBoxInfo>> GetTexFromType(Items item, ComboBoxInfo race, string part, string type, string IMCVersion, string selectedParent)
         {
             string MTRLFolder, MTRLFile;
+            string MTRLPath = "";
             bool isUncompressed = true;
             int offset = 0;
 
@@ -504,6 +513,7 @@ namespace FFXIV_TexTools2.Material
                 MTRLFolder = String.Format(Strings.FaceMtrlFolder, race.ID, part.PadLeft(4, '0'));
                 MTRLFile = String.Format(Strings.FaceMtrlFile, race.ID, part.PadLeft(4, '0'), Info.FaceTypes[type]);
                 offset = Helper.GetOffset(FFCRC.GetHash(MTRLFolder), FFCRC.GetHash(MTRLFile));
+                MTRLPath = MTRLFolder + "/" + MTRLFile;
 
                 isUncompressed = true;
             }
@@ -521,6 +531,7 @@ namespace FFXIV_TexTools2.Material
                     MTRLFile = String.Format(Strings.HairMtrlFile, race.ID, part.PadLeft(4, '0'), Info.HairTypes[type], "a");
                 }
 
+                MTRLPath = MTRLFolder + "/" + MTRLFile;
                 offset = Helper.GetOffset(FFCRC.GetHash(MTRLFolder), FFCRC.GetHash(MTRLFile));
             }
             else if (selectedParent.Equals(Strings.Mounts))
@@ -536,12 +547,16 @@ namespace FFXIV_TexTools2.Material
                     MTRLFile = String.Format(Strings.MonsterMtrlFile, item.itemID.PadLeft(4, '0'), item.weaponBody.PadLeft(4, '0'), part);
                 }
 
+                MTRLPath = item.mtrlFolder + IMCVersion + "/" + MTRLFile;
                 offset = Helper.GetOffset(FFCRC.GetHash(item.mtrlFolder + IMCVersion), FFCRC.GetHash(MTRLFile));
             }
 
 
 
             var mtrlInfo = GetTEXFromMTRL(offset, isUncompressed);
+            mtrlInfo.MTRLPath = MTRLPath;
+            mtrlInfo.MTRLOffset = offset;
+
 
             return new Tuple<MTRLInfo, List<ComboBoxInfo>>(mtrlInfo, mtrlInfo.TextureMaps);
         }
@@ -656,7 +671,15 @@ namespace FFXIV_TexTools2.Material
                 {
                     br.BaseStream.Seek((16 + (texNum*4) + (mapNum*4) + (clrNum*4) + texNameSize + 4), SeekOrigin.Begin);
                     info.TextureMaps.Add(new ComboBoxInfo(Strings.ColorSet, ""));
-                    info.ColorData = br.ReadBytes(clrSize);
+                    if (clrSize == 544)
+                    {
+                        info.ColorData = br.ReadBytes(clrSize - 32);
+                        info.ColorFlags = br.ReadBytes(32);
+                    }
+                    else
+                    {
+                        info.ColorData = br.ReadBytes(clrSize);
+                    }
                 }
             }
 

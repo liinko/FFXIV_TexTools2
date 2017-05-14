@@ -16,6 +16,7 @@
 
 using FFXIV_TexTools2.Helpers;
 using FFXIV_TexTools2.Material;
+using FFXIV_TexTools2.Resources;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -34,6 +35,7 @@ namespace FFXIV_TexTools2.ViewModel
         string selecteditem, selectedCategory, texMap, name;
         BitmapSource selectedBitmap;
         TexInfo texInfo;
+        MTRLInfo mtrlInfo;
 
         public bool CanExecute
         {
@@ -69,19 +71,39 @@ namespace FFXIV_TexTools2.ViewModel
             }
         }
 
-        public SaveViewModel(string item, string category, string map, BitmapSource bmp, TexInfo info, string path)
+        public SaveViewModel(string item, string category, string map, BitmapSource bmp, string path)
         {
             selecteditem = item;
             selectedCategory = category;
             selectedBitmap = bmp;
             texMap = map;
-            texInfo = info;
-            //name = path.Substring(path.LastIndexOf("/") + 1);
             name = path;
 
             savePNGCommand = new RelayCommand(SavePNG);
+        }
+
+        public SaveViewModel(string item, string category, string map, TexInfo info, string path)
+        {
+            selecteditem = item;
+            selectedCategory = category;
+            texMap = map;
+            texInfo = info;
+            name = path;
+
             saveDDSCommand = new RelayCommand(SaveDDS);
         }
+
+        public SaveViewModel(string item, string category, string map, MTRLInfo info)
+        {
+            selecteditem = item;
+            selectedCategory = category;
+            texMap = map;
+            mtrlInfo = info;
+            name = info.MTRLPath;
+
+            saveDDSCommand = new RelayCommand(SaveDDS);
+        }
+
 
         public void SavePNG(object obj)
         {
@@ -109,9 +131,19 @@ namespace FFXIV_TexTools2.ViewModel
 
             List<byte> DDS = new List<byte>();
 
+            if (texMap.Equals(Strings.ColorSet))
+            {
+                var colorFlagsDir = Path.Combine(directory, (Path.GetFileNameWithoutExtension(name) + ".dat"));
+                DDS.AddRange(CreateColorDDSHeader());
+                DDS.AddRange(mtrlInfo.ColorData);
+                File.WriteAllBytes(colorFlagsDir, mtrlInfo.ColorFlags);
+            }
+            else
+            {
+                DDS.AddRange(CreateDDSHeader());
+                DDS.AddRange(texInfo.RawTexData);
+            }
 
-            DDS.AddRange(CreateDDSHeader());
-            DDS.AddRange(texInfo.RawTexData);
 
             File.WriteAllBytes(saveDir, DDS.ToArray());
 
@@ -234,6 +266,55 @@ namespace FFXIV_TexTools2.ViewModel
                 Array.Clear(blank, 0, 40);
                 header.AddRange(blank1);
             }
+
+            return header.ToArray();
+        }
+
+        public byte[] CreateColorDDSHeader()
+        {
+            uint m_linearsize;
+            List<byte> header = new List<byte>();
+            //DDS
+            uint m_magic = 0x20534444;
+            header.AddRange(BitConverter.GetBytes(m_magic));
+            //header size
+            uint m_size = 124;
+            header.AddRange(BitConverter.GetBytes(m_size));
+            //Flags (DDSD_CAPS, DDSD_HEIGHT, DDSD_WIDTH, DDSD_PIXELFORMAT, DDSD_LINEARSIZE);
+            uint m_flags = 528399;
+            header.AddRange(BitConverter.GetBytes(m_flags));
+            //height
+            uint m_height = 16;
+            header.AddRange(BitConverter.GetBytes(m_height));
+            //width
+            uint m_width = 4;
+            header.AddRange(BitConverter.GetBytes(m_width));
+            //Linearsize
+            m_linearsize = 512;
+            header.AddRange(BitConverter.GetBytes(m_linearsize));
+            //depth
+            uint m_depth = 0;
+            header.AddRange(BitConverter.GetBytes(m_depth));
+            //mipmap count
+            uint m_mipmap = 0;
+            header.AddRange(BitConverter.GetBytes(m_mipmap));
+            //blank
+            byte[] blank = new byte[44];
+            Array.Clear(blank, 0, 44);
+            header.AddRange(blank);
+            //pixelformat size
+            uint m_psize = 32;
+            header.AddRange(BitConverter.GetBytes(m_psize));
+            //pixelformat flags (DDPF_FOURCC)
+            uint m_pflags = 4;
+            header.AddRange(BitConverter.GetBytes(m_pflags));
+            //pixelformat dwFourCC
+            uint m_filetype = 0x71;
+            header.AddRange(BitConverter.GetBytes(m_filetype));
+            //blank1
+            byte[] blank1 = new byte[40];
+            Array.Clear(blank, 0, 40);
+            header.AddRange(blank1);
 
             return header.ToArray();
         }

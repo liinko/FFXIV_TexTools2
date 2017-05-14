@@ -36,8 +36,13 @@ namespace FFXIV_TexTools2
 
             using(BinaryWriter bw = new BinaryWriter(File.OpenWrite(Info.indexDir))){
                 bw.BaseStream.Seek(1104, SeekOrigin.Begin);
-                byte b = 4;
-                bw.Write(b);
+                bw.Write((byte)4);
+            }
+
+            using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(Info.index2Dir)))
+            {
+                bw.BaseStream.Seek(1104, SeekOrigin.Begin);
+                bw.Write((byte)4);
             }
 
         }

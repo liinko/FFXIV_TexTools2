@@ -448,6 +448,8 @@ namespace FFXIV_TexTools2
                 else if (comboInfo.Name.Equals(Strings.ColorSet))
                 {
                     colorBmp = TEX.TextureToBitmap(mtrlInfo.ColorData, 9312, 4, 16);
+                    fullPath = mtrlInfo.MTRLPath;
+                    paragraph.Inlines.Add(new Run(fullPath));
                 }
 
                 if (File.Exists(Properties.Settings.Default.Save_Directory + "/" + selectedParent + "/" + selectedItem.itemName + "/" +  Path.GetFileNameWithoutExtension(fullPath) + ".dds"))
@@ -540,19 +542,35 @@ namespace FFXIV_TexTools2
 
         private void SavePNGButton_Click(object sender, RoutedEventArgs e)
         {
-            savePNGButton.DataContext = new SaveViewModel(selectedItem.itemName, selectedParent, ((ComboBoxInfo)mapComboBox.SelectedItem).Name, texImage.Source as BitmapSource, null, fullPath);
+            savePNGButton.DataContext = new SaveViewModel(selectedItem.itemName, selectedParent, ((ComboBoxInfo)mapComboBox.SelectedItem).Name, texImage.Source as BitmapSource, fullPath);
         }
 
         private void SaveDDSButton_Click(object sender, RoutedEventArgs e)
         {
-            saveDDSButton.DataContext = new SaveViewModel(selectedItem.itemName, selectedParent, ((ComboBoxInfo)mapComboBox.SelectedItem).Name, null, texInfo, fullPath);
+            if((mapComboBox.SelectedItem as ComboBoxInfo).Name.Equals(Strings.ColorSet))
+            {
+                saveDDSButton.DataContext = new SaveViewModel(selectedItem.itemName, selectedParent, ((ComboBoxInfo)mapComboBox.SelectedItem).Name, mtrlInfo);
+
+            }
+            else
+            {
+                saveDDSButton.DataContext = new SaveViewModel(selectedItem.itemName, selectedParent, ((ComboBoxInfo)mapComboBox.SelectedItem).Name, texInfo, fullPath);
+            }
+            
             importButton.IsEnabled = true;
         }
 
         private void ImportButton_Click(object sender, RoutedEventArgs e)
         {
-            importButton.DataContext = new ImportViewModel(texInfo, selectedParent, selectedItem.itemName, ((ComboBoxInfo)mapComboBox.SelectedItem).Name, fullPath);
+            if ((mapComboBox.SelectedItem as ComboBoxInfo).Name.Equals(Strings.ColorSet))
+            {
+                importButton.DataContext = new ImportViewModel(mtrlInfo, selectedParent, selectedItem.itemName);
 
+            }
+            else
+            {
+                importButton.DataContext = new ImportViewModel(texInfo, selectedParent, selectedItem.itemName, ((ComboBoxInfo)mapComboBox.SelectedItem).Name, fullPath);
+            }
         }
 
         private void RevertButton_Click(object sender, RoutedEventArgs e)
