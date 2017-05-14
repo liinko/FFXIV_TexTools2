@@ -224,11 +224,11 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <PixelShader Include="Shader\rgbaChannels.fx">
+    <None Include="Shader\rgbaChannels.fx">
       <ShaderModel>2_0</ShaderModel>
       <CompileDirect2DCustomEffect>False</CompileDirect2DCustomEffect>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </PixelShader>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">
