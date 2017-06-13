@@ -16,7 +16,7 @@ Currenlty Functional:
 Not Yet Implemented:
 * Revert
 * Mod List
-* Importer
+* Mod Importer
 * Directories
 * Revert All
 * Reapply All
