@@ -213,10 +213,15 @@ namespace FFXIV_TexTools2.Helpers
 
         public static Dictionary<int, int> DDSType = new Dictionary<int, int>
         {
+            //DXT1
             {13344, 827611204 },
+            //DXT3
             {13360, 861165636 },
+            //DXT5
             {13361, 894720068 },
+            //ARGB 16F
             {9312, 113 },
+            //Uncompressed RGBA
             {5200, 0 }
         };
     }

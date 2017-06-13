@@ -106,7 +106,7 @@ namespace FFXIV_TexTools2.Material
                             compressedSize = br.ReadInt32();
                             decompressedSize = br.ReadInt32();
 
-                            if(compressedSize != 32000)
+                            if (compressedSize != 32000)
                             {
                                 compressedData = br.ReadBytes(compressedSize);
                                 decompressedData = new byte[decompressedSize];

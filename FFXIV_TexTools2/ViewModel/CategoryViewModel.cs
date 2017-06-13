@@ -27,10 +27,26 @@ namespace FFXIV_TexTools2.ViewModel
         readonly Category _category;
         List<Items> _itemList;
 
-        public CategoryViewModel(Category category, List<Items> itemList) : base(null, true)
+        public CategoryViewModel(Category category, List<Items> itemList) : base(null, false)
         {
             _category = category;
+
             _itemList = itemList;
+
+            IEnumerable<Items> items;
+            if (!CategoryName.Equals(Strings.Character) && !CategoryName.Equals(Strings.Pets))
+            {
+                items = from item in _itemList where item.itemSlot.Equals(Info.IDSlot[CategoryName]) orderby item.itemName select item;
+            }
+            else
+            {
+                items = from item in _itemList where item.itemSlot.Equals(Info.IDSlot[CategoryName]) select item;
+            }
+
+            foreach (Items item in items)
+            {
+                Children.Add(new ItemViewModel(item, this));
+            }
         }
 
         public string CategoryName
@@ -55,7 +71,6 @@ namespace FFXIV_TexTools2.ViewModel
             {
                 Children.Add(new ItemViewModel(item, this));
             }
-
         }
     }
 }

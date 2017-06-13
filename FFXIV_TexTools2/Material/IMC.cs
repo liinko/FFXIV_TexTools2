@@ -17,6 +17,8 @@
 using FFXIV_TexTools2.Helpers;
 using FFXIV_TexTools2.Model;
 using FFXIV_TexTools2.Resources;
+using System;
+using System.Diagnostics;
 using System.IO;
 
 namespace FFXIV_TexTools2.Material

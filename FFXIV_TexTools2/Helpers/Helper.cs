@@ -18,6 +18,7 @@ using FFXIV_TexTools2.Model;
 using FFXIV_TexTools2.Resources;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
@@ -230,8 +231,6 @@ namespace FFXIV_TexTools2.Helpers
                         if (fTempOffset == folderHash)
                         {
                             fileOffset = br.ReadInt32() * 8;
-                            //byte[] offset = br.ReadBytes(4);
-                            //fileOffset = BitConverter.ToInt32(offset, 0) * 8;
                             break;
                         }
                         else
@@ -316,7 +315,88 @@ namespace FFXIV_TexTools2.Helpers
             }
             return fileOffset;
         }
-        #endregion //offset
+
+        public static int UpdateIndex(long offset, string fullPath)
+        {
+            var folderHash = FFCRC.GetHash(fullPath.Substring(0, fullPath.LastIndexOf("/")));
+            var fileHash = FFCRC.GetHash(Path.GetFileName(fullPath));
+            int oldOffset = 0;
+
+            using(var index = File.Open(Info.indexDir, FileMode.Open))
+            {
+                using (BinaryReader br = new BinaryReader(index))
+                {
+                    using (BinaryWriter bw = new BinaryWriter(index))
+                    {
+                        br.BaseStream.Seek(1036, SeekOrigin.Begin);
+                        int totalFiles = br.ReadInt32();
+
+                        br.BaseStream.Seek(2048, SeekOrigin.Begin);
+                        for (int i = 0; i < totalFiles; br.ReadBytes(4), i += 16)
+                        {
+                            int tempOffset = br.ReadInt32();
+
+                            if (tempOffset == fileHash)
+                            {
+                                int fTempOffset = br.ReadInt32();
+
+                                if (fTempOffset == folderHash)
+                                {
+                                    oldOffset = br.ReadInt32();
+                                    bw.BaseStream.Seek(br.BaseStream.Position - 4, SeekOrigin.Begin);
+                                    bw.Write(offset / 8);
+                                    break;
+                                }
+                                else
+                                {
+                                    br.ReadBytes(4);
+                                }
+                            }
+                            else
+                            {
+                                br.ReadBytes(8);
+                            }
+                        }
+                    }
+                }
+            }
+            return oldOffset;
+        }
+
+        public static void UpdateIndex2(long offset, string fullPath)
+        {
+            var pathHash = FFCRC.GetHash(fullPath);
+
+            using (var index = File.Open(Info.index2Dir, FileMode.Open))
+            {
+                using (BinaryReader br = new BinaryReader(index))
+                {
+                    using (BinaryWriter bw = new BinaryWriter(index))
+                    {
+                        br.BaseStream.Seek(1036, SeekOrigin.Begin);
+                        int totalFiles = br.ReadInt32();
+
+                        br.BaseStream.Seek(2056, SeekOrigin.Begin);
+                        for (int i = 0; i < totalFiles; br.ReadBytes(4), i += 16)
+                        {
+                            int tempOffset = br.ReadInt32();
+
+                            if (tempOffset == pathHash)
+                            {
+                                bw.BaseStream.Seek(br.BaseStream.Position, SeekOrigin.Begin);
+                                bw.Write((int)(offset / 8));
+                                break;
+                            }
+                            else
+                            {
+                                br.ReadBytes(8);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+#endregion offset
 
 #region IO
         public static bool FolderExists(int folderHash)
@@ -345,7 +425,7 @@ namespace FFXIV_TexTools2.Helpers
             return false;
         }
 
-        public static bool FileExists(int fileHash)
+        public static bool FileExists(int fileHash, int folderHash)
         {
             using (BinaryReader br = new BinaryReader(File.OpenRead(Info.indexDir)))
             {
@@ -359,7 +439,16 @@ namespace FFXIV_TexTools2.Helpers
 
                     if (tempFileOffset == fileHash)
                     {
-                        return true;
+                        int tempFolderOffset = br.ReadInt32();
+
+                        if (tempFolderOffset == folderHash)
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            br.ReadBytes(4);
+                        }
                     }
                     else
                     {
@@ -449,9 +538,55 @@ namespace FFXIV_TexTools2.Helpers
             }
             return fileOffsetDict;
         }
-        #endregion
 
-#region Misc
+        public static bool CheckIndex()
+        {
+            bool problem = false;
+
+            using (BinaryReader br = new BinaryReader(File.OpenRead(Info.indexDir)))
+            {
+                br.BaseStream.Seek(1104, SeekOrigin.Begin);
+
+                var numDats = br.ReadInt16();
+
+                if(numDats != 4)
+                {
+                    problem = true;
+                }
+            }
+
+            using (BinaryReader br = new BinaryReader(File.OpenRead(Info.index2Dir)))
+            {
+                br.BaseStream.Seek(1104, SeekOrigin.Begin);
+
+                var numDats = br.ReadInt16();
+
+                if (numDats != 4)
+                {
+                    problem = true;
+                }
+            }
+
+            return problem;
+        }
+
+        public static void FixIndex()
+        {
+            using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(Info.indexDir)))
+            {
+                bw.BaseStream.Seek(1104, SeekOrigin.Begin);
+                bw.Write((byte)4);
+            }
+
+            using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(Info.index2Dir)))
+            {
+                bw.BaseStream.Seek(1104, SeekOrigin.Begin);
+                bw.Write((byte)4);
+            }
+        }
+#endregion
+
+        #region Misc
         public static string GetItemType(string selectedParent)
         {
             string itemType;
@@ -472,6 +607,10 @@ namespace FFXIV_TexTools2.Helpers
             else if (selectedParent.Equals(Strings.Mounts) || selectedParent.Equals(Strings.Minions) || selectedParent.Equals(Strings.Pets))
             {
                 itemType = "monster";
+            }
+            else if (selectedParent.Equals(Strings.Character))
+            {
+                itemType = "character";
             }
             else
             {

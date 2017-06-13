@@ -21,10 +21,14 @@ using FFXIV_TexTools2.Model;
 using FFXIV_TexTools2.Resources;
 using FFXIV_TexTools2.Shader;
 using FFXIV_TexTools2.ViewModel;
+using FFXIV_TexTools2.Views;
 using FolderSelect;
+using HelixToolkit.Wpf.SharpDX;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Globalization;
@@ -51,9 +55,15 @@ namespace FFXIV_TexTools2
         string selectedParent, imcVersion, fullPath;
         Items selectedItem;
         BitmapSource noAlphaBitmap, alphaBitmap;
+        BitmapSource newDiffuse = null;
+        Bitmap noAlphaNormal = null;
         ColorChannels CC = new ColorChannels();
         List<Category> categoryList;
         TexInfo texInfo;
+        ModListModel goTo = null;
+        List<Mesh> meshList;
+        string modelName;
+        bool loaded3D = false;
 
         public MainWindow()
         {
@@ -77,7 +87,10 @@ namespace FFXIV_TexTools2
 
             foreach(Button b in modelButtonGrid.Children)
             {
-                b.IsEnabled = false;
+                if (!b.Content.Equals("Export OBJ + Materials"))
+                {
+                    b.IsEnabled = false;
+                }
             }
 
             if (Properties.Settings.Default.Language.Equals("en"))
@@ -105,11 +118,13 @@ namespace FFXIV_TexTools2
             {
                 Menu_DX11.IsChecked = true;
                 Menu_DX11.IsEnabled = false;
+                DXVerStatus.Content = DXVerStatus.Content + "11";
             }
             else if (Properties.Settings.Default.DX_Ver.Equals("DX9"))
             {
                 Menu_DX9.IsChecked = true;
                 Menu_DX9.IsEnabled = false;
+                DXVerStatus.Content = DXVerStatus.Content + "9";
             }
 
             importButton.IsEnabled = false;
@@ -119,6 +134,8 @@ namespace FFXIV_TexTools2
             mapComboBox.SelectionChanged += new SelectionChangedEventHandler(MapComboBox_SelectionChanged);
             partComboBox.SelectionChanged += new SelectionChangedEventHandler(PartComboBox_SelectionChanged);
             typeComboBox.SelectionChanged += new SelectionChangedEventHandler(TypeComboBox_SelectionChanged);
+            raceComboBox3D.SelectionChanged += new SelectionChangedEventHandler(RaceComboBox3D_SelectionChanged);
+            bodyComboBox3D.SelectionChanged += new SelectionChangedEventHandler(BodyComboBox3D_SelectionChanged);
 
             searchTextBox.Text = Strings.SearchBox;
             searchTextBox.Foreground = System.Windows.Media.Brushes.Gray;
@@ -128,9 +145,11 @@ namespace FFXIV_TexTools2
 
         private void FillTree()
         {
-            BackgroundWorker fillTreeView = new BackgroundWorker();
-            fillTreeView.WorkerReportsProgress = true;
-            fillTreeView.WorkerSupportsCancellation = true;
+            BackgroundWorker fillTreeView = new BackgroundWorker()
+            {
+                WorkerReportsProgress = true,
+                WorkerSupportsCancellation = true
+            };
             fillTreeView.DoWork += new DoWorkEventHandler(FillTreeView_Work);
             fillTreeView.ProgressChanged += new ProgressChangedEventHandler(FillTreeView_ProgressChanged);
             fillTreeView.RunWorkerCompleted += new RunWorkerCompletedEventHandler(FillTreeView_RunWorkerCompleted);
@@ -201,16 +220,33 @@ namespace FFXIV_TexTools2
 
         private void TextureTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
+            tabControl.SelectedIndex = 0;
+            loaded3D = false;
             if(textureTreeView.SelectedItem is ItemViewModel)
             {
+                savePNGButton.IsEnabled = true;
+                saveDDSButton.IsEnabled = true;
+                mapComboBox.IsEnabled = true;
+
                 var item = textureTreeView.SelectedItem as ItemViewModel;
                 var parent = item.Parent as CategoryViewModel;
 
                 selectedParent = parent.CategoryName;
                 selectedItem = item.Item;
 
-                BackgroundWorker selectedWorker = new BackgroundWorker();
-                selectedWorker.WorkerReportsProgress = true;
+                if(selectedItem.itemName.Equals(Strings.Face_Paint) || selectedItem.itemName.Equals(Strings.Equipment_Decals) || selectedParent.Equals(Strings.Pets))
+                {
+                    _3DTab.IsEnabled = false;
+                }
+                else
+                {
+                    _3DTab.IsEnabled = true;
+                }
+
+                BackgroundWorker selectedWorker = new BackgroundWorker()
+                {
+                    WorkerReportsProgress = true
+                };
                 selectedWorker.DoWork += new DoWorkEventHandler(SelectedWoker_Work);
                 selectedWorker.ProgressChanged += new ProgressChangedEventHandler(SelectedWorker_ProgressChanged);
                 selectedWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(SelectedWorker_RunWorkerCompleted);
@@ -236,7 +272,23 @@ namespace FFXIV_TexTools2
             {
                 ComboView cView = new ComboView(e.Result as List<ComboBoxInfo>);
                 raceComboBox.DataContext = cView;
-                raceComboBox.SelectedIndex = 0;
+
+                if(goTo != null)
+                {
+                    foreach (var race in raceComboBox.Items)
+                    {
+                        if (((ComboBoxInfo)race).Name.Equals(goTo.Race))
+                        {
+                            raceComboBox.SelectedItem = race;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    raceComboBox.SelectedIndex = 0;
+                }
+
 
                 if ((e.Result as List<ComboBoxInfo>).Count > 1)
                 {
@@ -256,8 +308,10 @@ namespace FFXIV_TexTools2
 
             if (e.AddedItems.Count > 0)
             {
-                BackgroundWorker raceWorker = new BackgroundWorker();
-                raceWorker.WorkerReportsProgress = true;
+                BackgroundWorker raceWorker = new BackgroundWorker()
+                {
+                    WorkerReportsProgress = true
+                };
                 raceWorker.DoWork += new DoWorkEventHandler(RaceWoker_Work);
                 raceWorker.ProgressChanged += new ProgressChangedEventHandler(RaceWorker_ProgressChanged);
                 raceWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(RaceWorker_RunWorkerCompleted);
@@ -286,7 +340,22 @@ namespace FFXIV_TexTools2
             {
                 ComboView cView = new ComboView(e.Result as List<ComboBoxInfo>);
                 partComboBox.DataContext = cView;
-                partComboBox.SelectedIndex = 0;
+
+                if(goTo != null)
+                {
+                    foreach (var part in partComboBox.Items)
+                    {
+                        if (((ComboBoxInfo)part).Name.Equals(goTo.Part))
+                        {
+                            partComboBox.SelectedItem = part;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    partComboBox.SelectedIndex = 0;
+                }
 
                 if ((e.Result as List<ComboBoxInfo>).Count > 1)
                 {
@@ -308,8 +377,10 @@ namespace FFXIV_TexTools2
 
             if (e.AddedItems.Count > 0)
             {
-                BackgroundWorker partsWorker = new BackgroundWorker();
-                partsWorker.WorkerReportsProgress = true;
+                BackgroundWorker partsWorker = new BackgroundWorker()
+                {
+                    WorkerReportsProgress = true
+                };
                 partsWorker.DoWork += new DoWorkEventHandler(PartsWoker_Work);
                 partsWorker.ProgressChanged += new ProgressChangedEventHandler(PartsWorker_ProgressChanged);
                 partsWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(PartsdWorker_RunWorkerCompleted);
@@ -343,7 +414,22 @@ namespace FFXIV_TexTools2
                 if (selectedItem.itemName.Equals(Strings.Face) || selectedItem.itemName.Equals(Strings.Hair))
                 {
                     typeComboBox.DataContext = cView;
+
+                    if(goTo != null)
+                    {
+                        foreach (var type in typeComboBox.Items)
+                        {
+                            if (((ComboBoxInfo)type).Name.Equals(goTo.Type))
+                            {
+                                typeComboBox.SelectedItem = type;
+                                break;
+                            }
+                        }
+                    }
+                    else
+                    {
                     typeComboBox.SelectedIndex = 0;
+                    }
                     typeComboBox.IsEnabled = true;
                 }
                 else if (selectedParent.Equals(Strings.Mounts))
@@ -352,7 +438,21 @@ namespace FFXIV_TexTools2
                         (mountsDict[selectedItem.itemName]).itemID.Equals("1011") || (mountsDict[selectedItem.itemName]).itemID.Equals("1022"))
                     {
                         typeComboBox.DataContext = cView;
-                        typeComboBox.SelectedIndex = 0;
+                        if (goTo != null)
+                        {
+                            foreach (var type in typeComboBox.Items)
+                            {
+                                if (((ComboBoxInfo)type).Name.Equals(goTo.Type))
+                                {
+                                    typeComboBox.SelectedItem = type;
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            typeComboBox.SelectedIndex = 0;
+                        }
                         typeComboBox.IsEnabled = true;
                     }
                     else
@@ -360,7 +460,22 @@ namespace FFXIV_TexTools2
                         typeComboBox.DataContext = null;
                         typeComboBox.IsEnabled = false;
                         mapComboBox.DataContext = cView;
-                        mapComboBox.SelectedIndex = 0;
+                        if (goTo != null)
+                        {
+                            foreach (var map in mapComboBox.Items)
+                            {
+                                if (((ComboBoxInfo)map).Name.Equals(goTo.Map))
+                                {
+                                    mapComboBox.SelectedItem = map;
+                                    goTo = null;
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            mapComboBox.SelectedIndex = 0;
+                        }
                     }
                 }
                 else
@@ -368,7 +483,22 @@ namespace FFXIV_TexTools2
                     typeComboBox.DataContext = null;
                     typeComboBox.IsEnabled = false;
                     mapComboBox.DataContext = cView;
-                    mapComboBox.SelectedIndex = 0;
+                    if (goTo != null)
+                    {
+                        foreach (var map in mapComboBox.Items)
+                        {
+                            if (((ComboBoxInfo)map).Name.Equals(goTo.Map))
+                            {
+                                mapComboBox.SelectedItem = map;
+                                goTo = null;
+                                break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        mapComboBox.SelectedIndex = 0;
+                    }
                 }
             }
         }
@@ -376,17 +506,50 @@ namespace FFXIV_TexTools2
         private void TypeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var comboInfo = typeComboBox.SelectedItem as ComboBoxInfo;
+            string type;
 
             if (e.AddedItems.Count > 0)
             {
+                if (selectedParent.Equals(Strings.Mounts))
+                {
+                    if ((mountsDict[selectedItem.itemName]).itemID.Equals("1") || (mountsDict[selectedItem.itemName]).itemID.Equals("2") ||
+                        (mountsDict[selectedItem.itemName]).itemID.Equals("1011") || (mountsDict[selectedItem.itemName]).itemID.Equals("1022"))
+                    {
+                        type = Info.slotAbr[comboInfo.Name];
+                    }
+                    else
+                    {
+                        type = comboInfo.Name;
+                    }
+                }
+                else
+                {
+                    type = comboInfo.Name;
+                }
 
-                var info = MTRL.GetTexFromType(selectedItem, raceComboBox.SelectedItem as ComboBoxInfo, ((ComboBoxInfo)partComboBox.SelectedItem).Name, comboInfo.Name, imcVersion, selectedParent);
+
+                var info = MTRL.GetTexFromType(selectedItem, raceComboBox.SelectedItem as ComboBoxInfo, ((ComboBoxInfo)partComboBox.SelectedItem).Name, type, imcVersion, selectedParent);
                 mtrlInfo = info.Item1;
 
                 ComboView cView = new ComboView(info.Item2);
                 mapComboBox.DataContext = cView;
 
-                mapComboBox.SelectedIndex = 0;
+                if(goTo != null)
+                {
+                    foreach (var map in mapComboBox.Items)
+                    {
+                        if (((ComboBoxInfo)map).Name.Equals(goTo.Map))
+                        {
+                            mapComboBox.SelectedItem = map;
+                            goTo = null;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    mapComboBox.SelectedIndex = 0;
+                }
             }
 
             e.Handled = true;
@@ -397,8 +560,10 @@ namespace FFXIV_TexTools2
             if (e.AddedItems.Count > 0)
             {
                 var comboInfo = mapComboBox.SelectedItem as ComboBoxInfo;
-                Paragraph paragraph = new Paragraph();
-                paragraph.TextAlignment = TextAlignment.Center;
+                Paragraph paragraph = new Paragraph()
+                {
+                    TextAlignment = TextAlignment.Center
+                };
                 Bitmap colorBmp = null;
                 int offset = 0;
 
@@ -416,7 +581,7 @@ namespace FFXIV_TexTools2
                 }
                 else if (comboInfo.Name.Equals(Strings.Diffuse))
                 {
-                    fullPath = mtrlInfo.DiffusePath;
+                    fullPath = mtrlInfo.DiffusePath; 
                     offset = mtrlInfo.DiffuseOffset;
                     paragraph.Inlines.Add(new Run(fullPath));
                 }
@@ -434,9 +599,9 @@ namespace FFXIV_TexTools2
                             part = ((ComboBoxInfo)partComboBox.SelectedItem).Name;
                         }
 
-                        fullPath = mtrlInfo.MaskPath;
+                        fullPath = String.Format(mtrlInfo.MaskPath, part);
                         offset = MTRL.GetDecalOffset(selectedItem.itemName, ((ComboBoxInfo)partComboBox.SelectedItem).Name);
-                        paragraph.Inlines.Add(new Run(String.Format(fullPath, part)));
+                        paragraph.Inlines.Add(new Run(fullPath));
                     }
                     else
                     {
@@ -452,13 +617,55 @@ namespace FFXIV_TexTools2
                     paragraph.Inlines.Add(new Run(fullPath));
                 }
 
-                if (File.Exists(Properties.Settings.Default.Save_Directory + "/" + selectedParent + "/" + selectedItem.itemName + "/" +  Path.GetFileNameWithoutExtension(fullPath) + ".dds"))
+                string dxPath = Path.GetFileNameWithoutExtension(fullPath);
+
+                if (File.Exists(Properties.Settings.Default.Save_Directory + "/" + selectedParent + "/" + selectedItem.itemName + "/" + dxPath  + ".dds"))
                 {
                     importButton.IsEnabled = true;
                 }
                 else
                 {
                     importButton.IsEnabled = false;
+                }
+
+                string line;
+                JsonEntry modEntry = null;
+                bool inModList = false;
+                using (StreamReader sr = new StreamReader(Info.modListDir))
+                {
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        modEntry = JsonConvert.DeserializeObject<JsonEntry>(line);
+                        if (modEntry.fullPath.Equals(fullPath))
+                        {
+                            inModList = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (inModList)
+                {
+                    var currOffset = Helper.GetOffset(FFCRC.GetHash(modEntry.fullPath.Substring(0, modEntry.fullPath.LastIndexOf("/"))), FFCRC.GetHash(Path.GetFileName(modEntry.fullPath)));
+
+                    if(currOffset == modEntry.modOffset)
+                    {
+                        revertButton.Content = "Disable";
+                    }
+                    else if(currOffset == modEntry.originalOffset)
+                    {
+                        revertButton.Content = "Enable";
+                    }
+                    else
+                    {
+                        revertButton.Content = "Error";
+                    }
+
+                    revertButton.IsEnabled = true;
+                }
+                else
+                {
+                    revertButton.IsEnabled = false;
                 }
 
                 fullPathLabel.Document = new FlowDocument(paragraph);
@@ -506,7 +713,7 @@ namespace FFXIV_TexTools2
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.StackTrace);
+                    Debug.WriteLine(ex.StackTrace);
                 }
 
                 texImage.Source = noAlphaBitmap;
@@ -518,7 +725,7 @@ namespace FFXIV_TexTools2
         public Bitmap SetAlpha(Bitmap bmp, byte alpha)
         {
             var data = bmp.LockBits(
-                new Rectangle(0, 0, bmp.Width, bmp.Height),
+                new System.Drawing.Rectangle(0, 0, bmp.Width, bmp.Height),
                 ImageLockMode.ReadWrite,
                 System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
@@ -565,62 +772,140 @@ namespace FFXIV_TexTools2
             if ((mapComboBox.SelectedItem as ComboBoxInfo).Name.Equals(Strings.ColorSet))
             {
                 importButton.DataContext = new ImportViewModel(mtrlInfo, selectedParent, selectedItem.itemName);
+                revertButton.IsEnabled = true;
 
             }
             else
             {
                 importButton.DataContext = new ImportViewModel(texInfo, selectedParent, selectedItem.itemName, ((ComboBoxInfo)mapComboBox.SelectedItem).Name, fullPath);
+                revertButton.IsEnabled = true;
             }
+
+            var itemSelected = (ItemViewModel)textureTreeView.SelectedItem;
+            ((ItemViewModel)textureTreeView.SelectedItem).IsSelected = false;
+            itemSelected.IsSelected = true;
         }
 
         private void RevertButton_Click(object sender, RoutedEventArgs e)
         {
+            JsonEntry modEntry = null;
+            string line;
+            
+            using (StreamReader sr = new StreamReader(Info.modListDir))
+            {
+                while ((line = sr.ReadLine()) != null)
+                {
+                    modEntry = JsonConvert.DeserializeObject<JsonEntry>(line);
+                    if (modEntry.fullPath.Equals(fullPath))
+                    {
+                        break;
+                    }
+                }
+            }
+
+            if(modEntry != null)
+            {
+                if (revertButton.Content.Equals("Enable"))
+                {
+                    Helper.UpdateIndex(modEntry.modOffset, fullPath);
+                    Helper.UpdateIndex2(modEntry.modOffset, fullPath);
+                    revertButton.Content = "Disable";
+                }
+                else if (revertButton.Content.Equals("Disable"))
+                {
+                    Helper.UpdateIndex(modEntry.originalOffset, fullPath);
+                    Helper.UpdateIndex2(modEntry.originalOffset, fullPath);
+                    revertButton.Content = "Enable";
+                }
+                else
+                {
+                    //error
+                }
+            }
+
+            var itemSelected = (ItemViewModel)textureTreeView.SelectedItem;
+            ((ItemViewModel)textureTreeView.SelectedItem).IsSelected = false;
+            itemSelected.IsSelected = true;
 
         }
 
         private void ExportObjButton_Click(object sender, RoutedEventArgs e)
         {
+            Directory.CreateDirectory(Properties.Settings.Default.Save_Directory + "/" + selectedParent + "/" + selectedItem.itemName + "/3D");
+            File.WriteAllLines(Properties.Settings.Default.Save_Directory + "/" + selectedParent + "/" + selectedItem.itemName + "/3D/" + modelName + "_mesh_" + bodyComboBox3D.SelectedItem + ".obj", meshList[(int)bodyComboBox3D.SelectedItem].Obj);
 
+            var dir = Properties.Settings.Default.Save_Directory + "/" + selectedParent + "/" + selectedItem.itemName + "/3D/" + modelName + "_mesh_" + bodyComboBox3D.SelectedItem + "_Diffuse.png";
+
+            using (var fileStream = new FileStream(dir, FileMode.Create))
+            {
+                BitmapEncoder encoder = new PngBitmapEncoder();
+                encoder.Frames.Add(BitmapFrame.Create(newDiffuse));
+                encoder.Save(fileStream);
+            }
+
+            dir = Properties.Settings.Default.Save_Directory + "/" + selectedParent + "/" + selectedItem.itemName + "/3D/" + modelName + "_mesh_" + bodyComboBox3D.SelectedItem + "_Normal.png";
+
+            noAlphaNormal.Save(dir, ImageFormat.Png);
         }
 
         private void Import3DButton_Click(object sender, RoutedEventArgs e)
         {
-
+            //Not yet implemented
         }
 
         private void Revert3DButton_Click(object sender, RoutedEventArgs e)
         {
-
-        }
-
-        private void Menu_Search_Click(object sender, RoutedEventArgs e)
-        {
-
+            //Not yet implemented
         }
 
         private void Menu_ModList_Click(object sender, RoutedEventArgs e)
         {
-
+            ModList ml = new ModList()
+            {
+                Owner = this
+            };
+            ml.Show();
         }
 
         private void Menu_Importer_Click(object sender, RoutedEventArgs e)
         {
-
+            //Not yet implemented
         }
 
         private void Menu_Directories_Click(object sender, RoutedEventArgs e)
         {
-
+            DirectoriesView dv = new DirectoriesView();
+            dv.Show();
         }
 
         private void Menu_RevertAll_Click(object sender, RoutedEventArgs e)
         {
-
+            JsonEntry modEntry = null;
+            string line;
+            using (StreamReader sr = new StreamReader(Info.modListDir))
+            {
+                while ((line = sr.ReadLine()) != null)
+                {
+                    modEntry = JsonConvert.DeserializeObject<JsonEntry>(line);
+                    Helper.UpdateIndex(modEntry.originalOffset, modEntry.fullPath);
+                    Helper.UpdateIndex2(modEntry.originalOffset, modEntry.fullPath);
+                }
+            }
         }
 
         private void Menu_ReapplyAll_Click(object sender, RoutedEventArgs e)
         {
-
+            JsonEntry modEntry = null;
+            string line;
+            using (StreamReader sr = new StreamReader(Info.modListDir))
+            {
+                while ((line = sr.ReadLine()) != null)
+                {
+                    modEntry = JsonConvert.DeserializeObject<JsonEntry>(line);
+                    Helper.UpdateIndex(modEntry.modOffset, modEntry.fullPath);
+                    Helper.UpdateIndex2(modEntry.modOffset, modEntry.fullPath);
+                }
+            }
         }
 
         private void Menu_DX9_Click(object sender, RoutedEventArgs e)
@@ -631,6 +916,8 @@ namespace FFXIV_TexTools2
             Menu_DX9.IsEnabled = false;
             Menu_DX11.IsEnabled = true;
             Menu_DX11.IsChecked = false;
+
+            DXVerStatus.Content = DXVerStatus.Content + "9";
 
             var itemSelected = (ItemViewModel)textureTreeView.SelectedItem;
             ((ItemViewModel)textureTreeView.SelectedItem).IsSelected = false;
@@ -646,6 +933,8 @@ namespace FFXIV_TexTools2
             Menu_DX9.IsEnabled = true;
             Menu_DX9.IsChecked = false;
 
+            DXVerStatus.Content = DXVerStatus.Content + "11";
+
             var itemSelected = (ItemViewModel)textureTreeView.SelectedItem;
             ((ItemViewModel)textureTreeView.SelectedItem).IsSelected = false;
             itemSelected.IsSelected = true;
@@ -653,17 +942,28 @@ namespace FFXIV_TexTools2
 
         private void Menu_ProblemCheck_Click(object sender, RoutedEventArgs e)
         {
-
+            if (Helper.CheckIndex())
+            {
+                if (MessageBox.Show("The index file does not have access to the modded dat file. \nFix now?", "Found an Issue", MessageBoxButton.YesNo, MessageBoxImage.Error) == MessageBoxResult.Yes)
+                {
+                    Helper.FixIndex();
+                }
+            }
+            else
+            {
+                MessageBox.Show("No issues were found \nIf you are still experiencing issues, please submit a bug report.", "No Issues Found", MessageBoxButton.OK, MessageBoxImage.None);
+            }
         }
 
         private void Menu_BugReport_Click(object sender, RoutedEventArgs e)
         {
-
+            System.Diagnostics.Process.Start("http://ffxivtextools.dualwield.net/bug_report.html");
         }
 
         private void Menu_About_Click(object sender, RoutedEventArgs e)
         {
-
+            About a = new About();
+            a.Show();
         }
 
         private void Menu_English_Click(object sender, RoutedEventArgs e)
@@ -732,9 +1032,68 @@ namespace FFXIV_TexTools2
             }
         }
 
+        /// <summary>
+        /// Gets the ModListModel from ModList window and selects the item
+        /// **Currently not in use as it does not function correctly with Virtualization**
+        /// </summary>
+        /// <param name="mlm"></param>
+        public void GoToItem(ModListModel mlm)
+        {
+            goTo = mlm;
+
+            var entry = mlm.Entry;
+
+            var vm = textureTreeView.DataContext as TreeViewModel;
+
+            int index = 0;
+            foreach(string key in Info.IDSlot.Keys)
+            {
+                if (key.Equals(entry.category))
+                {
+                    break;
+                }
+                index++;
+            }
+
+            var category = vm.Category[index];
+            category.IsExpanded = true;
+
+            ItemViewModel c = null;
+
+            foreach(var child in category.Children)
+            {
+                c = child as ItemViewModel;
+                if (c.ItemName.Equals(entry.name))
+                {
+                    c.IsSelected = true;
+                    break;
+                }
+            }
+
+            TreeViewItem tvi = textureTreeView.ItemContainerGenerator.ContainerFromItem(c) as TreeViewItem;
+        }
+
         private void RaceComboBox3D_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            bodyComboBox3D.Items.Clear();
+            if (e.AddedItems.Count > 0)
+            {
+                var comboInfo = (ComboBoxInfo)raceComboBox3D.SelectedItem;
 
+                MDL mdl = new MDL(selectedItem, Info.raceID[comboInfo.Name], selectedParent);
+                meshList = mdl.GetMeshList();
+                var numMesh = mdl.GetNumMeshes() / 3;
+                modelName = mdl.GetModelName();
+
+                for(int i = 0; i < numMesh; i++)
+                {
+                    bodyComboBox3D.Items.Add(i);
+                }
+
+                bodyComboBox3D.SelectedIndex = 0;
+
+            }
+            e.Handled = true;
         }
 
         private void CheckBox_Click(object sender, RoutedEventArgs e)
@@ -758,10 +1117,10 @@ namespace FFXIV_TexTools2
                 img = noAlphaBitmap;
             }
 
-            ColorChannels CC = new ColorChannels();
-
-            CC.Channel = new System.Windows.Media.Media3D.Point4D(r, g, b, a);
-
+            ColorChannels CC = new ColorChannels()
+            {
+                Channel = new System.Windows.Media.Media3D.Point4D(r, g, b, a)
+            };
             texImage.Effect = CC;
 
             texImage.Source = img;
@@ -772,6 +1131,264 @@ namespace FFXIV_TexTools2
         private void MapComboBox_PreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
 
+        }
+
+        private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var control = sender as TabControl;
+            var selected = control.SelectedItem as TabItem;
+
+            if (selected.Header.Equals("3D Model") && !loaded3D)
+            {
+                string type = Helper.GetItemType(selectedParent);
+                List<ComboBoxInfo> cbiInfo = new List<ComboBoxInfo>();
+                Dictionary<int, string> racesDict = new Dictionary<int, string>();
+                string MDLFolder, MDLFile = "";
+
+                List<string> races = new List<string>();
+                if(type.Equals("weapon") || type.Equals("food"))
+                {
+                    MDLFolder = "";
+                    cbiInfo.Add(new ComboBoxInfo(Strings.All, Strings.All));
+                }
+                else if (type.Equals("accessory"))
+                {
+                    MDLFolder = "chara/accessory/a" + selectedItem.itemID + "/model";
+                    MDLFile = "c{0}a" + selectedItem.itemID + "_" + Info.slotAbr[selectedParent] + ".mdl";
+                }
+                else if(type.Equals("character"))
+                {
+                    if (selectedItem.itemName.Equals(Strings.Body))
+                    {
+                        MDLFolder = "chara/human/c{0}/obj/body/b0001/model";
+                    }
+                    else if (selectedItem.itemName.Equals(Strings.Face))
+                    {
+                        MDLFolder = "chara/human/c{0}/obj/face/f0001/model";
+                    }
+                    else if (selectedItem.itemName.Equals(Strings.Hair))
+                    {
+                        MDLFolder = "chara/human/c{0}/obj/hair/h0001/model";
+                    }
+                    else if (selectedItem.itemName.Equals(Strings.Tail))
+                    {
+                        MDLFolder = "chara/human/c{0}/obj/tail/t0001/model";
+                    }
+                    else
+                    {
+                        MDLFolder = null;
+                    }
+                }
+                else if (type.Equals("monster"))
+                {
+                    MDLFolder = "";
+                    cbiInfo.Add(new ComboBoxInfo(Strings.All, Strings.All));
+                }
+                else
+                {
+                    MDLFolder = "chara/equipment/e" + selectedItem.itemID + "/model";
+                    MDLFile = "c{0}e" + selectedItem.itemID + "_" + Info.slotAbr[selectedParent] + ".mdl";
+                }
+
+                var fileOffsetDict = Helper.GetAllFilesInFolder(FFCRC.GetHash(MDLFolder));
+                int fileHash;
+
+                if (!type.Equals("weapon") && !type.Equals("monster"))
+                {
+                    foreach (string raceID in Info.IDRace.Keys)
+                    {
+                        if (type.Equals("character"))
+                        {
+                            string fol = String.Format(MDLFolder, raceID);
+                            racesDict.Add(FFCRC.GetHash(fol), raceID);
+                        }
+                        else
+                        {
+                            string mdl = String.Format(MDLFile, raceID);
+                            fileHash = FFCRC.GetHash(mdl);
+
+                            if (fileOffsetDict.Keys.Contains(fileHash))
+                            {
+
+                                cbiInfo.Add(new ComboBoxInfo(Info.IDRace[raceID], raceID));
+                            }
+                        }
+                    }
+                    if (type.Equals("character"))
+                    {
+                        cbiInfo = Helper.FolderExistsListRace(racesDict).ToList();
+                    }
+                }
+
+                ComboView cView = new ComboView(cbiInfo);
+                raceComboBox3D.DataContext = cView;
+                raceComboBox3D.SelectedIndex = 0;
+
+                loaded3D = true;
+            }
+            e.Handled = true;
+        }
+
+        private void BodyComboBox3D_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+            if (e.AddedItems.Count > 0)
+            {
+                var comboInfo = (int)bodyComboBox3D.SelectedItem;
+
+                BitmapSource colorBMP = null;
+
+                BitmapSource displace = null;
+                MTRLInfo mInfo = MTRL3D();
+
+
+
+
+                if (mInfo.ColorData != null)
+                {
+                    var colorBmp = TEX.TextureToBitmap(mInfo.ColorData, 9312, 4, 16);
+                    colorBMP = Imaging.CreateBitmapSourceFromHBitmap(colorBmp.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                }
+
+
+                TexInfo specularTI = null;
+                TexInfo maskTI = null;
+                TexInfo normalTI = null;
+
+                if (mInfo.NormalOffset != 0)
+                {
+                    normalTI = TEX.GetTex(mInfo.NormalOffset);
+                }
+
+                if (mInfo.SpecularOffset != 0)
+                {
+                    specularTI = TEX.GetTex(mInfo.SpecularOffset);
+                }
+
+                if (mInfo.MaskOffset != 0)
+                {
+                    maskTI = TEX.GetTex(mInfo.MaskOffset);
+                    displace = TexHelper.MakeDisplaceMap(maskTI);
+                }
+
+                if (mInfo.DiffuseOffset != 0)
+                {
+                    var diffTI = TEX.GetTex(mInfo.DiffuseOffset);
+
+                    newDiffuse = Imaging.CreateBitmapSourceFromHBitmap(diffTI.BMP.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+
+                }
+                else
+                {
+                    newDiffuse = TexHelper.MakeDiffuseMap(normalTI.BMP, colorBMP, maskTI);
+                }
+
+                MeshGeometry3D mg3d = new MeshGeometry3D();
+
+                Element3DCollection modelGeometry = new Element3DCollection();
+
+                var gm = new MeshGeometryModel3D();
+
+                mg3d.Normals = meshList[comboInfo].NormalList;
+                mg3d.Positions = meshList[comboInfo].VertexList;
+                mg3d.TextureCoordinates = meshList[comboInfo].CoordList;
+
+
+                gm.Geometry = mg3d;
+
+                noAlphaNormal = SetNormal(normalTI.BMP, 255);
+
+                var MDLViewModel = new MDLViewModel(meshList[comboInfo], newDiffuse, Imaging.CreateBitmapSourceFromHBitmap(noAlphaNormal.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()), gm, displace);
+
+                viewport3DX.DataContext = MDLViewModel;
+            }
+            e.Handled = true;
+        }
+
+        public MTRLInfo MTRL3D()
+        {
+
+            MTRLInfo mInfo;
+
+            if (typeComboBox.HasItems)
+            {
+                string type;
+
+                if (selectedParent.Equals(Strings.Mounts))
+                {
+                    if ((mountsDict[selectedItem.itemName]).itemID.Equals("1") || (mountsDict[selectedItem.itemName]).itemID.Equals("2") ||
+                        (mountsDict[selectedItem.itemName]).itemID.Equals("1011") || (mountsDict[selectedItem.itemName]).itemID.Equals("1022"))
+                    {
+                        type = Info.slotAbr[((ComboBoxInfo)typeComboBox.SelectedItem).Name];
+                    }
+                    else
+                    {
+                        type = ((ComboBoxInfo)typeComboBox.SelectedItem).Name;
+                    }
+                }
+                else
+                {
+                    type = ((ComboBoxInfo)typeComboBox.SelectedItem).Name;
+                }
+
+                var info = MTRL.GetTexFromType(selectedItem, raceComboBox3D.SelectedItem as ComboBoxInfo, ((ComboBoxInfo)partComboBox.SelectedItem).Name, type, imcVersion, selectedParent);
+                mInfo = info.Item1;
+
+            }
+            else
+            {
+                var info = MTRL.GetMTRLOffset(((ComboBoxInfo)raceComboBox3D.SelectedItem), selectedParent, selectedItem, ((ComboBoxInfo)partComboBox.SelectedItem).Name, imcVersion, "");
+
+                if(info != null)
+                {
+                    mInfo = info.Item1;
+                }
+                else
+                {
+                    var combo = new ComboBoxInfo("Female", "0201");
+                    info = MTRL.GetMTRLOffset(combo, selectedParent, selectedItem, ((ComboBoxInfo)partComboBox.SelectedItem).Name, imcVersion, "");
+
+                    if (info != null)
+                    {
+                        mInfo = info.Item1;
+                    }
+                    else
+                    {
+                        combo = new ComboBoxInfo("Male", "0101");
+                        info = MTRL.GetMTRLOffset(combo, selectedParent, selectedItem, ((ComboBoxInfo)partComboBox.SelectedItem).Name, imcVersion, "");
+                        mInfo = info.Item1;
+                    }
+                }
+            }
+
+            return mInfo;
+        }
+
+        public Bitmap SetNormal(Bitmap bmp, byte alpha)
+        {
+            var data = bmp.LockBits(
+                new System.Drawing.Rectangle(0, 0, bmp.Width, bmp.Height),
+                ImageLockMode.ReadWrite,
+                System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+            var line = data.Scan0;
+            var eof = line + data.Height * data.Stride;
+            while (line != eof)
+            {
+                var pixelAlpha = line + 3;
+                var pixelBlue = line + 2;
+                var eol = pixelAlpha + data.Width * 4;
+                while (pixelAlpha != eol)
+                {
+                    Marshal.WriteByte(pixelAlpha, 255);
+                    Marshal.WriteByte(pixelBlue, 255);
+                    pixelAlpha += 4;
+                }
+                line += data.Stride;
+            }
+            bmp.UnlockBits(data);
+
+            return bmp;
         }
 
         class CategoryComparer : IEqualityComparer<Category>

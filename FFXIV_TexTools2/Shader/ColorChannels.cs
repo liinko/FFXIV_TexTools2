@@ -25,7 +25,7 @@ namespace FFXIV_TexTools2.Shader
     public class ColorChannels : ShaderEffect
     {
         private static PixelShader _pixelShader = new PixelShader()
-        { UriSource = new Uri("pack://application:,,,/FFXIV_TexTools2;component/Shader/rgbaChannels.cso") };
+        { UriSource = new Uri("pack://application:,,,/FFXIV TexTools 2;component/Shader/rgbaChannels.cso") };
 
         public static readonly DependencyProperty InputProperty = RegisterPixelShaderSamplerProperty("Input", typeof(ColorChannels), 0);
 

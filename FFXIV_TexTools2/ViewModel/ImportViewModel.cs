@@ -16,8 +16,10 @@
 
 using FFXIV_TexTools2.Helpers;
 using FFXIV_TexTools2.Material;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Windows;
@@ -32,7 +34,8 @@ namespace FFXIV_TexTools2.ViewModel
         private bool canExecute = true;
         TexInfo texInfo;
         MTRLInfo mtrlInfo;
-        string path, fPath;
+        string category, item, path, fPath;
+        int newHeight, newWidth, newMipCount;
 
         public bool CanExecute
         {
@@ -62,15 +65,22 @@ namespace FFXIV_TexTools2.ViewModel
 
         public ImportViewModel(TexInfo info, string category, string item, string map, string fullPath)
         {
+            this.category = category;
+            this.item = item;
             texInfo = info;
             fPath = fullPath;
-            path = Properties.Settings.Default.Save_Directory + "/" + category + "/" + item + "/" + Path.GetFileNameWithoutExtension(fullPath) + ".dds";
+
+            string dxPath = Path.GetFileNameWithoutExtension(fullPath);
+
+            path = Properties.Settings.Default.Save_Directory + "/" + category + "/" + item + "/" + dxPath + ".dds";
 
             importCommand = new RelayCommand(Import);
         }
 
         public ImportViewModel(MTRLInfo info, string category, string item)
         {
+            this.category = category;
+            this.item = item;
             mtrlInfo = info;
             fPath = info.MTRLPath;
             path = Properties.Settings.Default.Save_Directory + "/" + category + "/" + item + "/" + Path.GetFileNameWithoutExtension(info.MTRLPath) + ".dds";
@@ -81,52 +91,167 @@ namespace FFXIV_TexTools2.ViewModel
 
         public void Import(object obj)
         {
-            int type;
+            int type, modOffset = 0, modSize = 0;
+            int linenum = 0;
+            bool inModList = false;
+            bool overWrite = false;
+            JsonEntry modEntry  = null;
 
+            //If the file requesting to be imported exists
             if (File.Exists(path))
             {
+                //check to see if the item has been modified before i.e. full path of item already exists in mod list 
+                using (StreamReader sr = new StreamReader(Info.modListDir))
+                {
+                    string line;
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        modEntry = JsonConvert.DeserializeObject<JsonEntry>(line);
+                        if (modEntry.fullPath.Equals(fPath))
+                        {
+                            modOffset = modEntry.modOffset;
+                            modSize = modEntry.modSize;
+                            inModList = true;
+                            break;
+                        }
+                        linenum++;
+                    }
+                }
+
+                //read file to be imported
                 using (BinaryReader br = new BinaryReader(File.OpenRead(path)))
                 {
+
+                    br.BaseStream.Seek(12, SeekOrigin.Begin);
+                    newHeight = br.ReadInt32();
+                    newWidth = br.ReadInt32();
+                    br.ReadBytes(8);
+                    newMipCount = br.ReadInt32();
+
                     br.BaseStream.Seek(84, SeekOrigin.Begin);
+
                     type = br.ReadInt32();
 
+                    //check for type equality
                     if (type == Info.DDSType[texInfo.Type])
                     {
                         List<byte> fullImport = new List<byte>();
-                        long offset;
+                        long offset = 0;
 
                         int uncompLength = (int)new FileInfo(path).Length - 128;
 
                         var DDSInfo = ReadDDS(br);
 
                         fullImport.AddRange(MakeHeader(DDSInfo.Item2, DDSInfo.Item3, uncompLength));
-                        fullImport.AddRange(makeSecondHeader());
+                        fullImport.AddRange(MakeSecondHeader());
                         fullImport.AddRange(DDSInfo.Item1);
 
+                        //open dat3 for writing 
                         using(BinaryWriter bw = new BinaryWriter(File.OpenWrite(Properties.Settings.Default.FFXIV_Directory + "/040000.win32.dat3")))
                         {
-                            bw.BaseStream.Seek(0, SeekOrigin.End);
-
-                            if ((bw.BaseStream.Position & 0xff) != 0)
+                            //If the item has been previously modified and the compressed data being imported is smaller or equal to the exisiting data
+                            //replace the existing data with new data.
+                            if (inModList && fullImport.Count <= modSize)
                             {
-                                bw.Write((byte)0);
+                                int sizeDiff = modSize - fullImport.Count;
+
+                                bw.BaseStream.Seek(modOffset - 48, SeekOrigin.Begin);
+
+                                bw.Write(fullImport.ToArray());
+
+                                bw.Write(new byte[sizeDiff]);
+
+                                Helper.UpdateIndex(modEntry.modOffset, fPath);
+                                Helper.UpdateIndex2(modEntry.modOffset, fPath);
+
+                                overWrite = true;
                             }
-
-                            int eof = (int)bw.BaseStream.Position + fullImport.Count;
-
-                            while((eof & 0xFF) != 0)
+                            else
                             {
-                                fullImport.AddRange(new byte[16]);
-                                eof = eof + 16;
+                                int emptyLength = 0;
+                                int emptyLine = 0;
+
+                                //check for an empty entry in the modlist in which the data to be imported may fit.
+                                foreach(string line in File.ReadAllLines(Info.modListDir))
+                                {
+                                    JsonEntry emptyEntry = JsonConvert.DeserializeObject<JsonEntry>(line);
+
+                                    if (emptyEntry.fullPath.Equals(""))
+                                    {
+                                        emptyLength = emptyEntry.modSize;
+
+                                        if (emptyLength > fullImport.Count)
+                                        {
+                                            int sizeDiff = emptyLength - fullImport.Count;
+
+                                            bw.BaseStream.Seek(emptyEntry.modOffset - 48, SeekOrigin.Begin);
+
+                                            bw.Write(fullImport.ToArray());
+
+                                            bw.Write(new byte[sizeDiff]);
+
+                                            int oldOffset = Helper.UpdateIndex(emptyEntry.modOffset, fPath) * 8;
+                                            Helper.UpdateIndex2(emptyEntry.modOffset, fPath);
+                                            
+                                            JsonEntry replaceEntry = new JsonEntry(category, item, fPath, oldOffset, emptyEntry.modOffset, emptyEntry.modSize);
+                                            string[] lines = File.ReadAllLines(Info.modListDir);
+                                            lines[emptyLine] = JsonConvert.SerializeObject(replaceEntry);
+                                            File.WriteAllLines(Info.modListDir, lines);
+
+                                            overWrite = true;
+                                            break;
+                                        }
+                                    }
+                                    emptyLine++;
+                                }
+
+                                if (!overWrite)
+                                {
+                                    bw.BaseStream.Seek(0, SeekOrigin.End);
+
+                                    if ((bw.BaseStream.Position & 0xff) != 0)
+                                    {
+                                        bw.Write((byte)0);
+                                    }
+
+                                    int eof = (int)bw.BaseStream.Position + fullImport.Count;
+
+                                    while ((eof & 0xFF) != 0)
+                                    {
+                                        fullImport.AddRange(new byte[16]);
+                                        eof = eof + 16;
+                                    }
+
+                                    offset = bw.BaseStream.Position + 48;
+
+                                    bw.Write(fullImport.ToArray());
+                                }
                             }
-
-                            offset = bw.BaseStream.Position + 48;
-
-                            bw.Write(fullImport.ToArray());
                         }
 
-                        UpdateIndex(offset);
-                        UpdateIndex2(offset);
+                        if (!overWrite)
+                        {
+                            //If the item has been previously modifed, but the new compressed data to be imported is larger than the existing data
+                            //remove the data from the modlist, leaving the offset and size intact for future use
+                            if (inModList && fullImport.Count > modSize && modEntry != null)
+                            {
+                                JsonEntry replaceEntry = new JsonEntry(String.Empty, String.Empty, String.Empty, 0, modEntry.modOffset, modEntry.modSize);
+                                string[] lines = File.ReadAllLines(Info.modListDir);
+                                lines[linenum] = JsonConvert.SerializeObject(replaceEntry);
+                                File.WriteAllLines(Info.modListDir, lines);
+                            }
+
+                            int oldOffset = Helper.UpdateIndex(offset, fPath) * 8;
+                            Helper.UpdateIndex2(offset, fPath);
+
+                            JsonEntry entry = new JsonEntry(category, item, fPath, oldOffset, (int)offset, fullImport.Count);
+
+                            using (StreamWriter modFile = new StreamWriter(Info.modListDir, true))
+                            {
+                                modFile.BaseStream.Seek(0, SeekOrigin.End);
+                                modFile.WriteLine(JsonConvert.SerializeObject(entry));
+                            }
+                        }
                     }
                     else
                     {
@@ -148,10 +273,34 @@ namespace FFXIV_TexTools2.ViewModel
                 List<byte> complete = new List<byte>();
 
                 int offset = mtrlInfo.MTRLOffset;
-                long newOffset;
+                long newOffset = 0;
                 short fileSize;
+                JsonEntry modEntry;
+                int modOffset = 0;
+                int modSize = 0;
+                int lineNum = 0;
+                bool inModList = false;
+                bool overWrite = false;
 
                 int datNum = ((offset / 8) & 0x000f) / 2;
+
+
+                using (StreamReader sr = new StreamReader(Info.modListDir))
+                {
+                    string line;
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        modEntry = JsonConvert.DeserializeObject<JsonEntry>(line);
+                        if (modEntry.fullPath.Equals(fPath))
+                        {
+                            modOffset = modEntry.modOffset;
+                            modSize = modEntry.modSize;
+                            inModList = true;
+                            break;
+                        }
+                        lineNum++;
+                    }
+                }
 
                 using (BinaryReader br = new BinaryReader(new MemoryStream(Helper.GetDecompressedIMCBytes(offset, datNum))))
                 {
@@ -217,32 +366,100 @@ namespace FFXIV_TexTools2.ViewModel
 
                 using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(Properties.Settings.Default.FFXIV_Directory + "/040000.win32.dat3")))
                 {
-                    bw.BaseStream.Seek(0, SeekOrigin.End);
 
-                    if((bw.BaseStream.Position & 0xff) != 0)
+                    if (inModList)
                     {
-                        bw.Write((byte)0);
+                        int sizeDiff = modSize - complete.Count;
+
+                        bw.BaseStream.Seek(modOffset, SeekOrigin.Begin);
+
+                        bw.Write(complete.ToArray());
+
+                        bw.Write(new byte[sizeDiff]);
+
+                        overWrite = true;
                     }
-
-                    int eof = (int)bw.BaseStream.Position + complete.Count;
-
-                    while ((eof & 0xFF) != 0)
+                    else
                     {
-                        complete.AddRange(new byte[16]);
-                        eof = eof + 16;
+                        int emptyLength = 0;
+                        int emptyLine = 0;
+
+                        //check for an empty entry in the modlist in which the data to be imported may fit.
+                        foreach (string line in File.ReadAllLines(Info.modListDir))
+                        {
+                            JsonEntry emptyEntry = JsonConvert.DeserializeObject<JsonEntry>(line);
+
+                            if (emptyEntry.fullPath.Equals(""))
+                            {
+                                emptyLength = emptyEntry.modSize;
+
+                                if (emptyLength > complete.Count)
+                                {
+                                    int sizeDiff = emptyLength - complete.Count;
+
+                                    bw.BaseStream.Seek(emptyEntry.modOffset - 48, SeekOrigin.Begin);
+
+                                    bw.Write(complete.ToArray());
+
+                                    bw.Write(new byte[sizeDiff]);
+
+                                    int oldOffset = Helper.UpdateIndex(emptyEntry.modOffset, fPath) * 8;
+                                    Helper.UpdateIndex2(emptyEntry.modOffset, fPath);
+
+                                    JsonEntry replaceEntry = new JsonEntry(category, item, fPath, oldOffset, emptyEntry.modOffset, emptyEntry.modSize);
+                                    string[] lines = File.ReadAllLines(Info.modListDir);
+                                    lines[emptyLine] = JsonConvert.SerializeObject(replaceEntry);
+                                    File.WriteAllLines(Info.modListDir, lines);
+
+                                    overWrite = true;
+                                    break;
+                                }
+                            }
+                            emptyLine++;
+                        }
+
+                        if (!overWrite)
+                        {
+                            bw.BaseStream.Seek(0, SeekOrigin.End);
+
+                            if ((bw.BaseStream.Position & 0xff) != 0)
+                            {
+                                bw.Write((byte)0);
+                            }
+
+                            int eof = (int)bw.BaseStream.Position + complete.Count;
+
+                            while ((eof & 0xFF) != 0)
+                            {
+                                complete.AddRange(new byte[16]);
+                                eof = eof + 16;
+                            }
+
+                            newOffset = bw.BaseStream.Position + 48;
+
+                            bw.Write(complete.ToArray());
+                        }
                     }
-
-                    newOffset = bw.BaseStream.Position + 48;
-
-                    bw.Write(complete.ToArray());
                 }
 
-                UpdateIndex(newOffset);
-                UpdateIndex2(newOffset);
+                if (!overWrite)
+                {
+                    int oldOffset = Helper.UpdateIndex(newOffset, fPath) * 8;
+                    Helper.UpdateIndex2(newOffset, fPath);
+
+                    JsonEntry entry = new JsonEntry(category, item, fPath, oldOffset, (int)newOffset, complete.Count);
+
+                    using (StreamWriter modFile = new StreamWriter(Info.modListDir, true))
+                    {
+                        modFile.BaseStream.Seek(0, SeekOrigin.End);
+                        modFile.WriteLine(JsonConvert.SerializeObject(entry));
+                    }
+                }
+
             }
             else
             {
-
+                MessageBox.Show("Could not find file \n" + path, "File read Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -252,11 +469,27 @@ namespace FFXIV_TexTools2.ViewModel
             List<short> mipPartList = new List<short>();
             List<short> mipPartCount = new List<short>();
 
-            int mipLength = texInfo.Width * texInfo.Height;
+            int mipLength;
+            if(texInfo.Type == 13344)
+            {
+                mipLength = (newWidth * newHeight) / 2;
+            }
+            else if(texInfo.Type == 13361)
+            {
+                mipLength = newWidth * newHeight;
+
+            }
+            else
+            {
+                mipLength = (newWidth * newHeight) * 4;
+
+            }
+
+
 
             br.BaseStream.Seek(128, SeekOrigin.Begin);
 
-            for (int i = 0; i < texInfo.MipCount; i++)
+            for (int i = 0; i < newMipCount; i++)
             {
                 int mipParts = (int)Math.Ceiling(mipLength / 16000f);
                 mipPartCount.Add((short)mipParts);
@@ -354,7 +587,7 @@ namespace FFXIV_TexTools2.ViewModel
         {
             List<byte> header = new List<byte>();
 
-            int headerSize = 24 + (texInfo.MipCount * 20) + (mipPartList.Count * 2);
+            int headerSize = 24 + (newMipCount * 20) + (mipPartList.Count * 2);
             int headerPadding = 128 - (headerSize % 128);
 
             header.AddRange(BitConverter.GetBytes(headerSize + headerPadding));
@@ -362,13 +595,28 @@ namespace FFXIV_TexTools2.ViewModel
             header.AddRange(BitConverter.GetBytes(uncompLength));
             header.AddRange(BitConverter.GetBytes(0));
             header.AddRange(BitConverter.GetBytes(0));
-            header.AddRange(BitConverter.GetBytes(texInfo.MipCount));
+            header.AddRange(BitConverter.GetBytes(newMipCount));
+
 
             int partIndex = 0;
             int mipOffsetIndex = 80;
-            int uncompMipSize = texInfo.Height * texInfo.Width;
+            int uncompMipSize = newHeight * newWidth;
+            if (texInfo.Type == 13344)
+            {
+                uncompMipSize = (newWidth * newHeight) / 2;
+            }
+            else if (texInfo.Type == 13361)
+            {
+                uncompMipSize = newWidth * newHeight;
 
-            for(int i = 0; i < texInfo.MipCount; i++)
+            }
+            else
+            {
+                uncompMipSize = (newWidth * newHeight) * 4;
+
+            }
+
+            for (int i = 0; i < newMipCount; i++)
             {
                 header.AddRange(BitConverter.GetBytes(mipOffsetIndex));
 
@@ -408,7 +656,7 @@ namespace FFXIV_TexTools2.ViewModel
             return header;
         }
 
-        private List<byte> makeSecondHeader()
+        private List<byte> MakeSecondHeader()
         {
             List<byte> header = new List<byte>();
 
@@ -416,19 +664,36 @@ namespace FFXIV_TexTools2.ViewModel
             header.AddRange(BitConverter.GetBytes((short)128));
             header.AddRange(BitConverter.GetBytes((short)texInfo.Type));
             header.AddRange(BitConverter.GetBytes((short)0));
-            header.AddRange(BitConverter.GetBytes((short)texInfo.Width));
-            header.AddRange(BitConverter.GetBytes((short)texInfo.Height));
+            header.AddRange(BitConverter.GetBytes((short)newWidth));
+            header.AddRange(BitConverter.GetBytes((short)newHeight));
             header.AddRange(BitConverter.GetBytes((short)1));
-            header.AddRange(BitConverter.GetBytes((short)texInfo.MipCount));
+            header.AddRange(BitConverter.GetBytes((short)newMipCount));
+
 
             header.AddRange(BitConverter.GetBytes(0));
             header.AddRange(BitConverter.GetBytes(1));
             header.AddRange(BitConverter.GetBytes(2));
 
-            int mipLength = texInfo.Height * texInfo.Width;
+            int mipLength;
+            if (texInfo.Type == 13344)
+            {
+                mipLength = (newWidth * newHeight) / 2;
+            }
+            else if (texInfo.Type == 13361)
+            {
+                mipLength = newWidth * newHeight;
+
+            }
+            else
+            {
+                mipLength = (newWidth * newHeight) * 4;
+
+            }
+
+
             int combindedLength = 80;
 
-            for (int i = 0; i < texInfo.MipCount; i++)
+            for (int i = 0; i < newMipCount; i++)
             {
                 header.AddRange(BitConverter.GetBytes(combindedLength));
                 combindedLength = combindedLength + mipLength;
@@ -466,80 +731,6 @@ namespace FFXIV_TexTools2.ViewModel
             header.AddRange(new byte[96]);
 
             return header;
-        }
-
-        private void UpdateIndex(long offset)
-        {
-            var index = File.Open(Info.indexDir, FileMode.Open);
-            var folderHash = FFCRC.GetHash(fPath.Substring(0, fPath.LastIndexOf("/")));
-            var fileHash = FFCRC.GetHash(Path.GetFileName(fPath));
-
-            using(BinaryReader br = new BinaryReader(index))
-            {
-                using(BinaryWriter bw = new BinaryWriter(index))
-                {
-                    br.BaseStream.Seek(1036, SeekOrigin.Begin);
-                    int totalFiles = br.ReadInt32();
-
-                    br.BaseStream.Seek(2048, SeekOrigin.Begin);
-                    for (int i = 0; i < totalFiles; br.ReadBytes(4), i += 16)
-                    {
-                        int tempOffset = br.ReadInt32();
-
-                        if (tempOffset == fileHash)
-                        {
-                            int fTempOffset = br.ReadInt32();
-
-                            if (fTempOffset == folderHash)
-                            {
-                                bw.BaseStream.Seek(br.BaseStream.Position, SeekOrigin.Begin);
-                                bw.Write(offset / 8);
-                                break;
-                            }
-                            else
-                            {
-                                br.ReadBytes(4);
-                            }
-                        }
-                        else
-                        {
-                            br.ReadBytes(8);
-                        }
-                    }
-                }
-            }
-        }
-
-        private void UpdateIndex2(long offset)
-        {
-            var index = File.Open(Info.index2Dir, FileMode.Open);
-            var pathHash = FFCRC.GetHash(fPath);
-
-            using (BinaryReader br = new BinaryReader(index))
-            {
-                using (BinaryWriter bw = new BinaryWriter(index))
-                {
-                    br.BaseStream.Seek(1036, SeekOrigin.Begin);
-                    int totalFiles = br.ReadInt32();
-
-                    br.BaseStream.Seek(2056, SeekOrigin.Begin);
-                    for (int i = 0; i < totalFiles; br.ReadBytes(4), i += 16)
-                    {
-                        int tempOffset = br.ReadInt32();
-
-                        if (tempOffset == pathHash)
-                        {
-                            bw.BaseStream.Seek(br.BaseStream.Position, SeekOrigin.Begin);
-                            bw.Write((int)(offset / 8));
-                            break;
-                        }
-                        else
-                        {
-                            br.ReadBytes(8);
-                        }
-                    }
-                }
-            }
         }
 
         private byte[] Compressor(byte[] uncomp)

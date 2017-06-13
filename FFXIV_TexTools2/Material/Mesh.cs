@@ -15,30 +15,18 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using FFXIV_TexTools2.Model;
-using System.Collections.Generic;
+using HelixToolkit.Wpf.SharpDX.Core;
 
 namespace FFXIV_TexTools2.Material
 {
-    public class MTRLInfo
+    public class Mesh
     {
-        public List<ComboBoxInfo> TextureMaps { get; set; } = new List<ComboBoxInfo>();
-
-        public string MTRLPath { get; set; }
-        public string SpecularPath { get; set; }
-        public string MaskPath { get; set; }
-        public string NormalPath { get; set; }
-        public string DiffusePath { get; set; }
-
-        public int MTRLOffset { get; set; }
-        public int SpecularOffset { get; set; }
-        public int MaskOffset { get; set; }
-        public int NormalOffset { get;  set; }
-        public int DiffuseOffset { get; set; }
-
-        public byte[] ColorData { get; set; }
-        public byte[] ColorFlags { get; set; }
-
-        public bool Found { get; set; }
-
+        public ModelData ModelData { get; set; }
+        public Vector3Collection VertexList { get; set; }
+        public Vector2Collection CoordList { get; set; }
+        public Vector3Collection NormalList { get; set; }
+        public Vector3Collection TangentList { get; set; }
+        public IntCollection IndList { get; set; }
+        public string[] Obj { get; set; }
     }
 }

@@ -41,7 +41,6 @@ namespace FFXIV_TexTools2.Model
             this.hasSecondary = hasSecondary;
             this.mtrlFolder = mtrlFolder;
             this.sMtrlFolder = sMtrlFolder;
-
         }
     }
 }

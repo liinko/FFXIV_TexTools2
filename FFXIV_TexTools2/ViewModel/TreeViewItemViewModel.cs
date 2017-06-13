@@ -16,6 +16,7 @@
 
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 
 namespace FFXIV_TexTools2.ViewModel
 {
@@ -42,7 +43,10 @@ namespace FFXIV_TexTools2.ViewModel
             _children = new ObservableCollection<TreeViewItemViewModel>();
 
             if (lazyLoadChildren)
+            {
                 _children.Add(DummyChild);
+            }
+
         }
 
         // This is used to create the DummyChild instance.
@@ -161,7 +165,7 @@ namespace FFXIV_TexTools2.ViewModel
         protected virtual void OnPropertyChanged(string propertyName)
         {
             if (this.PropertyChanged != null)
-                this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
         }
 
         #endregion // INotifyPropertyChanged Members

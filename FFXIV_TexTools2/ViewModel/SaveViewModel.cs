@@ -111,7 +111,15 @@ namespace FFXIV_TexTools2.ViewModel
             string directory = Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selecteditem;
             Directory.CreateDirectory(directory);
 
-            saveDir = Path.Combine(directory, (Path.GetFileNameWithoutExtension(name) + ".png"));
+            if (Properties.Settings.Default.DX_Ver.Equals("DX11") && (selecteditem.Equals(Strings.Body) || selecteditem.Equals(Strings.Face) || selecteditem.Equals(Strings.Hair) || selecteditem.Equals(Strings.Tail)))
+            {
+                saveDir = Path.Combine(directory, ("--" + Path.GetFileNameWithoutExtension(name) + ".png"));
+            }
+            else
+            {
+                saveDir = Path.Combine(directory, (Path.GetFileNameWithoutExtension(name) + ".png"));
+            }
+
 
             using(var fileStream = new FileStream(saveDir, FileMode.Create))
             {
@@ -127,7 +135,14 @@ namespace FFXIV_TexTools2.ViewModel
             string directory = Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selecteditem;
             Directory.CreateDirectory(directory);
 
-            saveDir = Path.Combine(directory, (Path.GetFileNameWithoutExtension(name) + ".dds"));
+            if (Properties.Settings.Default.DX_Ver.Equals("DX11") && (selecteditem.Equals(Strings.Body) || selecteditem.Equals(Strings.Face) || selecteditem.Equals(Strings.Hair) || selecteditem.Equals(Strings.Tail)))
+            {
+                saveDir = Path.Combine(directory, ("--" + Path.GetFileNameWithoutExtension(name) + ".dds"));
+            }
+            else
+            {
+                saveDir = Path.Combine(directory, (Path.GetFileNameWithoutExtension(name) + ".dds"));
+            }
 
             List<byte> DDS = new List<byte>();
 
@@ -178,6 +193,10 @@ namespace FFXIV_TexTools2.ViewModel
             else if (texInfo.Type == 5200)
             {
                 m_linearsize = (uint)((m_height * m_width) * 4);
+            }
+            else if(texInfo.Type == 13344)
+            {
+                m_linearsize = (uint)((m_height * m_width) / 2);
             }
             else
             {

@@ -19,6 +19,7 @@ using FFXIV_TexTools2.Model;
 using FFXIV_TexTools2.Resources;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -340,7 +341,6 @@ namespace FFXIV_TexTools2.IO
                                 br.ReadBytes(lastText);
 
                                 byte[] itemNameBytes = br.ReadBytes(entrySize - (lastText + 160));
-                                //string itemName = Encoding.ASCII.GetString(itemNameBytes);
                                 string itemName = Encoding.UTF8.GetString(itemNameBytes);
                                 itemName = itemName.Replace("\0", "");
 
@@ -374,7 +374,7 @@ namespace FFXIV_TexTools2.IO
                                 }
                                 catch (Exception e)
                                 {
-                                    Console.WriteLine("EXD_MakeItemListError " + e);
+                                    Debug.WriteLine("EXD_MakeItemListError " + e);
                                 }
                             }
 
