@@ -17,6 +17,8 @@
 using System.IO;
 using System.Security.Cryptography;
 using FFXIV_TexTools2.Helpers;
+using System;
+using System.Windows;
 
 namespace FFXIV_TexTools2
 {
@@ -24,25 +26,50 @@ namespace FFXIV_TexTools2
     {
         public static void MakeDat()
         {
-            using(FileStream fs = File.Create(Info.datDir + "3")){
-                using (BinaryWriter bw = new BinaryWriter(fs))
+            try
+            {
+                using (FileStream fs = File.Create(Info.datDir + "3"))
                 {
-                    bw.BaseStream.Seek(0, SeekOrigin.Begin);
+                    using (BinaryWriter bw = new BinaryWriter(fs))
+                    {
+                        bw.BaseStream.Seek(0, SeekOrigin.Begin);
 
-                    WriteSqPackHeader(bw);
-                    WriteDatHeader(bw);
+                        WriteSqPackHeader(bw);
+                        WriteDatHeader(bw);
+                    }
                 }
             }
-
-            using(BinaryWriter bw = new BinaryWriter(File.OpenWrite(Info.indexDir))){
-                bw.BaseStream.Seek(1104, SeekOrigin.Begin);
-                bw.Write((byte)4);
+            catch (Exception e)
+            {
+                MessageBox.Show("[Create] Error Creating .Dat3 File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
-            using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(Info.index2Dir)))
+
+            try
             {
-                bw.BaseStream.Seek(1104, SeekOrigin.Begin);
-                bw.Write((byte)4);
+                using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(Info.indexDir)))
+                {
+                    bw.BaseStream.Seek(1104, SeekOrigin.Begin);
+                    bw.Write((byte)4);
+                }
+            }
+            catch(Exception e)
+            {
+                MessageBox.Show("[Create] Error Accessing Index File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+
+            try
+            {
+                using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(Info.index2Dir)))
+                {
+                    bw.BaseStream.Seek(1104, SeekOrigin.Begin);
+                    bw.Write((byte)4);
+                }
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("[Create] Error Accessing Index 2 File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
         }
@@ -101,7 +128,15 @@ namespace FFXIV_TexTools2
 
         public static void CreateModList()
         {
+            try
+            {
             File.Create(Info.modListDir);
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("[Create] Error Creating .modlist File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
         }
     }
 }

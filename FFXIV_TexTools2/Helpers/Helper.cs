@@ -23,6 +23,7 @@ using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Windows;
 
 namespace FFXIV_TexTools2.Helpers
 {
@@ -214,35 +215,42 @@ namespace FFXIV_TexTools2.Helpers
         {
             int fileOffset = 0;
 
-            using (BinaryReader br = new BinaryReader(File.OpenRead(Info.indexDir)))
+            try
             {
-                br.BaseStream.Seek(1036, SeekOrigin.Begin);
-                int totalFiles = br.ReadInt32();
-
-                br.BaseStream.Seek(2048, SeekOrigin.Begin);
-                for (int i = 0; i < totalFiles; br.ReadBytes(4), i += 16)
+                using (BinaryReader br = new BinaryReader(File.OpenRead(Info.indexDir)))
                 {
-                    int tempOffset = br.ReadInt32();
+                    br.BaseStream.Seek(1036, SeekOrigin.Begin);
+                    int totalFiles = br.ReadInt32();
 
-                    if (tempOffset == fileHash)
+                    br.BaseStream.Seek(2048, SeekOrigin.Begin);
+                    for (int i = 0; i < totalFiles; br.ReadBytes(4), i += 16)
                     {
-                        int fTempOffset = br.ReadInt32();
+                        int tempOffset = br.ReadInt32();
 
-                        if (fTempOffset == folderHash)
+                        if (tempOffset == fileHash)
                         {
-                            fileOffset = br.ReadInt32() * 8;
-                            break;
+                            int fTempOffset = br.ReadInt32();
+
+                            if (fTempOffset == folderHash)
+                            {
+                                fileOffset = br.ReadInt32() * 8;
+                                break;
+                            }
+                            else
+                            {
+                                br.ReadBytes(4);
+                            }
                         }
                         else
                         {
-                            br.ReadBytes(4);
+                            br.ReadBytes(8);
                         }
                     }
-                    else
-                    {
-                        br.ReadBytes(8);
-                    }
                 }
+            }
+            catch(Exception e)
+            {
+                MessageBox.Show("[Helper] Error Accessing Index File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             return fileOffset;
         }
@@ -251,37 +259,45 @@ namespace FFXIV_TexTools2.Helpers
         {
             int fileOffset = 0;
 
-            using (BinaryReader br = new BinaryReader(File.OpenRead(Info.aIndexDir)))
+            try
             {
-                br.BaseStream.Seek(1036, SeekOrigin.Begin);
-                int totalFiles = br.ReadInt32();
-
-                br.BaseStream.Seek(2048, SeekOrigin.Begin);
-                for (int i = 0; i < totalFiles; br.ReadBytes(4), i += 16)
+                using (BinaryReader br = new BinaryReader(File.OpenRead(Info.aIndexDir)))
                 {
-                    int tempOffset = br.ReadInt32();
+                    br.BaseStream.Seek(1036, SeekOrigin.Begin);
+                    int totalFiles = br.ReadInt32();
 
-                    if (tempOffset == fileHash)
+                    br.BaseStream.Seek(2048, SeekOrigin.Begin);
+                    for (int i = 0; i < totalFiles; br.ReadBytes(4), i += 16)
                     {
-                        int fTempOffset = br.ReadInt32();
+                        int tempOffset = br.ReadInt32();
 
-                        if (fTempOffset == folderHash)
+                        if (tempOffset == fileHash)
                         {
-                            byte[] offset = br.ReadBytes(4);
-                            fileOffset = BitConverter.ToInt32(offset, 0) * 8;
-                            break;
+                            int fTempOffset = br.ReadInt32();
+
+                            if (fTempOffset == folderHash)
+                            {
+                                byte[] offset = br.ReadBytes(4);
+                                fileOffset = BitConverter.ToInt32(offset, 0) * 8;
+                                break;
+                            }
+                            else
+                            {
+                                br.ReadBytes(4);
+                            }
                         }
                         else
                         {
-                            br.ReadBytes(4);
+                            br.ReadBytes(8);
                         }
-                    }
-                    else
-                    {
-                        br.ReadBytes(8);
                     }
                 }
             }
+            catch (Exception e)
+            {
+                MessageBox.Show("[Helper] Error Accessing Index A File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
             return fileOffset;
         }
 
@@ -290,29 +306,37 @@ namespace FFXIV_TexTools2.Helpers
         {
             int fileOffset = 0;
 
-            using (BinaryReader br = new BinaryReader(File.OpenRead(Info.indexDir)))
+            try
             {
-                br.BaseStream.Seek(1036, SeekOrigin.Begin);
-                int totalFiles = br.ReadInt32();
-
-                br.BaseStream.Seek(2048, SeekOrigin.Begin);
-                for (int i = 0; i < totalFiles; br.ReadBytes(4), i += 16)
+                using (BinaryReader br = new BinaryReader(File.OpenRead(Info.indexDir)))
                 {
-                    int tempFileOffset = br.ReadInt32();
+                    br.BaseStream.Seek(1036, SeekOrigin.Begin);
+                    int totalFiles = br.ReadInt32();
 
-                    if (tempFileOffset == fileHash)
+                    br.BaseStream.Seek(2048, SeekOrigin.Begin);
+                    for (int i = 0; i < totalFiles; br.ReadBytes(4), i += 16)
                     {
-                        br.ReadBytes(4);
-                        byte[] offset = br.ReadBytes(4);
-                        fileOffset = BitConverter.ToInt32(offset, 0) * 8;
-                        break;
-                    }
-                    else
-                    {
-                        br.ReadBytes(8);
+                        int tempFileOffset = br.ReadInt32();
+
+                        if (tempFileOffset == fileHash)
+                        {
+                            br.ReadBytes(4);
+                            byte[] offset = br.ReadBytes(4);
+                            fileOffset = BitConverter.ToInt32(offset, 0) * 8;
+                            break;
+                        }
+                        else
+                        {
+                            br.ReadBytes(8);
+                        }
                     }
                 }
             }
+            catch (Exception e)
+            {
+                MessageBox.Show("[Helper] Error Accessing Index File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
             return fileOffset;
         }
 
@@ -322,44 +346,52 @@ namespace FFXIV_TexTools2.Helpers
             var fileHash = FFCRC.GetHash(Path.GetFileName(fullPath));
             int oldOffset = 0;
 
-            using(var index = File.Open(Info.indexDir, FileMode.Open))
+            try
             {
-                using (BinaryReader br = new BinaryReader(index))
+                using (var index = File.Open(Info.indexDir, FileMode.Open))
                 {
-                    using (BinaryWriter bw = new BinaryWriter(index))
+                    using (BinaryReader br = new BinaryReader(index))
                     {
-                        br.BaseStream.Seek(1036, SeekOrigin.Begin);
-                        int totalFiles = br.ReadInt32();
-
-                        br.BaseStream.Seek(2048, SeekOrigin.Begin);
-                        for (int i = 0; i < totalFiles; br.ReadBytes(4), i += 16)
+                        using (BinaryWriter bw = new BinaryWriter(index))
                         {
-                            int tempOffset = br.ReadInt32();
+                            br.BaseStream.Seek(1036, SeekOrigin.Begin);
+                            int totalFiles = br.ReadInt32();
 
-                            if (tempOffset == fileHash)
+                            br.BaseStream.Seek(2048, SeekOrigin.Begin);
+                            for (int i = 0; i < totalFiles; br.ReadBytes(4), i += 16)
                             {
-                                int fTempOffset = br.ReadInt32();
+                                int tempOffset = br.ReadInt32();
 
-                                if (fTempOffset == folderHash)
+                                if (tempOffset == fileHash)
                                 {
-                                    oldOffset = br.ReadInt32();
-                                    bw.BaseStream.Seek(br.BaseStream.Position - 4, SeekOrigin.Begin);
-                                    bw.Write(offset / 8);
-                                    break;
+                                    int fTempOffset = br.ReadInt32();
+
+                                    if (fTempOffset == folderHash)
+                                    {
+                                        oldOffset = br.ReadInt32();
+                                        bw.BaseStream.Seek(br.BaseStream.Position - 4, SeekOrigin.Begin);
+                                        bw.Write(offset / 8);
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        br.ReadBytes(4);
+                                    }
                                 }
                                 else
                                 {
-                                    br.ReadBytes(4);
+                                    br.ReadBytes(8);
                                 }
-                            }
-                            else
-                            {
-                                br.ReadBytes(8);
                             }
                         }
                     }
                 }
             }
+            catch (Exception e)
+            {
+                MessageBox.Show("[Helper] Error Accessing Index File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
             return oldOffset;
         }
 
@@ -367,78 +399,59 @@ namespace FFXIV_TexTools2.Helpers
         {
             var pathHash = FFCRC.GetHash(fullPath);
 
-            using (var index = File.Open(Info.index2Dir, FileMode.Open))
+            try
             {
-                using (BinaryReader br = new BinaryReader(index))
+                using (var index = File.Open(Info.index2Dir, FileMode.Open))
                 {
-                    using (BinaryWriter bw = new BinaryWriter(index))
+                    using (BinaryReader br = new BinaryReader(index))
                     {
-                        br.BaseStream.Seek(1036, SeekOrigin.Begin);
-                        int totalFiles = br.ReadInt32();
-
-                        br.BaseStream.Seek(2056, SeekOrigin.Begin);
-                        for (int i = 0; i < totalFiles; br.ReadBytes(4), i += 16)
+                        using (BinaryWriter bw = new BinaryWriter(index))
                         {
-                            int tempOffset = br.ReadInt32();
+                            br.BaseStream.Seek(1036, SeekOrigin.Begin);
+                            int totalFiles = br.ReadInt32();
 
-                            if (tempOffset == pathHash)
+                            br.BaseStream.Seek(2056, SeekOrigin.Begin);
+                            for (int i = 0; i < totalFiles; br.ReadBytes(4), i += 16)
                             {
-                                bw.BaseStream.Seek(br.BaseStream.Position, SeekOrigin.Begin);
-                                bw.Write((int)(offset / 8));
-                                break;
-                            }
-                            else
-                            {
-                                br.ReadBytes(8);
+                                int tempOffset = br.ReadInt32();
+
+                                if (tempOffset == pathHash)
+                                {
+                                    bw.BaseStream.Seek(br.BaseStream.Position, SeekOrigin.Begin);
+                                    bw.Write((int)(offset / 8));
+                                    break;
+                                }
+                                else
+                                {
+                                    br.ReadBytes(8);
+                                }
                             }
                         }
                     }
                 }
             }
+            catch (Exception e)
+            {
+                MessageBox.Show("[Helper] Error Accessing Index 2 File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
         }
 #endregion offset
 
 #region IO
         public static bool FolderExists(int folderHash)
         {
-            using (BinaryReader br = new BinaryReader(File.OpenRead(Info.indexDir)))
+            try
             {
-                br.BaseStream.Seek(1036, SeekOrigin.Begin);
-                int totalFiles = br.ReadInt32();
-
-                br.BaseStream.Seek(2048, SeekOrigin.Begin);
-                for (int i = 0; i < totalFiles; br.ReadBytes(4), i += 16)
+                using (BinaryReader br = new BinaryReader(File.OpenRead(Info.indexDir)))
                 {
-                    br.ReadBytes(4);
-                    int tempFolderOffset = br.ReadInt32();
+                    br.BaseStream.Seek(1036, SeekOrigin.Begin);
+                    int totalFiles = br.ReadInt32();
 
-                    if (tempFolderOffset == folderHash)
-                    {
-                        return true;
-                    }
-                    else
+                    br.BaseStream.Seek(2048, SeekOrigin.Begin);
+                    for (int i = 0; i < totalFiles; br.ReadBytes(4), i += 16)
                     {
                         br.ReadBytes(4);
-                    }
-                }
-            }
-            return false;
-        }
-
-        public static bool FileExists(int fileHash, int folderHash)
-        {
-            using (BinaryReader br = new BinaryReader(File.OpenRead(Info.indexDir)))
-            {
-                br.BaseStream.Seek(1036, SeekOrigin.Begin);
-                int totalFiles = br.ReadInt32();
-
-                br.BaseStream.Seek(2048, SeekOrigin.Begin);
-                for (int i = 0; i < totalFiles; br.ReadBytes(4), i += 16)
-                {
-                    int tempFileOffset = br.ReadInt32();
-
-                    if (tempFileOffset == fileHash)
-                    {
                         int tempFolderOffset = br.ReadInt32();
 
                         if (tempFolderOffset == folderHash)
@@ -450,12 +463,55 @@ namespace FFXIV_TexTools2.Helpers
                             br.ReadBytes(4);
                         }
                     }
-                    else
+                }
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("[Helper] Error Accessing Index File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+            return false;
+        }
+
+        public static bool FileExists(int fileHash, int folderHash)
+        {
+            try
+            {
+                using (BinaryReader br = new BinaryReader(File.OpenRead(Info.indexDir)))
+                {
+                    br.BaseStream.Seek(1036, SeekOrigin.Begin);
+                    int totalFiles = br.ReadInt32();
+
+                    br.BaseStream.Seek(2048, SeekOrigin.Begin);
+                    for (int i = 0; i < totalFiles; br.ReadBytes(4), i += 16)
                     {
-                        br.ReadBytes(8);
+                        int tempFileOffset = br.ReadInt32();
+
+                        if (tempFileOffset == fileHash)
+                        {
+                            int tempFolderOffset = br.ReadInt32();
+
+                            if (tempFolderOffset == folderHash)
+                            {
+                                return true;
+                            }
+                            else
+                            {
+                                br.ReadBytes(4);
+                            }
+                        }
+                        else
+                        {
+                            br.ReadBytes(8);
+                        }
                     }
                 }
             }
+            catch (Exception e)
+            {
+                MessageBox.Show("[Helper] Error Accessing Index File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
             return false;
         }
 
@@ -463,24 +519,32 @@ namespace FFXIV_TexTools2.Helpers
         {
             SortedSet<ComboBoxInfo> parts = new SortedSet<ComboBoxInfo>();
 
-            using (BinaryReader br = new BinaryReader(File.OpenRead(Info.indexDir)))
+            try
             {
-                br.BaseStream.Seek(1036, SeekOrigin.Begin);
-                int totalFiles = br.ReadInt32();
-
-                br.BaseStream.Seek(2048, SeekOrigin.Begin);
-                for (int i = 0; i < totalFiles; br.ReadBytes(4), i += 16)
+                using (BinaryReader br = new BinaryReader(File.OpenRead(Info.indexDir)))
                 {
-                    br.ReadBytes(4);
-                    int tempFolderOffset = br.ReadInt32();
+                    br.BaseStream.Seek(1036, SeekOrigin.Begin);
+                    int totalFiles = br.ReadInt32();
 
-                    if (mtrl.Keys.Contains(tempFolderOffset))
+                    br.BaseStream.Seek(2048, SeekOrigin.Begin);
+                    for (int i = 0; i < totalFiles; br.ReadBytes(4), i += 16)
                     {
-                        parts.Add(new ComboBoxInfo(mtrl[tempFolderOffset].ToString(), mtrl[tempFolderOffset].ToString()));
+                        br.ReadBytes(4);
+                        int tempFolderOffset = br.ReadInt32();
+
+                        if (mtrl.Keys.Contains(tempFolderOffset))
+                        {
+                            parts.Add(new ComboBoxInfo(mtrl[tempFolderOffset].ToString(), mtrl[tempFolderOffset].ToString()));
+                        }
+                        br.ReadBytes(4);
                     }
-                    br.ReadBytes(4);
                 }
             }
+            catch (Exception e)
+            {
+                MessageBox.Show("[Helper] Error Accessing Index File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
             return parts;
         }
 
@@ -488,24 +552,32 @@ namespace FFXIV_TexTools2.Helpers
         {
             SortedSet<ComboBoxInfo> raceList = new SortedSet<ComboBoxInfo>();
 
-            using (BinaryReader br = new BinaryReader(File.OpenRead(Info.indexDir)))
+            try
             {
-                br.BaseStream.Seek(1036, SeekOrigin.Begin);
-                int totalFiles = br.ReadInt32();
-
-                br.BaseStream.Seek(2048, SeekOrigin.Begin);
-                for (int i = 0; i < totalFiles; br.ReadBytes(4), i += 16)
+                using (BinaryReader br = new BinaryReader(File.OpenRead(Info.indexDir)))
                 {
-                    br.ReadBytes(4);
-                    int tempFolderOffset = br.ReadInt32();
+                    br.BaseStream.Seek(1036, SeekOrigin.Begin);
+                    int totalFiles = br.ReadInt32();
 
-                    if (races.Keys.Contains(tempFolderOffset))
+                    br.BaseStream.Seek(2048, SeekOrigin.Begin);
+                    for (int i = 0; i < totalFiles; br.ReadBytes(4), i += 16)
                     {
-                        raceList.Add(new ComboBoxInfo(Info.IDRace[races[tempFolderOffset]], races[tempFolderOffset]));
+                        br.ReadBytes(4);
+                        int tempFolderOffset = br.ReadInt32();
+
+                        if (races.Keys.Contains(tempFolderOffset))
+                        {
+                            raceList.Add(new ComboBoxInfo(Info.IDRace[races[tempFolderOffset]], races[tempFolderOffset]));
+                        }
+                        br.ReadBytes(4);
                     }
-                    br.ReadBytes(4);
                 }
             }
+            catch (Exception e)
+            {
+                MessageBox.Show("[Helper] Error Accessing Index File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
 
             return raceList;
         }
@@ -514,27 +586,34 @@ namespace FFXIV_TexTools2.Helpers
         {
             Dictionary<int, int> fileOffsetDict = new Dictionary<int, int>();
 
-            using (BinaryReader br = new BinaryReader(File.OpenRead(Info.indexDir)))
+            try
             {
-                br.BaseStream.Seek(1036, SeekOrigin.Begin);
-                int totalFiles = br.ReadInt32();
-
-                br.BaseStream.Seek(2048, SeekOrigin.Begin);
-                for (int i = 0; i < totalFiles; br.ReadBytes(4), i += 16)
+                using (BinaryReader br = new BinaryReader(File.OpenRead(Info.indexDir)))
                 {
-                    int tempFileHash = br.ReadInt32();
+                    br.BaseStream.Seek(1036, SeekOrigin.Begin);
+                    int totalFiles = br.ReadInt32();
 
-                    int tempFolderHash = br.ReadInt32();
+                    br.BaseStream.Seek(2048, SeekOrigin.Begin);
+                    for (int i = 0; i < totalFiles; br.ReadBytes(4), i += 16)
+                    {
+                        int tempFileHash = br.ReadInt32();
 
-                    if (tempFolderHash == folderHash)
-                    {
-                        fileOffsetDict.Add(tempFileHash, BitConverter.ToInt32(br.ReadBytes(4), 0) * 8);
-                    }
-                    else
-                    {
-                        br.ReadBytes(4);
+                        int tempFolderHash = br.ReadInt32();
+
+                        if (tempFolderHash == folderHash)
+                        {
+                            fileOffsetDict.Add(tempFileHash, BitConverter.ToInt32(br.ReadBytes(4), 0) * 8);
+                        }
+                        else
+                        {
+                            br.ReadBytes(4);
+                        }
                     }
                 }
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("[Helper] Error Accessing Index File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             return fileOffsetDict;
         }
@@ -543,46 +622,76 @@ namespace FFXIV_TexTools2.Helpers
         {
             bool problem = false;
 
-            using (BinaryReader br = new BinaryReader(File.OpenRead(Info.indexDir)))
+            try
             {
-                br.BaseStream.Seek(1104, SeekOrigin.Begin);
-
-                var numDats = br.ReadInt16();
-
-                if(numDats != 4)
+                using (BinaryReader br = new BinaryReader(File.OpenRead(Info.indexDir)))
                 {
-                    problem = true;
+                    br.BaseStream.Seek(1104, SeekOrigin.Begin);
+
+                    var numDats = br.ReadInt16();
+
+                    if (numDats != 4)
+                    {
+                        problem = true;
+                    }
                 }
             }
-
-            using (BinaryReader br = new BinaryReader(File.OpenRead(Info.index2Dir)))
+            catch (Exception e)
             {
-                br.BaseStream.Seek(1104, SeekOrigin.Begin);
+                MessageBox.Show("[Helper] Error Accessing Index File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
 
-                var numDats = br.ReadInt16();
-
-                if (numDats != 4)
+            try
+            {
+                using (BinaryReader br = new BinaryReader(File.OpenRead(Info.index2Dir)))
                 {
-                    problem = true;
+                    br.BaseStream.Seek(1104, SeekOrigin.Begin);
+
+                    var numDats = br.ReadInt16();
+
+                    if (numDats != 4)
+                    {
+                        problem = true;
+                    }
                 }
             }
+            catch (Exception e)
+            {
+                MessageBox.Show("[Helper] Error Accessing Index 2 File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
 
             return problem;
         }
 
         public static void FixIndex()
         {
-            using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(Info.indexDir)))
+            try
             {
-                bw.BaseStream.Seek(1104, SeekOrigin.Begin);
-                bw.Write((byte)4);
+                using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(Info.indexDir)))
+                {
+                    bw.BaseStream.Seek(1104, SeekOrigin.Begin);
+                    bw.Write((byte)4);
+                }
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("[Helper] Error Accessing Index File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
-            using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(Info.index2Dir)))
+            try
             {
-                bw.BaseStream.Seek(1104, SeekOrigin.Begin);
-                bw.Write((byte)4);
+                using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(Info.index2Dir)))
+                {
+                    bw.BaseStream.Seek(1104, SeekOrigin.Begin);
+                    bw.Write((byte)4);
+                }
             }
+            catch (Exception e)
+            {
+                MessageBox.Show("[Helper] Error Accessing Index File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
         }
 #endregion
 

@@ -631,17 +631,24 @@ namespace FFXIV_TexTools2
                 string line;
                 JsonEntry modEntry = null;
                 bool inModList = false;
-                using (StreamReader sr = new StreamReader(Info.modListDir))
+                try
                 {
-                    while ((line = sr.ReadLine()) != null)
+                    using (StreamReader sr = new StreamReader(Info.modListDir))
                     {
-                        modEntry = JsonConvert.DeserializeObject<JsonEntry>(line);
-                        if (modEntry.fullPath.Equals(fullPath))
+                        while ((line = sr.ReadLine()) != null)
                         {
-                            inModList = true;
-                            break;
+                            modEntry = JsonConvert.DeserializeObject<JsonEntry>(line);
+                            if (modEntry.fullPath.Equals(fullPath))
+                            {
+                                inModList = true;
+                                break;
+                            }
                         }
                     }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("[Main] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
 
                 if (inModList)
@@ -781,29 +788,36 @@ namespace FFXIV_TexTools2
                 revertButton.IsEnabled = true;
             }
 
-            var itemSelected = (ItemViewModel)textureTreeView.SelectedItem;
-            ((ItemViewModel)textureTreeView.SelectedItem).IsSelected = false;
-            itemSelected.IsSelected = true;
+            //var itemSelected = (ItemViewModel)textureTreeView.SelectedItem;
+            //((ItemViewModel)textureTreeView.SelectedItem).IsSelected = false;
+            //itemSelected.IsSelected = true;
         }
 
         private void RevertButton_Click(object sender, RoutedEventArgs e)
         {
             JsonEntry modEntry = null;
             string line;
-            
-            using (StreamReader sr = new StreamReader(Info.modListDir))
+
+            try
             {
-                while ((line = sr.ReadLine()) != null)
+                using (StreamReader sr = new StreamReader(Info.modListDir))
                 {
-                    modEntry = JsonConvert.DeserializeObject<JsonEntry>(line);
-                    if (modEntry.fullPath.Equals(fullPath))
+                    while ((line = sr.ReadLine()) != null)
                     {
-                        break;
+                        modEntry = JsonConvert.DeserializeObject<JsonEntry>(line);
+                        if (modEntry.fullPath.Equals(fullPath))
+                        {
+                            break;
+                        }
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show("[Main] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
 
-            if(modEntry != null)
+            if (modEntry != null)
             {
                 if (revertButton.Content.Equals("Enable"))
                 {
@@ -823,9 +837,9 @@ namespace FFXIV_TexTools2
                 }
             }
 
-            var itemSelected = (ItemViewModel)textureTreeView.SelectedItem;
-            ((ItemViewModel)textureTreeView.SelectedItem).IsSelected = false;
-            itemSelected.IsSelected = true;
+            //var itemSelected = (ItemViewModel)textureTreeView.SelectedItem;
+            //((ItemViewModel)textureTreeView.SelectedItem).IsSelected = false;
+            //itemSelected.IsSelected = true;
 
         }
 
@@ -882,30 +896,47 @@ namespace FFXIV_TexTools2
         {
             JsonEntry modEntry = null;
             string line;
-            using (StreamReader sr = new StreamReader(Info.modListDir))
+
+            try
             {
-                while ((line = sr.ReadLine()) != null)
+                using (StreamReader sr = new StreamReader(Info.modListDir))
                 {
-                    modEntry = JsonConvert.DeserializeObject<JsonEntry>(line);
-                    Helper.UpdateIndex(modEntry.originalOffset, modEntry.fullPath);
-                    Helper.UpdateIndex2(modEntry.originalOffset, modEntry.fullPath);
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        modEntry = JsonConvert.DeserializeObject<JsonEntry>(line);
+                        Helper.UpdateIndex(modEntry.originalOffset, modEntry.fullPath);
+                        Helper.UpdateIndex2(modEntry.originalOffset, modEntry.fullPath);
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show("[Main] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
         }
 
         private void Menu_ReapplyAll_Click(object sender, RoutedEventArgs e)
         {
             JsonEntry modEntry = null;
             string line;
-            using (StreamReader sr = new StreamReader(Info.modListDir))
+            try
             {
-                while ((line = sr.ReadLine()) != null)
+                using (StreamReader sr = new StreamReader(Info.modListDir))
                 {
-                    modEntry = JsonConvert.DeserializeObject<JsonEntry>(line);
-                    Helper.UpdateIndex(modEntry.modOffset, modEntry.fullPath);
-                    Helper.UpdateIndex2(modEntry.modOffset, modEntry.fullPath);
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        modEntry = JsonConvert.DeserializeObject<JsonEntry>(line);
+                        Helper.UpdateIndex(modEntry.modOffset, modEntry.fullPath);
+                        Helper.UpdateIndex2(modEntry.modOffset, modEntry.fullPath);
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show("[Main] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
         }
 
         private void Menu_DX9_Click(object sender, RoutedEventArgs e)

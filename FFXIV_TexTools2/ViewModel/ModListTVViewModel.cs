@@ -16,9 +16,11 @@
 
 using FFXIV_TexTools2.Helpers;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Windows;
 
 namespace FFXIV_TexTools2.ViewModel
 {
@@ -43,18 +45,26 @@ namespace FFXIV_TexTools2.ViewModel
 
             HashSet<string> itemSet = new HashSet<string>();
 
-            foreach (string line in File.ReadAllLines(Info.modListDir))
+            try
             {
-                JsonEntry entry = JsonConvert.DeserializeObject<JsonEntry>(line);
-
-                if (entry.category.Equals(category) && _parent == null)
+                foreach (string line in File.ReadAllLines(Info.modListDir))
                 {
-                    itemSet.Add(entry.name);
+                    JsonEntry entry = JsonConvert.DeserializeObject<JsonEntry>(line);
 
+                    if (entry.category.Equals(category) && _parent == null)
+                    {
+                        itemSet.Add(entry.name);
+
+                    }
                 }
             }
+            catch (Exception e)
+            {
+                MessageBox.Show("[VM] Error Accessing .modlist File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
 
-            foreach(string name in itemSet)
+
+            foreach (string name in itemSet)
             {
                 _children.Add(new ModListTVViewModel(name, this));
             }

@@ -38,15 +38,23 @@ namespace FFXIV_TexTools2.ViewModel
 
         public ListViewModel(string selectedItem)
         {
-            foreach (string line in File.ReadAllLines(Info.modListDir))
+            try
             {
-                JsonEntry entry = JsonConvert.DeserializeObject<JsonEntry>(line);
-
-                if (entry.name.Equals(selectedItem))
+                foreach (string line in File.ReadAllLines(Info.modListDir))
                 {
-                    mlmList.Add(ParseEntry(entry));
+                    JsonEntry entry = JsonConvert.DeserializeObject<JsonEntry>(line);
+
+                    if (entry.name.Equals(selectedItem))
+                    {
+                        mlmList.Add(ParseEntry(entry));
+                    }
                 }
             }
+            catch (Exception e)
+            {
+                MessageBox.Show("[VM] Error Accessing .modlist File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
         }
 
         public List<ModListModel> ModList
