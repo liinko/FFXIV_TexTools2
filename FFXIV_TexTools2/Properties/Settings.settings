@@ -14,5 +14,8 @@
     <Setting Name="DX_Ver" Type="System.String" Scope="User">
       <Value Profile="(Default)">DX11</Value>
     </Setting>
+    <Setting Name="Mod_List" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

@@ -70,5 +70,17 @@ namespace FFXIV_TexTools2.Properties {
                 this["DX_Ver"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool Mod_List {
+            get {
+                return ((bool)(this["Mod_List"]));
+            }
+            set {
+                this["Mod_List"] = value;
+            }
+        }
     }
 }

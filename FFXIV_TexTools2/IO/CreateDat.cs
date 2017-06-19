@@ -28,7 +28,7 @@ namespace FFXIV_TexTools2
         {
             try
             {
-                using (FileStream fs = File.Create(Info.datDir + "3"))
+                using (FileStream fs = File.Create(Info.datDir + "4"))
                 {
                     using (BinaryWriter bw = new BinaryWriter(fs))
                     {
@@ -41,7 +41,7 @@ namespace FFXIV_TexTools2
             }
             catch (Exception e)
             {
-                MessageBox.Show("[Create] Error Creating .Dat3 File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("[Create] Error Creating .Dat4 File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
 
@@ -50,7 +50,7 @@ namespace FFXIV_TexTools2
                 using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(Info.indexDir)))
                 {
                     bw.BaseStream.Seek(1104, SeekOrigin.Begin);
-                    bw.Write((byte)4);
+                    bw.Write((byte)5);
                 }
             }
             catch(Exception e)
@@ -64,7 +64,7 @@ namespace FFXIV_TexTools2
                 using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(Info.index2Dir)))
                 {
                     bw.BaseStream.Seek(1104, SeekOrigin.Begin);
-                    bw.Write((byte)4);
+                    bw.Write((byte)5);
                 }
             }
             catch (Exception e)

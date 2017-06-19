@@ -19,7 +19,6 @@ using FFXIV_TexTools2.Material;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Windows;
@@ -153,7 +152,7 @@ namespace FFXIV_TexTools2.ViewModel
                         fullImport.AddRange(MakeSecondHeader());
                         fullImport.AddRange(DDSInfo.Item1);
 
-                        //open dat3 for writing 
+                        //open dat4 for writing 
                         try
                         {
                             using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(Info.modDatDir)))
@@ -164,7 +163,7 @@ namespace FFXIV_TexTools2.ViewModel
                                 {
                                     int sizeDiff = modSize - fullImport.Count;
 
-                                    bw.BaseStream.Seek(modOffset - 48, SeekOrigin.Begin);
+                                    bw.BaseStream.Seek(modOffset - 64, SeekOrigin.Begin);
 
                                     bw.Write(fullImport.ToArray());
 
@@ -195,7 +194,7 @@ namespace FFXIV_TexTools2.ViewModel
                                                 {
                                                     int sizeDiff = emptyLength - fullImport.Count;
 
-                                                    bw.BaseStream.Seek(emptyEntry.modOffset - 48, SeekOrigin.Begin);
+                                                    bw.BaseStream.Seek(emptyEntry.modOffset - 64, SeekOrigin.Begin);
 
                                                     bw.Write(fullImport.ToArray());
 
@@ -238,7 +237,7 @@ namespace FFXIV_TexTools2.ViewModel
                                             eof = eof + 16;
                                         }
 
-                                        offset = bw.BaseStream.Position + 48;
+                                        offset = bw.BaseStream.Position + 64;
 
                                         bw.Write(fullImport.ToArray());
                                     }
@@ -247,7 +246,7 @@ namespace FFXIV_TexTools2.ViewModel
                         }
                         catch (Exception ex)
                         {
-                            MessageBox.Show("[Import] Error Accessing .dat3 File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                            MessageBox.Show("[Import] Error Accessing .dat4 File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                         }
 
 
@@ -411,7 +410,7 @@ namespace FFXIV_TexTools2.ViewModel
                         {
                             int sizeDiff = modSize - complete.Count;
 
-                            bw.BaseStream.Seek(modOffset, SeekOrigin.Begin);
+                            bw.BaseStream.Seek(modOffset - 64, SeekOrigin.Begin);
 
                             bw.Write(complete.ToArray());
 
@@ -439,7 +438,7 @@ namespace FFXIV_TexTools2.ViewModel
                                         {
                                             int sizeDiff = emptyLength - complete.Count;
 
-                                            bw.BaseStream.Seek(emptyEntry.modOffset - 48, SeekOrigin.Begin);
+                                            bw.BaseStream.Seek(emptyEntry.modOffset - 64, SeekOrigin.Begin);
 
                                             bw.Write(complete.ToArray());
 
@@ -483,7 +482,7 @@ namespace FFXIV_TexTools2.ViewModel
                                     eof = eof + 16;
                                 }
 
-                                newOffset = bw.BaseStream.Position + 48;
+                                newOffset = bw.BaseStream.Position + 64;
 
                                 bw.Write(complete.ToArray());
                             }
@@ -492,7 +491,7 @@ namespace FFXIV_TexTools2.ViewModel
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("[Import] Error Accessing .dat3 File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("[Import] Error Accessing .dat4 File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
 
 

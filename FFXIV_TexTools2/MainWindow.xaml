@@ -47,14 +47,18 @@
             </Viewbox>
         </StatusBar>
         <Menu x:Name="menu" Height="22" VerticalAlignment="Top" Margin="0,0,1,0">
-            <MenuItem Header="View">
+            <MenuItem Header="Mods">
                 <MenuItem x:Name="Menu_ModList" Header="Mod List" BorderThickness="1" Click="Menu_ModList_Click"/>
                 <MenuItem x:Name="Menu_Importer" Header="Importer" HorizontalAlignment="Left" Width="140" Click="Menu_Importer_Click" IsEnabled="False"/>
+                <MenuItem x:Name="Menu_RevertAll" Header="Disable all Mods" Click="Menu_RevertAll_Click"/>
+                <MenuItem x:Name="Menu_ReapplyAll" Header="ReEnable All Mods" Click="Menu_ReapplyAll_Click"/>
             </MenuItem>
             <MenuItem Header="Options" StaysOpenOnClick="True" Height="22">
                 <MenuItem x:Name="Menu_Directories" Header="Directories" Click="Menu_Directories_Click"/>
-                <MenuItem x:Name="Menu_RevertAll" Header="Disable all Mods" Click="Menu_RevertAll_Click"/>
-                <MenuItem x:Name="Menu_ReapplyAll" Header="ReEnable All Mods" Click="Menu_ReapplyAll_Click"/>
+                <MenuItem Header="ModList" StaysOpenOnClick="True">
+                    <MenuItem x:Name="ModList_On" Header="On" IsCheckable="True" Click="ModList_On_Click"/>
+                    <MenuItem x:Name="ModList_Off" Header="Off" IsCheckable="True" Checked="ModList_Off_Checked"/>
+                </MenuItem>
                 <MenuItem Header="DX Version">
                     <MenuItem x:Name="Menu_DX9" Header="DX9" HorizontalAlignment="Left" Click="Menu_DX9_Click" IsCheckable="True"/>
                     <MenuItem x:Name="Menu_DX11" Header="DX11" HorizontalAlignment="Left" Click="Menu_DX11_Click" IsCheckable="True"/>

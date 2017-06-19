@@ -327,11 +327,13 @@ namespace FFXIV_TexTools2.IO
 
                                 if (!hasSecondary)
                                 {
-                                    br.ReadBytes(118);
+                                    //br.ReadBytes(118);
+                                    br.ReadBytes(110);
                                 }
                                 else
                                 {
-                                    br.ReadBytes(114);
+                                    //br.ReadBytes(114);
+                                    br.ReadBytes(106);
                                 }
 
 
@@ -340,7 +342,7 @@ namespace FFXIV_TexTools2.IO
 
                                 br.ReadBytes(lastText);
 
-                                byte[] itemNameBytes = br.ReadBytes(entrySize - (lastText + 160));
+                                byte[] itemNameBytes = br.ReadBytes(entrySize - (lastText + 152));
                                 string itemName = Encoding.UTF8.GetString(itemNameBytes);
                                 itemName = itemName.Replace("\0", "");
 

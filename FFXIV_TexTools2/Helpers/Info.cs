@@ -29,7 +29,7 @@ namespace FFXIV_TexTools2.Helpers
         public static string datDir = Properties.Settings.Default.FFXIV_Directory + "/040000.win32.dat";
 
         public static string modListDir = Properties.Settings.Default.FFXIV_Directory + "/040000.modlist";
-        public static string modDatDir = Properties.Settings.Default.FFXIV_Directory + "/040000.win32.dat3";
+        public static string modDatDir = Properties.Settings.Default.FFXIV_Directory + "/040000.win32.dat4";
 
 
 

@@ -410,8 +410,8 @@ namespace FFXIV_TexTools2.Helpers
                             br.BaseStream.Seek(1036, SeekOrigin.Begin);
                             int totalFiles = br.ReadInt32();
 
-                            br.BaseStream.Seek(2056, SeekOrigin.Begin);
-                            for (int i = 0; i < totalFiles; br.ReadBytes(4), i += 16)
+                            br.BaseStream.Seek(2048, SeekOrigin.Begin);
+                            for (int i = 0; i < totalFiles; i += 8)
                             {
                                 int tempOffset = br.ReadInt32();
 
@@ -423,7 +423,7 @@ namespace FFXIV_TexTools2.Helpers
                                 }
                                 else
                                 {
-                                    br.ReadBytes(8);
+                                    br.ReadBytes(4);
                                 }
                             }
                         }

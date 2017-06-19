@@ -118,13 +118,13 @@ namespace FFXIV_TexTools2
             {
                 Menu_DX11.IsChecked = true;
                 Menu_DX11.IsEnabled = false;
-                DXVerStatus.Content = DXVerStatus.Content + "11";
+                DXVerStatus.Content = "DX Version: 11";
             }
             else if (Properties.Settings.Default.DX_Ver.Equals("DX9"))
             {
                 Menu_DX9.IsChecked = true;
                 Menu_DX9.IsEnabled = false;
-                DXVerStatus.Content = DXVerStatus.Content + "9";
+                DXVerStatus.Content = "DX Version: 9";
             }
 
             importButton.IsEnabled = false;
@@ -160,7 +160,7 @@ namespace FFXIV_TexTools2
         {
             BackgroundWorker worker = sender as BackgroundWorker;
 
-            if (!File.Exists(Info.modDatDir))
+            if (!File.Exists(Info.modDatDir) || !File.Exists(Info.modListDir))
             {
                 CreateDat.MakeDat();
                 CreateDat.CreateModList();
@@ -571,19 +571,19 @@ namespace FFXIV_TexTools2
                 {
                     fullPath = mtrlInfo.NormalPath;
                     offset = mtrlInfo.NormalOffset;      
-                    paragraph.Inlines.Add(new Run(fullPath));
+                    paragraph.Inlines.Add(new Run(fullPath + FFCRC.GetHash(fullPath)));
                 }
                 else if (comboInfo.Name.Equals(Strings.Specular))
                 {
                     fullPath = mtrlInfo.SpecularPath;
                     offset = mtrlInfo.SpecularOffset;
-                    paragraph.Inlines.Add(new Run(fullPath));
+                    paragraph.Inlines.Add(new Run(fullPath + FFCRC.GetHash(fullPath)));
                 }
                 else if (comboInfo.Name.Equals(Strings.Diffuse))
                 {
                     fullPath = mtrlInfo.DiffusePath; 
                     offset = mtrlInfo.DiffuseOffset;
-                    paragraph.Inlines.Add(new Run(fullPath));
+                    paragraph.Inlines.Add(new Run(fullPath + FFCRC.GetHash(fullPath)));
                 }
                 else if (comboInfo.Name.Equals(Strings.Mask) || comboInfo.Name.Equals(Strings.Skin))
                 {
@@ -601,20 +601,20 @@ namespace FFXIV_TexTools2
 
                         fullPath = String.Format(mtrlInfo.MaskPath, part);
                         offset = MTRL.GetDecalOffset(selectedItem.itemName, ((ComboBoxInfo)partComboBox.SelectedItem).Name);
-                        paragraph.Inlines.Add(new Run(fullPath));
+                        paragraph.Inlines.Add(new Run(fullPath + FFCRC.GetHash(fullPath)));
                     }
                     else
                     {
                         fullPath = mtrlInfo.MaskPath;
                         offset = mtrlInfo.MaskOffset;
-                        paragraph.Inlines.Add(new Run(fullPath));
+                        paragraph.Inlines.Add(new Run(fullPath + FFCRC.GetHash(fullPath)));
                     }
                 }
                 else if (comboInfo.Name.Equals(Strings.ColorSet))
                 {
                     colorBmp = TEX.TextureToBitmap(mtrlInfo.ColorData, 9312, 4, 16);
                     fullPath = mtrlInfo.MTRLPath;
-                    paragraph.Inlines.Add(new Run(fullPath));
+                    paragraph.Inlines.Add(new Run(fullPath + FFCRC.GetHash(fullPath)));
                 }
 
                 string dxPath = Path.GetFileNameWithoutExtension(fullPath);
@@ -941,34 +941,50 @@ namespace FFXIV_TexTools2
 
         private void Menu_DX9_Click(object sender, RoutedEventArgs e)
         {
-            Properties.Settings.Default.DX_Ver = "DX9";
-            Properties.Settings.Default.Save();
+            try
+            {
+                Properties.Settings.Default.DX_Ver = "DX9";
+                Properties.Settings.Default.Save();
 
-            Menu_DX9.IsEnabled = false;
-            Menu_DX11.IsEnabled = true;
-            Menu_DX11.IsChecked = false;
+                Menu_DX9.IsEnabled = false;
+                Menu_DX11.IsEnabled = true;
+                Menu_DX11.IsChecked = false;
 
-            DXVerStatus.Content = DXVerStatus.Content + "9";
+                DXVerStatus.Content = "DX Version: 9";
 
-            var itemSelected = (ItemViewModel)textureTreeView.SelectedItem;
-            ((ItemViewModel)textureTreeView.SelectedItem).IsSelected = false;
-            itemSelected.IsSelected = true;
+                var itemSelected = (ItemViewModel)textureTreeView.SelectedItem;
+                ((ItemViewModel)textureTreeView.SelectedItem).IsSelected = false;
+                itemSelected.IsSelected = true;
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show("[Main] DX Switch Error \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
         }
 
         private void Menu_DX11_Click(object sender, RoutedEventArgs e)
         {
-            Properties.Settings.Default.DX_Ver = "DX11";
-            Properties.Settings.Default.Save();
+            try
+            {
+                Properties.Settings.Default.DX_Ver = "DX11";
+                Properties.Settings.Default.Save();
 
-            Menu_DX11.IsEnabled = false;
-            Menu_DX9.IsEnabled = true;
-            Menu_DX9.IsChecked = false;
+                Menu_DX11.IsEnabled = false;
+                Menu_DX9.IsEnabled = true;
+                Menu_DX9.IsChecked = false;
 
-            DXVerStatus.Content = DXVerStatus.Content + "11";
+                DXVerStatus.Content = "DX Version: 11";
 
-            var itemSelected = (ItemViewModel)textureTreeView.SelectedItem;
-            ((ItemViewModel)textureTreeView.SelectedItem).IsSelected = false;
-            itemSelected.IsSelected = true;
+                var itemSelected = (ItemViewModel)textureTreeView.SelectedItem;
+                ((ItemViewModel)textureTreeView.SelectedItem).IsSelected = false;
+                itemSelected.IsSelected = true;
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show("[Main] DX Switch Error \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
         }
 
         private void Menu_ProblemCheck_Click(object sender, RoutedEventArgs e)
@@ -1106,24 +1122,33 @@ namespace FFXIV_TexTools2
 
         private void RaceComboBox3D_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            bodyComboBox3D.Items.Clear();
-            if (e.AddedItems.Count > 0)
+            try
             {
-                var comboInfo = (ComboBoxInfo)raceComboBox3D.SelectedItem;
-
-                MDL mdl = new MDL(selectedItem, Info.raceID[comboInfo.Name], selectedParent);
-                meshList = mdl.GetMeshList();
-                var numMesh = mdl.GetNumMeshes() / 3;
-                modelName = mdl.GetModelName();
-
-                for(int i = 0; i < numMesh; i++)
+                bodyComboBox3D.Items.Clear();
+                if (e.AddedItems.Count > 0)
                 {
-                    bodyComboBox3D.Items.Add(i);
-                }
+                    var comboInfo = (ComboBoxInfo)raceComboBox3D.SelectedItem;
 
-                bodyComboBox3D.SelectedIndex = 0;
+                    MDL mdl = new MDL(selectedItem, Info.raceID[comboInfo.Name], selectedParent);
+                    meshList = mdl.GetMeshList();
+                    var numMesh = mdl.GetNumMeshes() / 3;
+                    modelName = mdl.GetModelName();
+
+                    for (int i = 0; i < numMesh; i++)
+                    {
+                        bodyComboBox3D.Items.Add(i);
+                    }
+
+                    bodyComboBox3D.SelectedIndex = 0;
+
+                }
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show("[Main] 3D Error \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
 
             }
+
             e.Handled = true;
         }
 
@@ -1171,91 +1196,99 @@ namespace FFXIV_TexTools2
 
             if (selected.Header.Equals("3D Model") && !loaded3D)
             {
-                string type = Helper.GetItemType(selectedParent);
-                List<ComboBoxInfo> cbiInfo = new List<ComboBoxInfo>();
-                Dictionary<int, string> racesDict = new Dictionary<int, string>();
-                string MDLFolder, MDLFile = "";
+                try
+                {
+                    string type = Helper.GetItemType(selectedParent);
+                    List<ComboBoxInfo> cbiInfo = new List<ComboBoxInfo>();
+                    Dictionary<int, string> racesDict = new Dictionary<int, string>();
+                    string MDLFolder, MDLFile = "";
 
-                List<string> races = new List<string>();
-                if(type.Equals("weapon") || type.Equals("food"))
-                {
-                    MDLFolder = "";
-                    cbiInfo.Add(new ComboBoxInfo(Strings.All, Strings.All));
-                }
-                else if (type.Equals("accessory"))
-                {
-                    MDLFolder = "chara/accessory/a" + selectedItem.itemID + "/model";
-                    MDLFile = "c{0}a" + selectedItem.itemID + "_" + Info.slotAbr[selectedParent] + ".mdl";
-                }
-                else if(type.Equals("character"))
-                {
-                    if (selectedItem.itemName.Equals(Strings.Body))
+                    List<string> races = new List<string>();
+                    if (type.Equals("weapon") || type.Equals("food"))
                     {
-                        MDLFolder = "chara/human/c{0}/obj/body/b0001/model";
+                        MDLFolder = "";
+                        cbiInfo.Add(new ComboBoxInfo(Strings.All, Strings.All));
                     }
-                    else if (selectedItem.itemName.Equals(Strings.Face))
+                    else if (type.Equals("accessory"))
                     {
-                        MDLFolder = "chara/human/c{0}/obj/face/f0001/model";
+                        MDLFolder = "chara/accessory/a" + selectedItem.itemID + "/model";
+                        MDLFile = "c{0}a" + selectedItem.itemID + "_" + Info.slotAbr[selectedParent] + ".mdl";
                     }
-                    else if (selectedItem.itemName.Equals(Strings.Hair))
+                    else if (type.Equals("character"))
                     {
-                        MDLFolder = "chara/human/c{0}/obj/hair/h0001/model";
-                    }
-                    else if (selectedItem.itemName.Equals(Strings.Tail))
-                    {
-                        MDLFolder = "chara/human/c{0}/obj/tail/t0001/model";
-                    }
-                    else
-                    {
-                        MDLFolder = null;
-                    }
-                }
-                else if (type.Equals("monster"))
-                {
-                    MDLFolder = "";
-                    cbiInfo.Add(new ComboBoxInfo(Strings.All, Strings.All));
-                }
-                else
-                {
-                    MDLFolder = "chara/equipment/e" + selectedItem.itemID + "/model";
-                    MDLFile = "c{0}e" + selectedItem.itemID + "_" + Info.slotAbr[selectedParent] + ".mdl";
-                }
-
-                var fileOffsetDict = Helper.GetAllFilesInFolder(FFCRC.GetHash(MDLFolder));
-                int fileHash;
-
-                if (!type.Equals("weapon") && !type.Equals("monster"))
-                {
-                    foreach (string raceID in Info.IDRace.Keys)
-                    {
-                        if (type.Equals("character"))
+                        if (selectedItem.itemName.Equals(Strings.Body))
                         {
-                            string fol = String.Format(MDLFolder, raceID);
-                            racesDict.Add(FFCRC.GetHash(fol), raceID);
+                            MDLFolder = "chara/human/c{0}/obj/body/b0001/model";
+                        }
+                        else if (selectedItem.itemName.Equals(Strings.Face))
+                        {
+                            MDLFolder = "chara/human/c{0}/obj/face/f0001/model";
+                        }
+                        else if (selectedItem.itemName.Equals(Strings.Hair))
+                        {
+                            MDLFolder = "chara/human/c{0}/obj/hair/h0001/model";
+                        }
+                        else if (selectedItem.itemName.Equals(Strings.Tail))
+                        {
+                            MDLFolder = "chara/human/c{0}/obj/tail/t0001/model";
                         }
                         else
                         {
-                            string mdl = String.Format(MDLFile, raceID);
-                            fileHash = FFCRC.GetHash(mdl);
-
-                            if (fileOffsetDict.Keys.Contains(fileHash))
-                            {
-
-                                cbiInfo.Add(new ComboBoxInfo(Info.IDRace[raceID], raceID));
-                            }
+                            MDLFolder = null;
                         }
                     }
-                    if (type.Equals("character"))
+                    else if (type.Equals("monster"))
                     {
-                        cbiInfo = Helper.FolderExistsListRace(racesDict).ToList();
+                        MDLFolder = "";
+                        cbiInfo.Add(new ComboBoxInfo(Strings.All, Strings.All));
                     }
+                    else
+                    {
+                        MDLFolder = "chara/equipment/e" + selectedItem.itemID + "/model";
+                        MDLFile = "c{0}e" + selectedItem.itemID + "_" + Info.slotAbr[selectedParent] + ".mdl";
+                    }
+
+                    var fileOffsetDict = Helper.GetAllFilesInFolder(FFCRC.GetHash(MDLFolder));
+                    int fileHash;
+
+                    if (!type.Equals("weapon") && !type.Equals("monster"))
+                    {
+                        foreach (string raceID in Info.IDRace.Keys)
+                        {
+                            if (type.Equals("character"))
+                            {
+                                string fol = String.Format(MDLFolder, raceID);
+                                racesDict.Add(FFCRC.GetHash(fol), raceID);
+                            }
+                            else
+                            {
+                                string mdl = String.Format(MDLFile, raceID);
+                                fileHash = FFCRC.GetHash(mdl);
+
+                                if (fileOffsetDict.Keys.Contains(fileHash))
+                                {
+
+                                    cbiInfo.Add(new ComboBoxInfo(Info.IDRace[raceID], raceID));
+                                }
+                            }
+                        }
+                        if (type.Equals("character"))
+                        {
+                            cbiInfo = Helper.FolderExistsListRace(racesDict).ToList();
+                        }
+                    }
+
+                    ComboView cView = new ComboView(cbiInfo);
+                    raceComboBox3D.DataContext = cView;
+                    raceComboBox3D.SelectedIndex = 0;
+
+                    loaded3D = true;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("[Main] 3D Error \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
 
-                ComboView cView = new ComboView(cbiInfo);
-                raceComboBox3D.DataContext = cView;
-                raceComboBox3D.SelectedIndex = 0;
-
-                loaded3D = true;
             }
             e.Handled = true;
         }
@@ -1265,73 +1298,81 @@ namespace FFXIV_TexTools2
 
             if (e.AddedItems.Count > 0)
             {
-                var comboInfo = (int)bodyComboBox3D.SelectedItem;
-
-                BitmapSource colorBMP = null;
-
-                BitmapSource displace = null;
-                MTRLInfo mInfo = MTRL3D();
-
-
-
-
-                if (mInfo.ColorData != null)
+                try
                 {
-                    var colorBmp = TEX.TextureToBitmap(mInfo.ColorData, 9312, 4, 16);
-                    colorBMP = Imaging.CreateBitmapSourceFromHBitmap(colorBmp.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                    var comboInfo = (int)bodyComboBox3D.SelectedItem;
+
+                    BitmapSource colorBMP = null;
+
+                    BitmapSource displace = null;
+                    MTRLInfo mInfo = MTRL3D();
+
+
+
+
+                    if (mInfo.ColorData != null)
+                    {
+                        var colorBmp = TEX.TextureToBitmap(mInfo.ColorData, 9312, 4, 16);
+                        colorBMP = Imaging.CreateBitmapSourceFromHBitmap(colorBmp.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                    }
+
+
+                    TexInfo specularTI = null;
+                    TexInfo maskTI = null;
+                    TexInfo normalTI = null;
+
+                    if (mInfo.NormalOffset != 0)
+                    {
+                        normalTI = TEX.GetTex(mInfo.NormalOffset);
+                    }
+
+                    if (mInfo.SpecularOffset != 0)
+                    {
+                        specularTI = TEX.GetTex(mInfo.SpecularOffset);
+                    }
+
+                    if (mInfo.MaskOffset != 0)
+                    {
+                        maskTI = TEX.GetTex(mInfo.MaskOffset);
+                        displace = TexHelper.MakeDisplaceMap(maskTI);
+                    }
+
+                    if (mInfo.DiffuseOffset != 0)
+                    {
+                        var diffTI = TEX.GetTex(mInfo.DiffuseOffset);
+
+                        newDiffuse = Imaging.CreateBitmapSourceFromHBitmap(diffTI.BMP.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+
+                    }
+                    else
+                    {
+                        newDiffuse = TexHelper.MakeDiffuseMap(normalTI.BMP, colorBMP, maskTI);
+                    }
+
+                    MeshGeometry3D mg3d = new MeshGeometry3D();
+
+                    Element3DCollection modelGeometry = new Element3DCollection();
+
+                    var gm = new MeshGeometryModel3D();
+
+                    mg3d.Normals = meshList[comboInfo].NormalList;
+                    mg3d.Positions = meshList[comboInfo].VertexList;
+                    mg3d.TextureCoordinates = meshList[comboInfo].CoordList;
+
+
+                    gm.Geometry = mg3d;
+
+                    noAlphaNormal = SetNormal(normalTI.BMP, 255);
+
+                    var MDLViewModel = new MDLViewModel(meshList[comboInfo], newDiffuse, Imaging.CreateBitmapSourceFromHBitmap(noAlphaNormal.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()), gm, displace);
+
+                    viewport3DX.DataContext = MDLViewModel;
+                }
+                catch(Exception ex)
+                {
+                    MessageBox.Show("[Main] 3D Error \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
 
-
-                TexInfo specularTI = null;
-                TexInfo maskTI = null;
-                TexInfo normalTI = null;
-
-                if (mInfo.NormalOffset != 0)
-                {
-                    normalTI = TEX.GetTex(mInfo.NormalOffset);
-                }
-
-                if (mInfo.SpecularOffset != 0)
-                {
-                    specularTI = TEX.GetTex(mInfo.SpecularOffset);
-                }
-
-                if (mInfo.MaskOffset != 0)
-                {
-                    maskTI = TEX.GetTex(mInfo.MaskOffset);
-                    displace = TexHelper.MakeDisplaceMap(maskTI);
-                }
-
-                if (mInfo.DiffuseOffset != 0)
-                {
-                    var diffTI = TEX.GetTex(mInfo.DiffuseOffset);
-
-                    newDiffuse = Imaging.CreateBitmapSourceFromHBitmap(diffTI.BMP.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-
-                }
-                else
-                {
-                    newDiffuse = TexHelper.MakeDiffuseMap(normalTI.BMP, colorBMP, maskTI);
-                }
-
-                MeshGeometry3D mg3d = new MeshGeometry3D();
-
-                Element3DCollection modelGeometry = new Element3DCollection();
-
-                var gm = new MeshGeometryModel3D();
-
-                mg3d.Normals = meshList[comboInfo].NormalList;
-                mg3d.Positions = meshList[comboInfo].VertexList;
-                mg3d.TextureCoordinates = meshList[comboInfo].CoordList;
-
-
-                gm.Geometry = mg3d;
-
-                noAlphaNormal = SetNormal(normalTI.BMP, 255);
-
-                var MDLViewModel = new MDLViewModel(meshList[comboInfo], newDiffuse, Imaging.CreateBitmapSourceFromHBitmap(noAlphaNormal.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()), gm, displace);
-
-                viewport3DX.DataContext = MDLViewModel;
             }
             e.Handled = true;
         }
@@ -1420,6 +1461,18 @@ namespace FFXIV_TexTools2
             bmp.UnlockBits(data);
 
             return bmp;
+        }
+
+        private void ModList_On_Click(object sender, RoutedEventArgs e)
+        {
+            Properties.Settings.Default.Mod_List = true;
+            Properties.Settings.Default.Save();
+        }
+
+        private void ModList_Off_Checked(object sender, RoutedEventArgs e)
+        {
+            Properties.Settings.Default.Mod_List = false;
+            Properties.Settings.Default.Save();
         }
 
         class CategoryComparer : IEqualityComparer<Category>
