@@ -41,6 +41,7 @@ using System.Windows.Documents;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Xml;
 
 namespace FFXIV_TexTools2
 {
@@ -52,7 +53,7 @@ namespace FFXIV_TexTools2
         List<Items> itemList;
         Dictionary<string, Items> mountsDict, minionsDict;
         MTRLInfo mtrlInfo;
-        string selectedParent, imcVersion, fullPath;
+        string selectedParent, imcVersion, fullPath, siteURL;
         Items selectedItem;
         BitmapSource noAlphaBitmap, alphaBitmap;
         BitmapSource newDiffuse = null;
@@ -64,6 +65,7 @@ namespace FFXIV_TexTools2
         List<Mesh> meshList;
         string modelName;
         bool loaded3D = false;
+        Version v;
 
         public MainWindow()
         {
@@ -127,6 +129,76 @@ namespace FFXIV_TexTools2
                 DXVerStatus.Content = "DX Version: 9";
             }
 
+            if (Properties.Settings.Default.Mod_List)
+            {
+                ModList_On.IsChecked = true;
+                ModList_On.IsEnabled = false;
+            }
+            else if (!Properties.Settings.Default.Mod_List)
+            {
+                ModList_Off.IsChecked = true;
+                ModList_Off.IsEnabled = false;
+                Menu_ModList.IsEnabled = false;
+                Menu_RevertAll.IsEnabled = false;
+                Menu_ReapplyAll.IsEnabled = false;
+            }
+
+            string xmlURL = "https://raw.githubusercontent.com/liinko/FFXIVTexToolsWeb/master/version.xml";
+            string changeLog = "";
+            try
+            {
+                using (XmlTextReader reader = new XmlTextReader(xmlURL))
+                {
+                    reader.MoveToContent();
+                    string elementName = "";
+
+                    if (reader.NodeType == XmlNodeType.Element && reader.Name == "FFXIVTexTools2")
+                    {
+                        while (reader.Read())
+                        {
+                            if (reader.NodeType == XmlNodeType.Element)
+                            {
+                                elementName = reader.Name;
+                            }
+                            else
+                            {
+                                if (reader.NodeType == XmlNodeType.Text && reader.HasValue)
+                                {
+                                    switch (elementName)
+                                    {
+                                        case "version":
+                                            v = new Version(reader.Value);
+                                            break;
+                                        case "url":
+                                            siteURL = reader.Value;
+                                            break;
+                                        case "log":
+                                            changeLog = reader.Value;
+                                            break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Version curVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+                Debug.WriteLine("CurVersion " + curVersion);
+
+                if (curVersion.CompareTo(v) < 0)
+                {
+
+                    Update up = new Update();
+
+                    up.Message = "Version " + v.ToString().Substring(0, 5) + "\n\nChange Log:" + changeLog + "\n\nPlease visit the website to download the update.";
+                    up.Show();
+                }
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show("There was an issue checking for updates. \n" + ex.Message, "Updater Error", MessageBoxButton.OK, MessageBoxImage.None);
+            }
+
             importButton.IsEnabled = false;
             revertButton.IsEnabled = false;
 
@@ -160,9 +232,13 @@ namespace FFXIV_TexTools2
         {
             BackgroundWorker worker = sender as BackgroundWorker;
 
-            if (!File.Exists(Info.modDatDir) || !File.Exists(Info.modListDir))
+            if (!File.Exists(Info.modDatDir))
             {
                 CreateDat.MakeDat();
+            }
+
+            if (!File.Exists(Info.modListDir) && Properties.Settings.Default.Mod_List)
+            {
                 CreateDat.CreateModList();
             }
 
@@ -571,19 +647,19 @@ namespace FFXIV_TexTools2
                 {
                     fullPath = mtrlInfo.NormalPath;
                     offset = mtrlInfo.NormalOffset;      
-                    paragraph.Inlines.Add(new Run(fullPath + FFCRC.GetHash(fullPath)));
+                    paragraph.Inlines.Add(new Run(fullPath + " [" + FFCRC.GetHash(fullPath) + "]"));
                 }
                 else if (comboInfo.Name.Equals(Strings.Specular))
                 {
                     fullPath = mtrlInfo.SpecularPath;
                     offset = mtrlInfo.SpecularOffset;
-                    paragraph.Inlines.Add(new Run(fullPath + FFCRC.GetHash(fullPath)));
+                    paragraph.Inlines.Add(new Run(fullPath + " [" + FFCRC.GetHash(fullPath) + "]"));
                 }
                 else if (comboInfo.Name.Equals(Strings.Diffuse))
                 {
                     fullPath = mtrlInfo.DiffusePath; 
                     offset = mtrlInfo.DiffuseOffset;
-                    paragraph.Inlines.Add(new Run(fullPath + FFCRC.GetHash(fullPath)));
+                    paragraph.Inlines.Add(new Run(fullPath + " [" + FFCRC.GetHash(fullPath) + "]"));
                 }
                 else if (comboInfo.Name.Equals(Strings.Mask) || comboInfo.Name.Equals(Strings.Skin))
                 {
@@ -601,20 +677,20 @@ namespace FFXIV_TexTools2
 
                         fullPath = String.Format(mtrlInfo.MaskPath, part);
                         offset = MTRL.GetDecalOffset(selectedItem.itemName, ((ComboBoxInfo)partComboBox.SelectedItem).Name);
-                        paragraph.Inlines.Add(new Run(fullPath + FFCRC.GetHash(fullPath)));
+                        paragraph.Inlines.Add(new Run(fullPath + " [" + FFCRC.GetHash(fullPath) + "]"));
                     }
                     else
                     {
                         fullPath = mtrlInfo.MaskPath;
                         offset = mtrlInfo.MaskOffset;
-                        paragraph.Inlines.Add(new Run(fullPath + FFCRC.GetHash(fullPath)));
+                        paragraph.Inlines.Add(new Run(fullPath + " [" + FFCRC.GetHash(fullPath) + "]"));
                     }
                 }
                 else if (comboInfo.Name.Equals(Strings.ColorSet))
                 {
                     colorBmp = TEX.TextureToBitmap(mtrlInfo.ColorData, 9312, 4, 16);
                     fullPath = mtrlInfo.MTRLPath;
-                    paragraph.Inlines.Add(new Run(fullPath + FFCRC.GetHash(fullPath)));
+                    paragraph.Inlines.Add(new Run(fullPath + " [" + FFCRC.GetHash(fullPath) + "]"));
                 }
 
                 string dxPath = Path.GetFileNameWithoutExtension(fullPath);
@@ -628,52 +704,61 @@ namespace FFXIV_TexTools2
                     importButton.IsEnabled = false;
                 }
 
-                string line;
-                JsonEntry modEntry = null;
-                bool inModList = false;
-                try
+
+                if (Properties.Settings.Default.Mod_List)
                 {
-                    using (StreamReader sr = new StreamReader(Info.modListDir))
+                    string line;
+                    JsonEntry modEntry = null;
+                    bool inModList = false;
+                    try
                     {
-                        while ((line = sr.ReadLine()) != null)
+                        using (StreamReader sr = new StreamReader(Info.modListDir))
                         {
-                            modEntry = JsonConvert.DeserializeObject<JsonEntry>(line);
-                            if (modEntry.fullPath.Equals(fullPath))
+                            while ((line = sr.ReadLine()) != null)
                             {
-                                inModList = true;
-                                break;
+                                modEntry = JsonConvert.DeserializeObject<JsonEntry>(line);
+                                if (modEntry.fullPath.Equals(fullPath))
+                                {
+                                    inModList = true;
+                                    break;
+                                }
                             }
                         }
                     }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("[Main] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-
-                if (inModList)
-                {
-                    var currOffset = Helper.GetOffset(FFCRC.GetHash(modEntry.fullPath.Substring(0, modEntry.fullPath.LastIndexOf("/"))), FFCRC.GetHash(Path.GetFileName(modEntry.fullPath)));
-
-                    if(currOffset == modEntry.modOffset)
+                    catch (Exception ex)
                     {
-                        revertButton.Content = "Disable";
+                        MessageBox.Show("[Main] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
-                    else if(currOffset == modEntry.originalOffset)
+
+                    if (inModList)
                     {
-                        revertButton.Content = "Enable";
+                        var currOffset = Helper.GetOffset(FFCRC.GetHash(modEntry.fullPath.Substring(0, modEntry.fullPath.LastIndexOf("/"))), FFCRC.GetHash(Path.GetFileName(modEntry.fullPath)));
+
+                        if (currOffset == modEntry.modOffset)
+                        {
+                            revertButton.Content = "Disable";
+                        }
+                        else if (currOffset == modEntry.originalOffset)
+                        {
+                            revertButton.Content = "Enable";
+                        }
+                        else
+                        {
+                            revertButton.Content = "Error";
+                        }
+
+                        revertButton.IsEnabled = true;
                     }
                     else
                     {
-                        revertButton.Content = "Error";
+                        revertButton.IsEnabled = false;
                     }
-
-                    revertButton.IsEnabled = true;
                 }
                 else
                 {
                     revertButton.IsEnabled = false;
                 }
+
 
                 fullPathLabel.Document = new FlowDocument(paragraph);
 
@@ -754,6 +839,40 @@ namespace FFXIV_TexTools2
             return bmp;
         }
 
+        public void UpdateImage(int offset, Bitmap colorBmp)
+        {
+
+            if (offset == 0)
+            {
+                texTypeLabel.Content = "A16B16G16R16F";
+                texDimensionLabel.Content = "(4 x 16)";
+
+                alphaBitmap = Imaging.CreateBitmapSourceFromHBitmap(colorBmp.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+
+                var removeAlphaBitmap = SetAlpha(colorBmp, 255);
+
+                noAlphaBitmap = Imaging.CreateBitmapSourceFromHBitmap(removeAlphaBitmap.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+
+                RenderOptions.SetBitmapScalingMode(texImage, BitmapScalingMode.NearestNeighbor);
+            }
+            else
+            {
+                texInfo = TEX.GetTex(offset);
+
+                texTypeLabel.Content = texInfo.TypeString;
+                texDimensionLabel.Content = "(" + texInfo.Width + " x " + texInfo.Height + ")";
+
+                alphaBitmap = Imaging.CreateBitmapSourceFromHBitmap(texInfo.BMP.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+
+                var removeAlphaBitmap = SetAlpha(texInfo.BMP, 255);
+
+                noAlphaBitmap = Imaging.CreateBitmapSourceFromHBitmap(removeAlphaBitmap.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+            }
+
+            texImage.Source = noAlphaBitmap;
+            texImage.UpdateLayout();
+        }
+
         private void SavePNGButton_Click(object sender, RoutedEventArgs e)
         {
             savePNGButton.DataContext = new SaveViewModel(selectedItem.itemName, selectedParent, ((ComboBoxInfo)mapComboBox.SelectedItem).Name, texImage.Source as BitmapSource, fullPath);
@@ -780,17 +899,18 @@ namespace FFXIV_TexTools2
             {
                 importButton.DataContext = new ImportViewModel(mtrlInfo, selectedParent, selectedItem.itemName);
                 revertButton.IsEnabled = true;
-
             }
             else
             {
-                importButton.DataContext = new ImportViewModel(texInfo, selectedParent, selectedItem.itemName, ((ComboBoxInfo)mapComboBox.SelectedItem).Name, fullPath);
+                var importVM = new ImportViewModel(texInfo, selectedParent, selectedItem.itemName, ((ComboBoxInfo)mapComboBox.SelectedItem).Name, fullPath);
+                importButton.DataContext = importVM;
                 revertButton.IsEnabled = true;
             }
 
-            //var itemSelected = (ItemViewModel)textureTreeView.SelectedItem;
-            //((ItemViewModel)textureTreeView.SelectedItem).IsSelected = false;
-            //itemSelected.IsSelected = true;
+            if (revertButton.Content.Equals("Enable"))
+            {
+                revertButton.Content = "Disable";
+            }
         }
 
         private void RevertButton_Click(object sender, RoutedEventArgs e)
@@ -819,28 +939,36 @@ namespace FFXIV_TexTools2
 
             if (modEntry != null)
             {
+                int offset = 0;
+
                 if (revertButton.Content.Equals("Enable"))
                 {
-                    Helper.UpdateIndex(modEntry.modOffset, fullPath);
-                    Helper.UpdateIndex2(modEntry.modOffset, fullPath);
+                    offset = modEntry.modOffset;
+                    Helper.UpdateIndex(offset, fullPath);
+                    Helper.UpdateIndex2(offset, fullPath);
                     revertButton.Content = "Disable";
                 }
                 else if (revertButton.Content.Equals("Disable"))
                 {
-                    Helper.UpdateIndex(modEntry.originalOffset, fullPath);
-                    Helper.UpdateIndex2(modEntry.originalOffset, fullPath);
+                    offset = modEntry.originalOffset;
+                    Helper.UpdateIndex(offset, fullPath);
+                    Helper.UpdateIndex2(offset, fullPath);
                     revertButton.Content = "Enable";
                 }
                 else
                 {
                     //error
                 }
+
+                if ((mapComboBox.SelectedItem as ComboBoxInfo).Name.Equals(Strings.ColorSet))
+                {
+                    UpdateImage(0, MTRL.GetColorBitmap(offset));
+                }
+                else
+                {
+                    UpdateImage(offset, null);
+                }
             }
-
-            //var itemSelected = (ItemViewModel)textureTreeView.SelectedItem;
-            //((ItemViewModel)textureTreeView.SelectedItem).IsSelected = false;
-            //itemSelected.IsSelected = true;
-
         }
 
         private void ExportObjButton_Click(object sender, RoutedEventArgs e)
@@ -876,7 +1004,7 @@ namespace FFXIV_TexTools2
         {
             ModList ml = new ModList()
             {
-                Owner = this
+                Owner = GetWindow(this)
             };
             ml.Show();
         }
@@ -889,6 +1017,7 @@ namespace FFXIV_TexTools2
         private void Menu_Directories_Click(object sender, RoutedEventArgs e)
         {
             DirectoriesView dv = new DirectoriesView();
+            dv.Owner = GetWindow(this);
             dv.Show();
         }
 
@@ -1010,6 +1139,7 @@ namespace FFXIV_TexTools2
         private void Menu_About_Click(object sender, RoutedEventArgs e)
         {
             About a = new About();
+            a.Owner = GetWindow(this);
             a.Show();
         }
 
@@ -1467,12 +1597,24 @@ namespace FFXIV_TexTools2
         {
             Properties.Settings.Default.Mod_List = true;
             Properties.Settings.Default.Save();
+
+            ModList_On.IsChecked = true;
+            ModList_On.IsEnabled = false;
+            ModList_Off.IsChecked = false;
+            ModList_Off.IsEnabled = true;
         }
 
-        private void ModList_Off_Checked(object sender, RoutedEventArgs e)
+        private void ModList_Off_Click(object sender, RoutedEventArgs e)
         {
             Properties.Settings.Default.Mod_List = false;
             Properties.Settings.Default.Save();
+
+            ModList_On.IsEnabled = true;
+            ModList_On.IsChecked = false;
+            ModList_Off.IsChecked = true;
+            ModList_Off.IsEnabled = false;
+
+
         }
 
         class CategoryComparer : IEqualityComparer<Category>

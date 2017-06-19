@@ -22,6 +22,7 @@ using System.IO.Compression;
 using System.Runtime.InteropServices;
 using FFXIV_TexTools2.Helpers;
 using Microsoft.Xna.Framework.Graphics;
+using System.Diagnostics;
 
 namespace FFXIV_TexTools2.Material
 {

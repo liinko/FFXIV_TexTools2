@@ -20,6 +20,7 @@ using FFXIV_TexTools2.Resources;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -742,6 +743,44 @@ namespace FFXIV_TexTools2.Material
             }
 
             return info;
+        }
+
+        public static Bitmap GetColorBitmap(int offset)
+        {
+            int datNum = ((offset / 8) & 0x000f) / 2;
+            byte[] colorData = null;
+
+            using (BinaryReader br = new BinaryReader(new MemoryStream(Helper.GetDecompressedIMCBytes(offset, datNum))))
+            {
+                br.BaseStream.Seek(6, SeekOrigin.Begin);
+                short clrSize = br.ReadInt16();
+                short texNameSize = br.ReadInt16();
+                br.ReadBytes(2);
+                byte texNum = br.ReadByte();
+                byte mapNum = br.ReadByte();
+                byte clrNum = br.ReadByte();
+                byte unkNum = br.ReadByte();
+
+                if (clrNum > 0 && clrSize > 0)
+                {
+                    br.BaseStream.Seek((16 + (texNum * 4) + (mapNum * 4) + (clrNum * 4) + texNameSize + 4), SeekOrigin.Begin);
+
+                    if (clrSize == 544)
+                    {
+                        colorData = br.ReadBytes(clrSize - 32);
+                    }
+                    else
+                    {
+                        colorData = br.ReadBytes(clrSize);
+                    }
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            return TEX.TextureToBitmap(colorData, 9312, 4, 16);
         }
 
         private static string GetMapName(string fileName)

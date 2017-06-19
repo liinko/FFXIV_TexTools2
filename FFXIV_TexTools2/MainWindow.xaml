@@ -8,7 +8,7 @@
     xmlns:hx="http://helix-toolkit.org/wpf/SharpDX"
     x:Class="FFXIV_TexTools2.MainWindow"
     mc:Ignorable="d"
-    Title="FFXIV TexTools" Height="650" Width="1100" Icon="Resources/ffxiv2.ico">
+    Title="FFXIV TexTools" Height="650" Width="1100" Icon="Resources/ffxiv2.ico" WindowStartupLocation="CenterScreen">
     <Window.Resources>
         <SolidColorBrush x:Key="DarkSquareColor" Color="#CC000000" />
         <SolidColorBrush x:Key="LightSquareColor" Color="#BF000000" />
@@ -57,7 +57,7 @@
                 <MenuItem x:Name="Menu_Directories" Header="Directories" Click="Menu_Directories_Click"/>
                 <MenuItem Header="ModList" StaysOpenOnClick="True">
                     <MenuItem x:Name="ModList_On" Header="On" IsCheckable="True" Click="ModList_On_Click"/>
-                    <MenuItem x:Name="ModList_Off" Header="Off" IsCheckable="True" Checked="ModList_Off_Checked"/>
+                    <MenuItem x:Name="ModList_Off" Header="Off" IsCheckable="True" Click="ModList_Off_Click"/>
                 </MenuItem>
                 <MenuItem Header="DX Version">
                     <MenuItem x:Name="Menu_DX9" Header="DX9" HorizontalAlignment="Left" Click="Menu_DX9_Click" IsCheckable="True"/>

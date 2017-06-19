@@ -630,7 +630,7 @@ namespace FFXIV_TexTools2.Helpers
 
                     var numDats = br.ReadInt16();
 
-                    if (numDats != 4)
+                    if (numDats != 5)
                     {
                         problem = true;
                     }
@@ -649,7 +649,7 @@ namespace FFXIV_TexTools2.Helpers
 
                     var numDats = br.ReadInt16();
 
-                    if (numDats != 4)
+                    if (numDats != 5)
                     {
                         problem = true;
                     }
@@ -671,7 +671,7 @@ namespace FFXIV_TexTools2.Helpers
                 using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(Info.indexDir)))
                 {
                     bw.BaseStream.Seek(1104, SeekOrigin.Begin);
-                    bw.Write((byte)4);
+                    bw.Write((byte)5);
                 }
             }
             catch (Exception e)

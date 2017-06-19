@@ -9,7 +9,7 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="Language" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
+      <Value Profile="(Default)">en</Value>
     </Setting>
     <Setting Name="DX_Ver" Type="System.String" Scope="User">
       <Value Profile="(Default)">DX11</Value>

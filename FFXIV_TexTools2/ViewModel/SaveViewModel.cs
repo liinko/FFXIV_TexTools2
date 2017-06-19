@@ -111,17 +111,9 @@ namespace FFXIV_TexTools2.ViewModel
             string directory = Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selecteditem;
             Directory.CreateDirectory(directory);
 
-            if (Properties.Settings.Default.DX_Ver.Equals("DX11") && (selecteditem.Equals(Strings.Body) || selecteditem.Equals(Strings.Face) || selecteditem.Equals(Strings.Hair) || selecteditem.Equals(Strings.Tail)))
-            {
-                saveDir = Path.Combine(directory, ("--" + Path.GetFileNameWithoutExtension(name) + ".png"));
-            }
-            else
-            {
-                saveDir = Path.Combine(directory, (Path.GetFileNameWithoutExtension(name) + ".png"));
-            }
+            saveDir = Path.Combine(directory, (Path.GetFileNameWithoutExtension(name) + ".png"));
 
-
-            using(var fileStream = new FileStream(saveDir, FileMode.Create))
+            using (var fileStream = new FileStream(saveDir, FileMode.Create))
             {
                 BitmapEncoder encoder = new PngBitmapEncoder();
                 encoder.Frames.Add(BitmapFrame.Create(selectedBitmap));
@@ -135,23 +127,20 @@ namespace FFXIV_TexTools2.ViewModel
             string directory = Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selecteditem;
             Directory.CreateDirectory(directory);
 
-            if (Properties.Settings.Default.DX_Ver.Equals("DX11") && (selecteditem.Equals(Strings.Body) || selecteditem.Equals(Strings.Face) || selecteditem.Equals(Strings.Hair) || selecteditem.Equals(Strings.Tail)))
-            {
-                saveDir = Path.Combine(directory, ("--" + Path.GetFileNameWithoutExtension(name) + ".dds"));
-            }
-            else
-            {
-                saveDir = Path.Combine(directory, (Path.GetFileNameWithoutExtension(name) + ".dds"));
-            }
+            saveDir = Path.Combine(directory, (Path.GetFileNameWithoutExtension(name) + ".dds"));
 
             List<byte> DDS = new List<byte>();
 
             if (texMap.Equals(Strings.ColorSet))
             {
-                var colorFlagsDir = Path.Combine(directory, (Path.GetFileNameWithoutExtension(name) + ".dat"));
+                if(mtrlInfo.ColorFlags != null)
+                {
+                    var colorFlagsDir = Path.Combine(directory, (Path.GetFileNameWithoutExtension(name) + ".dat"));
+                    File.WriteAllBytes(colorFlagsDir, mtrlInfo.ColorFlags);
+                }
+
                 DDS.AddRange(CreateColorDDSHeader());
                 DDS.AddRange(mtrlInfo.ColorData);
-                File.WriteAllBytes(colorFlagsDir, mtrlInfo.ColorFlags);
             }
             else
             {
