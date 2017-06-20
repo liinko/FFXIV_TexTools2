@@ -680,13 +680,13 @@ namespace FFXIV_TexTools2.ViewModel
                     mipPartList.Add((short)(compressed.Length + padding + 16));
                 }
 
-                if (mipLength > 16)
+                if (mipLength > 32)
                 {
                     mipLength = mipLength / 4;
                 }
                 else
                 {
-                    mipLength = 16;
+                    mipLength = 8;
                 }
             }
 
