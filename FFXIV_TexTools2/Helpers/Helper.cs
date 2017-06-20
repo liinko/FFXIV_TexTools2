@@ -684,7 +684,7 @@ namespace FFXIV_TexTools2.Helpers
                 using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(Info.index2Dir)))
                 {
                     bw.BaseStream.Seek(1104, SeekOrigin.Begin);
-                    bw.Write((byte)4);
+                    bw.Write((byte)5);
                 }
             }
             catch (Exception e)
