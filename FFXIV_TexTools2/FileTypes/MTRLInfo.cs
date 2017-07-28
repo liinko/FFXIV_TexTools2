@@ -17,22 +17,29 @@
 using FFXIV_TexTools2.Model;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 
-namespace FFXIV_TexTools2.ViewModel
+namespace FFXIV_TexTools2.Material
 {
-    public class TreeViewModel
+    public class MTRLInfo
     {
-        readonly ReadOnlyCollection<CategoryViewModel> _categories;
+        public ObservableCollection<ComboBoxInfo> TextureMaps { get; set; } = new ObservableCollection<ComboBoxInfo>();
 
-        public TreeViewModel(Category[] categories, List<Items> itemList)
-        {
-            _categories = new ReadOnlyCollection<CategoryViewModel>((from category in categories select new CategoryViewModel(category, itemList)).ToList());
-        }
+        public string MTRLPath { get; set; }
+        public string SpecularPath { get; set; }
+        public string MaskPath { get; set; }
+        public string NormalPath { get; set; }
+        public string DiffusePath { get; set; }
 
-        public ReadOnlyCollection<CategoryViewModel> Category
-        {
-            get { return _categories; }
-        }
+        public int MTRLOffset { get; set; }
+        public int SpecularOffset { get; set; }
+        public int MaskOffset { get; set; }
+        public int NormalOffset { get;  set; }
+        public int DiffuseOffset { get; set; }
+
+        public byte[] ColorData { get; set; }
+        public byte[] ColorFlags { get; set; }
+
+        public bool Found { get; set; }
+
     }
 }

@@ -18,17 +18,40 @@ namespace FFXIV_TexTools2.Helpers
 {
     public class JsonEntry
     {
-        public string category, name, fullPath;
-        public int originalOffset, modOffset, modSize;
+        /// <summary>
+        /// The modified items category
+        /// </summary>
+        public string category { get; set; }
 
-        public JsonEntry(string category, string name, string fullPath, int oldOffset, int newOffset, int size)
-        {
-            this.category = category;
-            this.name = name;
-            this.fullPath = fullPath;
-            originalOffset = oldOffset;
-            modOffset = newOffset;
-            modSize = size;
-        }
+        /// <summary>
+        /// The modified items name
+        /// </summary>
+        public string name { get; set; }
+
+        /// <summary>
+        /// The internal path of the modified item
+        /// </summary>
+        public string fullPath { get; set; }
+
+        /// <summary>
+        /// The oringial offset of the modified item
+        /// </summary>
+        /// <remarks>
+        /// Used to revert to the items original texture
+        /// </remarks>
+        public int originalOffset { get; set; }
+
+        /// <summary>
+        /// The modified offset of the modified item
+        /// </summary>
+        public int modOffset { get; set; }
+
+        /// <summary>
+        /// The size of the modified items data
+        /// </summary>
+        /// <remarks>
+        /// When importing a previously modified texture, this value is used to determine whether the modified data will be overwritten
+        /// </remarks>
+        public int modSize { get; set; }
     }
 }

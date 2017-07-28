@@ -6,6 +6,8 @@
     xmlns:local1 ="clr-namespace:FFXIV_TexTools2.ViewModel"
     xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
     xmlns:hx="http://helix-toolkit.org/wpf/SharpDX"
+    xmlns:shader="clr-namespace:FFXIV_TexTools2.Shader"
+    xmlns:views ="clr-namespace:FFXIV_TexTools2.Views"
     x:Class="FFXIV_TexTools2.MainWindow"
     mc:Ignorable="d"
     Title="FFXIV TexTools" Height="650" Width="1100" Icon="Resources/ffxiv2.ico" WindowStartupLocation="CenterScreen">
@@ -48,20 +50,20 @@
         </StatusBar>
         <Menu x:Name="menu" Height="22" VerticalAlignment="Top" Margin="0,0,1,0">
             <MenuItem Header="Mods">
-                <MenuItem x:Name="Menu_ModList" Header="Mod List" BorderThickness="1" Click="Menu_ModList_Click"/>
+                <MenuItem x:Name="Menu_ModList" Header="Mod List" BorderThickness="1" Click="Menu_ModList_Click" IsEnabled="{Binding ModlistOffEnabled}"/>
                 <MenuItem x:Name="Menu_Importer" Header="Importer" HorizontalAlignment="Left" Width="140" Click="Menu_Importer_Click" IsEnabled="False"/>
-                <MenuItem x:Name="Menu_RevertAll" Header="Disable all Mods" Click="Menu_RevertAll_Click"/>
-                <MenuItem x:Name="Menu_ReapplyAll" Header="ReEnable All Mods" Click="Menu_ReapplyAll_Click"/>
+                <MenuItem x:Name="Menu_RevertAll" Header="Disable all Mods" Click="Menu_RevertAll_Click" IsEnabled="{Binding ModlistOffEnabled}"/>
+                <MenuItem x:Name="Menu_ReapplyAll" Header="ReEnable All Mods" Click="Menu_ReapplyAll_Click" IsEnabled="{Binding ModlistOffEnabled}"/>
             </MenuItem>
             <MenuItem Header="Options" StaysOpenOnClick="True" Height="22">
                 <MenuItem x:Name="Menu_Directories" Header="Directories" Click="Menu_Directories_Click"/>
                 <MenuItem Header="ModList" StaysOpenOnClick="True">
-                    <MenuItem x:Name="ModList_On" Header="On" IsCheckable="True" Click="ModList_On_Click"/>
-                    <MenuItem x:Name="ModList_Off" Header="Off" IsCheckable="True" Click="ModList_Off_Click"/>
+                    <MenuItem x:Name="ModList_On" Header="On" IsCheckable="True" Command="{Binding ModListOnCommand}" IsEnabled="{Binding ModlistOnEnabled}" IsChecked="{Binding ModlistOnChecked, Mode=OneWay}"/>
+                    <MenuItem x:Name="ModList_Off" Header="Off" IsCheckable="True" Command="{Binding ModListOffCommand}" IsEnabled="{Binding ModlistOffEnabled}" IsChecked="{Binding ModlistOffChecked, Mode=OneWay}"/>
                 </MenuItem>
                 <MenuItem Header="DX Version">
-                    <MenuItem x:Name="Menu_DX9" Header="DX9" HorizontalAlignment="Left" Click="Menu_DX9_Click" IsCheckable="True"/>
-                    <MenuItem x:Name="Menu_DX11" Header="DX11" HorizontalAlignment="Left" Click="Menu_DX11_Click" IsCheckable="True"/>
+                    <MenuItem x:Name="Menu_DX9" Header="DX9" HorizontalAlignment="Left" Click="Menu_DX9_Click" IsCheckable="True" IsChecked="{Binding IsDX9, Mode=OneWay}" IsEnabled="{Binding DX9Enabled}"/>
+                    <MenuItem x:Name="Menu_DX11" Header="DX11" HorizontalAlignment="Left" Click="Menu_DX11_Click" IsCheckable="True" IsChecked="{Binding IsDX11, Mode=OneWay}" IsEnabled="{Binding DX11Enabled}"/>
                 </MenuItem>
             </MenuItem>
             <MenuItem Header="Help">
@@ -72,10 +74,10 @@
                 <MenuItem x:Name="Menu_About" Header="FFXIV TexTools" Click="Menu_About_Click"/>
             </MenuItem>
             <MenuItem Header="Language">
-                <MenuItem x:Name="Menu_English" Header="English" HorizontalAlignment="Left" Width="140" IsCheckable="True" Click="Menu_English_Click"/>
-                <MenuItem x:Name="Menu_Japanese" Header="Japanese" HorizontalAlignment="Left" Width="140" IsCheckable="True" Click="Menu_Japanese_Click"/>
-                <MenuItem x:Name="Menu_French" Header="French" HorizontalAlignment="Left" Width="140" IsCheckable="True" Click="Menu_French_Click"/>
-                <MenuItem x:Name="Menu_German" Header="German" HorizontalAlignment="Left" Width="140" IsCheckable="True" Click="Menu_German_Click"/>
+                <MenuItem x:Name="Menu_English" Header="English" HorizontalAlignment="Left" Width="140" IsCheckable="True" Click="Menu_English_Click" IsEnabled="{Binding EnglishEnabled}" IsChecked="{Binding IsEnglish, Mode=OneWay}"/>
+                <MenuItem x:Name="Menu_Japanese" Header="Japanese" HorizontalAlignment="Left" Width="140" IsCheckable="True" Click="Menu_Japanese_Click" IsEnabled="{Binding JapaneseEnabled}" IsChecked="{Binding IsJapanese, Mode=OneWay}"/>
+                <MenuItem x:Name="Menu_French" Header="French" HorizontalAlignment="Left" Width="140" IsCheckable="True" Click="Menu_French_Click" IsEnabled="{Binding FrenchEnabled}" IsChecked="{Binding IsFrench, Mode=OneWay}"/>
+                <MenuItem x:Name="Menu_German" Header="German" HorizontalAlignment="Left" Width="140" IsCheckable="True" Click="Menu_German_Click" IsEnabled="{Binding GermanEnabled}" IsChecked="{Binding IsGerman, Mode=OneWay}"/>
             </MenuItem>
         </Menu>
         <Grid Margin="0,22,0,21">
@@ -90,10 +92,7 @@
                         <RowDefinition Height="257*"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <TreeView x:Name="textureTreeView" ItemsSource="{Binding Category}" Grid.Row="0"
-                              VirtualizingStackPanel.IsVirtualizing="True"
-                              VirtualizingStackPanel.VirtualizationMode="Recycling"
-                              Margin="0,0,2,0" SelectedItemChanged="TextureTreeView_SelectedItemChanged">
+                    <TreeView x:Name="textureTreeView" ItemsSource="{Binding Category}" Grid.Row="0" Margin="0,0,2,0">
                         <TreeView.ItemContainerStyle>
                             <Style TargetType="{x:Type TreeViewItem}">
                                 <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
@@ -122,163 +121,17 @@
                         </TreeView.Resources>
                     </TreeView>
                     <Grid Grid.Row="1" Margin="0,0,2,0">
-                        <TextBox x:Name="searchTextBox" TextWrapping="NoWrap" TextChanged="SearchTextBox_TextChanged" GotFocus="SearchTextBox_GotFocus" LostFocus="SearchTextBox_LostFocus" VerticalAlignment="Bottom"/>
-
+                        <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" TextWrapping="NoWrap"  VerticalAlignment="Bottom"/>
                     </Grid>
                 </Grid>
             </GroupBox>
             <GridSplitter x:Name="gridSplitter" Grid.Column="1" Width="5" HorizontalAlignment="Center" Margin="0,52,0,49"/>
-            <TabControl x:Name="tabControl" Grid.Column="2" Margin="10" SelectionChanged="TabControl_SelectionChanged">
-                <TabItem Header="Texture" Width="100" Margin="-6,-2,-2,0">
-                    <Grid Background="White">
-                        <GroupBox x:Name="groupBox" Header="Viewer" Margin="10,47,10,63">
-                            <Border>
-                                <Border.Background>
-                                    <DrawingBrush Viewport="0,0,20,20" ViewportUnits="Absolute" Stretch="None" TileMode="Tile">
-                                        <DrawingBrush.Drawing>
-                                            <DrawingGroup>
-                                                <GeometryDrawing Brush="{DynamicResource DarkSquareColor}">
-                                                    <GeometryDrawing.Geometry>
-                                                        <GeometryGroup>
-                                                            <RectangleGeometry Rect="0,0,10,10"/>
-                                                            <RectangleGeometry Rect="10,10,10,10"/>
-                                                        </GeometryGroup>
-                                                    </GeometryDrawing.Geometry>
-                                                </GeometryDrawing>
-                                                <GeometryDrawing Brush="{DynamicResource LightSquareColor}">
-                                                    <GeometryDrawing.Geometry>
-                                                        <GeometryGroup>
-                                                            <RectangleGeometry Rect="10,0,10,10"/>
-                                                            <RectangleGeometry Rect="0,10,10,10"/>
-                                                        </GeometryGroup>
-                                                    </GeometryDrawing.Geometry>
-                                                </GeometryDrawing>
-                                            </DrawingGroup>
-                                        </DrawingBrush.Drawing>
-                                    </DrawingBrush>
-                                </Border.Background>
-                                <Grid>
-                                    <xctk:Zoombox x:Name="zoomBox"  DragModifiers="0" ZoomModifiers="0"
-                                        KeepContentInBounds="True" MinScale="0.2" MaxScale="40" IsAnimated="False" ViewStackMode="Disabled" PanDistance="2" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto">
-                                        <Image x:Name="texImage"/>
-                                    </xctk:Zoombox>
-                                    <Grid Margin="0" Background="#3FFFFFFF" Height="33" VerticalAlignment="Top" HorizontalAlignment="Right" Width="151">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition/>
-                                            <ColumnDefinition/>
-                                            <ColumnDefinition/>
-                                            <ColumnDefinition/>
-                                        </Grid.ColumnDefinitions>
-                                        <CheckBox x:Name="redCheckBox" Content="R" HorizontalAlignment="Center" Margin="-2,0,0,0" VerticalAlignment="Center" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" IsChecked="True" Click="CheckBox_Click"/>
-                                        <CheckBox x:Name="greenCheckBox" Content="G" Grid.Column="1" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" IsChecked="True" Click="CheckBox_Click"/>
-                                        <CheckBox x:Name="blueCheckBox" Content="B" Grid.Column="2" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" IsChecked="True" Click="CheckBox_Click"/>
-                                        <CheckBox x:Name="alphaCheckBox" Content="A" Grid.Column="3" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Click="CheckBox_Click"/>
-                                    </Grid>
-                                    <Label x:Name="texTypeLabel" Content="Texture Type" Background="#66FFFFFF" HorizontalAlignment="Left" VerticalAlignment="Top" FontWeight="Bold"/>
-                                    <Label x:Name="texDimensionLabel" Content="Texture Dimensions" Background="#66FFFFFF" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontWeight="Bold"/>
-                                </Grid>
-                            </Border>
-                        </GroupBox>
-                        <Grid Height="37" Margin="10,10,10,0" VerticalAlignment="Top">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
-                            </Grid.ColumnDefinitions>
-                            <ComboBox x:Name="raceComboBox" Margin="5,5,5.5,5" SelectionChanged="RaceComboBox_SelectionChanged" IsSynchronizedWithCurrentItem="False" IsReadOnly="True" ItemsSource="{Binding GetComboInfo}" DisplayMemberPath="Name" SelectedValuePath="Name" IsEnabled="False"/>
-                            <ComboBox x:Name="mapComboBox" Grid.Column="1" Margin="5" SelectionChanged="MapComboBox_SelectionChanged" IsReadOnly="True" IsTextSearchEnabled="False" IsSynchronizedWithCurrentItem="False" ItemsSource="{Binding GetComboInfo}" DisplayMemberPath="Name" SelectedValuePath="Name" IsEnabled="False"/>
-                            <ComboBox x:Name="partComboBox" Grid.Column="2" Margin="5" SelectionChanged="PartComboBox_SelectionChanged" IsSynchronizedWithCurrentItem="False" IsReadOnly="True" ItemsSource="{Binding GetComboInfo}" DisplayMemberPath="Name" SelectedValuePath="Name" IsEnabled="False"/>
-                            <ComboBox x:Name="typeComboBox" Grid.Column="3" Margin="5,5,6,5" SelectionChanged="TypeComboBox_SelectionChanged" IsSynchronizedWithCurrentItem="False" IsReadOnly="True" ItemsSource="{Binding GetComboInfo}" DisplayMemberPath="Name" SelectedValuePath="Name" IsEnabled="False"/>
-                        </Grid>
-                        <RichTextBox x:Name="fullPathLabel" VerticalAlignment="Bottom" Margin="10,0,10,40" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}" HorizontalContentAlignment="Center" IsReadOnly="True"/>
-                        <Grid x:Name="textureButtonGrid" Margin="10,0,10,0" Height="40" VerticalAlignment="Bottom">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
-                            </Grid.ColumnDefinitions>
-                            <Button x:Name="savePNGButton" Content="Export PNG" Margin="5" Click="SavePNGButton_Click" Command="{Binding SavePNGCommand}" IsEnabled="False"/>
-                            <Button x:Name="saveDDSButton" Content="Export DDS" Grid.Column="1" Margin="5" Click="SaveDDSButton_Click" Command="{Binding SaveDDSCommand}" IsEnabled="False"/>
-                            <Button x:Name="importButton" Content="Import" Grid.Column="2" Margin="5" Click="ImportButton_Click" Command="{Binding ImportCommand}" IsEnabled="False"/>
-                            <Button x:Name="revertButton" Content="Revert" Grid.Column="3" Margin="5" Click="RevertButton_Click" IsEnabled="False"/>
-                        </Grid>
-                    </Grid>
+            <TabControl Grid.Column="2" Margin="10">
+                <TabItem Header="Texture" Width="100" Margin="-6,-2,-2,0" DataContext="{Binding TextureVM}" >
+                    <views:TextureView/>
                 </TabItem>
-                <TabItem x:Name="_3DTab"  Header="3D Model" Width="100" Margin="-6,-2,-2,0" IsEnabled="False">
-                    <Grid Background="White">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
-                        </Grid.ColumnDefinitions>
-                        <GroupBox x:Name="groupBox1" Header="Viewer" Margin="10,56,10,67">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="*" />
-                                </Grid.RowDefinitions>
-                                <hx:Viewport3DX
-                                    x:Name="viewport3DX"
-                                    Camera="{Binding Camera}"
-                                    Grid.Row="0" Grid.Column="0"
-                                    CoordinateSystemLabelForeground="White"
-                                    IsShadowMappingEnabled="True"
-                                    ShowCoordinateSystem="False"
-                                    TextBrush="Black"
-                                    UseDefaultGestures="False"
-                                    BackgroundColor="{Binding BackgroundColor}"
-                                    RenderTechnique="{Binding RenderTechnique}">
-                                    <hx:Viewport3DX.InputBindings>
-                                        <KeyBinding Key="B" Command="hx:ViewportCommands.BackView" />
-                                        <KeyBinding Key="F" Command="hx:ViewportCommands.FrontView" />
-                                        <KeyBinding Key="U" Command="hx:ViewportCommands.TopView" />
-                                        <KeyBinding Key="D" Command="hx:ViewportCommands.BottomView" />
-                                        <KeyBinding Key="L" Command="hx:ViewportCommands.LeftView" />
-                                        <KeyBinding Key="R" Command="hx:ViewportCommands.RightView" />
-                                        <KeyBinding Command="hx:ViewportCommands.ZoomExtents" Gesture="Control+E" />
-                                        <MouseBinding Command="hx:ViewportCommands.Rotate" Gesture="RightClick" />
-                                        <MouseBinding Command="hx:ViewportCommands.Zoom" Gesture="MiddleClick" />
-                                        <MouseBinding Command="hx:ViewportCommands.Pan" Gesture="LeftClick" />
-                                    </hx:Viewport3DX.InputBindings>
-                                    <hx:ShadowMap3D />
-                                    <hx:AmbientLight3D Color="{Binding AmbientLightColor}"/>
-                                    <hx:DirectionalLight3D
-                                        Direction="{Binding Light1Direction}"
-                                        IsRendering="{Binding RenderLight1}"
-                                        Color="{Binding Light1Color}" />
-                                    <hx:DirectionalLight3D
-                                        Direction="{Binding Light2Direction}"
-                                        IsRendering="{Binding RenderLight1}"
-                                        Color="{Binding Light1Color}" />
-                                    <hx:MeshGeometryModel3D
-                                        x:Name="model"
-                                        Geometry="{Binding Model}"
-                                        Material="{Binding ModelMaterial}" 
-                                        Transform="{Binding ModelTransform}"/>
-                                </hx:Viewport3DX>
-                            </Grid>
-                        </GroupBox>
-                        <TextBlock x:Name="textBlock" Margin="10,0,10,46" TextWrapping="Wrap" Text="" RenderTransformOrigin="0.286,0" Height="16" VerticalAlignment="Bottom"/>
-                        <Grid x:Name="modelButtonGrid" Margin="10,0,10,7" Height="34" VerticalAlignment="Bottom">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="1*"/>
-                                <ColumnDefinition Width="1*"/>
-                                <ColumnDefinition Width="1*"/>
-                            </Grid.ColumnDefinitions>
-                            <Button x:Name="exportObjButton" Content="Export OBJ + Materials" Margin="5" Click="ExportObjButton_Click"/>
-                            <Button x:Name="import3DButton" Content="Import" Grid.Column="1" Margin="5" Click="Import3DButton_Click"/>
-                            <Button x:Name="revert3DButton" Content="Revert" Grid.Column="2" Margin="5,5,4.5,5" Click="Revert3DButton_Click"/>
-                        </Grid>
-                        <Grid Margin="10,10,10,0" Height="37" VerticalAlignment="Top">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
-                                <ColumnDefinition/>
-                            </Grid.ColumnDefinitions>
-                            <ComboBox x:Name="raceComboBox3D" Margin="5" SelectionChanged="RaceComboBox3D_SelectionChanged" IsSynchronizedWithCurrentItem="False" ItemsSource="{Binding GetComboInfo}" DisplayMemberPath="Name" SelectedValuePath="Name" IsReadOnly="True"/>
-                            <ComboBox x:Name="bodyComboBox3D" Grid.Column="1" Margin="5" SelectionChanged="BodyComboBox3D_SelectionChanged"/>
-                            <ComboBox x:Name="variantComboBox3D" Grid.Column="2" Margin="5" IsEnabled="False"/>
-                        </Grid>
-                    </Grid>
+                <TabItem Header="3D Model" Width="100" Margin="-6,-2,-2,0" IsEnabled="{Binding ModelTabEnabled, FallbackValue=false}" DataContext="{Binding ModelVM}">
+                    <views:ModelView/>
                 </TabItem>
             </TabControl>
         </Grid>

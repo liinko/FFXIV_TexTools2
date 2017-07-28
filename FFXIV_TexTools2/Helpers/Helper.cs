@@ -18,7 +18,6 @@ using FFXIV_TexTools2.Model;
 using FFXIV_TexTools2.Resources;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
@@ -30,82 +29,93 @@ namespace FFXIV_TexTools2.Helpers
     public static class Helper
     {
 
-#region Decompressors
+        #region Decompressors
+
         /// <summary>
-        /// Decompresses the byte array 
+        /// Decompresses the data for the given EXD file.
         /// </summary>
-        /// <param name="offset">Offset of the byte list to decompress</param>
-        /// <returns></returns>
-        public static byte[] GetDecompressedBytes(int offset)
+        /// <param name="offset">Offset to the EXD data.</param>
+        /// <returns>The decompressed data.</returns>
+        public static byte[] GetDecompressedEXDData(int offset)
         {
-            List<byte> byteList = new List<byte>();
+            List<byte> decompressedData = new List<byte>();
 
             using (BinaryReader br = new BinaryReader(File.OpenRead(Info.aDatDir)))
             {
                 br.BaseStream.Seek(offset, SeekOrigin.Begin);
 
                 int headerLength = br.ReadInt32();
-                int type = br.ReadInt32();
-                int decompressedSize = br.ReadInt32();
+                int fileType = br.ReadInt32();
+                int uncompressedSize = br.ReadInt32();
                 br.ReadBytes(8);
                 int parts = br.ReadInt32();
 
                 int endOfHeader = offset + headerLength;
-                int partStart = offset + 24;
+                int partDataOffset = offset + 24;
 
                 for (int f = 0, g = 0; f < parts; f++)
                 {
-                    //read the current parts info
-                    br.BaseStream.Seek(partStart + g, SeekOrigin.Begin);
-                    int fromHeaderEnd = br.ReadInt32();
+                    br.BaseStream.Seek(partDataOffset + g, SeekOrigin.Begin);
+                    int offsetFromHeaderEnd = br.ReadInt32();
                     int partLength = br.ReadInt16();
                     int partSize = br.ReadInt16();
-                    int partLocation = endOfHeader + fromHeaderEnd;
+                    int partOffset = endOfHeader + offsetFromHeaderEnd;
 
-                    //go to part data and read its info
-                    br.BaseStream.Seek(partLocation, SeekOrigin.Begin);
+                    br.BaseStream.Seek(partOffset, SeekOrigin.Begin);
                     br.ReadBytes(8);
-                    int partCompressedSize = br.ReadInt32();
-                    int partDecompressedSize = br.ReadInt32();
 
-                    //if data is already uncompressed add to list if not decompress and add to list
+                    int partCompressedSize = br.ReadInt32();
+                    int partUncompressedSize = br.ReadInt32();
+
                     if (partCompressedSize == 32000)
                     {
-                        byte[] forlist = br.ReadBytes(partDecompressedSize);
-                        byteList.AddRange(forlist);
+                        byte[] uncompressedPartData = br.ReadBytes(partUncompressedSize);
+                        decompressedData.AddRange(uncompressedPartData);
                     }
                     else
                     {
-                        byte[] forlist = br.ReadBytes(partCompressedSize);
-                        byte[] partDecompressedBytes = new byte[partDecompressedSize];
+                        byte[] compressedPartData = br.ReadBytes(partCompressedSize);
+                        byte[] decompressedPartData = new byte[partUncompressedSize];
 
-                        using (MemoryStream ms = new MemoryStream(forlist))
+                        using (MemoryStream ms = new MemoryStream(compressedPartData))
                         {
                             using (DeflateStream ds = new DeflateStream(ms, CompressionMode.Decompress))
                             {
-                                int count = ds.Read(partDecompressedBytes, 0x00, partDecompressedSize);
+                                int count = ds.Read(decompressedPartData, 0x00, partUncompressedSize);
                             }
                         }
-                        byteList.AddRange(partDecompressedBytes);
+                        decompressedData.AddRange(decompressedPartData);
                     }
                     g += 8;
                 }
 
-                if (byteList.Count < decompressedSize)
+                if (decompressedData.Count < uncompressedSize)
                 {
-                    int difference = decompressedSize - byteList.Count;
-                    byte[] padd = new byte[difference];
-                    Array.Clear(padd, 0, difference);
-                    byteList.AddRange(padd);
+                    int difference = uncompressedSize - decompressedData.Count;
+                    byte[] padding = new byte[difference];
+                    Array.Clear(padding, 0, difference);
+                    decompressedData.AddRange(padding);
                 }
             }
 
-            return byteList.ToArray();
+            return decompressedData.ToArray();
         }
 
-        public static byte[] GetDecompressedBytes(int offset, int datNum)
+
+        /// <summary>
+        /// Decompresses the data for the given texture file.
+        /// </summary>
+        /// <remarks>
+        /// Type 4 is texture data
+        /// </remarks>
+        /// <param name="offset">Offset to the texture data.</param>
+        /// <param name="datNum">The .dat number to read from.</param>
+        /// <returns>The decompressed data.</returns>
+        public static byte[] GetType4DecompressedData(int offset, int datNum)
         {
-            List<byte> byteList = new List<byte>();
+            int textureType, width, height, mipMapCount;
+
+            List<byte> decompressedData = new List<byte>();
 
             offset = OffsetCorrection(datNum, offset);
 
@@ -114,126 +124,334 @@ namespace FFXIV_TexTools2.Helpers
                 br.BaseStream.Seek(offset, SeekOrigin.Begin);
 
                 int headerLength = br.ReadInt32();
-                int type = br.ReadInt32();
-                int decompressedSize = br.ReadInt32();
+                int fileType = br.ReadInt32();
+                int uncompressedFileSize = br.ReadInt32();
                 br.ReadBytes(8);
-                int parts = br.ReadInt32();
+                mipMapCount = br.ReadInt32();
+
 
                 int endOfHeader = offset + headerLength;
-                int partStart = offset + 24;
+                int mipMapInfoOffset = offset + 24;
 
-                for (int f = 0, g = 0; f < parts; f++)
+                br.BaseStream.Seek(endOfHeader + 4, SeekOrigin.Begin);
+
+                textureType = br.ReadInt32();
+                width = br.ReadInt16();
+                height = br.ReadInt16();
+
+                for (int i = 0, j = 0; i < mipMapCount; i++)
                 {
-                    //read the current parts info
-                    br.BaseStream.Seek(partStart + g, SeekOrigin.Begin);
-                    int fromHeaderEnd = br.ReadInt32();
-                    int partLength = br.ReadInt16();
-                    int partSize = br.ReadInt16();
-                    int partLocation = endOfHeader + fromHeaderEnd;
+                    br.BaseStream.Seek(mipMapInfoOffset + j, SeekOrigin.Begin);
 
-                    //go to part data and read its info
-                    br.BaseStream.Seek(partLocation, SeekOrigin.Begin);
+                    int offsetFromHeaderEnd = br.ReadInt32();
+                    int mipMapLength = br.ReadInt32();
+                    int mipMapSize = br.ReadInt32();
+                    int mipMapStart = br.ReadInt32();
+                    int mipMapParts = br.ReadInt32();
+
+                    int mipMapPartOffset = endOfHeader + offsetFromHeaderEnd;
+
+                    br.BaseStream.Seek(mipMapPartOffset, SeekOrigin.Begin);
+
                     br.ReadBytes(8);
-                    int partCompressedSize = br.ReadInt32();
-                    int partDecompressedSize = br.ReadInt32();
+                    int compressedSize = br.ReadInt32();
+                    int uncompressedSize = br.ReadInt32();
 
-                    //if data is already uncompressed add to list if not decompress and add to list
-                    if (partCompressedSize == 32000)
+                    if (mipMapParts > 1)
                     {
-                        byte[] forlist = br.ReadBytes(partDecompressedSize);
-                        byteList.AddRange(forlist);
-                    }
-                    else
-                    {
-                        byte[] forlist = br.ReadBytes(partCompressedSize);
-                        byte[] partDecompressedBytes = new byte[partDecompressedSize];
+                        byte[] compressedData = br.ReadBytes(compressedSize);
+                        byte[] decompressedPartData = new byte[uncompressedSize];
 
-                        using (MemoryStream ms = new MemoryStream(forlist))
+                        using (MemoryStream ms = new MemoryStream(compressedData))
                         {
                             using (DeflateStream ds = new DeflateStream(ms, CompressionMode.Decompress))
                             {
-                                int count = ds.Read(partDecompressedBytes, 0x00, partDecompressedSize);
+                                ds.Read(decompressedPartData, 0x00, uncompressedSize);
                             }
                         }
-                        byteList.AddRange(partDecompressedBytes);
+
+                        decompressedData.AddRange(decompressedPartData);
+
+                        for (int k = 1; k < mipMapParts; k++)
+                        {
+                            byte check = br.ReadByte();
+                            while (check != 0x10)
+                            {
+                                check = br.ReadByte();
+                            }
+
+                            br.ReadBytes(7);
+                            compressedSize = br.ReadInt32();
+                            uncompressedSize = br.ReadInt32();
+
+                            if (compressedSize != 32000)
+                            {
+                                compressedData = br.ReadBytes(compressedSize);
+                                decompressedPartData = new byte[uncompressedSize];
+                                using (MemoryStream ms = new MemoryStream(compressedData))
+                                {
+                                    using (DeflateStream ds = new DeflateStream(ms, CompressionMode.Decompress))
+                                    {
+                                        ds.Read(decompressedPartData, 0x00, uncompressedSize);
+                                    }
+                                }
+                                decompressedData.AddRange(decompressedPartData);
+                            }
+                            else
+                            {
+                                decompressedPartData = br.ReadBytes(uncompressedSize);
+                                decompressedData.AddRange(decompressedPartData);
+                            }
+                        }
                     }
-                    g += 8;
+                    else
+                    {
+                        if (compressedSize != 32000)
+                        {
+                            var compressedData = br.ReadBytes(compressedSize);
+                            var uncompressedData = new byte[uncompressedSize];
+
+                            using (MemoryStream ms = new MemoryStream(compressedData))
+                            {
+                                using (DeflateStream ds = new DeflateStream(ms, CompressionMode.Decompress))
+                                {
+                                    ds.Read(uncompressedData, 0x00, uncompressedSize);
+                                }
+                            }
+
+                            decompressedData.AddRange(uncompressedData);
+                        }
+                        else
+                        {
+                            var decompressedPartData = br.ReadBytes(uncompressedSize);
+                            decompressedData.AddRange(decompressedPartData);
+                        }
+                    }
+                    j = j + 20;
                 }
 
-                if (byteList.Count < decompressedSize)
+                if (decompressedData.Count < uncompressedFileSize)
                 {
-                    int difference = decompressedSize - byteList.Count;
-                    byte[] padd = new byte[difference];
-                    Array.Clear(padd, 0, difference);
-                    byteList.AddRange(padd);
+                    int difference = uncompressedFileSize - decompressedData.Count;
+                    byte[] padding = new byte[difference];
+                    Array.Clear(padding, 0, difference);
+                    decompressedData.AddRange(padding);
                 }
             }
 
-            return byteList.ToArray();
+            return decompressedData.ToArray();
         }
 
-        public static byte[] GetDecompressedIMCBytes(int offset, int datNum)
+        /// <summary>
+        /// Decompresses the data for files of type 2.
+        /// </summary>
+        /// <remarks>
+        /// Type 2 data varies.
+        /// </remarks>
+        /// <param name="offset">Offset to the type 2 data.</param>
+        /// <param name="datNum">The .dat number to read from.</param>
+        /// <returns>The decompressed data.</returns>
+        public static byte[] GetType2DecompressedData(int offset, int datNum)
         {
             offset = OffsetCorrection(datNum, offset);
-            byte[] decompBytes;
+            byte[] decompressedData;
 
-            using(BinaryReader b = new BinaryReader(File.OpenRead(Info.datDir + datNum)))
+            List<byte> type2Bytes = new List<byte>();
+
+            using(BinaryReader br = new BinaryReader(File.OpenRead(Info.datDir + datNum)))
             {
-                b.BaseStream.Seek(offset, SeekOrigin.Begin);
+                br.BaseStream.Seek(offset, SeekOrigin.Begin);
 
-                int headerLength = b.ReadInt32();
+                int headerLength = br.ReadInt32();
 
-                b.ReadBytes(headerLength + 4);
+                br.ReadBytes(16);
 
-                int compressedSize = b.ReadInt32();
-                int uncompressedSize = b.ReadInt32();
+                int dataBlockCount = br.ReadInt32();
 
-                byte[] data = b.ReadBytes(compressedSize);
-                decompBytes = new byte[uncompressedSize];
-
-                using (MemoryStream ms = new MemoryStream(data))
+                for (int i = 0;  i < dataBlockCount; i++)
                 {
-                    using (DeflateStream ds = new DeflateStream(ms, CompressionMode.Decompress))
+                    br.BaseStream.Seek(offset + (24 + (8 * i)), SeekOrigin.Begin);
+
+                    int dataBlockOffset = br.ReadInt32();
+
+                    br.BaseStream.Seek(offset + headerLength + dataBlockOffset, SeekOrigin.Begin);
+
+                    br.ReadBytes(8);
+
+                    int compressedSize = br.ReadInt32();
+                    int uncompressedSize = br.ReadInt32();
+
+                    byte[] compressedData = br.ReadBytes(compressedSize);
+
+                    decompressedData = new byte[uncompressedSize];
+
+                    using (MemoryStream ms = new MemoryStream(compressedData))
                     {
-                        int count = ds.Read(decompBytes, 0, uncompressedSize);
+                        using (DeflateStream ds = new DeflateStream(ms, CompressionMode.Decompress))
+                        {
+                            int count = ds.Read(decompressedData, 0, uncompressedSize);
+                        }
                     }
+
+                    type2Bytes.AddRange(decompressedData);
+                }
+            }
+            return type2Bytes.ToArray();
+        }
+
+        /// <summary>
+        /// Decompressed the data for files of type 3.
+        /// </summary>
+        /// <remarks>
+        /// Type 3 is model data.
+        /// </remarks>
+        /// <param name="offset">Offset to the type 3 data.</param>
+        /// <param name="datNum">The .dat number to read from.</param>
+        /// <returns></returns>
+        public static Tuple<byte[], int, int> GetType3DecompressedData(int offset, int datNum)
+        {
+            List<byte> byteList = new List<byte>();
+            int meshCount, materialCount;
+
+            using (BinaryReader br = new BinaryReader(File.OpenRead(Info.datDir + datNum)))
+            {
+                br.BaseStream.Seek(offset, SeekOrigin.Begin);
+
+                int headerLength = br.ReadInt32();
+                int fileType = br.ReadInt32();
+                int decompressedSize = br.ReadInt32();
+                br.ReadBytes(8);
+                int parts = br.ReadInt16();
+
+                int endOfHeader = offset + headerLength;
+
+                byteList.AddRange(new byte[68]);
+
+                br.BaseStream.Seek(offset + 24, SeekOrigin.Begin);
+
+                int[] chunkUncompSizes = new int[11];
+                int[] chunkLengths = new int[11];
+                int[] chunkOffsets = new int[11];
+                int[] chunkBlockStart = new int[11];
+                int[] chunkNumBlocks = new int[11];
+
+                for (int i = 0; i < 11; i++)
+                {
+                    chunkUncompSizes[i] = br.ReadInt32();
+                }
+                for (int i = 0; i < 11; i++)
+                {
+                    chunkLengths[i] = br.ReadInt32();
+                }
+                for (int i = 0; i < 11; i++)
+                {
+                    chunkOffsets[i] = br.ReadInt32();
+                }
+                for (int i = 0; i < 11; i++)
+                {
+                    chunkBlockStart[i] = br.ReadInt16();
+                }
+                int totalBlocks = 0;
+                for (int i = 0; i < 11; i++)
+                {
+                    chunkNumBlocks[i] = br.ReadInt16();
+
+                    totalBlocks += chunkNumBlocks[i];
+                }
+
+                meshCount = br.ReadInt16();
+                materialCount = br.ReadInt16();
+
+                br.ReadBytes(4);
+
+                int[] blockSizes = new int[totalBlocks];
+
+                for (int i = 0; i < totalBlocks; i++)
+                {
+                    blockSizes[i] = br.ReadInt16();
+                }
+
+                br.BaseStream.Seek(offset + headerLength + chunkOffsets[0], SeekOrigin.Begin);
+
+                for (int i = 0; i < totalBlocks; i++)
+                {
+                    int lastPos = (int)br.BaseStream.Position;
+
+                    br.ReadBytes(8);
+
+                    int partCompSize = br.ReadInt32();
+                    int partDecompSize = br.ReadInt32();
+
+                    if (partCompSize == 32000)
+                    {
+                        byteList.AddRange(br.ReadBytes(partDecompSize));
+                    }
+                    else
+                    {
+                        byte[] partDecompBytes = new byte[partDecompSize];
+                        using (MemoryStream ms = new MemoryStream(br.ReadBytes(partCompSize)))
+                        {
+                            using (DeflateStream ds = new DeflateStream(ms, CompressionMode.Decompress))
+                            {
+                                ds.Read(partDecompBytes, 0, partDecompSize);
+                            }
+                        }
+                        byteList.AddRange(partDecompBytes);
+                    }
+
+                    br.BaseStream.Seek(lastPos + blockSizes[i], SeekOrigin.Begin);
                 }
             }
 
-            return decompBytes;
+            return new Tuple<byte[], int, int>(byteList.ToArray(), meshCount, materialCount);
         }
+
         #endregion //Decompressors
 
-#region offset
+        #region Offset Helpers
+        /// <summary>
+        /// Changes the offset to the correct location based on .dat number.
+        /// </summary>
+        /// <param name="datNum">The .dat number being used.</param>
+        /// <param name="offset">The offset to correct.</param>
+        /// <returns>The corrected offset.</returns>
         public static int OffsetCorrection(int datNum, int offset)
         {
             return offset - (16 * datNum);
         }
 
-
-        public static int GetOffset(int folderHash, int fileHash)
+        /// <summary>
+        /// Gets the offset of the item data.
+        /// </summary>
+        /// <remarks>
+        /// Used to obtain the offset of the items IMC, MTRL, MDL, and TEX data
+        /// </remarks>
+        /// <param name="folderHash">The hash value of the internal folder path.</param>
+        /// <param name="fileHash">The hash value of the internal file path.</param>
+        /// <returns>The offset in which the items data is located</returns>
+        public static int GetItemOffset(int folderHash, int fileHash)
         {
-            int fileOffset = 0;
+            int itemOffset = 0;
 
             try
             {
                 using (BinaryReader br = new BinaryReader(File.OpenRead(Info.indexDir)))
                 {
                     br.BaseStream.Seek(1036, SeekOrigin.Begin);
-                    int totalFiles = br.ReadInt32();
+                    int numOfFiles = br.ReadInt32();
 
                     br.BaseStream.Seek(2048, SeekOrigin.Begin);
-                    for (int i = 0; i < totalFiles; br.ReadBytes(4), i += 16)
+                    for (int i = 0; i < numOfFiles; br.ReadBytes(4), i += 16)
                     {
-                        int tempOffset = br.ReadInt32();
+                        int fileNameHash = br.ReadInt32();
 
-                        if (tempOffset == fileHash)
+                        if (fileNameHash == fileHash)
                         {
-                            int fTempOffset = br.ReadInt32();
+                            int folderPathHash = br.ReadInt32();
 
-                            if (fTempOffset == folderHash)
+                            if (folderPathHash == folderHash)
                             {
-                                fileOffset = br.ReadInt32() * 8;
+                                itemOffset = br.ReadInt32() * 8;
                                 break;
                             }
                             else
@@ -252,33 +470,40 @@ namespace FFXIV_TexTools2.Helpers
             {
                 MessageBox.Show("[Helper] Error Accessing Index File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            return fileOffset;
+
+            return itemOffset;
         }
 
-        public static int GetAOffset(int folderHash, int fileHash)
+        /// <summary>
+        /// Gets the offset of the EXD data.
+        /// </summary>
+        /// <param name="folderHash">The hash value of the internal folder path.</param>
+        /// <param name="fileHash">The hash value of the internal file path.</param>
+        /// <returns>The offset in which the EXD data is located.</returns>
+        public static int GetEXDOffset(int folderHash, int fileHash)
         {
-            int fileOffset = 0;
+            int exdOffset = 0;
 
             try
             {
                 using (BinaryReader br = new BinaryReader(File.OpenRead(Info.aIndexDir)))
                 {
                     br.BaseStream.Seek(1036, SeekOrigin.Begin);
-                    int totalFiles = br.ReadInt32();
+                    int numOfFiles = br.ReadInt32();
 
                     br.BaseStream.Seek(2048, SeekOrigin.Begin);
-                    for (int i = 0; i < totalFiles; br.ReadBytes(4), i += 16)
+                    for (int i = 0; i < numOfFiles; br.ReadBytes(4), i += 16)
                     {
-                        int tempOffset = br.ReadInt32();
+                        int fileNameHash = br.ReadInt32();
 
-                        if (tempOffset == fileHash)
+                        if (fileNameHash == fileHash)
                         {
-                            int fTempOffset = br.ReadInt32();
+                            int folderPathHash = br.ReadInt32();
 
-                            if (fTempOffset == folderHash)
+                            if (folderPathHash == folderHash)
                             {
                                 byte[] offset = br.ReadBytes(4);
-                                fileOffset = BitConverter.ToInt32(offset, 0) * 8;
+                                exdOffset = BitConverter.ToInt32(offset, 0) * 8;
                                 break;
                             }
                             else
@@ -298,10 +523,18 @@ namespace FFXIV_TexTools2.Helpers
                 MessageBox.Show("[Helper] Error Accessing Index A File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
-            return fileOffset;
+            return exdOffset;
         }
 
 
+        /// <summary>
+        /// Gets the offset given only a file name hash.
+        /// </summary>
+        /// <remarks>
+        /// Not in use due to the fact that the same file name can exist in differnt folders
+        /// </remarks>
+        /// <param name="fileHash">The hash value of the internal file path.</param>
+        /// <returns>The offset in which the data is located</returns>
         public static int GetOffset(int fileHash)
         {
             int fileOffset = 0;
@@ -340,6 +573,12 @@ namespace FFXIV_TexTools2.Helpers
             return fileOffset;
         }
 
+        /// <summary>
+        /// Updates the .index files offset for a given item.
+        /// </summary>
+        /// <param name="offset">The new offset to be used.</param>
+        /// <param name="fullPath">The internal path of the file whos offset is to be updated.</param>
+        /// <returns>The offset which was replaced.</returns>
         public static int UpdateIndex(long offset, string fullPath)
         {
             var folderHash = FFCRC.GetHash(fullPath.Substring(0, fullPath.LastIndexOf("/")));
@@ -355,18 +594,18 @@ namespace FFXIV_TexTools2.Helpers
                         using (BinaryWriter bw = new BinaryWriter(index))
                         {
                             br.BaseStream.Seek(1036, SeekOrigin.Begin);
-                            int totalFiles = br.ReadInt32();
+                            int numOfFiles = br.ReadInt32();
 
                             br.BaseStream.Seek(2048, SeekOrigin.Begin);
-                            for (int i = 0; i < totalFiles; br.ReadBytes(4), i += 16)
+                            for (int i = 0; i < numOfFiles; br.ReadBytes(4), i += 16)
                             {
-                                int tempOffset = br.ReadInt32();
+                                int fileNameHash = br.ReadInt32();
 
-                                if (tempOffset == fileHash)
+                                if (fileNameHash == fileHash)
                                 {
-                                    int fTempOffset = br.ReadInt32();
+                                    int folderPathHash = br.ReadInt32();
 
-                                    if (fTempOffset == folderHash)
+                                    if (folderPathHash == folderHash)
                                     {
                                         oldOffset = br.ReadInt32();
                                         bw.BaseStream.Seek(br.BaseStream.Position - 4, SeekOrigin.Begin);
@@ -395,6 +634,12 @@ namespace FFXIV_TexTools2.Helpers
             return oldOffset;
         }
 
+        /// <summary>
+        /// Updates the .index2 files offset for a given item.
+        /// </summary>
+        /// <param name="offset">The new offset to be used.</param>
+        /// <param name="fullPath">The internal path of the file whos offset is to be updated.</param>
+        /// <returns>The offset which was replaced.</returns>
         public static void UpdateIndex2(long offset, string fullPath)
         {
             var pathHash = FFCRC.GetHash(fullPath);
@@ -408,14 +653,14 @@ namespace FFXIV_TexTools2.Helpers
                         using (BinaryWriter bw = new BinaryWriter(index))
                         {
                             br.BaseStream.Seek(1036, SeekOrigin.Begin);
-                            int totalFiles = br.ReadInt32();
+                            int numOfFiles = br.ReadInt32();
 
                             br.BaseStream.Seek(2048, SeekOrigin.Begin);
-                            for (int i = 0; i < totalFiles; i += 8)
+                            for (int i = 0; i < numOfFiles; i += 8)
                             {
-                                int tempOffset = br.ReadInt32();
+                                int fullPathHash = br.ReadInt32();
 
-                                if (tempOffset == pathHash)
+                                if (fullPathHash == pathHash)
                                 {
                                     bw.BaseStream.Seek(br.BaseStream.Position, SeekOrigin.Begin);
                                     bw.Write((int)(offset / 8));
@@ -436,9 +681,14 @@ namespace FFXIV_TexTools2.Helpers
             }
 
         }
-#endregion offset
+        #endregion Offset Helpers
 
-#region IO
+        #region IO
+        /// <summary>
+        /// Determines whether a given folder path exists
+        /// </summary>
+        /// <param name="folderHash">The hash value of the internal folder path.</param>
+        /// <returns></returns>
         public static bool FolderExists(int folderHash)
         {
             try
@@ -446,15 +696,15 @@ namespace FFXIV_TexTools2.Helpers
                 using (BinaryReader br = new BinaryReader(File.OpenRead(Info.indexDir)))
                 {
                     br.BaseStream.Seek(1036, SeekOrigin.Begin);
-                    int totalFiles = br.ReadInt32();
+                    int numOfFiles = br.ReadInt32();
 
                     br.BaseStream.Seek(2048, SeekOrigin.Begin);
-                    for (int i = 0; i < totalFiles; br.ReadBytes(4), i += 16)
+                    for (int i = 0; i < numOfFiles; br.ReadBytes(4), i += 16)
                     {
                         br.ReadBytes(4);
-                        int tempFolderOffset = br.ReadInt32();
+                        int folderPathHash = br.ReadInt32();
 
-                        if (tempFolderOffset == folderHash)
+                        if (folderPathHash == folderHash)
                         {
                             return true;
                         }
@@ -473,6 +723,13 @@ namespace FFXIV_TexTools2.Helpers
             return false;
         }
 
+
+        /// <summary>
+        /// Determines whether a given file name exists
+        /// </summary>
+        /// <param name="fileHash">The hash value of the internal file path.</param>
+        /// <param name="folderHash">The hash value of the internal file name.</param>
+        /// <returns></returns>
         public static bool FileExists(int fileHash, int folderHash)
         {
             try
@@ -480,18 +737,18 @@ namespace FFXIV_TexTools2.Helpers
                 using (BinaryReader br = new BinaryReader(File.OpenRead(Info.indexDir)))
                 {
                     br.BaseStream.Seek(1036, SeekOrigin.Begin);
-                    int totalFiles = br.ReadInt32();
+                    int numOfFiles = br.ReadInt32();
 
                     br.BaseStream.Seek(2048, SeekOrigin.Begin);
-                    for (int i = 0; i < totalFiles; br.ReadBytes(4), i += 16)
+                    for (int i = 0; i < numOfFiles; br.ReadBytes(4), i += 16)
                     {
-                        int tempFileOffset = br.ReadInt32();
+                        int fileNameHash = br.ReadInt32();
 
-                        if (tempFileOffset == fileHash)
+                        if (fileNameHash == fileHash)
                         {
-                            int tempFolderOffset = br.ReadInt32();
+                            int folderPathHash = br.ReadInt32();
 
-                            if (tempFolderOffset == folderHash)
+                            if (folderPathHash == folderHash)
                             {
                                 return true;
                             }
@@ -515,7 +772,12 @@ namespace FFXIV_TexTools2.Helpers
             return false;
         }
 
-        public static SortedSet<ComboBoxInfo> FolderExistsList(Dictionary<int, int> mtrl)
+        /// <summary>
+        /// Determines which folder paths exist given several folder path hashes.
+        /// </summary>
+        /// <param name="pathPart">A dictionary containing folder path hashes and their associated part number.</param>
+        /// <returns>A sorted set of part numbers whos folder path was found.</returns>
+        public static SortedSet<ComboBoxInfo> FolderExistsList(Dictionary<int, int> pathPart)
         {
             SortedSet<ComboBoxInfo> parts = new SortedSet<ComboBoxInfo>();
 
@@ -524,17 +786,18 @@ namespace FFXIV_TexTools2.Helpers
                 using (BinaryReader br = new BinaryReader(File.OpenRead(Info.indexDir)))
                 {
                     br.BaseStream.Seek(1036, SeekOrigin.Begin);
-                    int totalFiles = br.ReadInt32();
+                    int numOfFiles = br.ReadInt32();
 
                     br.BaseStream.Seek(2048, SeekOrigin.Begin);
-                    for (int i = 0; i < totalFiles; br.ReadBytes(4), i += 16)
+                    for (int i = 0; i < numOfFiles; br.ReadBytes(4), i += 16)
                     {
                         br.ReadBytes(4);
-                        int tempFolderOffset = br.ReadInt32();
+                        int folderPathHash = br.ReadInt32();
 
-                        if (mtrl.Keys.Contains(tempFolderOffset))
+                        if (pathPart.Keys.Contains(folderPathHash))
                         {
-                            parts.Add(new ComboBoxInfo(mtrl[tempFolderOffset].ToString(), mtrl[tempFolderOffset].ToString()));
+                            
+                            parts.Add(new ComboBoxInfo() { Name = pathPart[folderPathHash].ToString(), ID = pathPart[folderPathHash].ToString(), IsNum = true });
                         }
                         br.ReadBytes(4);
                     }
@@ -548,7 +811,12 @@ namespace FFXIV_TexTools2.Helpers
             return parts;
         }
 
-        public static SortedSet<ComboBoxInfo> FolderExistsListRace(Dictionary<int, string> races)
+        /// <summary>
+        /// Determines which folder paths exist given several folder path hashes.
+        /// </summary>
+        /// <param name="pathRace">A dictionary containing folder path hashes and their associated race.</param>
+        /// <returns>A sorted set of races whos folder path was found.</returns>
+        public static SortedSet<ComboBoxInfo> FolderExistsListRace(Dictionary<int, string> pathRace)
         {
             SortedSet<ComboBoxInfo> raceList = new SortedSet<ComboBoxInfo>();
 
@@ -557,17 +825,18 @@ namespace FFXIV_TexTools2.Helpers
                 using (BinaryReader br = new BinaryReader(File.OpenRead(Info.indexDir)))
                 {
                     br.BaseStream.Seek(1036, SeekOrigin.Begin);
-                    int totalFiles = br.ReadInt32();
+                    int numOfFiles = br.ReadInt32();
 
                     br.BaseStream.Seek(2048, SeekOrigin.Begin);
-                    for (int i = 0; i < totalFiles; br.ReadBytes(4), i += 16)
+                    for (int i = 0; i < numOfFiles; br.ReadBytes(4), i += 16)
                     {
                         br.ReadBytes(4);
-                        int tempFolderOffset = br.ReadInt32();
+                        int folderPathHash = br.ReadInt32();
 
-                        if (races.Keys.Contains(tempFolderOffset))
+                        if (pathRace.Keys.Contains(folderPathHash))
                         {
-                            raceList.Add(new ComboBoxInfo(Info.IDRace[races[tempFolderOffset]], races[tempFolderOffset]));
+                            
+                            raceList.Add(new ComboBoxInfo() { Name = Info.IDRace[pathRace[folderPathHash]], ID = pathRace[folderPathHash], IsNum = false });
                         }
                         br.ReadBytes(4);
                     }
@@ -578,13 +847,17 @@ namespace FFXIV_TexTools2.Helpers
                 MessageBox.Show("[Helper] Error Accessing Index File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
-
             return raceList;
         }
 
-        public static Dictionary<int, int> GetAllFilesInFolder(int folderHash)
+        /// <summary>
+        /// Gets the hashes of all the files contained within a given folder.
+        /// </summary>
+        /// <param name="folderHash">The hash value of the internal folder path.</param>
+        /// <returns>A list of file hashes</returns>
+        public static List<int> GetAllFilesInFolder(int folderHash)
         {
-            Dictionary<int, int> fileOffsetDict = new Dictionary<int, int>();
+            List<int> fileOffsetDict = new List<int>();
 
             try
             {
@@ -596,13 +869,14 @@ namespace FFXIV_TexTools2.Helpers
                     br.BaseStream.Seek(2048, SeekOrigin.Begin);
                     for (int i = 0; i < totalFiles; br.ReadBytes(4), i += 16)
                     {
-                        int tempFileHash = br.ReadInt32();
+                        int fileNameHash = br.ReadInt32();
 
-                        int tempFolderHash = br.ReadInt32();
+                        int folderPathHash = br.ReadInt32();
 
-                        if (tempFolderHash == folderHash)
+                        if (folderPathHash == folderHash)
                         {
-                            fileOffsetDict.Add(tempFileHash, BitConverter.ToInt32(br.ReadBytes(4), 0) * 8);
+                            fileOffsetDict.Add(fileNameHash);
+                            br.ReadBytes(4);
                         }
                         else
                         {
@@ -618,9 +892,13 @@ namespace FFXIV_TexTools2.Helpers
             return fileOffsetDict;
         }
 
+        /// <summary>
+        /// Checks the index for the number of dats the game will attempt to read
+        /// </summary>
+        /// <returns></returns>
         public static bool CheckIndex()
         {
-            bool problem = false;
+            bool problemFound = false;
 
             try
             {
@@ -632,7 +910,7 @@ namespace FFXIV_TexTools2.Helpers
 
                     if (numDats != 5)
                     {
-                        problem = true;
+                        problemFound = true;
                     }
                 }
             }
@@ -651,7 +929,7 @@ namespace FFXIV_TexTools2.Helpers
 
                     if (numDats != 5)
                     {
-                        problem = true;
+                        problemFound = true;
                     }
                 }
             }
@@ -660,10 +938,12 @@ namespace FFXIV_TexTools2.Helpers
                 MessageBox.Show("[Helper] Error Accessing Index 2 File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
-
-            return problem;
+            return problemFound;
         }
 
+        /// <summary>
+        /// Changes the number of dats the game will attempt to read to 5
+        /// </summary>
         public static void FixIndex()
         {
             try
@@ -693,31 +973,36 @@ namespace FFXIV_TexTools2.Helpers
             }
 
         }
-#endregion
+        #endregion IO
 
         #region Misc
-        public static string GetItemType(string selectedParent)
+        /// <summary>
+        /// Gets the type of items contained within a category.
+        /// </summary>
+        /// <param name="selectedCategory">The currently selected category.</param>
+        /// <returns>The type of items contained within a category.</returns>
+        public static string GetCategoryType(string selectedCategory)
         {
             string itemType;
 
-            if (selectedParent.Equals(Strings.Main_Hand) || selectedParent.Equals(Strings.Off_Hand) || selectedParent.Equals(Strings.Main_Off) || selectedParent.Equals(Strings.Two_Handed))
+            if (selectedCategory.Equals(Strings.Main_Hand) || selectedCategory.Equals(Strings.Off_Hand) || selectedCategory.Equals(Strings.Main_Off) || selectedCategory.Equals(Strings.Two_Handed))
             {
                 itemType = "weapon";
 
             }
-            else if (selectedParent.Equals(Strings.Ears) || selectedParent.Equals(Strings.Neck) || selectedParent.Equals(Strings.Wrists) || selectedParent.Equals(Strings.Rings))
+            else if (selectedCategory.Equals(Strings.Ears) || selectedCategory.Equals(Strings.Neck) || selectedCategory.Equals(Strings.Wrists) || selectedCategory.Equals(Strings.Rings))
             {
                 itemType = "accessory";
             }
-            else if (selectedParent.Equals(Strings.Food))
+            else if (selectedCategory.Equals(Strings.Food))
             {
                 itemType = "food";
             }
-            else if (selectedParent.Equals(Strings.Mounts) || selectedParent.Equals(Strings.Minions) || selectedParent.Equals(Strings.Pets))
+            else if (selectedCategory.Equals(Strings.Mounts) || selectedCategory.Equals(Strings.Minions) || selectedCategory.Equals(Strings.Pets))
             {
                 itemType = "monster";
             }
-            else if (selectedParent.Equals(Strings.Character))
+            else if (selectedCategory.Equals(Strings.Character))
             {
                 itemType = "character";
             }
@@ -729,10 +1014,15 @@ namespace FFXIV_TexTools2.Helpers
             return itemType;
         }
 
-        public static string ToTitleCase(string s)
+        /// <summary>
+        /// Converts a strings case to Title Case.
+        /// </summary>
+        /// <param name="mString">The string to convert.</param>
+        /// <returns>The converted string.</returns>
+        public static string ToTitleCase(string mString)
         {
-            return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(s.ToLower());
+            return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(mString.ToLower());
         }
-#endregion
+        #endregion Misc
     }
 }

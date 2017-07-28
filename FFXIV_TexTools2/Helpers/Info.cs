@@ -14,8 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
 using FFXIV_TexTools2.Resources;
+using System.Collections.Generic;
 
 namespace FFXIV_TexTools2.Helpers
 {
@@ -215,14 +215,44 @@ namespace FFXIV_TexTools2.Helpers
         {
             //DXT1
             {13344, 827611204 },
+            {827611204, 13344 },
+
             //DXT3
             {13360, 861165636 },
+            {861165636, 13360 },
+
             //DXT5
             {13361, 894720068 },
+            {894720068, 13361 },
+
             //ARGB 16F
             {9312, 113 },
+            {113, 9312 },
+
             //Uncompressed RGBA
-            {5200, 0 }
+            {5200, 0 },
+            {0, 5200 }
+
+        };
+
+        public static Dictionary<int, string> TextureTypes = new Dictionary<int, string>
+        {
+            {4400, "L8" },
+            {4401, "A8" },
+            {4440, "Unknown" },
+            {5184, "A4R4G4B4" },
+            {5185, "A1R5G5B5" },
+            {5200, "A8R8G8B8" },
+            {5201, "X8R8G8B8" },
+            {8528, "R32F" },
+            {8784, "G16R16F" },
+            {8800, "G32R32F" },
+            {9312, "A16B16G16R16F" },
+            {9328, "A32B32G32R32F" },
+            {13344, "DXT1" },
+            {13360, "DXT3" },
+            {13361, "DXT5" },
+            {16704, "D16" }
         };
     }
 }

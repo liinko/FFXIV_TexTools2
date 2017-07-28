@@ -70,6 +70,42 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to a{0}.imc.
+        /// </summary>
+        internal static string AccIMCFile {
+            get {
+                return ResourceManager.GetString("AccIMCFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to chara/accessory/a{0}.
+        /// </summary>
+        internal static string AccIMCFolder {
+            get {
+                return ResourceManager.GetString("AccIMCFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to c{0}a{1}_{2}.mdl.
+        /// </summary>
+        internal static string AccMDLFile {
+            get {
+                return ResourceManager.GetString("AccMDLFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to chara/accessory/a{0}/model.
+        /// </summary>
+        internal static string AccMDLFolder {
+            get {
+                return ResourceManager.GetString("AccMDLFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to mt_c0101a{0}_{1}_{2}.mtrl.
         /// </summary>
         internal static string AccMtrlFile {
@@ -160,6 +196,24 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to c{0}b{1}_{2}.mdl.
+        /// </summary>
+        internal static string BodyMDLFile {
+            get {
+                return ResourceManager.GetString("BodyMDLFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to chara/human/c{0}/obj/body/b{1}/model.
+        /// </summary>
+        internal static string BodyMDLFolder {
+            get {
+                return ResourceManager.GetString("BodyMDLFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to mt_c{0}b{1}_a.mtrl.
         /// </summary>
         internal static string BodyMtrlFile {
@@ -201,6 +255,24 @@ namespace FFXIV_TexTools2.Resources {
         internal static string ColorSet {
             get {
                 return ResourceManager.GetString("ColorSet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to d{0}e{1}_{2}.mdl.
+        /// </summary>
+        internal static string DemiMDLFile {
+            get {
+                return ResourceManager.GetString("DemiMDLFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to chara/demihuman/d{0}/obj/equipment/e{1}/model.
+        /// </summary>
+        internal static string DemiMDLFolder {
+            get {
+                return ResourceManager.GetString("DemiMDLFolder", resourceCulture);
             }
         }
         
@@ -277,6 +349,42 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to e{0}.imc.
+        /// </summary>
+        internal static string EquipIMCFile {
+            get {
+                return ResourceManager.GetString("EquipIMCFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to chara/equipment/e{0}.
+        /// </summary>
+        internal static string EquipIMCFolder {
+            get {
+                return ResourceManager.GetString("EquipIMCFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to c{0}e{1}_{2}.mdl.
+        /// </summary>
+        internal static string EquipMDLFile {
+            get {
+                return ResourceManager.GetString("EquipMDLFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to chara/equipment/e{0}/model.
+        /// </summary>
+        internal static string EquipMDLFolder {
+            get {
+                return ResourceManager.GetString("EquipMDLFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Equipment Decals.
         /// </summary>
         internal static string Equipment_Decals {
@@ -300,6 +408,24 @@ namespace FFXIV_TexTools2.Resources {
         internal static string EquipMtrlFolder {
             get {
                 return ResourceManager.GetString("EquipMtrlFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ve{0}.avfx.
+        /// </summary>
+        internal static string EquipVFXFile {
+            get {
+                return ResourceManager.GetString("EquipVFXFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to chara/equipment/e{0}/vfx/eff.
+        /// </summary>
+        internal static string EquipVFXFolder {
+            get {
+                return ResourceManager.GetString("EquipVFXFolder", resourceCulture);
             }
         }
         
@@ -354,6 +480,24 @@ namespace FFXIV_TexTools2.Resources {
         internal static string Face_Paint {
             get {
                 return ResourceManager.GetString("Face_Paint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to c{0}f{1}_{2}.mdl.
+        /// </summary>
+        internal static string FaceMDLFile {
+            get {
+                return ResourceManager.GetString("FaceMDLFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to chara/human/c{0}/obj/face/f{1}/model.
+        /// </summary>
+        internal static string FaceMDLFolder {
+            get {
+                return ResourceManager.GetString("FaceMDLFolder", resourceCulture);
             }
         }
         
@@ -439,6 +583,24 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to c{0}h{1}_{2}.mdl.
+        /// </summary>
+        internal static string HairMDLFile {
+            get {
+                return ResourceManager.GetString("HairMDLFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to chara/human/c{0}/obj/hair/h{1}/model.
+        /// </summary>
+        internal static string HairMDLFolder {
+            get {
+                return ResourceManager.GetString("HairMDLFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to mt_c{0}h{1}_{2}_{3}.mtrl.
         /// </summary>
         internal static string HairMtrlFile {
@@ -507,6 +669,15 @@ namespace FFXIV_TexTools2.Resources {
         internal static string Ifrit_Egi {
             get {
                 return ResourceManager.GetString("Ifrit_Egi", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No index file backups detected. \nWould you like to create a backup now? \n\nWarning: This will disable any active modifications in order to create a backup. They will have to be manually re-enabled..
+        /// </summary>
+        internal static string Index_Backup {
+            get {
+                return ResourceManager.GetString("Index_Backup", resourceCulture);
             }
         }
         
@@ -619,6 +790,15 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 24.
+        /// </summary>
+        internal static string Minion_Category {
+            get {
+                return ResourceManager.GetString("Minion_Category", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to companion_0_{0}.exd.
         /// </summary>
         internal static string MinionFile {
@@ -664,6 +844,42 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to b{0}.imc.
+        /// </summary>
+        internal static string MonsterIMCFile {
+            get {
+                return ResourceManager.GetString("MonsterIMCFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to chara/monster/m{0}/obj/body/b{1}.
+        /// </summary>
+        internal static string MonsterIMCFolder {
+            get {
+                return ResourceManager.GetString("MonsterIMCFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to m{0}b{1}.mdl.
+        /// </summary>
+        internal static string MonsterMDLFile {
+            get {
+                return ResourceManager.GetString("MonsterMDLFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to chara/monster/m{0}/obj/body/b{1}/model.
+        /// </summary>
+        internal static string MonsterMDLFolder {
+            get {
+                return ResourceManager.GetString("MonsterMDLFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to mt_m{0}b{1}_{2}.mtrl.
         /// </summary>
         internal static string MonsterMtrlFile {
@@ -678,6 +894,15 @@ namespace FFXIV_TexTools2.Resources {
         internal static string MonsterMtrlFolder {
             get {
                 return ResourceManager.GetString("MonsterMtrlFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 23.
+        /// </summary>
+        internal static string Mount_Category {
+            get {
+                return ResourceManager.GetString("Mount_Category", resourceCulture);
             }
         }
         
@@ -826,6 +1051,24 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to c{0}t{1}_{2}.mdl.
+        /// </summary>
+        internal static string TailMDLFile {
+            get {
+                return ResourceManager.GetString("TailMDLFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to chara/human/c{0}/obj/tail/t{1}/model.
+        /// </summary>
+        internal static string TailMDLFolder {
+            get {
+                return ResourceManager.GetString("TailMDLFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to mt_c{0}t{1}_a.mtrl.
         /// </summary>
         internal static string TailMtrlFile {
@@ -871,6 +1114,42 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to b{0}.imc.
+        /// </summary>
+        internal static string WeapIMCFile {
+            get {
+                return ResourceManager.GetString("WeapIMCFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to chara/weapon/w{0}/obj/body/b{1}.
+        /// </summary>
+        internal static string WeapIMCFolder {
+            get {
+                return ResourceManager.GetString("WeapIMCFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to w{0}b{1}.mdl.
+        /// </summary>
+        internal static string WeapMDLFile {
+            get {
+                return ResourceManager.GetString("WeapMDLFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to chara/weapon/w{0}/obj/body/b{1}/model.
+        /// </summary>
+        internal static string WeapMDLFolder {
+            get {
+                return ResourceManager.GetString("WeapMDLFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to mt_w{0}b{1}_{2}.mtrl.
         /// </summary>
         internal static string WeapMtrlFile {
@@ -885,6 +1164,24 @@ namespace FFXIV_TexTools2.Resources {
         internal static string WeapMtrlFolder {
             get {
                 return ResourceManager.GetString("WeapMtrlFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to vw{0}.avfx.
+        /// </summary>
+        internal static string WeapVFXFile {
+            get {
+                return ResourceManager.GetString("WeapVFXFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to chara/weapon/w{0}/obj/body/b{1}/vfx/eff.
+        /// </summary>
+        internal static string WeapVFXFolder {
+            get {
+                return ResourceManager.GetString("WeapVFXFolder", resourceCulture);
             }
         }
         

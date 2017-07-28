@@ -43,7 +43,7 @@ namespace FFXIV_TexTools2.ViewModel
             }
             catch (Exception e)
             {
-                MessageBox.Show("[VM] Error Accessing .modlsit File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("[VM] Error Accessing .modlist File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
 

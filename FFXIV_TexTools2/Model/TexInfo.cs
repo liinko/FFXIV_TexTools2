@@ -28,5 +28,11 @@ namespace FFXIV_TexTools2.Material
         public byte[] RawTexData { get; set; }
 
         public Bitmap BMP { get; set; }
+
+
+        public virtual void Dispose()
+        {
+            BMP.Dispose();
+        }
     }
 }

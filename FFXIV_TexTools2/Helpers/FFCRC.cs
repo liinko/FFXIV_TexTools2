@@ -20,6 +20,9 @@ using System.Text;
 
 namespace FFXIV_TexTools2.Helpers
 {
+    /// <summary>
+    /// Gets the hash for the given internal file path
+    /// </summary>
     public static class FFCRC
     {
         static int dwCRC;

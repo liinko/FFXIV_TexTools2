@@ -396,4 +396,103 @@
   <data name="Language_Change_En" xml:space="preserve">
     <value>Changing the language requires the application to restart. \nRestart now?</value>
   </data>
+  <data name="Minion_Category" xml:space="preserve">
+    <value>24</value>
+  </data>
+  <data name="Mount_Category" xml:space="preserve">
+    <value>23</value>
+  </data>
+  <data name="AccIMCFile" xml:space="preserve">
+    <value>a{0}.imc</value>
+  </data>
+  <data name="AccIMCFolder" xml:space="preserve">
+    <value>chara/accessory/a{0}</value>
+  </data>
+  <data name="EquipIMCFile" xml:space="preserve">
+    <value>e{0}.imc</value>
+  </data>
+  <data name="EquipIMCFolder" xml:space="preserve">
+    <value>chara/equipment/e{0}</value>
+  </data>
+  <data name="MonsterIMCFile" xml:space="preserve">
+    <value>b{0}.imc</value>
+  </data>
+  <data name="MonsterIMCFolder" xml:space="preserve">
+    <value>chara/monster/m{0}/obj/body/b{1}</value>
+  </data>
+  <data name="WeapIMCFile" xml:space="preserve">
+    <value>b{0}.imc</value>
+  </data>
+  <data name="WeapIMCFolder" xml:space="preserve">
+    <value>chara/weapon/w{0}/obj/body/b{1}</value>
+  </data>
+  <data name="AccMDLFile" xml:space="preserve">
+    <value>c{0}a{1}_{2}.mdl</value>
+  </data>
+  <data name="AccMDLFolder" xml:space="preserve">
+    <value>chara/accessory/a{0}/model</value>
+  </data>
+  <data name="BodyMDLFolder" xml:space="preserve">
+    <value>chara/human/c{0}/obj/body/b{1}/model</value>
+  </data>
+  <data name="EquipMDLFile" xml:space="preserve">
+    <value>c{0}e{1}_{2}.mdl</value>
+  </data>
+  <data name="EquipMDLFolder" xml:space="preserve">
+    <value>chara/equipment/e{0}/model</value>
+  </data>
+  <data name="FaceMDLFolder" xml:space="preserve">
+    <value>chara/human/c{0}/obj/face/f{1}/model</value>
+  </data>
+  <data name="HairMDLFolder" xml:space="preserve">
+    <value>chara/human/c{0}/obj/hair/h{1}/model</value>
+  </data>
+  <data name="TailMDLFolder" xml:space="preserve">
+    <value>chara/human/c{0}/obj/tail/t{1}/model</value>
+  </data>
+  <data name="BodyMDLFile" xml:space="preserve">
+    <value>c{0}b{1}_{2}.mdl</value>
+  </data>
+  <data name="FaceMDLFile" xml:space="preserve">
+    <value>c{0}f{1}_{2}.mdl</value>
+  </data>
+  <data name="HairMDLFile" xml:space="preserve">
+    <value>c{0}h{1}_{2}.mdl</value>
+  </data>
+  <data name="TailMDLFile" xml:space="preserve">
+    <value>c{0}t{1}_{2}.mdl</value>
+  </data>
+  <data name="DemiMDLFile" xml:space="preserve">
+    <value>d{0}e{1}_{2}.mdl</value>
+  </data>
+  <data name="DemiMDLFolder" xml:space="preserve">
+    <value>chara/demihuman/d{0}/obj/equipment/e{1}/model</value>
+  </data>
+  <data name="MonsterMDLFile" xml:space="preserve">
+    <value>m{0}b{1}.mdl</value>
+  </data>
+  <data name="MonsterMDLFolder" xml:space="preserve">
+    <value>chara/monster/m{0}/obj/body/b{1}/model</value>
+  </data>
+  <data name="WeapMDLFile" xml:space="preserve">
+    <value>w{0}b{1}.mdl</value>
+  </data>
+  <data name="WeapMDLFolder" xml:space="preserve">
+    <value>chara/weapon/w{0}/obj/body/b{1}/model</value>
+  </data>
+  <data name="EquipVFXFile" xml:space="preserve">
+    <value>ve{0}.avfx</value>
+  </data>
+  <data name="EquipVFXFolder" xml:space="preserve">
+    <value>chara/equipment/e{0}/vfx/eff</value>
+  </data>
+  <data name="WeapVFXFile" xml:space="preserve">
+    <value>vw{0}.avfx</value>
+  </data>
+  <data name="WeapVFXFolder" xml:space="preserve">
+    <value>chara/weapon/w{0}/obj/body/b{1}/vfx/eff</value>
+  </data>
+  <data name="Index_Backup" xml:space="preserve">
+    <value>No index file backups detected. \nWould you like to create a backup now? \n\nWarning: This will disable any active modifications in order to create a backup. They will have to be manually re-enabled.</value>
+  </data>
 </root>

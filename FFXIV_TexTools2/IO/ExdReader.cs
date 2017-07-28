@@ -28,28 +28,28 @@ namespace FFXIV_TexTools2.IO
 {
     public static class ExdReader
     {
-
         /// <summary>
-        /// Makes the list of minions 
+        /// Creates a list of minions contained in companion_(num)_(language).exd 
         /// </summary>
-        /// <param name="offset">The offset where the minion list is located</param>
-        public static Dictionary<string, Items> MakeMinionsList()
+        /// <returns>List<Items> Items:Item data associated with Minion</returns>
+        public static List<ItemData> MakeMinionsList()
         {
             string minionFile = String.Format(Strings.MinionFile, Strings.Language);
 
-            byte[] minionsBytes = Helper.GetDecompressedBytes(Helper.GetAOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(minionFile)));
-            byte[] modelchara = Helper.GetDecompressedBytes(Helper.GetAOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(Strings.ModelCharaFile)));
+            byte[] minionsBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(minionFile)));
+            byte[] modelChara = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(Strings.ModelCharaFile)));
 
-            Dictionary<string, Items> minionsDict = new Dictionary<string, Items>();
+            List<ItemData> minionsDict = new List<ItemData>();
 
             using (BinaryReader br = new BinaryReader(new MemoryStream(minionsBytes)))
             {
-                using (BinaryReader br1 = new BinaryReader(new MemoryStream(modelchara)))
+                using (BinaryReader br1 = new BinaryReader(new MemoryStream(modelChara)))
                 {
-
-                    int duplicateCount = 1;
                     br.ReadBytes(8);
                     int offsetTableSize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                    br1.ReadBytes(8);
+                    int offsetTableSize1 = BitConverter.ToInt32(br1.ReadBytes(4).Reverse().ToArray(), 0);
 
                     for (int i = 0; i < offsetTableSize; i += 8)
                     {
@@ -65,6 +65,8 @@ namespace FFXIV_TexTools2.IO
 
                         if (firstText >= 2)
                         {
+                            ItemData item = new ItemData();
+
                             br.ReadBytes(8);
 
                             uint modelIndex = BitConverter.ToUInt16(br.ReadBytes(2).Reverse().ToArray(), 0);
@@ -72,11 +74,8 @@ namespace FFXIV_TexTools2.IO
                             br.ReadBytes(30);
 
                             byte[] minionNameBytes = br.ReadBytes(firstText - 1);
-                            string minionName = Encoding.UTF8.GetString(minionNameBytes);
-                            minionName = minionName.Replace("\0", "");
-
-                            br1.ReadBytes(8);
-                            int offsetTableSize1 = BitConverter.ToInt32(br1.ReadBytes(4).Reverse().ToArray(), 0);
+                            item.ItemName = Helper.ToTitleCase((Encoding.UTF8.GetString(minionNameBytes)).Replace("\0", ""));
+                            item.ItemCategory = Strings.Minion_Category;
 
                             for (int j = 0; j < offsetTableSize1; j += 8)
                             {
@@ -92,29 +91,17 @@ namespace FFXIV_TexTools2.IO
 
                                     br1.ReadBytes(6);
 
-                                    int model = BitConverter.ToInt16(br1.ReadBytes(2).Reverse().ToArray(), 0);
+                                    item.PrimaryModelID = (BitConverter.ToInt16(br1.ReadBytes(2).Reverse().ToArray(), 0)).ToString().PadLeft(4, '0');
                                     br1.ReadBytes(3);
-                                    int body = br1.ReadByte();
-                                    int variant = br1.ReadByte();
+                                    item.PrimaryModelBody = (br1.ReadByte()).ToString().PadLeft(4, '0');
+                                    item.PrimaryModelVariant = (br1.ReadByte()).ToString();
 
-                                    string minionMtrlFolder = string.Format(Strings.MonsterMtrlFolder, model.ToString().PadLeft(4, '0'), body.ToString().PadLeft(4, '0'));
+                                    item.PrimaryMTRLFolder = string.Format(Strings.MonsterMtrlFolder, item.PrimaryModelID, item.PrimaryModelBody);
 
-                                    Items item = new Items(Helper.ToTitleCase(minionName), model.ToString(), "", "24", variant.ToString(), "", body.ToString().PadLeft(4, '0'), "", false, minionMtrlFolder, "");
-
-                                    if(model != 0)
+                                    if(!item.PrimaryModelID.Equals("0000"))
                                     {
-                                        try
-                                        {
-                                            minionsDict.Add(Helper.ToTitleCase(minionName), item);
-                                        }
-                                        catch
-                                        {
-                                            minionsDict.Add(Helper.ToTitleCase(minionName) + "_" + duplicateCount, item);
-                                            duplicateCount++;
-                                        }
+                                        minionsDict.Add(item);
                                     }
-
-
                                     break;
                                 }
                             }
@@ -122,22 +109,21 @@ namespace FFXIV_TexTools2.IO
                     }
                 }
             }
-
             return minionsDict;
         }
 
         /// <summary>
-        /// Makes the list of mounts
+        /// Creates a list of Mounts contained in mount_(num)_(language).exd 
         /// </summary>
-        /// <param name="offset">Offset where the mounts are located</param>
-        public static Dictionary<string, Items> MakeMountsList()
+        /// <returns>List<Items> Items:Item data associated with Mount</returns>
+        public static SortedSet<ItemData> MakeMountsList()
         {
             string mountFile = String.Format(Strings.MountFile, Strings.Language);
 
-            byte[] mountBytes = Helper.GetDecompressedBytes(Helper.GetAOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(mountFile)));
-            byte[] modelchara = Helper.GetDecompressedBytes(Helper.GetAOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(Strings.ModelCharaFile)));
+            byte[] mountBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(mountFile)));
+            byte[] modelchara = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(Strings.ModelCharaFile)));
 
-            Dictionary<string, Items> mountsDict = new Dictionary<string, Items>();
+            SortedSet<ItemData> mountsDict = new SortedSet<ItemData>();
 
             using (BinaryReader br = new BinaryReader(new MemoryStream(mountBytes)))
             {
@@ -146,6 +132,9 @@ namespace FFXIV_TexTools2.IO
                     br.ReadBytes(8);
                     int offsetTableSize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
 
+                    br1.ReadBytes(8);
+                    int offsetTableSize1 = BitConverter.ToInt32(br1.ReadBytes(4).Reverse().ToArray(), 0);
+
                     for (int i = 0; i < offsetTableSize; i += 8)
                     {
                         br.BaseStream.Seek(i + 32, SeekOrigin.Begin);
@@ -160,18 +149,16 @@ namespace FFXIV_TexTools2.IO
 
                         if (firstText >= 2)
                         {
+                            ItemData item = new ItemData();
+
                             br.ReadBytes(70);
 
                             uint modelIndex = BitConverter.ToUInt16(br.ReadBytes(2).Reverse().ToArray(), 0);
 
                             br.ReadBytes(40);
 
-                            byte[] mountNameBytes = br.ReadBytes(firstText - 1);
-                            string mountName = Encoding.UTF8.GetString(mountNameBytes);
-                            mountName = mountName.Replace("\0", "");
-
-                            br1.ReadBytes(8);
-                            int offsetTableSize1 = BitConverter.ToInt32(br1.ReadBytes(4).Reverse().ToArray(), 0);
+                            item.ItemName = Helper.ToTitleCase(Encoding.UTF8.GetString(br.ReadBytes(firstText - 1)).Replace("\0", ""));
+                            item.ItemCategory = Strings.Mount_Category;
 
                             for (int j = 0; j < offsetTableSize1; j += 8)
                             {
@@ -186,29 +173,21 @@ namespace FFXIV_TexTools2.IO
 
                                     br1.ReadBytes(6);
 
-                                    int model = BitConverter.ToInt16(br1.ReadBytes(2).Reverse().ToArray(), 0);
+                                    item.PrimaryModelID = BitConverter.ToInt16(br1.ReadBytes(2).Reverse().ToArray(), 0).ToString().PadLeft(4, '0');
                                     br1.ReadBytes(3);
-                                    int body = br1.ReadByte();
-                                    int variant = br1.ReadByte();
+                                    item.PrimaryModelBody = br1.ReadByte().ToString().PadLeft(4, '0');
+                                    item.PrimaryModelVariant = br1.ReadByte().ToString();
 
-                                    string mountMtrlFolder;
-
-                                    if (model == 1 || model == 2 || model == 1011 || model == 1022)
+                                    if (item.PrimaryModelID.Equals("0001") || item.PrimaryModelID.Equals("0002") || item.PrimaryModelID.Equals("1011") || item.PrimaryModelID.Equals("1022"))
                                     {
-                                        mountMtrlFolder = String.Format(Strings.DemiMtrlFolder, model.ToString().PadLeft(4, '0'), body.ToString().PadLeft(4, '0'));
+                                        item.PrimaryMTRLFolder = String.Format(Strings.DemiMtrlFolder, item.PrimaryModelID, item.PrimaryModelBody);
                                     }
                                     else
                                     {
-                                        mountMtrlFolder = String.Format(Strings.MonsterMtrlFolder, model.ToString().PadLeft(4, '0'), body.ToString().PadLeft(4, '0'));
-
+                                        item.PrimaryMTRLFolder = String.Format(Strings.MonsterMtrlFolder, item.PrimaryModelID, item.PrimaryModelBody);
                                     }
 
-                                    Items item = new Items(Helper.ToTitleCase(mountName), model.ToString(), "", "23", variant.ToString(), "", body.ToString().PadLeft(4, '0'), "", false, mountMtrlFolder, "");
-
-                                    if (!mountsDict.ContainsKey(Helper.ToTitleCase(mountName)))
-                                    {
-                                        mountsDict.Add(Helper.ToTitleCase(mountName), item);
-                                    }
+                                    mountsDict.Add(item);
 
                                     break;
                                 }
@@ -217,34 +196,57 @@ namespace FFXIV_TexTools2.IO
                     }
                 }
             }
-
             return mountsDict;
         }
 
         /// <summary>
-        /// Makes the list of items
+        /// Creates a list of Items contained in item_(num)_(language).exd 
         /// </summary>
-        /// <param name="offset">Offset of items list</param>
-        public static Dictionary<string, Items> MakeItemsList()
+        /// <returns>Dictionary<string, Items> String:Item Name  Items:Item data associated with Item</returns>
+        public static List<ItemData> MakeItemsList()
         {
-            List<byte> byteList = new List<byte>();
-            Dictionary<string, Items> itemsDict = new Dictionary<string, Items>();
+            List<ItemData> itemsDict = new List<ItemData>();
             List<int> itemOffsetList = new List<int>();
 
-            //the smallclothes are not on the item list, so they are added manualy
+            var smallClothesMTRL = "chara/equipment/e0000/material/v";
 
-            itemsDict.Add("SmallClothes Body", new Items("SmallClothes Body", "0000", "0000", "4", "1", "1", "", "", false, "chara/equipment/e0000/material/v", ""));
+            //smallclothes are not in the item list, so they are added manualy
+            ItemData item = new ItemData()
+            {
+                ItemName = "SmallClothes Body",
+                ItemCategory = "4",
+                PrimaryModelID = "0000",
+                PrimaryModelVariant = "1",
+                PrimaryMTRLFolder = smallClothesMTRL
+            };
+            itemsDict.Add(item);
 
-            itemsDict.Add("SmallClothes Legs", new Items("SmallClothes Legs", "0000", "0000", "7", "1", "1", "", "", false, "chara/equipment/e0000/material/v", ""));
+            item = new ItemData()
+            {
+                ItemName = "SmallClothes Legs",
+                ItemCategory = "7",
+                PrimaryModelID = "0000",
+                PrimaryModelVariant = "1",
+                PrimaryMTRLFolder = smallClothesMTRL
+            };
+            itemsDict.Add(item);
 
-            itemsDict.Add("SmallClothes Feet", new Items("SmallClothes Feet", "0000", "0000", "8", "1", "1", "", "", false, "chara/equipment/e0000/material/v", ""));
+            item = new ItemData()
+            {
+                ItemName = "SmallClothes Feet",
+                ItemCategory = "8",
+                PrimaryModelID = "0000",
+                PrimaryModelVariant = "1",
+                PrimaryMTRLFolder = smallClothesMTRL
+            };
+            itemsDict.Add(item);
 
+            //searches item files which increase in increments of 500 in 0a0000 index until one does not exist
             for (int i = 0; ; i += 500)
             {
                 string itemExd = String.Format(Strings.itemFile, i, Strings.Language);
 
-
-                int offset = Helper.GetAOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(itemExd));
+                int offset = Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(itemExd));
 
                 if(offset != 0)
                 {
@@ -254,12 +256,11 @@ namespace FFXIV_TexTools2.IO
                 {
                     break;
                 }
-
             }
 
             foreach(int offset in itemOffsetList)
             {
-                using (BinaryReader br = new BinaryReader(new MemoryStream(Helper.GetDecompressedBytes(offset))))
+                using (BinaryReader br = new BinaryReader(new MemoryStream(Helper.GetDecompressedEXDData(offset))))
                 {
                     br.ReadBytes(8);
                     int offsetTableSize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
@@ -276,103 +277,88 @@ namespace FFXIV_TexTools2.IO
                         int lastText = BitConverter.ToInt16(br.ReadBytes(2).Reverse().ToArray(), 0);
                         br.ReadBytes(3);
 
-                        string imcVersion = "0", imcVersion1 = "0", weaponBody = "0", weaponBody1 = "0", itemID = "0", itemID1 = "0";
                         if (lastText > 10)
                         {
+                            item = new ItemData();
+
                             bool hasSecondary = false;
                             br.ReadBytes(7);
                             byte[] textureDetails = br.ReadBytes(4).ToArray();
                             int itemCheck = textureDetails[3];
-                            //if item has textureDetails
+
                             if (itemCheck != 0)
                             {
                                 int weaponCheck = textureDetails[1];
                                 if (weaponCheck == 0)
                                 {
-                                    //not a weapon
-                                    imcVersion = textureDetails[3].ToString().PadLeft(2, '0');
+                                    item.PrimaryModelVariant = textureDetails[3].ToString().PadLeft(2, '0');
                                 }
                                 else
                                 {
-                                    //is a weapon
-                                    imcVersion = weaponCheck.ToString().PadLeft(2, '0');
-                                    weaponBody = textureDetails[3].ToString().PadLeft(4, '0');
+                                    item.PrimaryModelVariant = weaponCheck.ToString().PadLeft(2, '0');
+                                    item.PrimaryModelBody = textureDetails[3].ToString().PadLeft(4, '0');
                                 }
 
-                                itemID = BitConverter.ToInt16(br.ReadBytes(2).Reverse().ToArray(), 0).ToString().PadLeft(4, '0');
+                                item.PrimaryModelID = BitConverter.ToInt16(br.ReadBytes(2).Reverse().ToArray(), 0).ToString().PadLeft(4, '0');
                                 br.ReadBytes(2);
 
                                 textureDetails = br.ReadBytes(4).ToArray();
                                 int secondaryCheck = textureDetails[3];
                                 if (secondaryCheck != 0)
                                 {
-                                    //Secondary textureDetails
                                     hasSecondary = true;
                                     weaponCheck = textureDetails[1];
                                     if (weaponCheck == 0)
                                     {
-                                        //not a weapon
-                                        imcVersion1 = textureDetails[3].ToString().PadLeft(2, '0');
+                                        item.SecondaryModelVariant = textureDetails[3].ToString().PadLeft(2, '0');
                                     }
                                     else
                                     {
-                                        //is a weapon
-                                        imcVersion1 = weaponCheck.ToString().PadLeft(2, '0');
-                                        weaponBody1 = textureDetails[3].ToString().PadLeft(4, '0');
+                                        item.SecondaryModelVariant = weaponCheck.ToString().PadLeft(2, '0');
+                                        item.SecondaryModelBody = textureDetails[3].ToString().PadLeft(4, '0');
                                     }
 
-                                    itemID1 = BitConverter.ToInt16(br.ReadBytes(2).Reverse().ToArray(), 0).ToString().PadLeft(4, '0');
+                                    item.SecondaryModelID = BitConverter.ToInt16(br.ReadBytes(2).Reverse().ToArray(), 0).ToString().PadLeft(4, '0');
                                     br.ReadBytes(2);
                                 }
 
                                 if (!hasSecondary)
                                 {
-                                    //br.ReadBytes(118);
                                     br.ReadBytes(110);
                                 }
                                 else
                                 {
-                                    //br.ReadBytes(114);
                                     br.ReadBytes(106);
                                 }
 
-
                                 byte[] slotBytes = br.ReadBytes(4).ToArray();
-                                string equipSlot = slotBytes[0].ToString();
+                                item.ItemCategory = slotBytes[0].ToString();
 
                                 br.ReadBytes(lastText);
 
-                                byte[] itemNameBytes = br.ReadBytes(entrySize - (lastText + 152));
-                                string itemName = Encoding.UTF8.GetString(itemNameBytes);
-                                itemName = itemName.Replace("\0", "");
-
-                                string itemMtrlFolder;
-                                string sItemMtrlFolder = "";
+                                item.ItemName = Encoding.UTF8.GetString(br.ReadBytes(entrySize - (lastText + 152))).Replace("\0", "");
 
 
-                                if (equipSlot.Equals("0") || equipSlot.Equals("1") || equipSlot.Equals("2") || equipSlot.Equals("13") || equipSlot.Equals("14"))
+                                if (item.ItemCategory.Equals("0") || item.ItemCategory.Equals("1") || item.ItemCategory.Equals("2") || item.ItemCategory.Equals("13") || item.ItemCategory.Equals("14"))
                                 {
-                                    itemMtrlFolder = String.Format(Strings.WeapMtrlFolder, itemID, weaponBody);
+                                    item.PrimaryMTRLFolder = String.Format(Strings.WeapMtrlFolder, item.PrimaryModelID, item.PrimaryModelBody);
                                     if (hasSecondary)
                                     {
-                                        sItemMtrlFolder = String.Format(Strings.WeapMtrlFolder, itemID1, weaponBody1);
+                                        item.SecondaryMTRLFolder = String.Format(Strings.WeapMtrlFolder, item.SecondaryModelID, item.SecondaryModelBody);
                                     }
                                 }
-                                else if (equipSlot.Equals("9") || equipSlot.Equals("10") || equipSlot.Equals("11") || equipSlot.Equals("12"))
+                                else if (item.ItemCategory.Equals("9") || item.ItemCategory.Equals("10") || item.ItemCategory.Equals("11") || item.ItemCategory.Equals("12"))
                                 {
-                                    itemMtrlFolder = String.Format(Strings.AccMtrlFolder, itemID);
+                                    item.PrimaryMTRLFolder = String.Format(Strings.AccMtrlFolder, item.PrimaryModelID);
                                 }
                                 else
                                 {
-                                    itemMtrlFolder = String.Format(Strings.EquipMtrlFolder, itemID);
+                                    item.PrimaryMTRLFolder = String.Format(Strings.EquipMtrlFolder, item.PrimaryModelID);
                                 }
-
-
-                                Items items = new Items(itemName, itemID, itemID1, equipSlot, imcVersion, imcVersion1, weaponBody, weaponBody1, hasSecondary, itemMtrlFolder, sItemMtrlFolder);
 
                                 try
                                 {
-                                    itemsDict.Add(itemName, items);
+                                    itemsDict.Add(item);
                                 }
                                 catch (Exception e)
                                 {

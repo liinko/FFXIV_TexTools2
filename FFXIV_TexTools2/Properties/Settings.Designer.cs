@@ -73,13 +73,25 @@ namespace FFXIV_TexTools2.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool Mod_List {
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int Mod_List {
             get {
-                return ((bool)(this["Mod_List"]));
+                return ((int)(this["Mod_List"]));
             }
             set {
                 this["Mod_List"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string FFXIV_Ver {
+            get {
+                return ((string)(this["FFXIV_Ver"]));
+            }
+            set {
+                this["FFXIV_Ver"] = value;
             }
         }
     }

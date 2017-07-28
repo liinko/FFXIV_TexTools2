@@ -67,7 +67,7 @@ namespace FFXIV_TexTools2.ViewModel
             ModListModel mlm = new ModListModel();
             string race, map, part, type;
 
-            if (entry.fullPath.Contains("weapon") || entry.fullPath.Contains("accessory") || entry.fullPath.Contains("decal"))
+            if (entry.fullPath.Contains("weapon") || entry.fullPath.Contains("accessory") || entry.fullPath.Contains("decal") || entry.fullPath.Contains("vfx"))
             {
                 race = Strings.All;
             }
@@ -185,7 +185,7 @@ namespace FFXIV_TexTools2.ViewModel
 
             if (entry.fullPath.Contains("material"))
             {
-                var info = MTRL.GetTEXFromMTRL(entry.modOffset, false);
+                var info = MTRL.GetMTRLInfo(entry.modOffset, false);
 
                 var bitmap = TEX.TextureToBitmap(info.ColorData, 9312, 4, 16);
 
@@ -193,13 +193,21 @@ namespace FFXIV_TexTools2.ViewModel
             }
             else
             {
+                TEXData texData;
 
-                var info = TEX.GetTex(entry.modOffset);
+                if (entry.fullPath.Contains("vfx"))
+                {
+                    texData = TEX.GetVFX(entry.modOffset);
+                }
+                else
+                {
+                    texData = TEX.GetTex(entry.modOffset);
+                }
 
-                mlm.BMP = Imaging.CreateBitmapSourceFromHBitmap(info.BMP.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                mlm.BMP = Imaging.CreateBitmapSourceFromHBitmap(texData.BMP.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
             }
 
-            var offset = Helper.GetOffset(FFCRC.GetHash(entry.fullPath.Substring(0, entry.fullPath.LastIndexOf("/"))), FFCRC.GetHash(Path.GetFileName(entry.fullPath)));
+            var offset = Helper.GetItemOffset(FFCRC.GetHash(entry.fullPath.Substring(0, entry.fullPath.LastIndexOf("/"))), FFCRC.GetHash(Path.GetFileName(entry.fullPath)));
 
             if(offset == entry.modOffset)
             {

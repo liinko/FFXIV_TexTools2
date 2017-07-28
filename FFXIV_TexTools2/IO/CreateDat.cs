@@ -14,16 +14,19 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using System.IO;
-using System.Security.Cryptography;
 using FFXIV_TexTools2.Helpers;
 using System;
+using System.IO;
+using System.Security.Cryptography;
 using System.Windows;
 
 namespace FFXIV_TexTools2
 {
     public static class CreateDat
     {
+        /// <summary>
+        /// Creates a .Dat file in which to store modified data
+        /// </summary>
         public static void MakeDat()
         {
             try
@@ -43,8 +46,13 @@ namespace FFXIV_TexTools2
             {
                 MessageBox.Show("[Create] Error Creating .Dat4 File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
 
-
+        /// <summary>
+        /// Changes the amount of dat files the game is to read upon loading 
+        /// </summary>
+        public static void ChangeDatAmounts()
+        {
             try
             {
                 using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(Info.indexDir)))
@@ -53,7 +61,7 @@ namespace FFXIV_TexTools2
                     bw.Write((byte)5);
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 MessageBox.Show("[Create] Error Accessing Index File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
@@ -71,9 +79,12 @@ namespace FFXIV_TexTools2
             {
                 MessageBox.Show("[Create] Error Accessing Index 2 File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-
         }
 
+        /// <summary>
+        /// Writes the SqPack header into the dat file
+        /// </summary>
+        /// <param name="bw"></param>
         public static void WriteSqPackHeader(BinaryWriter bw){
             byte[] header = new byte[1024];
 
@@ -99,6 +110,10 @@ namespace FFXIV_TexTools2
             }
         }
 
+        /// <summary>
+        /// Writes the default dat header into the dat file
+        /// </summary>
+        /// <param name="bw"></param>
         public static void WriteDatHeader(BinaryWriter bw)
         {
             byte[] header = new byte[1024];
@@ -126,11 +141,14 @@ namespace FFXIV_TexTools2
             }
         }
 
+        /// <summary>
+        /// Creates the ModList which stores data on which items have been modded
+        /// </summary>
         public static void CreateModList()
         {
             try
             {
-            File.Create(Info.modListDir);
+                File.Create(Info.modListDir);
             }
             catch (Exception e)
             {

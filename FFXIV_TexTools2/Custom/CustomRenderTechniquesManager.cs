@@ -14,19 +14,19 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using FFXIV_TexTools2.Model;
-using HelixToolkit.Wpf.SharpDX.Core;
+using HelixToolkit.Wpf.SharpDX;
+using System.Collections.Generic;
 
-namespace FFXIV_TexTools2.Material
+namespace FFXIV_TexTools2.Shader
 {
-    public class Mesh
+    public class CustomRenderTechniquesManager : DefaultRenderTechniquesManager
     {
-        public ModelData ModelData { get; set; }
-        public Vector3Collection VertexList { get; set; }
-        public Vector2Collection CoordList { get; set; }
-        public Vector3Collection NormalList { get; set; }
-        public Vector3Collection TangentList { get; set; }
-        public IntCollection IndList { get; set; }
-        public string[] Obj { get; set; }
+        private Dictionary<string, RenderTechnique> renderTechniques = new Dictionary<string, RenderTechnique>();
+
+        protected override void InitTechniques()
+        {
+            AddRenderTechnique(DefaultRenderTechniqueNames.Phong, Properties.Resources._custom);
+            AddRenderTechnique("RenderCustom", Properties.Resources._custom);
+        }
     }
 }

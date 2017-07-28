@@ -20,19 +20,24 @@ namespace FFXIV_TexTools2.ViewModel
 {
     public class ItemViewModel : TreeViewItemViewModel
     {
-        readonly Items _items;
+        readonly ItemData _items;
 
-        public ItemViewModel(Items item, CategoryViewModel parentCategory) : base(parentCategory, true)
+        /// <summary>
+        /// View model that holds the items name and data, and sets the items parent within the treeview
+        /// </summary>
+        /// <param name="item">The current item</param>
+        /// <param name="parentCategory">The category to be set as the parent of the current item</param>
+        public ItemViewModel(ItemData item, CategoryViewModel parentCategory) : base(parentCategory, true)
         {
             _items = item;
         }
 
         public string ItemName
         { 
-            get { return _items.itemName; }
+            get { return _items.ItemName; }
         }
 
-        public Items Item
+        public ItemData Item
         {
             get { return _items; }
         }

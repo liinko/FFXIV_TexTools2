@@ -15,24 +15,19 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using FFXIV_TexTools2.Model;
 
-namespace FFXIV_TexTools2.ViewModel
+namespace FFXIV_TexTools2.Material.ModelMaterial
 {
-    public class ComboView
+    public class BoundingBox
     {
+        /// <summary>
+        /// Bounding Box point A
+        /// </summary>
+        public List<float> PointA = new List<float>();
 
-        readonly ReadOnlyCollection<ComboBoxInfo> _comboInfo;
-
-        public ComboView(List<ComboBoxInfo> comboArray)
-        {
-            _comboInfo = new ReadOnlyCollection<ComboBoxInfo>(comboArray);
-        }
-
-        public ReadOnlyCollection<ComboBoxInfo> GetComboInfo
-        {
-            get { return _comboInfo; }
-        }
+        /// <summary>
+        /// Bounding Box point B
+        /// </summary>
+        public List<float> PointB = new List<float>();
     }
 }

@@ -18,32 +18,39 @@ using FFXIV_TexTools2.Helpers;
 using FFXIV_TexTools2.Model;
 using FFXIV_TexTools2.Resources;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace FFXIV_TexTools2.ViewModel
 {
     public class CategoryViewModel : TreeViewItemViewModel
     {
-        readonly Category _category;
-        List<Items> _itemList;
+        readonly string _category;
+        ObservableCollection<ItemData> _itemList;
 
-        public CategoryViewModel(Category category, List<Items> itemList) : base(null, false)
+        /// <summary>
+        /// View model that attaches the items to their respective category 
+        /// </summary>
+        /// <param name="category">The current category to have items assigned to</param>
+        /// <param name="itemList">The list of items obtained from the exd file</param>
+        public CategoryViewModel(string category, ObservableCollection<ItemData> itemList) : base(null, false)
         {
             _category = category;
-
             _itemList = itemList;
 
-            IEnumerable<Items> items;
+            IEnumerable<ItemData> filteredItems;
+
+            //for aesthetic purposes the items in the character and pets category are not sorted by name
             if (!CategoryName.Equals(Strings.Character) && !CategoryName.Equals(Strings.Pets))
             {
-                items = from item in _itemList where item.itemSlot.Equals(Info.IDSlot[CategoryName]) orderby item.itemName select item;
+                filteredItems = from item in _itemList where item.ItemCategory.Equals(Info.IDSlot[CategoryName]) orderby item.ItemName select item;
             }
             else
             {
-                items = from item in _itemList where item.itemSlot.Equals(Info.IDSlot[CategoryName]) select item;
+                filteredItems = from item in _itemList where item.ItemCategory.Equals(Info.IDSlot[CategoryName]) select item;
             }
 
-            foreach (Items item in items)
+            foreach (ItemData item in filteredItems)
             {
                 Children.Add(new ItemViewModel(item, this));
             }
@@ -51,26 +58,7 @@ namespace FFXIV_TexTools2.ViewModel
 
         public string CategoryName
         {
-            get { return _category.CategoryName; }
-        }
-
-        protected override void LoadChildren()
-        {
-            IEnumerable<Items> items;
-
-            if(!CategoryName.Equals(Strings.Character) && !CategoryName.Equals(Strings.Pets))
-            {
-                items = from item in _itemList where item.itemSlot.Equals(Info.IDSlot[CategoryName]) orderby item.itemName select item;
-            }
-            else
-            {
-                items = from item in _itemList where item.itemSlot.Equals(Info.IDSlot[CategoryName]) select item;
-            }
-
-            foreach (Items item in items)
-            {
-                Children.Add(new ItemViewModel(item, this));
-            }
+            get { return _category; }
         }
     }
 }

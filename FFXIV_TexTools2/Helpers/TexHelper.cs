@@ -14,13 +14,16 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using FFXIV_TexTools2.Material;
+using FFXIV_TexTools2.Model;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
+using System.Windows;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
@@ -28,34 +31,83 @@ namespace FFXIV_TexTools2.Helpers
 {
     public static class TexHelper
     {
-
-        public static BitmapSource MakeDiffuseMap(Bitmap normalMap, BitmapSource colorMap, TexInfo maskInfo)
+        /// <summary>
+        /// Creates the bitmap data for the model
+        /// </summary>
+        /// <remarks>
+        /// Because the original textures use channel packing, this method gets the pixel data of each texture
+        /// and then recombines them to create the unpacked textures to use in the 3D model.
+        /// <see cref="http://wiki.polycount.com/wiki/ChannelPacking"/>
+        /// </remarks>
+        /// <param name="normalTexData">The texture data of the normal map</param>
+        /// <param name="diffuseTexData">The texture data of the diffuse map</param>
+        /// <param name="maskTexData">The texture data of the mask map</param>
+        /// <param name="specularTexData">The texture data of the specular map</param>
+        /// <param name="colorMap">The bitmap of the color map</param>
+        /// <returns>An array of bitmaps to be used on the model</returns>
+        public static BitmapSource[] MakeModelTextureMaps(TEXData normalTexData, TEXData diffuseTexData, TEXData maskTexData, TEXData specularTexData, BitmapSource colorMap)
         {
+            int height = normalTexData.Height;
+            int width = normalTexData.Width;
+            int tSize = height * width;
+            Bitmap normalBitmap = null;
 
-            byte[] mPixels = null;
-            byte[] nPixels = null;
+            if (diffuseTexData != null && (diffuseTexData.Height * diffuseTexData.Width) > tSize)
+            {
+                height = diffuseTexData.Height;
+                width = diffuseTexData.Width;
+                tSize = height * width;
+            }
+
+            if (maskTexData != null && (maskTexData.Height * maskTexData.Width) > tSize)
+            {
+                height = maskTexData.Height;
+                width = maskTexData.Width;
+                tSize = height * width;
+            }
+
+            if (specularTexData != null && (specularTexData.Height * specularTexData.Width) > tSize)
+            {
+                height = specularTexData.Height;
+                width = specularTexData.Width;
+                tSize = height * width;
+            }
+
+            byte[] maskPixels = null;
+            byte[] specularPixels = null;
+            byte[] normalPixels = null;
+            byte[] diffusePixels = null;
+
             List<System.Drawing.Color> colorList = new List<System.Drawing.Color>();
+            List<System.Drawing.Color> specularList = new List<System.Drawing.Color>();
+
+            BitmapSource[] texBitmaps = new BitmapSource[4];
 
             if (colorMap != null)
             {
-                int cstride = (int)colorMap.PixelWidth * (colorMap.Format.BitsPerPixel / 8);
-                byte[] cpixels = new byte[colorMap.PixelHeight * cstride];
+                int colorSetStride = colorMap.PixelWidth * (colorMap.Format.BitsPerPixel / 8);
+                byte[] colorPixels = new byte[colorMap.PixelHeight * colorSetStride];
 
-                colorMap.CopyPixels(cpixels, cstride, 0);
+                colorMap.CopyPixels(colorPixels, colorSetStride, 0);
 
-                SortedSet<byte> cb = new SortedSet<byte>();
-
-                for (int i = 0; i < cpixels.Length; i += 16)
+                for (int i = 0; i < colorPixels.Length; i += 16)
                 {
-                    int red = cpixels[i + 2];
-                    int green = cpixels[i + 1];
-                    int blue = cpixels[i];
-                    int alpha = cpixels[i + 3];
+                    int red = colorPixels[i + 2];
+                    int green = colorPixels[i + 1];
+                    int blue = colorPixels[i];
+                    int alpha = colorPixels[i + 3];
 
                     colorList.Add(System.Drawing.Color.FromArgb(255, red, green, blue));
+
+                    red = colorPixels[i + 6];
+                    green = colorPixels[i + 5];
+                    blue = colorPixels[i + 4];
+                    alpha = colorPixels[i + 7];
+
+                    specularList.Add(System.Drawing.Color.FromArgb(255, red, green, blue));
                 }
             }
-            else if(colorMap == null)
+            else if (colorMap == null)
             {
                 for (int i = 0; i < 1024; i += 16)
                 {
@@ -64,170 +116,429 @@ namespace FFXIV_TexTools2.Helpers
             }
 
 
-            if(maskInfo != null)
+            if (maskTexData != null)
             {
-                var maskMap = maskInfo.BMP;
-                var nMaskMap = ResizeImage(Image.FromHbitmap(maskMap.GetHbitmap()), maskMap.Width * 2, maskMap.Height * 2);
-
-                var maskData = nMaskMap.LockBits(new Rectangle(0, 0, nMaskMap.Width, nMaskMap.Height), ImageLockMode.ReadOnly, nMaskMap.PixelFormat);
-                var mLength = maskData.Stride * maskData.Height;
-                mPixels = new byte[mLength];
-                Marshal.Copy(maskData.Scan0, mPixels, 0, mLength);
-                nMaskMap.UnlockBits(maskData);
+                if (tSize > (maskTexData.Height * maskTexData.Width))
+                {
+                    var maskBitmap = ResizeImage(Image.FromHbitmap(maskTexData.BMP.GetHbitmap()), width, height);
+                    var maskData = maskBitmap.LockBits(new System.Drawing.Rectangle(0, 0, maskBitmap.Width, maskBitmap.Height), ImageLockMode.ReadOnly, maskBitmap.PixelFormat);
+                    var bitmapLength = maskData.Stride * maskData.Height;
+                    maskPixels = new byte[bitmapLength];
+                    Marshal.Copy(maskData.Scan0, maskPixels, 0, bitmapLength);
+                    maskBitmap.UnlockBits(maskData);
+                }
+                else
+                {
+                    var maskData = maskTexData.BMP.LockBits(new System.Drawing.Rectangle(0, 0, maskTexData.Width, maskTexData.Height), ImageLockMode.ReadOnly, maskTexData.BMP.PixelFormat);
+                    var bitmapLength = maskData.Stride * maskData.Height;
+                    maskPixels = new byte[bitmapLength];
+                    Marshal.Copy(maskData.Scan0, maskPixels, 0, bitmapLength);
+                    maskTexData.BMP.UnlockBits(maskData);
+                }
             }
 
-            if(normalMap != null)
+            if (diffuseTexData != null)
             {
-                var normalData = normalMap.LockBits(new Rectangle(0, 0, normalMap.Width, normalMap.Height), ImageLockMode.ReadOnly, normalMap.PixelFormat);
-                var length = normalData.Stride * normalData.Height;
-                nPixels = new byte[length];
-                Marshal.Copy(normalData.Scan0, nPixels, 0, length);
-                normalMap.UnlockBits(normalData);
+                if (tSize > (diffuseTexData.Height * diffuseTexData.Width))
+                {
+                    var diffuseBitmap = ResizeImage(Image.FromHbitmap(diffuseTexData.BMP.GetHbitmap()), width, height);
+                    var diffData = diffuseBitmap.LockBits(new System.Drawing.Rectangle(0, 0, diffuseBitmap.Width, diffuseBitmap.Height), ImageLockMode.ReadOnly, diffuseBitmap.PixelFormat);
+                    var bitmapLength = diffData.Stride * diffData.Height;
+                    diffusePixels = new byte[bitmapLength];
+                    Marshal.Copy(diffData.Scan0, diffusePixels, 0, bitmapLength);
+                    diffuseBitmap.UnlockBits(diffData);
+                }
+                else
+                {
+                    var diffData = diffuseTexData.BMP.LockBits(new System.Drawing.Rectangle(0, 0, diffuseTexData.Width, diffuseTexData.Height), ImageLockMode.ReadOnly, diffuseTexData.BMP.PixelFormat);
+                    var bitmapLength = diffData.Stride * diffData.Height;
+                    diffusePixels = new byte[bitmapLength];
+                    Marshal.Copy(diffData.Scan0, diffusePixels, 0, bitmapLength);
+                    diffuseTexData.BMP.UnlockBits(diffData);
+                }
+
             }
 
+            if (specularTexData != null)
+            {
+                if (tSize > (specularTexData.Height * specularTexData.Width))
+                {
+                    var specularBitmap = ResizeImage(Image.FromHbitmap(specularTexData.BMP.GetHbitmap()), width, height);
+                    var specData = specularBitmap.LockBits(new System.Drawing.Rectangle(0, 0, specularBitmap.Width, specularBitmap.Height), ImageLockMode.ReadOnly, specularBitmap.PixelFormat);
+                    var bitmapLength = specData.Stride * specData.Height;
+                    specularPixels = new byte[bitmapLength];
+                    Marshal.Copy(specData.Scan0, specularPixels, 0, bitmapLength);
+                    specularBitmap.UnlockBits(specData);
+                }
+                else
+                {
+                    var specData = specularTexData.BMP.LockBits(new System.Drawing.Rectangle(0, 0, specularTexData.BMP.Width, specularTexData.BMP.Height), ImageLockMode.ReadOnly, specularTexData.BMP.PixelFormat);
+                    var bitmapLength = specData.Stride * specData.Height;
+                    specularPixels = new byte[bitmapLength];
+                    Marshal.Copy(specData.Scan0, specularPixels, 0, bitmapLength);
+                    specularTexData.BMP.UnlockBits(specData);
+                }
+            }
+
+            if (normalTexData != null)
+            {
+                if (tSize > (normalTexData.Height * normalTexData.Height))
+                {
+                    var normBitmap = ResizeImage(Image.FromHbitmap(normalTexData.BMP.GetHbitmap()), width, height);
+                    var normalData = normBitmap.LockBits(new System.Drawing.Rectangle(0, 0, normBitmap.Width, normBitmap.Height), ImageLockMode.ReadOnly, normBitmap.PixelFormat);
+                    var bitmapLength = normalData.Stride * normalData.Height;
+                    normalPixels = new byte[bitmapLength];
+                    Marshal.Copy(normalData.Scan0, normalPixels, 0, bitmapLength);
+                    normBitmap.UnlockBits(normalData);
+                    normalBitmap = normBitmap;
+                }
+                else
+                {
+                    var normalData = normalTexData.BMP.LockBits(new System.Drawing.Rectangle(0, 0, normalTexData.Width, normalTexData.Height), ImageLockMode.ReadOnly, normalTexData.BMP.PixelFormat);
+                    var bitmapLength = normalData.Stride * normalData.Height;
+                    normalPixels = new byte[bitmapLength];
+                    Marshal.Copy(normalData.Scan0, normalPixels, 0, bitmapLength);
+                    normalTexData.BMP.UnlockBits(normalData);
+                    normalBitmap = normalTexData.BMP;
+                }
+            }
 
             List<byte> diffuseMap = new List<byte>();
-
-            SortedSet<byte> b = new SortedSet<byte>();
+            List<byte> specularMap = new List<byte>();
+            List<byte> alphaMap = new List<byte>();
 
             float R = 1;
             float G = 1;
             float B = 1;
+            float R1 = 1;
+            float G1 = 1;
+            float B1 = 1;
 
-            for (int i = 3; i < nPixels.Length; i += 4)
+            for (int i = 3; i < normalPixels.Length; i += 4)
             {
-                int alpha = nPixels[i - 3];
+                int alpha = normalPixels[i - 3];
 
-                if(maskInfo != null)
+                if (maskTexData != null)
                 {
-                    B = mPixels[i - 1] / 255f;
-                    R = mPixels[i - 1] / 255f;
-                    G = mPixels[i - 1] / 255f;
-                }
+                    B = maskPixels[i - 1];
+                    R = maskPixels[i - 1];
+                    G = maskPixels[i - 1];
 
-                System.Drawing.Color mColor;
-
-                if(nPixels[i] >= 0 && nPixels[i] <= 16)
-                    {
-                    mColor = System.Drawing.Color.FromArgb(alpha, (int)(colorList[0].R * R), (int)(colorList[0].G * G), (int)(colorList[0].B * B));
-                    diffuseMap.AddRange(BitConverter.GetBytes(mColor.ToArgb()));
-                }
-                else if (nPixels[i] > 16 && nPixels[i] <= 32)
-                {
-                    mColor = System.Drawing.Color.FromArgb(alpha, (int)(colorList[1].R * R), (int)(colorList[1].G * G), (int)(colorList[1].B * B));
-                    diffuseMap.AddRange(BitConverter.GetBytes(mColor.ToArgb()));
-                }
-                else if (nPixels[i] > 32 && nPixels[i] <= 48)
-                {
-                    mColor = System.Drawing.Color.FromArgb(alpha, (int)(colorList[2].R * R), (int)(colorList[2].G * G), (int)(colorList[2].B * B));
-                    diffuseMap.AddRange(BitConverter.GetBytes(mColor.ToArgb()));
-                }
-                else if (nPixels[i] > 48 && nPixels[i] <= 64)
-                {
-                    mColor = System.Drawing.Color.FromArgb(alpha, (int)(colorList[3].R * R), (int)(colorList[3].G * G), (int)(colorList[3].B * B));
-                    diffuseMap.AddRange(BitConverter.GetBytes(mColor.ToArgb()));
-                }
-                else if (nPixels[i] > 64 && nPixels[i] <= 80)
-                {
-                    mColor = System.Drawing.Color.FromArgb(alpha, (int)(colorList[4].R * R), (int)(colorList[4].G * G), (int)(colorList[4].B * B));
-                    diffuseMap.AddRange(BitConverter.GetBytes(mColor.ToArgb()));
-                }
-                else if (nPixels[i] > 80 && nPixels[i] <= 96)
-                {
-                    mColor = System.Drawing.Color.FromArgb(alpha, (int)(colorList[5].R * R), (int)(colorList[5].G * G), (int)(colorList[5].B * B));
-                    diffuseMap.AddRange(BitConverter.GetBytes(mColor.ToArgb()));
-                }
-                else if (nPixels[i] > 96 && nPixels[i] <= 112)
-                {
-                    mColor = System.Drawing.Color.FromArgb(alpha, (int)(colorList[6].R * R), (int)(colorList[6].G * G), (int)(colorList[6].B * B));
-                    diffuseMap.AddRange(BitConverter.GetBytes(mColor.ToArgb()));
-                }
-                else if (nPixels[i] > 112 && nPixels[i] <= 128)
-                {
-                    mColor = System.Drawing.Color.FromArgb(alpha, (int)(colorList[7].R * R), (int)(colorList[7].G * G), (int)(colorList[7].B * B));
-                    diffuseMap.AddRange(BitConverter.GetBytes(mColor.ToArgb()));
-                }
-                else if (nPixels[i] > 128 && nPixels[i] <= 144)
-                {
-                    mColor = System.Drawing.Color.FromArgb(alpha, (int)(colorList[8].R * R), (int)(colorList[8].G * G), (int)(colorList[8].B * B));
-                    diffuseMap.AddRange(BitConverter.GetBytes(mColor.ToArgb()));
-                }
-                else if (nPixels[i] > 144 && nPixels[i] <= 160)
-                {
-                    mColor = System.Drawing.Color.FromArgb(alpha, (int)(colorList[9].R * R), (int)(colorList[9].G * G), (int)(colorList[9].B * B));
-                    diffuseMap.AddRange(BitConverter.GetBytes(mColor.ToArgb()));
-                }
-                else if (nPixels[i] > 160 && nPixels[i] <= 176)
-                {
-                    mColor = System.Drawing.Color.FromArgb(alpha, (int)(colorList[10].R * R), (int)(colorList[10].G * G), (int)(colorList[10].B * B));
-                    diffuseMap.AddRange(BitConverter.GetBytes(mColor.ToArgb()));
-                }
-                else if (nPixels[i] > 176 && nPixels[i] <= 192)
-                {
-                    mColor = System.Drawing.Color.FromArgb(alpha, (int)(colorList[11].R * R), (int)(colorList[11].G * G), (int)(colorList[11].B * B));
-                    diffuseMap.AddRange(BitConverter.GetBytes(mColor.ToArgb()));
-                }
-                else if (nPixels[i] > 192 && nPixels[i] <= 208)
-                {
-                    mColor = System.Drawing.Color.FromArgb(alpha, (int)(colorList[12].R * R), (int)(colorList[12].G * G), (int)(colorList[12].B * B));
-                    diffuseMap.AddRange(BitConverter.GetBytes(mColor.ToArgb()));
-                }
-                else if (nPixels[i] > 208 && nPixels[i] <= 224)
-                {
-                    mColor = System.Drawing.Color.FromArgb(alpha, (int)(colorList[13].R * R), (int)(colorList[13].G * G), (int)(colorList[13].B * B));
-                    diffuseMap.AddRange(BitConverter.GetBytes(mColor.ToArgb()));
-                }
-                else if (nPixels[i] > 224 && nPixels[i] <= 240)
-                {
-                    mColor = System.Drawing.Color.FromArgb(alpha, (int)(colorList[14].R * R), (int)(colorList[14].G * G), (int)(colorList[14].B * B));
-                    diffuseMap.AddRange(BitConverter.GetBytes(mColor.ToArgb()));
-                }
-                else if (nPixels[i] > 240 && nPixels[i] <= 255)
-                {
-                    mColor = System.Drawing.Color.FromArgb(alpha, (int)(colorList[15].R * R), (int)(colorList[15].G * G), (int)(colorList[15].B * B));
-                    diffuseMap.AddRange(BitConverter.GetBytes(mColor.ToArgb()));
+                    B1 = maskPixels[i - 3];
+                    R1 = maskPixels[i - 3];
+                    G1 = maskPixels[i - 3];
                 }
                 else
                 {
-                    mColor = System.Drawing.Color.FromArgb(alpha, 0, 0, 0);
-                    diffuseMap.AddRange(BitConverter.GetBytes(mColor.ToArgb()));
+                    B = diffusePixels[i - 3];
+                    G = diffusePixels[i - 2];
+                    R = diffusePixels[i - 1];
+
+                    B1 = specularPixels[i - 2];
+                    G1 = specularPixels[i - 2];
+                    R1 = specularPixels[i - 2];
+                }
+
+                float pixel = (normalPixels[i] / 255f) * 15f;
+                int colorLoc = (int)Math.Floor(pixel + 0.5f);
+
+                System.Drawing.Color diffuseColor;
+                System.Drawing.Color specularColor;
+                System.Drawing.Color alphaColor;
+
+                diffuseColor = System.Drawing.Color.FromArgb(alpha, (int)((colorList[colorLoc].R / 255f) * R), (int)((colorList[colorLoc].G / 255f) * G), (int)((colorList[colorLoc].B / 255f) * B));
+                specularColor = System.Drawing.Color.FromArgb(255, (int)((specularList[colorLoc].R / 255f) * R1), (int)((specularList[colorLoc].G / 255f) * G1), (int)((specularList[colorLoc].B / 255f) * B1));
+                alphaColor = System.Drawing.Color.FromArgb(255, alpha, alpha, alpha);
+
+                diffuseMap.AddRange(BitConverter.GetBytes(diffuseColor.ToArgb()));
+                specularMap.AddRange(BitConverter.GetBytes(specularColor.ToArgb()));
+                alphaMap.AddRange(BitConverter.GetBytes(alphaColor.ToArgb()));
+            }
+
+            int stride = normalBitmap.Width * (32 / 8);
+
+            BitmapSource bitmapSource = BitmapSource.Create(width, height, normalBitmap.HorizontalResolution, normalBitmap.VerticalResolution, PixelFormats.Bgra32, null, diffuseMap.ToArray(), stride);
+            texBitmaps[0] = bitmapSource;
+
+            bitmapSource = BitmapSource.Create(width, height, normalBitmap.HorizontalResolution, normalBitmap.VerticalResolution, PixelFormats.Bgra32, null, specularMap.ToArray(), stride);
+            texBitmaps[1] = bitmapSource;
+
+            var noAlphaNormal = SetAlpha(normalBitmap, 255);
+            texBitmaps[2] = Imaging.CreateBitmapSourceFromHBitmap(noAlphaNormal.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+
+            bitmapSource = BitmapSource.Create(width, height, normalBitmap.HorizontalResolution, normalBitmap.VerticalResolution, PixelFormats.Bgra32, null, alphaMap.ToArray(), stride);
+            texBitmaps[3] = bitmapSource;
+
+
+            if (normalTexData != null)
+            {
+                normalTexData.Dispose();
+            }
+
+            if (normalBitmap != null)
+            {
+                normalBitmap.Dispose();
+            }
+
+            if (diffuseTexData != null)
+            {
+                diffuseTexData.Dispose();
+            }
+
+            if (maskTexData != null)
+            {
+                maskTexData.Dispose();
+            }
+
+            if (specularTexData != null)
+            {
+                specularTexData.Dispose();
+            }
+
+            return texBitmaps;
+        }
+
+
+        /// <summary>
+        /// Creates the bitmap data for the models in the character category
+        /// </summary>
+        /// <remarks>
+        /// Because the original textures use channel packing, this method gets the pixel data of each texture
+        /// and then recombines them to create the unpacked textures to use in the 3D model.
+        /// <see cref="http://wiki.polycount.com/wiki/ChannelPacking"/>
+        /// </remarks>
+        /// <param name="normalTexData">The texture data of the normal map</param>
+        /// <param name="diffuseTexData">The texture data of the diffuse map</param>
+        /// <param name="maskTexData">The texture data of the mask map</param>
+        /// <param name="specularTexData">The texture data of the normal map</param>
+        /// <returns>An array of bitmaps to be used on the model</returns>
+        public static BitmapSource[] MakeCharacterMaps(TEXData normalTexData, TEXData diffuseTexData, TEXData maskTexData, TEXData specularTexData)
+        {
+            int height = normalTexData.Height;
+            int width = normalTexData.Width;
+            int tSize = height * width;
+            Bitmap normalBitmap = null;
+
+            if (diffuseTexData != null && (diffuseTexData.Height * diffuseTexData.Width) > tSize)
+            {
+                height = diffuseTexData.Height;
+                width = diffuseTexData.Width;
+                tSize = height * width;
+            }
+
+            if (maskTexData != null && (maskTexData.Height * maskTexData.Width) > tSize)
+            {
+                height = maskTexData.Height;
+                width = maskTexData.Width;
+                tSize = height * width;
+            }
+
+            if (specularTexData != null && (specularTexData.Height * specularTexData.Width) > tSize)
+            {
+                height = specularTexData.Height;
+                width = specularTexData.Width;
+                tSize = height * width;
+            }
+
+            byte[] maskPixels = null;
+            byte[] specularPixels = null;
+            byte[] normalPixels = null;
+            byte[] diffusePixels = null;
+
+            BitmapSource[] texBitmaps = new BitmapSource[4];
+
+            if (maskTexData != null)
+            {
+                if (tSize > (maskTexData.Height * maskTexData.Width))
+                {
+                    var maskBitmap = ResizeImage(Image.FromHbitmap(maskTexData.BMP.GetHbitmap()), width, height);
+                    var maskData = maskBitmap.LockBits(new System.Drawing.Rectangle(0, 0, maskBitmap.Width, maskBitmap.Height), ImageLockMode.ReadOnly, maskBitmap.PixelFormat);
+                    var bitmapLength = maskData.Stride * maskData.Height;
+                    maskPixels = new byte[bitmapLength];
+                    Marshal.Copy(maskData.Scan0, maskPixels, 0, bitmapLength);
+                    maskBitmap.UnlockBits(maskData);
+                }
+                else
+                {
+                    var maskData = maskTexData.BMP.LockBits(new System.Drawing.Rectangle(0, 0, maskTexData.Width, maskTexData.Height), ImageLockMode.ReadOnly, maskTexData.BMP.PixelFormat);
+                    var bitmapLength = maskData.Stride * maskData.Height;
+                    maskPixels = new byte[bitmapLength];
+                    Marshal.Copy(maskData.Scan0, maskPixels, 0, bitmapLength);
+                    maskTexData.BMP.UnlockBits(maskData);
                 }
             }
 
-            int stride = (int)normalMap.Width * (32 / 8);
-            BitmapSource bitmapSource = BitmapSource.Create(normalMap.Width, normalMap.Height, normalMap.HorizontalResolution, normalMap.VerticalResolution, PixelFormats.Bgra32, null, diffuseMap.ToArray(), stride);
-
-            return bitmapSource;
-        }
-
-        public static BitmapSource MakeDisplaceMap(TexInfo maskInfo)
-        {
-
-            byte[] mPixels = null;
-
-
-            var maskMap = maskInfo.BMP;
-            var nMaskMap = ResizeImage(Image.FromHbitmap(maskMap.GetHbitmap()), maskMap.Width * 2, maskMap.Height * 2);
-
-            var maskData = nMaskMap.LockBits(new Rectangle(0, 0, nMaskMap.Width, nMaskMap.Height), ImageLockMode.ReadOnly, nMaskMap.PixelFormat);
-            var mLength = maskData.Stride * maskData.Height;
-            mPixels = new byte[mLength];
-            Marshal.Copy(maskData.Scan0, mPixels, 0, mLength);
-            nMaskMap.UnlockBits(maskData);
-
-            List<byte> displaceList = new List<byte>();
-
-            for (int i = 0; i < mPixels.Length; i += 4)
+            if (diffuseTexData != null)
             {
-                var color = System.Drawing.Color.FromArgb(255, mPixels[i], mPixels[i], mPixels[i]);
-                displaceList.AddRange(BitConverter.GetBytes(color.ToArgb()));
+                try
+                {
+                    if (tSize > (diffuseTexData.Height * diffuseTexData.Width))
+                    {
+                        var diffuseBitmap = ResizeImage(Image.FromHbitmap(diffuseTexData.BMP.GetHbitmap()), width, height);
+                        var diffuseData = diffuseBitmap.LockBits(new System.Drawing.Rectangle(0, 0, diffuseBitmap.Width, diffuseBitmap.Height), ImageLockMode.ReadOnly, diffuseBitmap.PixelFormat);
+                        var bitmapLength = diffuseData.Stride * diffuseData.Height;
+                        diffusePixels = new byte[bitmapLength];
+                        Marshal.Copy(diffuseData.Scan0, diffusePixels, 0, bitmapLength);
+                        diffuseBitmap.UnlockBits(diffuseData);
+                    }
+                    else
+                    {
+                        var diffuseData = diffuseTexData.BMP.LockBits(new System.Drawing.Rectangle(0, 0, diffuseTexData.Width, diffuseTexData.Height), ImageLockMode.ReadOnly, diffuseTexData.BMP.PixelFormat);
+                        var bitmapLength = diffuseData.Stride * diffuseData.Height;
+                        diffusePixels = new byte[bitmapLength];
+                        Marshal.Copy(diffuseData.Scan0, diffusePixels, 0, bitmapLength);
+                        diffuseTexData.BMP.UnlockBits(diffuseData);
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex.Message);
+                    Debug.WriteLine(ex.StackTrace);
+                }
             }
 
-            int stride = (int)nMaskMap.Width * (32 / 8);
-            BitmapSource bitmapSource = BitmapSource.Create(nMaskMap.Width, nMaskMap.Height, nMaskMap.HorizontalResolution, nMaskMap.VerticalResolution, PixelFormats.Bgra32, null, displaceList.ToArray(), stride);
+            if (specularTexData != null)
+            {
+                try
+                {
+                    if (tSize > (specularTexData.Height * specularTexData.Width))
+                    {
+                        var specularBitmap = ResizeImage(Image.FromHbitmap(specularTexData.BMP.GetHbitmap()), width, height);
+                        var specularData = specularBitmap.LockBits(new System.Drawing.Rectangle(0, 0, specularBitmap.Width, specularBitmap.Height), ImageLockMode.ReadOnly, specularBitmap.PixelFormat);
+                        var bitmapLength = specularData.Stride * specularData.Height;
+                        specularPixels = new byte[bitmapLength];
+                        Marshal.Copy(specularData.Scan0, specularPixels, 0, bitmapLength);
+                        specularBitmap.UnlockBits(specularData);
+                    }
+                    else
+                    {
+                        var specularData = specularTexData.BMP.LockBits(new System.Drawing.Rectangle(0, 0, specularTexData.BMP.Width, specularTexData.BMP.Height), ImageLockMode.ReadOnly, specularTexData.BMP.PixelFormat);
+                        var bitmapLength = specularData.Stride * specularData.Height;
+                        specularPixels = new byte[bitmapLength];
+                        Marshal.Copy(specularData.Scan0, specularPixels, 0, bitmapLength);
+                        specularTexData.BMP.UnlockBits(specularData);
+                    }
 
-            return bitmapSource;
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex.Message);
+                    Debug.WriteLine(ex.StackTrace);
+                }
 
+            }
+
+
+            if (normalTexData != null)
+            {
+                if (tSize > (normalTexData.Height * normalTexData.Width))
+                {
+                    var normBitmap = ResizeImage(Image.FromHbitmap(normalTexData.BMP.GetHbitmap()), width, height);
+                    var normData = normBitmap.LockBits(new System.Drawing.Rectangle(0, 0, normBitmap.Width, normBitmap.Height), ImageLockMode.ReadOnly, normBitmap.PixelFormat);
+                    var bitmapLength = normData.Stride * normData.Height;
+                    normalPixels = new byte[bitmapLength];
+                    Marshal.Copy(normData.Scan0, normalPixels, 0, bitmapLength);
+                    normBitmap.UnlockBits(normData);
+                    normalBitmap = normBitmap;
+                }
+                else
+                {
+                    var normData = normalTexData.BMP.LockBits(new System.Drawing.Rectangle(0, 0, normalTexData.Width, normalTexData.Height), ImageLockMode.ReadOnly, normalTexData.BMP.PixelFormat);
+                    var bitmapLength = normData.Stride * normData.Height;
+                    normalPixels = new byte[bitmapLength];
+                    Marshal.Copy(normData.Scan0, normalPixels, 0, bitmapLength);
+                    normalTexData.BMP.UnlockBits(normData);
+                    normalBitmap = normalTexData.BMP;
+                }
+            }
+
+            List<byte> diffuseMap = new List<byte>();
+            List<byte> specularMap = new List<byte>();
+            List<byte> alphaMap = new List<byte>();
+
+            BitmapSource bitmapSource;
+
+            System.Drawing.Color diffuseColor;
+            System.Drawing.Color specularColor;
+            System.Drawing.Color alphaColor;
+
+            int stride = normalBitmap.Width * (32 / 8);
+
+            if (diffuseTexData == null)
+            {
+                for (int i = 3; i < normalPixels.Length; i += 4)
+                {
+                    int alpha = normalPixels[i];
+
+                    diffuseColor = System.Drawing.Color.FromArgb(alpha, (int)((96f / 255f) * specularPixels[i - 1]), (int)((57f / 255f) * specularPixels[i - 1]), (int)((19f / 255f) * specularPixels[i - 1]));
+
+                    specularColor = System.Drawing.Color.FromArgb(255, specularPixels[i - 2], specularPixels[i - 2], specularPixels[i - 2]);
+
+                    alphaColor = System.Drawing.Color.FromArgb(255, alpha, alpha, alpha);
+
+                    diffuseMap.AddRange(BitConverter.GetBytes(diffuseColor.ToArgb()));
+                    specularMap.AddRange(BitConverter.GetBytes(specularColor.ToArgb()));
+                    alphaMap.AddRange(BitConverter.GetBytes(alphaColor.ToArgb()));
+                }
+
+                bitmapSource = BitmapSource.Create(width, height, normalBitmap.HorizontalResolution, normalBitmap.VerticalResolution, PixelFormats.Bgra32, null, diffuseMap.ToArray(), stride);
+                texBitmaps[0] = bitmapSource;
+            }
+            else
+            {
+                for (int i = 3; i < normalPixels.Length; i += 4)
+                {
+                    int alpha = normalPixels[i-3];
+
+                    diffuseColor = System.Drawing.Color.FromArgb(alpha, diffusePixels[i - 1], diffusePixels[i - 2], diffusePixels[i - 3]);
+                    diffuseMap.AddRange(BitConverter.GetBytes(diffuseColor.ToArgb()));
+
+                    specularColor = System.Drawing.Color.FromArgb(255, specularPixels[i - 2], specularPixels[i - 2], specularPixels[i - 2]);
+                    specularMap.AddRange(BitConverter.GetBytes(specularColor.ToArgb()));
+
+                    alphaColor = System.Drawing.Color.FromArgb(255, alpha, alpha, alpha);
+                    alphaMap.AddRange(BitConverter.GetBytes(alphaColor.ToArgb()));
+                }
+
+                bitmapSource = BitmapSource.Create(width, height, normalBitmap.HorizontalResolution, normalBitmap.VerticalResolution, PixelFormats.Bgra32, null, diffuseMap.ToArray(), stride);
+                texBitmaps[0] = bitmapSource;
+            }
+
+            bitmapSource = BitmapSource.Create(width, height, normalBitmap.HorizontalResolution, normalBitmap.VerticalResolution, PixelFormats.Bgra32, null, specularMap.ToArray(), stride);
+            texBitmaps[1] = bitmapSource;
+
+            texBitmaps[2] = Imaging.CreateBitmapSourceFromHBitmap(normalBitmap.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+
+            bitmapSource = BitmapSource.Create(width, height, normalBitmap.HorizontalResolution, normalBitmap.VerticalResolution, PixelFormats.Bgra32, null, alphaMap.ToArray(), stride);
+            texBitmaps[3] = bitmapSource;
+
+            if (normalTexData != null)
+            {
+                normalTexData.Dispose();
+            }
+
+            if (normalBitmap != null)
+            {
+                normalBitmap.Dispose();
+            }
+
+            if (diffuseTexData != null)
+            {
+                diffuseTexData.Dispose();
+            }
+
+            if (maskTexData != null)
+            {
+                maskTexData.Dispose();
+            }
+
+            if (specularTexData != null)
+            {
+                specularTexData.Dispose();
+            }
+
+            return texBitmaps;
         }
 
         /// <summary>
@@ -239,7 +550,7 @@ namespace FFXIV_TexTools2.Helpers
         /// <returns>The resized image.</returns>
         public static Bitmap ResizeImage(Image image, int width, int height)
         {
-            var destRect = new Rectangle(0, 0, width, height);
+            var destRect = new System.Drawing.Rectangle(0, 0, width, height);
             var destImage = new Bitmap(width, height);
 
             destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
@@ -260,6 +571,37 @@ namespace FFXIV_TexTools2.Helpers
             }
 
             return destImage;
+        }
+
+        /// <summary>
+        /// Sets the alpha channel a bitmap.
+        /// </summary>
+        /// <param name="bmp">The bitmap to modify.</param>
+        /// <param name="alpha">The alpha value to use.</param>
+        /// <returns>A bitmap with the new alpha value.</returns>
+        public static Bitmap SetAlpha(Bitmap bmp, byte alpha)
+        {
+            var data = bmp.LockBits(
+                new System.Drawing.Rectangle(0, 0, bmp.Width, bmp.Height),
+                ImageLockMode.ReadWrite,
+                System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+            var line = data.Scan0;
+            var eof = line + data.Height * data.Stride;
+            while (line != eof)
+            {
+                var pixelAlpha = line + 3;
+                var eol = pixelAlpha + data.Width * 4;
+                while (pixelAlpha != eol)
+                {
+                    Marshal.WriteByte(pixelAlpha, alpha);
+                    pixelAlpha += 4;
+                }
+                line += data.Stride;
+            }
+            bmp.UnlockBits(data);
+
+            return bmp;
         }
     }
 }

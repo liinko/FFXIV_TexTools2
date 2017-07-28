@@ -9,14 +9,13 @@
 
 namespace FFXIV_TexTools2.ViewModel
 {
+    using HelixToolkit.Wpf.SharpDX;
     using System;
     using System.Collections.Generic;
-
-    using HelixToolkit.Wpf.SharpDX;
     using System.IO;
 
     /// <summary>
-    /// Base ViewModel for Demo Applications?
+    /// Base ViewModel
     /// </summary>
     public abstract class BaseViewModel : ObservableObject, IDisposable
     {
@@ -167,8 +166,8 @@ namespace FFXIV_TexTools2.ViewModel
             // default camera model
             CameraModel = Perspective;
 
-            Title = "Demo (HelixToolkitDX)";
-            SubTitle = "Default Base View Model";
+            Title = "";
+            SubTitle = "";
         }
 
         protected virtual void OnCameraModelChanged()

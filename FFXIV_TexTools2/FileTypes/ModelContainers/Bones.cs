@@ -16,21 +16,18 @@
 
 using System.Collections.Generic;
 
-namespace FFXIV_TexTools2.Model
+namespace FFXIV_TexTools2.Material.ModelMaterial
 {
-    public class Category
+    public class Bones
     {
-        public Category(string categoryName)
-        {
-            this.CategoryName = categoryName;
-        }
+        /// <summary>
+        /// The amount of bones of the current model
+        /// </summary>
+        public int BoneCount { get; set; }
 
-        public string CategoryName { get; private set; }
-
-        readonly List<Items> _items = new List<Items>();
-        public List<Items> Items
-        {
-            get { return _items; }
-        }
+        /// <summary>
+        /// The data for the models bones
+        /// </summary>
+        public List<int> BoneData = new List<int>();
     }
 }

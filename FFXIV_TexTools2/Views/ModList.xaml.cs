@@ -102,7 +102,7 @@ namespace FFXIV_TexTools2.Views
         {
             var selected = listBox.SelectedItem as ModListModel;
 
-            ((MainWindow)Owner).GoToItem(selected);
+            //((MainWindow)Owner).GoToItem(selected);
         }
     }
 }

@@ -16,7 +16,6 @@
 
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics;
 
 namespace FFXIV_TexTools2.ViewModel
 {
@@ -25,12 +24,15 @@ namespace FFXIV_TexTools2.ViewModel
         #region Data
 
         static readonly TreeViewItemViewModel DummyChild = new TreeViewItemViewModel();
+        private static object _selectedItem = null;
 
         readonly ObservableCollection<TreeViewItemViewModel> _children;
         readonly TreeViewItemViewModel _parent;
 
         bool _isExpanded;
         bool _isSelected;
+
+        public static TextureViewModel TextureView;
 
         #endregion // Data
 
@@ -129,6 +131,10 @@ namespace FFXIV_TexTools2.ViewModel
                 {
                     _isSelected = value;
                     this.OnPropertyChanged("IsSelected");
+                    if (_isSelected)
+                    {
+                        SelectedItem = this;
+                    }
                 }
             }
         }
@@ -155,6 +161,18 @@ namespace FFXIV_TexTools2.ViewModel
         }
 
         #endregion // Parent
+
+        public static object SelectedItem
+        {
+            get { return _selectedItem; }
+            private set
+            {
+                if(_selectedItem != value)
+                {
+                    _selectedItem = value;
+                }
+            }
+        }
 
         #endregion // Presentation Members
 

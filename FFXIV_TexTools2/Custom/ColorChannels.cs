@@ -22,19 +22,24 @@ using System.Windows.Media.Media3D;
 
 namespace FFXIV_TexTools2.Shader
 {
+    /// <summary>
+    /// Shader Effect for color channels
+    /// </summary>
     public class ColorChannels : ShaderEffect
     {
-        private static PixelShader _pixelShader = new PixelShader()
-        { UriSource = new Uri("pack://application:,,,/FFXIV TexTools 2;component/Shader/rgbaChannels.cso") };
-
         public static readonly DependencyProperty InputProperty = RegisterPixelShaderSamplerProperty("Input", typeof(ColorChannels), 0);
+
+        public static readonly DependencyProperty ChannelProperty = DependencyProperty.Register("Channels", typeof(Point4D), typeof(ColorChannels),
+             new UIPropertyMetadata(new Point4D(1.0f, 1.0f, 1.0f, 1.0f), PixelShaderConstantCallback(0)));
+
+        private static PixelShader _pixelShader = new PixelShader()
+        { UriSource = new Uri("pack://application:,,,/FFXIV TexTools 2;component/Custom/rgbaChannels.cso") };
 
         public Brush Input
         {
             get { return (Brush)GetValue(InputProperty); }
             set { SetValue(InputProperty, value); }
         }
-
 
         public ColorChannels()
         {
@@ -49,9 +54,5 @@ namespace FFXIV_TexTools2.Shader
             get { return (Point4D)GetValue(ChannelProperty); }
             set { SetValue(ChannelProperty, value); }
         }
-
-
-        public static readonly DependencyProperty ChannelProperty = DependencyProperty.Register("Channels", typeof(Point4D), typeof(ColorChannels),
-            new UIPropertyMetadata(new Point4D(1.0f, 1.0f, 1.0f, 1.0f), PixelShaderConstantCallback(0)));
     }
 }

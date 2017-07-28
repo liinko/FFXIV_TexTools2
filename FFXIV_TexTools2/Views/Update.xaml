@@ -5,10 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FFXIV_TexTools2.Views"
         mc:Ignorable="d"
-        Title="New Update Available!" Height="350" Width="350" WindowStyle="ToolWindow" WindowStartupLocation="CenterScreen" ResizeMode="NoResize" Topmost="True">
+        Title="New Update Available!" Height="400" Width="600" WindowStyle="ToolWindow" WindowStartupLocation="CenterScreen" ResizeMode="NoResize" Topmost="True" SizeToContent="Width" MaxWidth="700">
     <Grid>
         <Grid>
             <RichTextBox x:Name="changeLogTextBox" Margin="10,10,10,50" IsReadOnly="True" VerticalScrollBarVisibility="Auto"/>
+
             <Grid Margin="8,0,12,10" Height="34" VerticalAlignment="Bottom">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>

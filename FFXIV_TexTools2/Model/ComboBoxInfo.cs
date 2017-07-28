@@ -20,26 +20,39 @@ namespace FFXIV_TexTools2.Model
 {
     public class ComboBoxInfo : IComparable
     {
+        /// <summary>
+        /// The name to be displayed in the combo box
+        /// </summary>
         public string Name { get; set; }
+
+        /// <summary>
+        /// The ID of the combo box item
+        /// </summary>
         public string ID { get; set; }
 
-        public ComboBoxInfo(string name, string id)
-        {
-            Name = name;
-            ID = id;
-        }
+        /// <summary>
+        /// Is the value a number
+        /// </summary>
+        public bool IsNum { get; set; }
 
+
+        /// <summary>
+        /// Compares names in combobox for sorting
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
         public int CompareTo(object obj)
         {
             int compare;
-            try
+            if (IsNum)
             {
                 compare = int.Parse(Name).CompareTo(int.Parse(((ComboBoxInfo)obj).Name));
             }
-            catch
+            else
             {
                 compare = Name.CompareTo(((ComboBoxInfo)obj).Name);
             }
+
 
             return compare;
         }
