@@ -25,31 +25,17 @@ using System.ComponentModel;
 using System.IO;
 using System.Windows.Media.Imaging;
 using Media3D = System.Windows.Media.Media3D;
-using Transform3D = System.Windows.Media.Media3D.Transform3D;
-using TranslateTransform3D = System.Windows.Media.Media3D.TranslateTransform3D;
 
 namespace FFXIV_TexTools2.ViewModel
 {
     public class Composite3DViewModel : BaseViewModel, INotifyPropertyChanged
     {
-        bool modelRendering = true, secondModelRendering = true, thirdModelRendering = true;
         Vector3 light1Direction, light2Direction;
+        ObservableElement3DCollection modelCollection = new ObservableElement3DCollection();
+        int currentSS;
 
         public string Name { get; set; }
         public Composite3DViewModel ViewModel { get { return this; } }
-
-        public MeshGeometry3D Model { get; private set; }
-        public MeshGeometry3D SecondModel { get; private set; }
-        public MeshGeometry3D ThirdModel { get; private set; }
-
-        public CustomPhongMaterial ModelMaterial { get; set; }
-        public CustomPhongMaterial SecondModelMaterial { get; set; }
-        public CustomPhongMaterial ThirdModelMaterial { get; set; }
-
-
-        public Transform3D ModelTransform { get; private set; }
-        public Transform3D SecondModelTransform { get; private set; }
-        public Transform3D ThirdModelTransform { get; private set; }
 
         public Vector3 Light1Direction { get { return light1Direction; } set { light1Direction = value; NotifyPropertyChanged("Light1Direction"); } }
         public Vector3 Light2Direction { get { return light2Direction; } set { light2Direction = value; NotifyPropertyChanged("Light2Direction"); } }
@@ -61,20 +47,22 @@ namespace FFXIV_TexTools2.ViewModel
         public bool RenderLight1 { get; set; }
         public bool RenderLight2 { get; set; }
 
-        public bool ModelRendering { get { return modelRendering; } set { modelRendering = value; NotifyPropertyChanged("ModelRendering"); } }
-        public bool SecondModelRendering { get { return secondModelRendering; } set { secondModelRendering = value; NotifyPropertyChanged("SecondModelRendering"); } }
-        public bool ThirdModelRendering { get { return thirdModelRendering; } set { thirdModelRendering = value; NotifyPropertyChanged("ThirdModelRendering"); } }
+        public ObservableElement3DCollection ModelCollection { get { return modelCollection; } set { modelCollection = value; NotifyPropertyChanged("ModelCollection"); } }
+
+        public int CurrentSS { get { return currentSS; } set { currentSS = value; NotifyPropertyChanged("CurrentSS"); } }
+
 
         bool second = false;
         bool disposed = false;
         bool disposing = false;
 
         List<MDLTEXData> mData;
-        Stream diffuse, normal, colorTable, mask, specular, alpha;
+        Stream diffuse, normal, specular, alpha;
 
         /// <summary>
-        /// The Default View Model for the 3D content
+        /// Sets up the View Model for the given mesh data
         /// </summary>
+        /// <param name="meshData">The models data</param>
         public Composite3DViewModel()
         {
             RenderTechniquesManager = new CustomRenderTechniquesManager();
@@ -93,55 +81,26 @@ namespace FFXIV_TexTools2.ViewModel
             this.RenderLight2 = true;
         }
 
-        /// <summary>
-        /// Sets up the View Model for the given mesh data
-        /// </summary>
-        /// <param name="meshData">The models data</param>
-        public Composite3DViewModel(List<MDLTEXData> meshData)
+        public void UpdateModel(List<MDLTEXData> meshData)
         {
+            disposed = false;
+            disposing = false;
+
             mData = meshData;
 
-            for(int i = 0; i < meshData.Count; i++)
+            for (int i = 0; i < meshData.Count; i++)
             {
-                setModel(i);
+                ModelCollection.Add(setModel(i));
             }
 
-            RenderTechniquesManager = new CustomRenderTechniquesManager();
-            RenderTechnique = RenderTechniquesManager.RenderTechniques["RenderCustom"];
-            EffectsManager = new CustomEffectsManager(RenderTechniquesManager);
+            Vector3 center = ((CustomGM3D)ModelCollection[0]).Geometry.BoundingSphere.Center;
 
-            Vector3 center;
-            try
-            {
-                center = SecondModel.BoundingSphere.Center;
-            }
-            catch
-            {
-                center = Model.BoundingSphere.Center;
-            }
-
-
-            Camera = new PerspectiveCamera { Position = new Media3D.Point3D(center.X, center.Y, center.Z + 2), LookDirection = new Media3D.Vector3D(0, 0, center.Z - 2) };           
-
-
-            BackgroundColor = Color.Gray;
-            this.AmbientLightColor = new Color4(0.1f, 0.1f, 0.1f, 1.0f);
-
-            this.Light1Direction = new Vector3(0, 0, -1f);
-            this.Light2Direction = new Vector3(0, 0, 1f);
-            this.Light1Color = Color.White;
-            this.RenderLight1 = true;
-            this.RenderLight2 = true;
-
-
-            this.ModelTransform = new TranslateTransform3D(0, 0, 0);
-            this.SecondModelTransform = new TranslateTransform3D(0, 0, 0);
-            this.ThirdModelTransform = new TranslateTransform3D(0, 0, 0);
+            Camera.Position = new Media3D.Point3D(center.X, center.Y, center.Z + 2);
+            Camera.LookDirection =  new Media3D.Vector3D(0, 0, center.Z - 2);
         }
 
-        private void setModel(int m)
+        private CustomGM3D setModel(int m)
         {
-            MeshGeometryModel3D mgm3d = new MeshGeometryModel3D();
             MeshGeometry3D mg = new MeshGeometry3D();
             mg.Positions = mData[m].Mesh.Vertices;
             mg.Indices = mData[m].Mesh.Indices;
@@ -149,7 +108,10 @@ namespace FFXIV_TexTools2.ViewModel
             mg.TextureCoordinates = mData[m].Mesh.TextureCoordinates;
             mg.Colors = mData[m].Mesh.VertexColors;
             MeshBuilder.ComputeTangents(mg);
-            mgm3d.Geometry = mg;
+            mg.BiTangents = mData[m].Mesh.BiTangents;
+            mData[m].Mesh.Tangents = mg.Tangents;
+
+            CustomGM3D gm3d = new CustomGM3D();
 
             List<byte> DDS = new List<byte>();
 
@@ -169,24 +131,6 @@ namespace FFXIV_TexTools2.ViewModel
                 BitmapEncoder enc = new BmpBitmapEncoder();
                 enc.Frames.Add(BitmapFrame.Create(mData[m].Normal));
                 enc.Save(normal);
-            }
-
-            colorTable = null;
-            if (mData[m].ColorTable != null)
-            {
-                colorTable = new MemoryStream();
-                var enc = new BmpBitmapEncoder();
-                enc.Frames.Add(BitmapFrame.Create(mData[m].ColorTable));
-                enc.Save(colorTable);
-            }
-
-            mask = null;
-            if (mData[m].Mask != null)
-            {
-                mask = new MemoryStream();
-                BitmapEncoder enc = new BmpBitmapEncoder();
-                enc.Frames.Add(BitmapFrame.Create(mData[m].Mask));
-                enc.Save(mask);
             }
 
             specular = null;
@@ -210,35 +154,32 @@ namespace FFXIV_TexTools2.ViewModel
             if (mData.Count > 1)
             {
                 float specularShine = 30f;
+                CurrentSS = 30;
 
                 if (mData[m].IsBody || mData[m].IsFace)
                 {
-                    this.Model = mg;
+                    gm3d.Geometry = mg;
+                    gm3d.ModelBody = true;
 
-                    ModelMaterial = new CustomPhongMaterial()
+                    gm3d.Material = new CustomPhongMaterial()
                     {
                         DiffuseColor = PhongMaterials.ToColor(1, 1, 1, 1),
                         SpecularShininess = specularShine,
                         NormalMap = normal,
-                        MaskMap = mask,
                         DiffuseMap = diffuse,
                         DiffuseAlphaMap = alpha,
-                        ColorTable = colorTable,
                         SpecularMap = specular
                     };
-
                 }
                 else if (!mData[m].IsBody && !second)
                 {
-                    this.SecondModel = mg;
+                    gm3d.Geometry = mg;
 
-                    SecondModelMaterial = new CustomPhongMaterial()
+                    gm3d.Material = new CustomPhongMaterial()
                     {
                         DiffuseColor = PhongMaterials.ToColor(1, 1, 1, 1),
                         SpecularShininess = specularShine,
                         NormalMap = normal,
-                        MaskMap = mask,
-                        ColorTable = colorTable,
                         DiffuseMap = diffuse,
                         DiffuseAlphaMap = alpha,
                         SpecularMap = specular
@@ -248,14 +189,13 @@ namespace FFXIV_TexTools2.ViewModel
                 }
                 else if(!mData[m].IsBody)
                 {
-                    this.ThirdModel = mg;
-                    ThirdModelMaterial = new CustomPhongMaterial()
+                    gm3d.Geometry = mg;
+
+                    gm3d.Material = new CustomPhongMaterial()
                     {
                         DiffuseColor = PhongMaterials.ToColor(1, 1, 1, 1),
                         SpecularShininess = specularShine,
                         NormalMap = normal,
-                        MaskMap = mask,
-                        ColorTable = colorTable,
                         DiffuseMap = diffuse,
                         DiffuseAlphaMap = alpha,
                         SpecularMap = specular
@@ -264,20 +204,23 @@ namespace FFXIV_TexTools2.ViewModel
             }
             else
             {
-                this.SecondModel = mg;
+                float specularShine = 30f;
+                CurrentSS = 30;
 
-                SecondModelMaterial = new CustomPhongMaterial()
+                gm3d.Geometry = mg;
+
+                gm3d.Material = new CustomPhongMaterial()
                 {
                     DiffuseColor = PhongMaterials.ToColor(1, 1, 1, 1),
-                    SpecularShininess = 30f,
+                    SpecularShininess = specularShine,
                     NormalMap = normal,
-                    MaskMap = mask,
-                    ColorTable = colorTable,
                     SpecularMap = specular,
                     DiffuseMap = diffuse,
                     DiffuseAlphaMap = alpha
                 };
             }
+
+            return gm3d;
         }
 
         /// <summary>
@@ -288,50 +231,27 @@ namespace FFXIV_TexTools2.ViewModel
         {
             if (selected.Equals(Strings.All))
             {
-                ModelRendering = true;
-                SecondModelRendering = true;
-                ThirdModelRendering = true;
+                foreach(var model in ModelCollection)
+                {
+                    model.IsRendering = true;
+                }
             }
             else
             {
                var selectedMesh = int.Parse(selected);
 
-                if(mData.Count >= 3)
+                for(int i = 0; i < ModelCollection.Count; i++)
                 {
-                    if (selectedMesh == 0)
+                    if(i == selectedMesh)
                     {
-                        ModelRendering = true;
-                        SecondModelRendering = false;
-                        ThirdModelRendering = false;
+                        ModelCollection[i].IsRendering = true;
                     }
-                    else if (selectedMesh == 1)
+                    else
                     {
-                        ModelRendering = false;
-                        SecondModelRendering = true;
-                        ThirdModelRendering = false;
+                        ModelCollection[i].IsRendering = false;
                     }
-                    else if (selectedMesh == 2)
-                    {
-                        ModelRendering = false;
-                        SecondModelRendering = false;
-                        ThirdModelRendering = true;
-                    }
-                }
-                else
-                {
-                    if (selectedMesh == 0)
-                    {
-                        ModelRendering = true;
-                        SecondModelRendering = false;
-                    }
-                    else if (selectedMesh == 1)
-                    {
 
-                        ModelRendering = false;
-                        SecondModelRendering = true;
-                    }
                 }
-
             }
         }
 
@@ -340,27 +260,22 @@ namespace FFXIV_TexTools2.ViewModel
         /// </summary>
         public void Transparency()
         {
-            if(SecondModelMaterial.DiffuseColor.Alpha == 1)
+            foreach(var model in ModelCollection)
             {
-                SecondModelMaterial.DiffuseColor = PhongMaterials.ToColor(1, 1, 1, .4);
-                SecondModel.UpdateVertices();
-
-                if (ThirdModel != null)
+                if (!((CustomGM3D)model).ModelBody)
                 {
-                    ThirdModelMaterial.DiffuseColor = PhongMaterials.ToColor(1, 1, 1, .4);
-                    ThirdModel.UpdateVertices();
-                }
+                    var material = (CustomPhongMaterial)((CustomGM3D)model).Material;
 
-            }
-            else
-            {
-                SecondModelMaterial.DiffuseColor = PhongMaterials.ToColor(1, 1, 1, 1);
-                SecondModel.UpdateVertices();
-
-                if (ThirdModel != null)
-                {
-                    ThirdModelMaterial.DiffuseColor = PhongMaterials.ToColor(1, 1, 1, 1);
-                    ThirdModel.UpdateVertices();
+                    if (material.DiffuseColor.Alpha == 1)
+                    {
+                        material.DiffuseColor = PhongMaterials.ToColor(1, 1, 1, .4);
+                        ((CustomGM3D)model).Geometry.UpdateVertices();
+                    }
+                    else
+                    {
+                        material.DiffuseColor = PhongMaterials.ToColor(1, 1, 1, 1);
+                        ((CustomGM3D)model).Geometry.UpdateVertices();
+                    }
                 }
             }
         }
@@ -371,58 +286,28 @@ namespace FFXIV_TexTools2.ViewModel
         /// <param name="itemName">The currently selected items name</param>
         public void Reflections(string itemName)
         {
-            if (itemName.Equals(Strings.Face) || itemName.Equals(Strings.Face))
+
+            foreach(var model in ModelCollection)
             {
-                if (ModelMaterial.SpecularShininess < 10)
-                {
-                    ModelMaterial.SpecularShininess += 1;
-                    Model.UpdateVertices();
-                }
-                else if (ModelMaterial.SpecularShininess < 50)
-                {
-                    ModelMaterial.SpecularShininess += 10;
-                    Model.UpdateVertices();
-                }
-                else
-                {
-                    ModelMaterial.SpecularShininess = 1;
-                    Model.UpdateVertices();
-                }
-            }
-            else
-            {
-                if (SecondModelMaterial.SpecularShininess < 10)
-                {
-                    SecondModelMaterial.SpecularShininess += 1;
-                    SecondModel.UpdateVertices();
+                var material = (CustomPhongMaterial)((CustomGM3D)model).Material;
 
-                    if (ThirdModel != null)
-                    {
-                        ThirdModelMaterial.SpecularShininess += 1;
-                        ThirdModel.UpdateVertices();
-                    }
-                }
-                else if (SecondModelMaterial.SpecularShininess < 50)
+                if (!((CustomGM3D)model).ModelBody || itemName.Equals(Strings.Face))
                 {
-                    SecondModelMaterial.SpecularShininess += 10;
-                    SecondModel.UpdateVertices();
-
-                    if (ThirdModel != null)
+                    if (material.SpecularShininess < 10)
                     {
-                        ThirdModelMaterial.SpecularShininess += 10;
-                        ThirdModel.UpdateVertices();
+                        material.SpecularShininess += 1;
                     }
-                }
-                else
-                {
-                    SecondModelMaterial.SpecularShininess = 1;
-                    SecondModel.UpdateVertices();
-
-                    if (ThirdModel != null)
+                    else if (material.SpecularShininess < 50)
                     {
-                        ThirdModelMaterial.SpecularShininess = 1;
-                        ThirdModel.UpdateVertices();
+                        material.SpecularShininess += 10;
                     }
+                    else
+                    {
+                        material.SpecularShininess = 1;
+                    }
+                    ((CustomGM3D)model).Geometry.UpdateVertices();
+
+                    CurrentSS = (int)material.SpecularShininess;
                 }
             }
         }
@@ -462,7 +347,29 @@ namespace FFXIV_TexTools2.ViewModel
             {
                 if (disposing)
                 {
-                    if(diffuse != null)
+                    if (ModelCollection != null)
+                    {
+                        foreach (var model in modelCollection)
+                        {
+                            ((CustomPhongMaterial)((CustomGM3D)model).Material).Dispose();
+                            ((CustomGM3D)model).Detach();
+                            ((CustomGM3D)model).Dispose();
+                            model.Dispose();
+                        }
+
+                        foreach (var model in ModelCollection)
+                        {
+                            ((CustomPhongMaterial)((CustomGM3D)model).Material).Dispose();
+                            ((CustomGM3D)model).Detach();
+                            ((CustomGM3D)model).Dispose();
+                            model.Dispose();
+                        }
+
+                        modelCollection.Clear();
+                        ModelCollection.Clear();
+                    }
+
+                    if (diffuse != null)
                     {
                         diffuse.Dispose();
                     }
@@ -472,50 +379,22 @@ namespace FFXIV_TexTools2.ViewModel
                         normal.Dispose();
                     }
 
-                    if(colorTable != null)
-                    {
-                        colorTable.Dispose();
-                    }
-
-                    if(mask != null)
-                    {
-                        mask.Dispose();
-                    }
-
                     if(specular != null)
                     {
                         specular.Dispose();
                     }
 
-                    if (ModelMaterial != null)
-                    {
-                        ModelMaterial.Dispose();
-                    }
-
-                    if (SecondModelMaterial != null)
-                    {
-
-                        SecondModelMaterial.Dispose();
-                    }
-
-                    if (ThirdModelMaterial != null)
-                    {
-                        ThirdModelMaterial.Dispose();
-                    }
-
                     if (mData != null)
                     {
                         mData.Clear();
+                        mData = null;
                     }
                 }
                 disposed = true;
+                base.Dispose(disposing);
             }
-
-            base.Dispose(disposing);
-
         }
-
-        
+      
         public event PropertyChangedEventHandler PropertyChanged;
 
 

@@ -14,11 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using FFXIV_TexTools2.Custom.Interop;
 using FFXIV_TexTools2.Helpers;
 using FFXIV_TexTools2.ViewModel;
 using FFXIV_TexTools2.Views;
 using Newtonsoft.Json;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
 
@@ -36,6 +38,8 @@ namespace FFXIV_TexTools2
             this.DataContext = mViewModel;
 
             DXVerStatus.Content = "DX Version: " + Properties.Settings.Default.DX_Ver.Substring(2);
+
+            //HavokInterop.InitializeSTA();
 
             //searchTextBox.Text = Strings.SearchBox;
             //searchTextBox.Foreground = System.Windows.Media.Brushes.Gray;
@@ -216,8 +220,11 @@ namespace FFXIV_TexTools2
                     while ((line = sr.ReadLine()) != null)
                     {
                         modEntry = JsonConvert.DeserializeObject<JsonEntry>(line);
-                        Helper.UpdateIndex(modEntry.originalOffset, modEntry.fullPath);
-                        Helper.UpdateIndex2(modEntry.originalOffset, modEntry.fullPath);
+                        if(modEntry.originalOffset != 0)
+                        {
+                            Helper.UpdateIndex(modEntry.originalOffset, modEntry.fullPath);
+                            Helper.UpdateIndex2(modEntry.originalOffset, modEntry.fullPath);
+                        }
                     }
                 }
             }
@@ -239,8 +246,11 @@ namespace FFXIV_TexTools2
                     while ((line = sr.ReadLine()) != null)
                     {
                         modEntry = JsonConvert.DeserializeObject<JsonEntry>(line);
-                        Helper.UpdateIndex(modEntry.modOffset, modEntry.fullPath);
-                        Helper.UpdateIndex2(modEntry.modOffset, modEntry.fullPath);
+                        if(modEntry.originalOffset != 0)
+                        {
+                            Helper.UpdateIndex(modEntry.modOffset, modEntry.fullPath);
+                            Helper.UpdateIndex2(modEntry.modOffset, modEntry.fullPath);
+                        }
                     }
                 }
             }

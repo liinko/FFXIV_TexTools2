@@ -324,16 +324,17 @@ namespace FFXIV_TexTools2.IO
 
                                 if (!hasSecondary)
                                 {
-                                    br.ReadBytes(110);
+                                    br.ReadBytes(108);
                                 }
                                 else
                                 {
-                                    br.ReadBytes(106);
+                                    br.ReadBytes(104);
                                 }
 
                                 byte[] slotBytes = br.ReadBytes(4).ToArray();
                                 item.ItemCategory = slotBytes[0].ToString();
 
+                                br.ReadBytes(2);
                                 br.ReadBytes(lastText);
 
                                 item.ItemName = Encoding.UTF8.GetString(br.ReadBytes(entrySize - (lastText + 152))).Replace("\0", "");

@@ -1,0 +1,90 @@
+﻿<Window x:Class="FFXIV_TexTools2.Views.ModelSearch"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:FFXIV_TexTools2.Views"
+        mc:Ignorable="d"
+        Title="ModelSearch" Height="300" Width="450" ResizeMode="NoResize" WindowStartupLocation="CenterOwner">
+    <Window.Resources>
+        <DataTemplate x:Key="SlotBorderTemplate">
+            <Border BorderBrush="#FF000000" BorderThickness="0,0,1,1" Margin="-6,-2,-6,-2">
+                <StackPanel Margin="6,2,6,2">
+                    <TextBlock Text="{Binding Slot}"/>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+        <DataTemplate x:Key="BodyBorderTemplate">
+            <Border BorderBrush="#FF000000" BorderThickness="0,0,1,1" Margin="-6,-2,-6,-2">
+                <StackPanel Margin="6,2,6,2">
+                    <TextBlock Text="{Binding Body}"/>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+        <DataTemplate x:Key="VariantBorderTemplate">
+            <Border BorderBrush="#FF000000" BorderThickness="0,0,1,1" Margin="-6,-2,-6,-2">
+                <StackPanel Margin="6,2,6,2">
+                    <TextBlock Text="{Binding Variant}"/>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+        <DataTemplate x:Key="PartBorderTemplate">
+            <Border BorderBrush="#FF000000" BorderThickness="0,0,0,1" Margin="-6,-2,-6,-2">
+                <StackPanel Margin="6,2,6,2">
+                    <TextBlock Text="{Binding Part}"/>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+
+        <Style x:Key="BorderItemContainerStyle" TargetType="{x:Type ListViewItem}">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Stretch" />
+        </Style>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50*"/>
+            <RowDefinition Height="50*"/>
+            <RowDefinition Height="250*"/>
+            <RowDefinition Height="50*"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <ComboBox Grid.Column="0" Margin="5" ItemsSource="{Binding TypeComboBox}" DisplayMemberPath="Name" SelectedValuePath="Name" SelectedItem="{Binding SelectedType}" SelectedIndex="{Binding TypeIndex}" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+            <TextBox Grid.Column="1" Text="{Binding ModelSearchText}" VerticalContentAlignment="Center" Margin="5"/>
+            <Button Content="Search" Command="{Binding ModelSearchCommand}" Grid.Column="2" Margin="5"/>
+        </Grid>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <ProgressBar Grid.Column="0" Margin="5" Value="{Binding ProgressValue}"/>
+            <Label Content="{Binding ProgressLabel}" Grid.Column="1" VerticalContentAlignment="Center" Padding="0"/>
+        </Grid>
+        <Grid Grid.Row="2">
+            <ListView Margin="5" ItemContainerStyle="{DynamicResource BorderItemContainerStyle}" ItemsSource="{Binding ResultList}" SelectionMode="Single" SelectedItem="{Binding SelectedItem}">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Header="Slot" Width="100" CellTemplate="{DynamicResource SlotBorderTemplate}"/>
+                        <GridViewColumn Header="Body" Width="100" CellTemplate="{DynamicResource BodyBorderTemplate}"/>
+                        <GridViewColumn Header="Variant" Width="100" CellTemplate="{DynamicResource VariantBorderTemplate}"/>
+                        <GridViewColumn Header="Part" Width="100" CellTemplate="{DynamicResource PartBorderTemplate}"/>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+        </Grid>
+        <Grid Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="10*"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Text="{Binding MTRLPath}" IsReadOnly="True" Grid.Column="0" VerticalContentAlignment="Center"/>
+            <Button Content="Open" Grid.Column="1" Command="{Binding OpenCommand}" IsEnabled="{Binding OpenEnabled, FallbackValue=false}"/>
+        </Grid>
+    </Grid>
+</Window>

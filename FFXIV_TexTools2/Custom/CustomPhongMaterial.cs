@@ -113,13 +113,9 @@ namespace HelixToolkit.Wpf.SharpDX
         public static readonly DependencyProperty DisplacementMapProperty =
             DependencyProperty.Register("DisplacementMap", typeof(Stream), typeof(CustomPhongMaterial), new AffectsRenderPropertyMetadata(null));
 
-
-        public static readonly DependencyProperty ColorTableProperty =
-            DependencyProperty.Register("ColorTable", typeof(Stream), typeof(CustomPhongMaterial), new AffectsRenderPropertyMetadata(null));
-
-        public static readonly DependencyProperty MaskMapProperty =
-            DependencyProperty.Register("MaskMap", typeof(Stream), typeof(CustomPhongMaterial), new AffectsRenderPropertyMetadata(null));
-
+        /// <summary>
+        /// 
+        /// </summary>
         public static readonly DependencyProperty SpecularMapProperty =
             DependencyProperty.Register("SpecularMap", typeof(Stream), typeof(CustomPhongMaterial), new AffectsRenderPropertyMetadata(null));
 
@@ -211,18 +207,6 @@ namespace HelixToolkit.Wpf.SharpDX
             set { this.SetValue(DiffuseMapProperty, value); }
         }
 
-        public Stream ColorTable
-        {
-            get { return (Stream)this.GetValue(ColorTableProperty); }
-            set { this.SetValue(ColorTableProperty, value); }
-        }
-
-        public Stream MaskMap
-        {
-            get { return (Stream)this.GetValue(MaskMapProperty); }
-            set { this.SetValue(MaskMapProperty, value); }
-        }
-
         public Stream SpecularMap
         {
             get { return (Stream)this.GetValue(SpecularMapProperty); }
@@ -267,8 +251,6 @@ namespace HelixToolkit.Wpf.SharpDX
                 SpecularShininess = this.SpecularShininess,
                 DiffuseMap = this.DiffuseMap,
                 DiffuseAlphaMap = this.DiffuseAlphaMap,
-                ColorTable = this.ColorTable,
-                MaskMap = this.MaskMap,
                 SpecularMap = this.SpecularMap
             };
         }
@@ -298,16 +280,6 @@ namespace HelixToolkit.Wpf.SharpDX
                 if(DiffuseAlphaMap != null)
                 {
                     DiffuseAlphaMap.Dispose();
-                }
-
-                if(ColorTable != null)
-                {
-                    ColorTable.Dispose();
-                }
-
-                if(MaskMap != null)
-                {
-                    MaskMap.Dispose();
                 }
 
                 if(SpecularMap != null)

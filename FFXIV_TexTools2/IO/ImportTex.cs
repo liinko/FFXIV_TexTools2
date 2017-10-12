@@ -130,7 +130,7 @@ namespace FFXIV_TexTools2.IO
         /// <param name="mtrlData">MTRL data for the currently displayed color set</param>
         /// <param name="category">The items category</param>
         /// <param name="itemName">The items name</param>
-        public static int ImportColor(MTRLData mtrlData, string category, string itemName)
+        public static Tuple<int, byte[]> ImportColor(MTRLData mtrlData, string category, string itemName)
         {
             var savePath = Properties.Settings.Default.Save_Directory + "/" + category + "/" + itemName + "/" + Path.GetFileNameWithoutExtension(mtrlData.MTRLPath) + ".dds";
             int newOffset = 0;
@@ -240,13 +240,16 @@ namespace FFXIV_TexTools2.IO
                 newMTRL.AddRange(new byte[padding]);
 
                 newOffset = WriteToDat(newMTRL, modEntry, inModList, mtrlData.MTRLPath, category, itemName, lineNum);
+
+                return new Tuple<int, byte[]>(newOffset, colorData);
             }
             else
             {
                 MessageBox.Show("Could not find file \n" + savePath, "File read Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return new Tuple<int, byte[]>(0, null);
             }
 
-            return newOffset;
+
         }
 
         /// <summary>
@@ -903,7 +906,8 @@ namespace FFXIV_TexTools2.IO
             headerData.AddRange(BitConverter.GetBytes(2));
             headerData.AddRange(BitConverter.GetBytes((int)fileSize));
             headerData.AddRange(BitConverter.GetBytes(4));
-            headerData.AddRange(BitConverter.GetBytes(paddedSize / 128));
+            //headerData.AddRange(BitConverter.GetBytes(paddedSize / 128));
+            headerData.AddRange(BitConverter.GetBytes(4));
             headerData.AddRange(BitConverter.GetBytes(1));
             headerData.AddRange(BitConverter.GetBytes(0));
             headerData.AddRange(BitConverter.GetBytes((short)paddedSize));

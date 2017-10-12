@@ -303,6 +303,9 @@
   <data name="Waist" xml:space="preserve">
     <value>帯</value>
   </data>
+  <data name="Weapon" xml:space="preserve">
+    <value>武器</value>
+  </data>
   <data name="Wrists" xml:space="preserve">
     <value>腕</value>
   </data>

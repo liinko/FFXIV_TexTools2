@@ -15,6 +15,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using HelixToolkit.Wpf.SharpDX.Core;
+using SharpDX;
+using System.Collections.Generic;
 
 namespace FFXIV_TexTools2.Material
 {
@@ -38,7 +40,14 @@ namespace FFXIV_TexTools2.Material
         /// <summary>
         /// The collection of tangents for the mesh
         /// </summary>
+        public Vector3Collection BiTangents = new Vector3Collection();
+
+
+        /// <summary>
+        /// The collection of tangents for the mesh
+        /// </summary>
         public Vector3Collection Tangents = new Vector3Collection();
+
 
         /// <summary>
         /// The collection of indices for the mesh
@@ -49,6 +58,36 @@ namespace FFXIV_TexTools2.Material
         /// The collection of vertex colors for the mesh
         /// </summary>
         public Color4Collection VertexColors = new Color4Collection();
+
+        /// <summary>
+        /// The list of bone strings
+        /// </summary>
+        public List<string> BoneStrings = new List<string>();
+
+        /// <summary>
+        /// The list of bone Indices
+        /// </summary>
+        public List<int> BoneIndices = new List<int>();
+        
+        /// <summary>
+        /// The list of bone transforms
+        /// </summary>
+        public List<float> BoneTransforms = new List<float>();
+
+        /// <summary>
+        /// The list of blend indices
+        /// </summary>
+        public List<int> BlendIndices = new List<int>();
+
+        /// <summary>
+        /// The list of blend weights
+        /// </summary>
+        public List<float> BlendWeights = new List<float>();
+
+        /// <summary>
+        /// The list of weight coutns
+        /// </summary>
+        public List<int> WeightCounts = new List<int>();
 
         /// <summary>
         /// The mesh data in OBJ format

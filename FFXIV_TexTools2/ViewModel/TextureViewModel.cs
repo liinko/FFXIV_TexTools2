@@ -43,6 +43,7 @@ namespace FFXIV_TexTools2.ViewModel
         TEXData texData;
         MTRLData mtrlData;
         ColorChannels imageEffect;
+        ColorChannels CC = new ColorChannels();
 
         string activeToggle = "Enable/Disable";
         string selectedCategory, imcVersion, fullPath, textureType, textureDimensions, fullPathString, VFXVersion;
@@ -95,7 +96,7 @@ namespace FFXIV_TexTools2.ViewModel
         /// </summary>
         /// <param name="item">The currently selected item</param>
         /// <param name="category">The category of the selected item</param>
-        public TextureViewModel(ItemData item, string category)
+        public void UpdateTexture(ItemData item, string category)
         {
             selectedItem = item;
             selectedCategory = category;
@@ -115,8 +116,44 @@ namespace FFXIV_TexTools2.ViewModel
             {
                 RaceEnabled = false;
             }
+
+            RaceIndex = 0;
         }
 
+        public TextureViewModel()
+        {
+
+        }
+
+        /// <summary>
+        /// View Model for TextureView from ID
+        /// </summary>
+        /// <param name="item">The currently selected item</param>
+        /// <param name="category">The category of the selected item</param>
+        public void UpdateTextureFromID(ItemData item, string raceID, string category, string part, string variant)
+        {
+            selectedItem = item;
+            selectedCategory = category;
+            imcVersion = variant;
+            VFXVersion = "0000";
+
+            RaceComboBox = MTRL.GetMTRLRaces(selectedItem, selectedCategory, imcVersion);
+
+            if (RaceComboBox.Count > 1)
+            {
+                RaceEnabled = true;
+            }
+            else
+            {
+                RaceEnabled = false;
+            }
+
+            RaceIndex = 0;
+
+            //var info = MTRL.GetMTRLData(item, raceID, category, part, variant, "", "", "0000");
+            //MapComboBox = info.Item2;
+            //MapIndex = 0;
+        }
 
         /// <summary>
         /// Command for the Export DDS Button
@@ -169,6 +206,8 @@ namespace FFXIV_TexTools2.ViewModel
             SaveTex.SaveImage(selectedCategory, selectedItem.ItemName, fullPath, ImageSource);
         }
 
+
+
         /// <summary>
         /// Runs the Import method from ImportTex, then updates the displayed image to reflect the changes
         /// </summary>
@@ -177,12 +216,13 @@ namespace FFXIV_TexTools2.ViewModel
         {
             if (SelectedMap.Name.Equals(Strings.ColorSet))
             {
-                int newOffset = ImportTex.ImportColor(mtrlData, selectedCategory, selectedItem.ItemName);
-                if(newOffset != 0)
+                var newData = ImportTex.ImportColor(mtrlData, selectedCategory, selectedItem.ItemName);
+                if(newData.Item1 != 0)
                 {
-                    UpdateImage(newOffset, true);
+                    UpdateImage(newData.Item1, true);
                     ActiveToggle = "Disable";
                     ActiveEnabled = true;
+                    mtrlData.ColorData = newData.Item2;
                 }
             }
             else if (SelectedMap.ID.Contains("vfx"))
@@ -322,7 +362,7 @@ namespace FFXIV_TexTools2.ViewModel
             get { return selectedRace; }
             set
             {
-                if(value.Name != null)
+                if(value != null)
                 {
                     selectedRace = value;
                     NotifyPropertyChanged("SelectedRace");
@@ -746,7 +786,7 @@ namespace FFXIV_TexTools2.ViewModel
         public Bitmap SetAlpha(Bitmap bmp, byte alpha)
         {
             var data = bmp.LockBits(
-                new Rectangle(0, 0, bmp.Width, bmp.Height),
+                new System.Drawing.Rectangle(0, 0, bmp.Width, bmp.Height),
                 ImageLockMode.ReadWrite,
                 PixelFormat.Format32bppArgb);
 
@@ -786,13 +826,15 @@ namespace FFXIV_TexTools2.ViewModel
                 TextureType = "A16B16G16R16F";
                 TextureDimensions = "(4 x 16)";
 
-                alphaBitmap = Imaging.CreateBitmapSourceFromHBitmap(colorBMP.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                alphaBitmap = Imaging.CreateBitmapSourceFromHBitmap(colorBMP.Item1.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
 
-                var removeAlphaBitmap = SetAlpha(colorBMP, 255);
+                var removeAlphaBitmap = SetAlpha(colorBMP.Item1, 255);
 
                 noAlphaBitmap = Imaging.CreateBitmapSourceFromHBitmap(removeAlphaBitmap.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
 
-                colorBMP.Dispose();
+                mtrlData.ColorData = colorBMP.Item2;
+
+                colorBMP.Item1.Dispose();
                 removeAlphaBitmap.Dispose();
             }
             else
@@ -835,7 +877,6 @@ namespace FFXIV_TexTools2.ViewModel
         /// </summary>
         private void SetColorChannelFilter()
         {
-
             float r = RedChecked == true ? 1.0f : 0.0f;
             float g = GreenChecked == true ? 1.0f : 0.0f;
             float b = BlueChecked == true ? 1.0f : 0.0f;
@@ -853,14 +894,12 @@ namespace FFXIV_TexTools2.ViewModel
                 img = noAlphaBitmap;
             }
 
-            ColorChannels CC = new ColorChannels()
-            {
-                Channel = new System.Windows.Media.Media3D.Point4D(r, g, b, a)
-            };
+            CC.Channel = new System.Windows.Media.Media3D.Point4D(r, g, b, a);
 
             ImageEffect = CC;
 
             ImageSource = img;
+
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

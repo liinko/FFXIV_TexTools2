@@ -55,6 +55,9 @@
                 <MenuItem x:Name="Menu_RevertAll" Header="Disable all Mods" Click="Menu_RevertAll_Click" IsEnabled="{Binding ModlistOffEnabled}"/>
                 <MenuItem x:Name="Menu_ReapplyAll" Header="ReEnable All Mods" Click="Menu_ReapplyAll_Click" IsEnabled="{Binding ModlistOffEnabled}"/>
             </MenuItem>
+            <MenuItem Header="Search" StaysOpenOnClick="True">
+                <MenuItem Header="Model ID" Command="{Binding IDSearchCommand}"/>
+            </MenuItem>
             <MenuItem Header="Options" StaysOpenOnClick="True" Height="22">
                 <MenuItem x:Name="Menu_Directories" Header="Directories" Click="Menu_Directories_Click"/>
                 <MenuItem Header="ModList" StaysOpenOnClick="True">

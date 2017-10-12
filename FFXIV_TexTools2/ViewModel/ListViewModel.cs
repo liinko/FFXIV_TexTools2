@@ -22,6 +22,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -119,6 +120,10 @@ namespace FFXIV_TexTools2.ViewModel
             {
                 map = Strings.ColorSet;
             }
+            else if (entry.fullPath.Contains("model"))
+            {
+                map = "3D";
+            }
             else
             {
                 map = Strings.Mask;
@@ -190,6 +195,10 @@ namespace FFXIV_TexTools2.ViewModel
                 var bitmap = TEX.TextureToBitmap(info.ColorData, 9312, 4, 16);
 
                 mlm.BMP = Imaging.CreateBitmapSourceFromHBitmap(bitmap.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+            }
+            else if (entry.fullPath.Contains("model"))
+            {
+                mlm.BMP = new BitmapImage(new Uri("pack://application:,,,/FFXIV TexTools 2;component/Resources/3DModel.png"));
             }
             else
             {

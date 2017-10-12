@@ -18,6 +18,7 @@ using FFXIV_TexTools2.Model;
 using FFXIV_TexTools2.Resources;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
@@ -795,8 +796,7 @@ namespace FFXIV_TexTools2.Helpers
                         int folderPathHash = br.ReadInt32();
 
                         if (pathPart.Keys.Contains(folderPathHash))
-                        {
-                            
+                        {                          
                             parts.Add(new ComboBoxInfo() { Name = pathPart[folderPathHash].ToString(), ID = pathPart[folderPathHash].ToString(), IsNum = true });
                         }
                         br.ReadBytes(4);

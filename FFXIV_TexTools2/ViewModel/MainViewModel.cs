@@ -36,9 +36,9 @@ namespace FFXIV_TexTools2.ViewModel
 {
     public class MainViewModel : INotifyPropertyChanged
     {
-        string searchText;
-        TextureViewModel TVM;
-        ModelViewModel MVM;
+        string searchText, modelText, variantText;
+        TextureViewModel TVM = new TextureViewModel();
+        ModelViewModel MVM = new ModelViewModel();
         List<ItemData> itemList;
         ObservableCollection<ItemData> oItemList;
         ObservableCollection<CategoryViewModel> _categories;
@@ -70,6 +70,8 @@ namespace FFXIV_TexTools2.ViewModel
         public TextureViewModel TextureVM { get { return TVM; } set { TVM = value; NotifyPropertyChanged("TextureVM"); } }
         public ModelViewModel ModelVM { get { return MVM; } set { MVM = value; NotifyPropertyChanged("ModelVM"); } }
 
+        public string ModelText { get { return modelText; } set { modelText = value; } }
+        public string VariantText { get { return variantText; } set { variantText = value; } }
 
         /// <summary>
         /// View Model Constructor for Main Window
@@ -169,6 +171,7 @@ namespace FFXIV_TexTools2.ViewModel
 
             }
 
+            CheckVersion();
             MakeModContainers();
             FillTree();
             SetEventHandler();
@@ -188,6 +191,14 @@ namespace FFXIV_TexTools2.ViewModel
         public ICommand ModListOffCommand
         {
             get { return new RelayCommand(ModlistOff); }
+        }
+
+        /// <summary>
+        /// Command for the ModList Menu
+        /// </summary>
+        public ICommand IDSearchCommand
+        {
+            get { return new RelayCommand(IDSearch); }
         }
 
         private void ModlistOff(object obj)
@@ -214,6 +225,14 @@ namespace FFXIV_TexTools2.ViewModel
             ModlistOffEnabled = true;
             ModlistOffChecked = false;
         }
+
+
+        private void IDSearch(object obj)
+        {
+            ModelSearch modelSearch = new ModelSearch(this);
+            modelSearch.Show();
+        }
+
 
         /// <summary>
         /// Asks for game directory and sets default save directory
@@ -312,8 +331,6 @@ namespace FFXIV_TexTools2.ViewModel
             {
                 CreateDat.CreateModList();
             }
-
-
         }
 
         /// <summary>
@@ -415,13 +432,13 @@ namespace FFXIV_TexTools2.ViewModel
 
             if (itemVM.IsSelected)
             {
-                //dispose of the data from teh previously selected item
+                //dispose of the data from the previously selected item
                 if(ModelVM != null)
                 {
                     ModelVM.Dispose();
                 }
 
-                TextureVM = new TextureViewModel(itemVM.Item, ((CategoryViewModel)itemVM.Parent).CategoryName);
+                TextureVM.UpdateTexture(itemVM.Item, ((CategoryViewModel)itemVM.Parent).CategoryName);
 
                 if(itemVM.ItemName.Equals(Strings.Face_Paint) || itemVM.ItemName.Equals(Strings.Equipment_Decals))
                 {
@@ -432,11 +449,24 @@ namespace FFXIV_TexTools2.ViewModel
                 }
                 else
                 {
-                    ModelVM = new ModelViewModel(itemVM.Item, ((CategoryViewModel)itemVM.Parent).CategoryName);
+                    ModelVM.UpdateModel(itemVM.Item, ((CategoryViewModel)itemVM.Parent).CategoryName);
                     ModelVM.ModelTabEnabled = true;
                 }
             }
         }
+
+        public void OpenID(ItemData item, string race, string category, string part, string variant)
+        {
+            if(ModelVM != null)
+            {
+                ModelVM.Dispose();
+            }
+
+            TextureVM.UpdateTextureFromID(item, race, category, part, variant);
+            ModelVM.UpdateModel(item, category);
+            ModelVM.ModelTabEnabled = true;
+        }
+
 
 
         /// <summary>

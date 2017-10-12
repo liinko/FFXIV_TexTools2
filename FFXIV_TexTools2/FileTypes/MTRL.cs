@@ -20,6 +20,7 @@ using FFXIV_TexTools2.Resources;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -67,6 +68,11 @@ namespace FFXIV_TexTools2.Material
                 foreach (string race in Info.IDRace.Keys)
                 {
                     MTRLFolder = String.Format(Strings.FaceMtrlFolder, race, "0001");
+                    if(race.Equals("0301") || race.Equals("0304") || race.Equals("0401") || race.Equals("0404"))
+                    {
+                        MTRLFolder = String.Format(Strings.FaceMtrlFolder, race, "0101");
+
+                    }
 
                     racesDict.Add(FFCRC.GetHash(MTRLFolder), race);
                 }
@@ -101,7 +107,7 @@ namespace FFXIV_TexTools2.Material
                 ComboBoxInfo cbi = new ComboBoxInfo() { Name = Strings.All, ID = "0",  IsNum = true };
                 cbiList.Add(cbi);
             }
-            else if (selectedCategory.Equals(Strings.Pets) || selectedCategory.Equals(Strings.Mounts) || selectedCategory.Equals(Strings.Minions))
+            else if (selectedCategory.Equals(Strings.Pets) || selectedCategory.Equals(Strings.Mounts) || selectedCategory.Equals(Strings.Minions) || selectedCategory.Equals(Strings.Monster))
             {
                 cbiList = new ObservableCollection<ComboBoxInfo>();
                 ComboBoxInfo cbi = new ComboBoxInfo() { Name = Strings.Monster, ID = "0", IsNum = true };
@@ -123,7 +129,6 @@ namespace FFXIV_TexTools2.Material
                 {
                     foreach (string raceID in Info.raceID.Values)
                     {
-                        Console.WriteLine(selectedCategory);
                         var MTRLFile = String.Format(Strings.EquipMtrlFile, raceID, item.PrimaryModelID, Info.slotAbr[selectedCategory], "a");
                     
                         var fileHash = FFCRC.GetHash(MTRLFile);
@@ -678,6 +683,7 @@ namespace FFXIV_TexTools2.Material
                 }
 
                 MTRLPath = MTRLFolder + "/" + MTRLFile;
+
                 offset = Helper.GetItemOffset(FFCRC.GetHash(MTRLFolder), FFCRC.GetHash(MTRLFile));
             }
             else if (selectedCategory.Equals(Strings.Mounts))
@@ -743,7 +749,9 @@ namespace FFXIV_TexTools2.Material
 
             MTRLData mtrlInfo = new MTRLData();
 
-            using (BinaryReader br = new BinaryReader(new MemoryStream(Helper.GetType2DecompressedData(offset, datNum))))
+            var decompData = Helper.GetType2DecompressedData(offset, datNum);
+
+            using (BinaryReader br = new BinaryReader(new MemoryStream(decompData)))
             {
                 br.BaseStream.Seek(6, SeekOrigin.Begin);
                 short colorDataSize = br.ReadInt16();
@@ -890,7 +898,7 @@ namespace FFXIV_TexTools2.Material
         /// </summary>
         /// <param name="offset">The offset of the MTRL file</param>
         /// <returns>Bitmap from the colorset</returns>
-        public static Bitmap GetColorBitmap(int offset)
+        public static Tuple<Bitmap, byte[]> GetColorBitmap(int offset)
         {
             int datNum = ((offset / 8) & 0x000f) / 2;
             byte[] colorData = null;
@@ -925,7 +933,7 @@ namespace FFXIV_TexTools2.Material
                 }
             }
 
-            return TEX.TextureToBitmap(colorData, 9312, 4, 16);
+            return new Tuple<Bitmap, byte[]>(TEX.TextureToBitmap(colorData, 9312, 4, 16), colorData);
         }
 
         /// <summary>

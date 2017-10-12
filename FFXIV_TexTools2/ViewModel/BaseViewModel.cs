@@ -208,6 +208,12 @@ namespace FFXIV_TexTools2.ViewModel
                     var effectManager = EffectsManager as IDisposable;
                     Disposer.RemoveAndDispose(ref effectManager);
                 }
+
+                if(RenderTechniquesManager != null)
+                {
+                    var renderTechniquesManager = RenderTechniquesManager as IDisposable;
+                    Disposer.RemoveAndDispose(ref renderTechniquesManager);
+                }
                 disposedValue = true;
                 GC.SuppressFinalize(this);
             }

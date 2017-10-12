@@ -303,6 +303,9 @@
   <data name="Waist" xml:space="preserve">
     <value>Waist</value>
   </data>
+  <data name="Weapon" xml:space="preserve">
+    <value>Weapon</value>
+  </data>
   <data name="Wrists" xml:space="preserve">
     <value>Wrists</value>
   </data>

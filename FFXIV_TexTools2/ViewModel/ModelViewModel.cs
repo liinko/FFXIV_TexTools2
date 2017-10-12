@@ -19,11 +19,14 @@ using FFXIV_TexTools2.IO;
 using FFXIV_TexTools2.Material;
 using FFXIV_TexTools2.Model;
 using FFXIV_TexTools2.Resources;
+using HelixToolkit.Wpf.SharpDX;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
@@ -34,17 +37,18 @@ namespace FFXIV_TexTools2.ViewModel
 {
     public class ModelViewModel : INotifyPropertyChanged
     {
-        TEXData texInfo;
-        MTRLData mtrlInfo;
         ItemData selectedItem;
         List<ModelMeshData> meshList;
         List<string> materialStrings;
         List<MDLTEXData> meshData;
-        Composite3DViewModel CVM = new Composite3DViewModel();
+        List<ComboBoxInfo> cbi = new List<ComboBoxInfo>();
+        Composite3DViewModel CVM;
 
         int raceIndex, meshIndex, bodyIndex, partIndex;
         bool raceEnabled, meshEnabled, bodyEnabled, partEnabled, modelRendering, secondModelRendering, thirdModelRendering, is3DLoaded, disposing, modelTabEnabled;
-        string selectedCategory, reflectionAmount, modelName;
+        bool import3dEnabled, activeEnabled;
+        string selectedCategory, reflectionAmount, modelName, fullPath;
+        string activeToggle = "Enable/Disable";
 
         private ObservableCollection<ComboBoxInfo> raceComboInfo = new ObservableCollection<ComboBoxInfo>();
         private ObservableCollection<ComboBoxInfo> meshComboInfo = new ObservableCollection<ComboBoxInfo>();
@@ -62,6 +66,8 @@ namespace FFXIV_TexTools2.ViewModel
         public int PartIndex { get { return partIndex; } set { partIndex = value; NotifyPropertyChanged("PartIndex"); } }
 
         public string ReflectionAmount { get { return reflectionAmount; } set { reflectionAmount = value; NotifyPropertyChanged("ReflectionAmount"); } }
+        public string ActiveToggle { get { return activeToggle; } set { activeToggle = value; NotifyPropertyChanged("ActiveToggle"); } }
+
 
         public bool RaceEnabled { get { return raceEnabled; } set { raceEnabled = value; NotifyPropertyChanged("RaceEnabled"); } }
         public bool MeshEnabled { get { return meshEnabled; } set { meshEnabled = value; NotifyPropertyChanged("MeshEnabled"); } }
@@ -69,6 +75,9 @@ namespace FFXIV_TexTools2.ViewModel
         public bool PartEnabled { get { return partEnabled; } set { partEnabled = value; NotifyPropertyChanged("PartEnabled"); } }
 
         public bool ModelTabEnabled { get { return modelTabEnabled; } set { modelTabEnabled = value; NotifyPropertyChanged("ModelTabEnabled"); } }
+        public bool Import3DEnabled { get { return import3dEnabled; } set { import3dEnabled = value; NotifyPropertyChanged("Import3DEnabled"); } }
+        public bool ActiveEnabled { get { return activeEnabled; } set { activeEnabled = value; NotifyPropertyChanged("ActiveEnabled"); } }
+
 
         public bool ModelRendering { get { return modelRendering; } set { modelRendering = value; NotifyPropertyChanged("ModelRendering"); } }
         public bool SecondModelRendering { get { return secondModelRendering; } set { secondModelRendering = value; NotifyPropertyChanged("SecondModelRendering"); } }
@@ -76,20 +85,23 @@ namespace FFXIV_TexTools2.ViewModel
 
         public Composite3DViewModel CompositeVM { get { return CVM; } set { CVM = value; NotifyPropertyChanged("CompositeVM"); } }
 
-        /// <summary>
-        /// View Model for model view.
-        /// </summary>
-        /// <param name="item">the currently selcted item.</param>
-        /// <param name="category">The category of the item.</param>
-        public ModelViewModel(ItemData item, string category)
+        public ModelViewModel()
         {
+            CompositeVM = new Composite3DViewModel();
+        }
+
+        public void UpdateModel(ItemData item, string category)
+        {
+            CompositeVM.Dispose();
+            cbi.Clear();
+
             selectedItem = item;
             selectedCategory = category;
 
             try
             {
                 string categoryType = Helper.GetCategoryType(selectedCategory);
-                List<ComboBoxInfo> cbi = new List<ComboBoxInfo>();
+
                 string MDLFolder = "";
                 string MDLFile = "";
 
@@ -143,6 +155,12 @@ namespace FFXIV_TexTools2.ViewModel
                             for (int i = 0; i < 3; i++)
                             {
                                 var mdlFolder = String.Format(MDLFolder, raceID, i.ToString().PadLeft(4, '0'));
+                                if (selectedItem.ItemName.Equals(Strings.Face) && (raceID.Equals("0301") || raceID.Equals("0304") || raceID.Equals("0401") || raceID.Equals("0404")))
+                                {
+                                   mdlFolder = String.Format(MDLFolder, raceID, "01" + i.ToString().PadLeft(2, '0'));
+
+                                }
+
 
                                 if (Helper.FolderExists(FFCRC.GetHash(mdlFolder)))
                                 {
@@ -218,11 +236,12 @@ namespace FFXIV_TexTools2.ViewModel
 
             if (selectedItem.ItemName.Equals(Strings.Face) || selectedItem.ItemName.Equals(Strings.Face))
             {
-                ReflectionAmount = String.Format("{0:0.##}", CompositeVM.ModelMaterial.SpecularShininess);
+                
+                ReflectionAmount = String.Format("{0:0.##}", CompositeVM.CurrentSS);
             }
             else
             {
-                ReflectionAmount = String.Format("{0:0.##}", CompositeVM.SecondModelMaterial.SpecularShininess);
+                ReflectionAmount = String.Format("{0:0.##}", CompositeVM.CurrentSS);
             }
         }
 
@@ -258,13 +277,113 @@ namespace FFXIV_TexTools2.ViewModel
         private void ExportOBJ(object obj)
         {
             SaveModel.Save(selectedCategory, modelName, SelectedMesh.ID, selectedItem.ItemName, meshData, meshList);
+
+            if (!selectedCategory.Equals(Strings.Pets) && !selectedCategory.Equals(Strings.Mounts) && !selectedCategory.Equals(Strings.Minions))
+            {
+                try
+                {
+                    SaveModel.SaveCollada(selectedCategory, modelName, SelectedMesh.ID, selectedItem.ItemName, meshData, meshList);
+                    Import3DEnabled = true;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("[Collada] Error saving .dae File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+
+            }
         }
-        
+
+        /// <summary>
+        /// Command for the Import OBJ button
+        /// </summary>
+        public ICommand ImportOBJCommand
+        {
+            get { return new RelayCommand(ImportOBJ); }
+        }
+
+        /// <summary>
+        /// Imports the model
+        /// </summary>
+        /// <param name="obj"></param>
+        private void ImportOBJ(object obj)
+        {
+            ImportModel.ImportDAE(selectedCategory, selectedItem.ItemName, modelName, SelectedMesh.ID, fullPath);
+            UpdateModel(selectedItem, selectedCategory);
+        }
+
+        /// <summary>
+        /// Command for the Revert OBJ button
+        /// </summary>
+        public ICommand RevertOBJCommand
+        {
+            get { return new RelayCommand(RevertOBJ); }
+        }
+
+        /// <summary>
+        /// Reverts the model
+        /// </summary>
+        /// <param name="obj"></param>
+        private void RevertOBJ(object obj)
+        {
+            JsonEntry modEntry = null;
+            string line;
+
+            try
+            {
+                using (StreamReader sr = new StreamReader(Info.modListDir))
+                {
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        modEntry = JsonConvert.DeserializeObject<JsonEntry>(line);
+                        if (modEntry.fullPath.Equals(fullPath))
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("[Main] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+            if (modEntry != null)
+            {
+                int offset = 0;
+
+                if (ActiveToggle.Equals("Enable"))
+                {
+                    offset = modEntry.modOffset;
+                    Helper.UpdateIndex(offset, fullPath);
+                    Helper.UpdateIndex2(offset, fullPath);
+                    ActiveToggle = "Disable";
+                }
+                else if (ActiveToggle.Equals("Disable"))
+                {
+                    offset = modEntry.originalOffset;
+                    Helper.UpdateIndex(offset, fullPath);
+                    Helper.UpdateIndex2(offset, fullPath);
+                    ActiveToggle = "Enable";
+                }
+            }
+
+            UpdateModel(selectedItem, selectedCategory);
+        }
+
+
         /// <summary>
         /// Disposes of the view model data
         /// </summary>
         public void Dispose()
         {
+            if(selectedItem != null)
+            {
+                selectedItem = null;
+                meshList = null;
+                materialStrings = null;
+                meshData = null;
+            }
+
             if (CompositeVM != null)
             {
                 CompositeVM.Dispose();
@@ -295,7 +414,7 @@ namespace FFXIV_TexTools2.ViewModel
             get { return selectedRace; }
             set
             {
-                if (value.Name != null)
+                if (value != null)
                 {
                     selectedRace = value;
                     NotifyPropertyChanged("SelectedRace");
@@ -364,7 +483,7 @@ namespace FFXIV_TexTools2.ViewModel
 
             if (categoryType.Equals("character"))
             {
-                for (int i = 0; i < 50; i++)
+                for (int i = 0; i < 250; i++)
                 {
                     string folder = String.Format(MDLFolder, i.ToString().PadLeft(4, '0'));
 
@@ -606,6 +725,7 @@ namespace FFXIV_TexTools2.ViewModel
                 meshList = mdl.GetMeshList();
                 modelName = mdl.GetModelName();
                 materialStrings = mdl.GetMaterialStrings();
+                fullPath = mdl.GetInternalPath();
 
                 cbi.Add(new ComboBoxInfo() { Name = Strings.All, ID = Strings.All, IsNum = false });
 
@@ -695,26 +815,46 @@ namespace FFXIV_TexTools2.ViewModel
                     {
                         if (selectedItem.ItemName.Equals(Strings.Tail) || selectedItem.ItemName.Equals(Strings.Hair))
                         {
-                            normalData = TEX.GetTex(mtrlData.NormalOffset);
-                            specularData = TEX.GetTex(mtrlData.SpecularOffset);
-
-                            if (mtrlData.DiffusePath != null)
+                            if(mtrlData.MaskPath != null)
                             {
-                                diffuseData = TEX.GetTex(mtrlData.DiffuseOffset);
+                                normalData = TEX.GetTex(mtrlData.NormalOffset);
+                                maskData = TEX.GetTex(mtrlData.MaskOffset);
+                                var colorBmp = TEX.TextureToBitmap(mtrlData.ColorData, 9312, 4, 16);
+                                colorBMP = Imaging.CreateBitmapSourceFromHBitmap(colorBmp.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+
+                                var maps = TexHelper.MakeModelTextureMaps(normalData, null, maskData, null, colorBMP);
+
+                                diffuseBMP = maps[0];
+                                specularBMP = maps[1];
+                                normalBMP = maps[2];
+                                alphaBMP = maps[3];
+
+                                normalData.Dispose();
+                                maskData.Dispose();
                             }
-
-                            var maps = TexHelper.MakeCharacterMaps(normalData, diffuseData, null, specularData);
-
-                            diffuseBMP = maps[0];
-                            specularBMP = maps[1];
-                            normalBMP = maps[2];
-                            alphaBMP = maps[3];
-
-                            specularData.Dispose();
-                            normalData.Dispose();
-                            if (diffuseData != null)
+                            else
                             {
-                                diffuseData.Dispose();
+                                normalData = TEX.GetTex(mtrlData.NormalOffset);
+                                specularData = TEX.GetTex(mtrlData.SpecularOffset);
+
+                                if (mtrlData.DiffusePath != null)
+                                {
+                                    diffuseData = TEX.GetTex(mtrlData.DiffuseOffset);
+                                }
+
+                                var maps = TexHelper.MakeCharacterMaps(normalData, diffuseData, null, specularData);
+
+                                diffuseBMP = maps[0];
+                                specularBMP = maps[1];
+                                normalBMP = maps[2];
+                                alphaBMP = maps[3];
+
+                                specularData.Dispose();
+                                normalData.Dispose();
+                                if (diffuseData != null)
+                                {
+                                    diffuseData.Dispose();
+                                }
                             }
                         }
 
@@ -838,11 +978,9 @@ namespace FFXIV_TexTools2.ViewModel
                     var mData = new MDLTEXData()
                     {
                         Specular = specularBMP,
-                        ColorTable = colorBMP,
                         Diffuse = diffuseBMP,
                         Normal = normalBMP,
                         Alpha = alphaBMP,
-                        Mask = maskBMP,
 
                         IsBody = isBody,
                         IsFace = isFace,
@@ -853,19 +991,76 @@ namespace FFXIV_TexTools2.ViewModel
                     meshData.Add(mData);
                 }
 
-                CompositeVM = new Composite3DViewModel(meshData);
+                CompositeVM = new Composite3DViewModel();
+                CompositeVM.UpdateModel(meshData);
 
                 is3DLoaded = true;
 
-                ReflectionAmount = String.Format("{0:.##}", CompositeVM.SecondModelMaterial.SpecularShininess);
+                ReflectionAmount = String.Format("{0:.##}", CompositeVM.CurrentSS);
 
-                try
+                if (File.Exists(Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selectedItem.ItemName + "/3D/" + modelName + ".DAE"))
                 {
-
+                    Import3DEnabled = true;
                 }
-                catch (Exception ex)
+                else
                 {
-                    MessageBox.Show("[Main] mesh 3D Error \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    Import3DEnabled = false;
+                }
+
+                if (Properties.Settings.Default.Mod_List == 0)
+                {
+                    string line;
+                    JsonEntry modEntry = null;
+                    bool inModList = false;
+                    try
+                    {
+                        using (StreamReader sr = new StreamReader(Info.modListDir))
+                        {
+                            while ((line = sr.ReadLine()) != null)
+                            {
+                                modEntry = JsonConvert.DeserializeObject<JsonEntry>(line);
+                                if (modEntry.fullPath.Equals(fullPath))
+                                {
+                                    inModList = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("[Main] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+
+                    if (inModList)
+                    {
+                        var currOffset = Helper.GetItemOffset(FFCRC.GetHash(modEntry.fullPath.Substring(0, modEntry.fullPath.LastIndexOf("/"))), FFCRC.GetHash(Path.GetFileName(modEntry.fullPath)));
+
+                        if (currOffset == modEntry.modOffset)
+                        {
+                            ActiveToggle = "Disable";
+                        }
+                        else if (currOffset == modEntry.originalOffset)
+                        {
+                            ActiveToggle = "Enable";
+                        }
+                        else
+                        {
+                            ActiveToggle = "Error";
+                        }
+
+                        ActiveEnabled = true;
+                    }
+                    else
+                    {
+                        ActiveEnabled = false;
+                        ActiveToggle = "Enable/Disable";
+                    }
+                }
+                else
+                {
+                    ActiveEnabled = false;
+                    ActiveToggle = "Enable/Disable";
                 }
             }
             else
@@ -907,9 +1102,9 @@ namespace FFXIV_TexTools2.ViewModel
                     {
                         var race = materialStrings[mesh].Substring(materialStrings[mesh].IndexOf("c") + 1, 4);
 
-                        if (materialStrings[mesh].Contains("h00"))
+                        if (materialStrings[mesh].Contains("h0"))
                         {
-                            var hairNum = materialStrings[mesh].Substring(materialStrings[mesh].IndexOf("h00") + 1, 4);
+                            var hairNum = materialStrings[mesh].Substring(materialStrings[mesh].IndexOf("h0") + 1, 4);
                             var mtrlFolder = string.Format(Strings.HairMtrlFolder, race, hairNum);
                             slotAbr = materialStrings[mesh].Substring(materialStrings[mesh].LastIndexOf("_") - 3, 3);
                             slotAbr = Info.HairTypes.FirstOrDefault(x => x.Value == slotAbr).Key;
@@ -917,9 +1112,9 @@ namespace FFXIV_TexTools2.ViewModel
                             var hairInfo = MTRL.GetMTRLDatafromType(selectedItem, SelectedRace, hairNum, slotAbr, itemVersion, selectedCategory);
                             return hairInfo.Item1;
                         }
-                        else if (materialStrings[mesh].Contains("f00"))
+                        else if (materialStrings[mesh].Contains("f0"))
                         {
-                            var faceNum = materialStrings[mesh].Substring(materialStrings[mesh].IndexOf("f00") + 1, 4);
+                            var faceNum = materialStrings[mesh].Substring(materialStrings[mesh].IndexOf("f0") + 1, 4);
                             var mtrlFolder = string.Format(Strings.FaceMtrlFolder, race, faceNum);
                             slotAbr = materialStrings[mesh].Substring(materialStrings[mesh].LastIndexOf("_") - 3, 3);
                             slotAbr = Info.FaceTypes.FirstOrDefault(x => x.Value == slotAbr).Key;

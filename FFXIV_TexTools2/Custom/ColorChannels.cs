@@ -29,8 +29,10 @@ namespace FFXIV_TexTools2.Shader
     {
         public static readonly DependencyProperty InputProperty = RegisterPixelShaderSamplerProperty("Input", typeof(ColorChannels), 0);
 
+        //public static readonly DependencyProperty ChannelProperty = DependencyProperty.Register("Channels", typeof(Point4D), typeof(ColorChannels),
+        //     new UIPropertyMetadata(new Point4D(1.0f, 1.0f, 1.0f, 1.0f), PixelShaderConstantCallback(0)));
         public static readonly DependencyProperty ChannelProperty = DependencyProperty.Register("Channels", typeof(Point4D), typeof(ColorChannels),
-             new UIPropertyMetadata(new Point4D(1.0f, 1.0f, 1.0f, 1.0f), PixelShaderConstantCallback(0)));
+     new UIPropertyMetadata(new Point4D(1.0f, 1.0f, 1.0f, 1.0f), PixelShaderConstantCallback(0)));
 
         private static PixelShader _pixelShader = new PixelShader()
         { UriSource = new Uri("pack://application:,,,/FFXIV TexTools 2;component/Custom/rgbaChannels.cso") };
@@ -44,6 +46,10 @@ namespace FFXIV_TexTools2.Shader
         public ColorChannels()
         {
             PixelShader = _pixelShader;
+
+            var ei = typeof(PixelShader).GetEvent("_shaderBytecodeChanged", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            var fi = typeof(PixelShader).GetField(ei.Name, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            fi.SetValue(_pixelShader, null);
 
             UpdateShaderValue(InputProperty);
             UpdateShaderValue(ChannelProperty);
