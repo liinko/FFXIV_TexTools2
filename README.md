@@ -2,29 +2,32 @@
 # FFXIV TexTools 2 by Liinko
 This is a more feature rich WPF implementation of FFXIV TexTools and replaced FFXIV TexTools.
 
-# Current Version: 1.1
+# Current Version: 1.2
 ChangeLog:
-Updated HelixToolkit and SharpDX versions.
-        
+
 Application:
- - Now works with 4.1 Patch.
- - Added Search > Model ID option in menu.
- - (Experimenta/Beta)Importing Models is now possible.
- - Should now be more memory efficient.
+ - Added DemiHuman category to Model Search.
+ - Folder select dialog now reappears if incorrect folder is selected.
  
+Textures:
+ - Added _stigma.tex to Equipment Decals
+
 3D:
- - Export Model + Materials now exports a Collada .dae file as well as .obj files.
- - Exported .dae files are skinned (include skeleton & blend weights).
- - Note: Not all models are exportable as .dae yet.
- - Changed culling mode.
- - A few tweaks to the shader.
+ - Meshes exported in .dae file are now separated into parts to reflect MDL structure.
+ - Improved importing, it should work with most equipment.
+ - Alpha texture for 3D files now exports separately.
  
 Bug Fixes:
- - Fixed a bug that would prevent using 'Disable All Mods' and 'ReEnable All Mods'.
- - Fixed colorset crashing under certain circumstances.
- - Fixed an issue where updated image would not stay after importing or enabling/disabling colorsets.
- - Fixed an issue where certain Hyur Highlander textures/models would not appear.
+ - Fixed an issue where certain model IDs would not appear in search results list.
+ - Fixed an issue where other windows would stay open when main window was closed.
+ - Fixed an issue where certain items with VFX files would crash due to being read incorrectly.
+ - Fixed an issue where certain models for MCH weapons would not be displayed.
+ - Fixed an issue where application would not check if a newer version was available.
  - Other minor bug fixes.
+
+Know Issues:
+ - Not all models are exportable as .dae.
+ - Importing faces appear correctly in TexTools, but crash the game.
 
 Not Yet Implemented:
 * Mod Importer
