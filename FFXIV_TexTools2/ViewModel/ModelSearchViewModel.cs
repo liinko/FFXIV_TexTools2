@@ -20,6 +20,7 @@ using FFXIV_TexTools2.Resources;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Windows.Input;
 
 namespace FFXIV_TexTools2.ViewModel
@@ -70,6 +71,8 @@ namespace FFXIV_TexTools2.ViewModel
             typeComboInfo.Add(new ComboBoxInfo() { Name = "Weapon", ID = "Weapon" });
             typeComboInfo.Add(new ComboBoxInfo() { Name = "Accessory", ID = "Accessory" });
             typeComboInfo.Add(new ComboBoxInfo() { Name = "Monster", ID = "Monster" });
+            typeComboInfo.Add(new ComboBoxInfo() { Name = "DemiHuman", ID = "DemiHuman" });
+
 
             TypeIndex = 0;
         }
@@ -179,6 +182,11 @@ namespace FFXIV_TexTools2.ViewModel
                 folder = Strings.MonsterMtrlFolder;
                 file = Strings.MonsterMtrlFile;
             }
+            else if (SelectedType.Name.Equals("DemiHuman"))
+            {
+                folder = Strings.DemiMtrlFolder;
+                file = Strings.DemiMtrlFile;
+            }
 
             string MTRLFolder = "";
             string MTRLFile = "";
@@ -262,6 +270,11 @@ namespace FFXIV_TexTools2.ViewModel
                 folder = Strings.MonsterMtrlFolder;
                 file = Strings.MonsterMtrlFile;
             }
+            else if (SelectedType.Name.Equals("DemiHuman"))
+            {
+                folder = Strings.DemiMtrlFolder;
+                file = Strings.DemiMtrlFile;
+            }
 
 
             if (SelectedType.Name.Equals(Strings.Equipment) || SelectedType.Name.Equals(Strings.Accessory))
@@ -279,29 +292,97 @@ namespace FFXIV_TexTools2.ViewModel
                 }
                 int var = 0;
 
-                foreach (int v in variantList)
+                if(variantList.Count > 0)
                 {
-                    slotList.Add(v, new List<string>());
-                    var eFolder = string.Format(folder, searchText.PadLeft(4, '0')) + v.ToString().PadLeft(4, '0');
+                    foreach (int v in variantList)
+                    {
+                        slotList.Add(v, new List<string>());
+                        var eFolder = string.Format(folder, searchText.PadLeft(4, '0')) + v.ToString().PadLeft(4, '0');
 
-                    var files = Helper.GetAllFilesInFolder(FFCRC.GetHash(eFolder));
+                        var files = Helper.GetAllFilesInFolder(FFCRC.GetHash(eFolder));
+
+                        if (SelectedType.Name.Equals(Strings.Accessory))
+                        {
+                            foreach (var s in acSlots)
+                            {
+                                foreach (var p in parts)
+                                {
+                                    var aFile = string.Format(file, searchText.PadLeft(4, '0'), s, p);
+
+                                    var fileHash = FFCRC.GetHash(aFile);
+                                    if (files.Contains(fileHash))
+                                    {
+                                        workList.Add(new SearchItems() { Race = Info.IDRace["0101"], RaceID = "0101", Slot = accSlotDict[s], SlotAbr = s, SlotID = Info.IDSlot[accSlotDict[s]], Body = "-", Variant = v.ToString(), Part = p });
+                                    }
+
+                                    ProgressLabel = "Slot: " + s + "Part: " + p;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            foreach (var r in Info.IDRace.Keys)
+                            {
+                                foreach (var s in eqSlots)
+                                {
+                                    foreach (var p in parts)
+                                    {
+                                        var eFile = string.Format(file, r, searchText.PadLeft(4, '0'), s, p);
+
+                                        var fileHash = FFCRC.GetHash(eFile);
+                                        if (files.Contains(fileHash))
+                                        {
+                                            if (!slotList[v].Contains(s))
+                                            {
+                                                slotList[v].Add(s);
+                                                workList.Add(new SearchItems() { Race = Info.IDRace[r], RaceID = r, Slot = equipSlotDict[s], SlotAbr = s, SlotID = Info.IDSlot[equipSlotDict[s]], Body = "-", Variant = v.ToString(), Part = p });
+                                            }
+                                        }
+                                        ProgressLabel = "Race: " + r + " Slot: " + s + "Part: " + p;
+                                    }
+                                }
+                            }
+                        }
+                        int prog = (int)(((double)var / Info.IDRace.Count) * 100f);
+                        worker.ReportProgress(prog);
+                        var++;
+                    }
+                }
+                else
+                {
+                    folder = Strings.EquipMDLFolder;
+                    file = Strings.EquipMDLFile;
+
+                    if (SelectedType.Name.Equals(Strings.Accessory))
+                    {
+                        folder = Strings.AccMDLFolder;
+                        file = Strings.AccMDLFile;
+                    }
+
+                    var folderCheck = string.Format(folder, searchText.PadLeft(4, '0'));
+
+                    if (Helper.FolderExists(FFCRC.GetHash(folderCheck)))
+                    {
+                        variantList.Add(1);
+                    }
+
+                    slotList.Add(1, new List<string>());
+
+                    var files = Helper.GetAllFilesInFolder(FFCRC.GetHash(folderCheck));
 
                     if (SelectedType.Name.Equals(Strings.Accessory))
                     {
                         foreach (var s in acSlots)
                         {
-                            foreach (var p in parts)
+                            var aFile = string.Format(file, "0101", searchText.PadLeft(4, '0'), s);
+
+                            var fileHash = FFCRC.GetHash(aFile);
+                            if (files.Contains(fileHash))
                             {
-                                var aFile = string.Format(file, searchText.PadLeft(4, '0'), s, p);
-
-                                var fileHash = FFCRC.GetHash(aFile);
-                                if (files.Contains(fileHash))
-                                {
-                                    workList.Add(new SearchItems() { Race = Info.IDRace["0101"], RaceID = "0101", Slot = accSlotDict[s], SlotAbr = s, SlotID = Info.IDSlot[accSlotDict[s]], Body = "-", Variant = v.ToString(), Part = p });
-                                }
-
-                                ProgressLabel = "Slot: " + s + "Part: " + p;
+                                workList.Add(new SearchItems() { Race = Info.IDRace["0101"], RaceID = "0101", Slot = accSlotDict[s], SlotAbr = s, SlotID = Info.IDSlot[accSlotDict[s]], Body = "-", Variant = "1", Part = "a" });
                             }
+
+                            ProgressLabel = "Slot: " + s;
                         }
                     }
                     else
@@ -310,79 +391,121 @@ namespace FFXIV_TexTools2.ViewModel
                         {
                             foreach (var s in eqSlots)
                             {
-                                foreach (var p in parts)
-                                {
-                                    var eFile = string.Format(file, r, searchText.PadLeft(4, '0'), s, p);
+                                var eFile = string.Format(file, r, searchText.PadLeft(4, '0'), s);
 
-                                    var fileHash = FFCRC.GetHash(eFile);
-                                    if (files.Contains(fileHash))
-                                    {
-                                        if (!slotList[v].Contains(s))
-                                        {
-                                            slotList[v].Add(s);
-                                            workList.Add(new SearchItems() { Race = Info.IDRace[r], RaceID = r, Slot = equipSlotDict[s], SlotAbr = s, SlotID = Info.IDSlot[equipSlotDict[s]], Body = "-", Variant = v.ToString(), Part = p });
-                                        }
-                                    }
-                                    ProgressLabel = "Race: " + r + " Slot: " + s + "Part: " + p;
+                                var fileHash = FFCRC.GetHash(eFile);
+                                if (files.Contains(fileHash))
+                                {
+                                    workList.Add(new SearchItems() { Race = Info.IDRace[r], RaceID = r, Slot = equipSlotDict[s], SlotAbr = s, SlotID = Info.IDSlot[equipSlotDict[s]], Body = "-", Variant = "1", Part = "a" });
                                 }
+                                ProgressLabel = "Race: " + r + " Slot: " + s ;
                             }
                         }
                     }
-                    int prog = (int)(((double)var / Info.IDRace.Count) * 100f);
-                    worker.ReportProgress(prog);
-                    var++;
+
                 }
+
 
                 ProgressLabel = "Found: " + workList.Count;
             }
             else
             {
-                string slotName = Strings.Main_Hand;
-
-                if (SelectedType.Name.Equals(Strings.Monster))
+                if (!SelectedType.Name.Equals("DemiHuman"))
                 {
-                    slotName = Strings.Mounts;
-                }
+                    string slotName = Strings.Main_Hand;
 
-                for (int i = 0; i <= 50; i++)
-                {
-                    var folderCheck = string.Format(folder, searchText.PadLeft(4, '0'), i.ToString().PadLeft(4, '0')) + "0001";
-
-                    if (Helper.FolderExists(FFCRC.GetHash(folderCheck)))
+                    if (SelectedType.Name.Equals(Strings.Monster))
                     {
-                        bodyList.Add(i);
+                        slotName = Strings.Mounts;
                     }
-                    ProgressLabel = "Body: " + i;
-                    worker.ReportProgress(i * 2);
-                }
 
-                for(int i = 0; i < bodyList.Count; i++)
-                {
-                    for (int j = 0; j <= 20; j++)
+
+
+                    for (int i = 0; i <= 50; i++)
                     {
-                        var wmFolder = string.Format(folder, searchText.PadLeft(4, '0'), bodyList[i].ToString().PadLeft(4, '0')) + j.ToString().PadLeft(4, '0');
+                        var folderCheck = string.Format(folder, searchText.PadLeft(4, '0'), i.ToString().PadLeft(4, '0')) + "0001";
 
-                        var files = Helper.GetAllFilesInFolder(FFCRC.GetHash(wmFolder));
-
-                        foreach (var p in parts)
+                        if (Helper.FolderExists(FFCRC.GetHash(folderCheck)))
                         {
-                            var wmFile = string.Format(file, searchText.PadLeft(4, '0'), bodyList[i].ToString().PadLeft(4, '0'), p);
-
-                            var fileHash = FFCRC.GetHash(wmFile);
-                            if (files.Contains(fileHash))
-                            {
-                                workList.Add(new SearchItems() { Race = "-", Slot = slotName, SlotID = Info.IDSlot[slotName], Body = bodyList[i].ToString(), Variant = j.ToString(), Part = p });
-                            }
-
-                            ProgressLabel = "Body: " + bodyList[i] + " Variant: " + j + " Part: " + p;
+                            bodyList.Add(i);
                         }
+                        ProgressLabel = "Body: " + i;
+                        worker.ReportProgress(i * 2);
                     }
 
-                    int prog = (int)(((double)(i + 1) / bodyList.Count) * 100f);
-                    worker.ReportProgress(prog);
+                    for (int i = 0; i < bodyList.Count; i++)
+                    {
+                        for (int j = 0; j <= 20; j++)
+                        {
+                            var wmFolder = string.Format(folder, searchText.PadLeft(4, '0'), bodyList[i].ToString().PadLeft(4, '0')) + j.ToString().PadLeft(4, '0');
+
+                            var files = Helper.GetAllFilesInFolder(FFCRC.GetHash(wmFolder));
+
+                            foreach (var p in parts)
+                            {
+                                var wmFile = string.Format(file, searchText.PadLeft(4, '0'), bodyList[i].ToString().PadLeft(4, '0'), p);
+
+                                var fileHash = FFCRC.GetHash(wmFile);
+                                if (files.Contains(fileHash))
+                                {
+                                    workList.Add(new SearchItems() { Race = "-", Slot = slotName, SlotID = Info.IDSlot[slotName], Body = bodyList[i].ToString(), Variant = j.ToString(), Part = p });
+                                }
+
+                                ProgressLabel = "Body: " + bodyList[i] + " Variant: " + j + " Part: " + p;
+                            }
+                        }
+
+                        int prog = (int)(((double)(i + 1) / bodyList.Count) * 100f);
+                        worker.ReportProgress(prog);
+                    }
+
+                    ProgressLabel = "Found: " + workList.Count;
+                }
+                else
+                {
+                    string slotName = "DemiHuman";
+
+                    for (int i = 0; i <= 100; i++)
+                    {
+                        var folderCheck = string.Format(folder, searchText.PadLeft(4, '0'), i.ToString().PadLeft(4, '0')) + "0001";
+
+                        if (Helper.FolderExists(FFCRC.GetHash(folderCheck)))
+                        {
+                            bodyList.Add(i);
+                        }
+                        ProgressLabel = "Equipment: " + i;
+                        worker.ReportProgress(i * 2);
+                    }
+
+                    for (int i = 0; i < bodyList.Count; i++)
+                    {
+                        for (int j = 0; j <= 20; j++)
+                        {
+                            var wmFolder = string.Format(folder, searchText.PadLeft(4, '0'), bodyList[i].ToString().PadLeft(4, '0')) + j.ToString().PadLeft(4, '0');
+
+                            var files = Helper.GetAllFilesInFolder(FFCRC.GetHash(wmFolder));
+
+                            foreach (var eq in eqSlots)
+                            {
+                                var wmFile = string.Format(file, searchText.PadLeft(4, '0'), bodyList[i].ToString().PadLeft(4, '0'), eq);
+
+                                var fileHash = FFCRC.GetHash(wmFile);
+                                if (files.Contains(fileHash))
+                                {
+                                    workList.Add(new SearchItems() { Race = "-", Slot = equipSlotDict[eq], SlotID = Info.IDSlot[equipSlotDict[eq]], Body = bodyList[i].ToString(), Variant = j.ToString(), Part = eq });
+                                }
+
+                                ProgressLabel = "Body: " + bodyList[i] + " Variant: " + j;
+                            }
+                        }
+
+                        int prog = (int)(((double)(i + 1) / bodyList.Count) * 100f);
+                        worker.ReportProgress(prog);
+                    }
+
+                    ProgressLabel = "Found: " + workList.Count;
                 }
 
-                ProgressLabel = "Found: " + workList.Count;
             }
             e.Result = workList;
         }

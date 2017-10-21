@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -79,6 +80,11 @@ namespace FFXIV_TexTools2.ViewModel
         public MainViewModel()
         {
             SetDirectories();
+
+            while (!Properties.Settings.Default.FFXIV_Directory.Contains("sqpack"))
+            {
+                SetDirectories();
+            }
 
             CultureInfo ci = new CultureInfo(Properties.Settings.Default.Language);
             CultureInfo.DefaultThreadCurrentCulture = ci;
@@ -246,9 +252,34 @@ namespace FFXIV_TexTools2.ViewModel
                 {
                     Title = "Select sqpack/ffxiv Folder"
                 };
-                folderSelect.ShowDialog();
-                Properties.Settings.Default.FFXIV_Directory = folderSelect.FileName;
-                Properties.Settings.Default.Save();
+                bool result = folderSelect.ShowDialog();
+                if (result)
+                {
+                    Properties.Settings.Default.FFXIV_Directory = folderSelect.FileName;
+                    Properties.Settings.Default.Save();
+                }
+                else
+                {
+                    Environment.Exit(0);
+                }
+
+            }
+            else if (!Properties.Settings.Default.FFXIV_Directory.Contains("sqpack"))
+            {
+                FolderSelectDialog folderSelect = new FolderSelectDialog()
+                {
+                    Title = "Select sqpack/ffxiv Folder"
+                };
+                bool result = folderSelect.ShowDialog();
+                if (result)
+                {
+                    Properties.Settings.Default.FFXIV_Directory = folderSelect.FileName;
+                    Properties.Settings.Default.Save();
+                }
+                else
+                {
+                    Environment.Exit(0);
+                }
             }
         }
 

@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using FFXIV_TexTools2.Material.ModelMaterial;
 using HelixToolkit.Wpf.SharpDX.Core;
 using SharpDX;
 using System.Collections.Generic;
@@ -93,5 +94,10 @@ namespace FFXIV_TexTools2.Material
         /// The mesh data in OBJ format
         /// </summary>
         public string[] OBJFileData { get; set; }
+
+        /// <summary>
+        /// The mesh parts list
+        /// </summary>
+        public List<MeshPart> MeshPartList { get; set; }
     }
 }

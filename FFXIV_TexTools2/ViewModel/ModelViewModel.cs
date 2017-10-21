@@ -288,6 +288,7 @@ namespace FFXIV_TexTools2.ViewModel
                 catch (Exception ex)
                 {
                     MessageBox.Show("[Collada] Error saving .dae File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    Debug.WriteLine(ex.StackTrace);
                 }
 
             }
@@ -307,7 +308,7 @@ namespace FFXIV_TexTools2.ViewModel
         /// <param name="obj"></param>
         private void ImportOBJ(object obj)
         {
-            ImportModel.ImportDAE(selectedCategory, selectedItem.ItemName, modelName, SelectedMesh.ID, fullPath);
+            ImportModel.ImportDAE(selectedCategory, selectedItem.ItemName, modelName, SelectedMesh.ID, fullPath, meshList[0].BoneStrings);
             UpdateModel(selectedItem, selectedCategory);
         }
 
@@ -641,6 +642,25 @@ namespace FFXIV_TexTools2.ViewModel
                     }
                 }
             }
+            else if (selectedItem.PrimaryModelID.Equals("9900"))
+            {
+                MDLFolder = string.Format(Strings.EquipMDLFolder, selectedItem.PrimaryModelID);
+                MDLFile = string.Format(Strings.EquipMDLFile, SelectedRace.ID, selectedItem.PrimaryModelID, "{0}");
+
+                abrParts = new string[5] { "met", "glv", "dwn", "sho", "top" };
+
+                var fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(MDLFolder));
+
+                foreach (string abrPart in abrParts)
+                {
+                    var file = String.Format(MDLFile, abrPart);
+
+                    if (fileHashList.Contains(FFCRC.GetHash(file)))
+                    {
+                        cbi.Add(new ComboBoxInfo() { Name = Info.slotAbr.FirstOrDefault(x => x.Value == abrPart).Key, ID = abrPart, IsNum = false });
+                    }
+                }
+            }
             else if (type.Equals("weapon"))
             {
                 if(selectedItem.SecondaryModelID != null)
@@ -752,6 +772,7 @@ namespace FFXIV_TexTools2.ViewModel
             catch (Exception ex)
             {
                 MessageBox.Show("[Main] part 3D Error \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                Debug.WriteLine(ex.StackTrace);
             }
         }
 
@@ -1188,6 +1209,7 @@ namespace FFXIV_TexTools2.ViewModel
                     {
                         string part = "a";
                         string itemID = selectedItem.PrimaryModelID;
+                        string body = "";
 
                         if (materialStrings.Count > 1)
                         {
@@ -1195,6 +1217,10 @@ namespace FFXIV_TexTools2.ViewModel
                             {
                                 part = materialStrings[mesh].Substring(materialStrings[mesh].LastIndexOf("_") + 1, 1);
                                 itemID = materialStrings[mesh].Substring(materialStrings[mesh].IndexOf("_") + 2, 4);
+                                if (itemType.Equals("weapon"))
+                                {
+                                    body = materialStrings[mesh].Substring(materialStrings[mesh].IndexOf("b") + 1, 4);
+                                }
                             }
                             catch (Exception ex)
                             {
@@ -1208,7 +1234,7 @@ namespace FFXIV_TexTools2.ViewModel
                             part = "1";
                         }
 
-                        info = MTRL.GetMTRLData(selectedItem, SelectedRace.ID, selectedCategory, part, itemVersion, "", itemID, "0000");
+                        info = MTRL.GetMTRLData(selectedItem, SelectedRace.ID, selectedCategory, part, itemVersion, body, itemID, "0000");
                     }
 
                     if (info != null)

@@ -10,7 +10,7 @@
     xmlns:views ="clr-namespace:FFXIV_TexTools2.Views"
     x:Class="FFXIV_TexTools2.MainWindow"
     mc:Ignorable="d"
-    Title="FFXIV TexTools" Height="650" Width="1100" Icon="Resources/ffxiv2.ico" WindowStartupLocation="CenterScreen">
+    Title="FFXIV TexTools" Height="650" Width="1100" Icon="Resources/ffxiv2.ico" WindowStartupLocation="CenterScreen" Closed="Window_Closed">
     <Window.Resources>
         <SolidColorBrush x:Key="DarkSquareColor" Color="#CC000000" />
         <SolidColorBrush x:Key="LightSquareColor" Color="#BF000000" />

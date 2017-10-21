@@ -132,10 +132,19 @@ namespace FFXIV_TexTools2.Material
             else
             {
                 MDLFolder = string.Format(Strings.EquipMDLFolder, selectedItem.PrimaryModelID);
-                MDLFile = string.Format(Strings.EquipMDLFile, selectedRace, selectedItem.PrimaryModelID, Info.slotAbr[selectedCategory]);
+
+                if (selectedPart.Equals("-"))
+                {
+                    MDLFile = string.Format(Strings.EquipMDLFile, selectedRace, selectedItem.PrimaryModelID, Info.slotAbr[selectedCategory]);
+                }
+                else
+                {
+                    MDLFile = string.Format(Strings.EquipMDLFile, selectedRace, selectedItem.PrimaryModelID, selectedPart);
+                }
             }
 
             fullPath = MDLFolder + "/" + MDLFile;
+
             int offset = Helper.GetItemOffset(FFCRC.GetHash(MDLFolder), FFCRC.GetHash(MDLFile));
 
             int datNum = ((offset / 8) & 0x000f) / 2;
@@ -479,7 +488,7 @@ namespace FFXIV_TexTools2.Material
                                 float y = HalfHelper.HalfToSingle(h2);
                                 float z = HalfHelper.HalfToSingle(h3);
 
-                                objBytes.Add("v " + x.ToString() + " " + y.ToString() + " " + z.ToString() + " ");
+                                objBytes.Add("v " + x.ToString("N5") + " " + y.ToString("N5") + " " + z.ToString("N5") + " ");
                                 vertexList.Add(new Vector3(x, y, z));
                             }
                             else if (meshDataInfoList[vertex].DataType == 2)
@@ -488,7 +497,7 @@ namespace FFXIV_TexTools2.Material
                                 float y = br1.ReadSingle();
                                 float z = br1.ReadSingle();
 
-                                objBytes.Add("v " + x.ToString() + " " + y.ToString() + " " + z.ToString() + " ");
+                                objBytes.Add("v " + x.ToString("N5") + " " + y.ToString("N5") + " " + z.ToString("N5") + " ");
                                 vertexList.Add(new Vector3(x, y, z));
                             }
                         }
@@ -581,7 +590,7 @@ namespace FFXIV_TexTools2.Material
                             float x = HalfHelper.HalfToSingle(h1);
                             float y = HalfHelper.HalfToSingle(h2);
                             
-                            objBytes.Add("vt " + x.ToString() + " " + (y * -1f).ToString() + " ");
+                            objBytes.Add("vt " + x.ToString("N5") + " " + (y * -1f).ToString("N5") + " ");
                             texCoordList.Add(new Vector2(x, y));
                         }
                     }
@@ -596,7 +605,7 @@ namespace FFXIV_TexTools2.Material
                             System.Half h2 = System.Half.ToHalf((ushort)br1.ReadInt16());
                             System.Half h3 = System.Half.ToHalf((ushort)br1.ReadInt16());
 
-                            objBytes.Add("vn " + HalfHelper.HalfToSingle(h1).ToString() + " " + HalfHelper.HalfToSingle(h2).ToString() + " " + HalfHelper.HalfToSingle(h3).ToString() + " ");
+                            objBytes.Add("vn " + HalfHelper.HalfToSingle(h1).ToString("N5") + " " + HalfHelper.HalfToSingle(h2).ToString("N5") + " " + HalfHelper.HalfToSingle(h3).ToString("N5") + " ");
                             normalList.Add(new Vector3(HalfHelper.HalfToSingle(h1), HalfHelper.HalfToSingle(h2), HalfHelper.HalfToSingle(h3)));
                         }
                     }
@@ -607,16 +616,11 @@ namespace FFXIV_TexTools2.Material
                         {
                             br1.BaseStream.Seek(j * mesh.MeshInfo.VertexSizes[meshDataInfoList[tangents].VertexDataBlock] + meshDataInfoList[tangents].Offset, SeekOrigin.Begin);
 
-                            //float x = br1.ReadByte() / 255f;
-                            //float y = br1.ReadByte() / 255f;
-                            //float z = br1.ReadByte() / 255f;
                             float x = br1.ReadByte() * 2 / 255f - 1f;
                             float y = br1.ReadByte() * 2 / 255f - 1f;
                             float z = br1.ReadByte() * 2 / 255f - 1f;
 
                             var nv = new Vector3(x, y, z);
-                            //var nv = new Vector3(x * -1, y * -1, z * -1);
-
 
                             tangentList.Add(nv);
                         }
@@ -667,7 +671,8 @@ namespace FFXIV_TexTools2.Material
                         BoneTransforms = boneTransforms,
                         BlendWeights = blendWeightList,
                         BlendIndices = blendIndicesList,
-                        WeightCounts = weightCounts
+                        WeightCounts = weightCounts,
+                        MeshPartList = mesh.MeshPartList
                     };
 
                     meshList.Add(modelMeshData);

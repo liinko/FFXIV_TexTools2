@@ -282,19 +282,26 @@ namespace FFXIV_TexTools2.Helpers
                     int compressedSize = br.ReadInt32();
                     int uncompressedSize = br.ReadInt32();
 
-                    byte[] compressedData = br.ReadBytes(compressedSize);
-
-                    decompressedData = new byte[uncompressedSize];
-
-                    using (MemoryStream ms = new MemoryStream(compressedData))
+                    if(compressedSize == 32000)
                     {
-                        using (DeflateStream ds = new DeflateStream(ms, CompressionMode.Decompress))
-                        {
-                            int count = ds.Read(decompressedData, 0, uncompressedSize);
-                        }
+                        type2Bytes.AddRange(br.ReadBytes(uncompressedSize));
                     }
+                    else
+                    {
+                        byte[] compressedData = br.ReadBytes(compressedSize);
 
-                    type2Bytes.AddRange(decompressedData);
+                        decompressedData = new byte[uncompressedSize];
+
+                        using (MemoryStream ms = new MemoryStream(compressedData))
+                        {
+                            using (DeflateStream ds = new DeflateStream(ms, CompressionMode.Decompress))
+                            {
+                                int count = ds.Read(decompressedData, 0, uncompressedSize);
+                            }
+                        }
+
+                        type2Bytes.AddRange(decompressedData);
+                    }
                 }
             }
             return type2Bytes.ToArray();

@@ -231,9 +231,10 @@ namespace FFXIV_TexTools2.Material
                     if (fileHashList.Contains(FFCRC.GetHash(MTRLFolder)))
                     {
                         cbiList.Add(new ComboBoxInfo() { Name = i.ToString(), ID = i.ToString(), IsNum = true });
-
                     }
                 }
+
+                cbiList.Add(new ComboBoxInfo() { Name = "_stigma", ID = "_stigma", IsNum = false });
             }
             else if (selectedCategory.Equals(Strings.Pets))
             {
@@ -431,7 +432,15 @@ namespace FFXIV_TexTools2.Material
                 }
                 else
                 {
-                    texPath = texPath + "decal_equip/-decal_{0}.tex";
+                    if (!part.Contains("stigma"))
+                    {
+                        texPath = texPath + "decal_equip/-decal_{0}.tex";
+                    }
+                    else
+                    {
+                        texPath = texPath + "decal_equip/_stigma.tex";
+                    }
+
                 }
 
                 cbiList = new ObservableCollection<ComboBoxInfo>
@@ -557,8 +566,17 @@ namespace FFXIV_TexTools2.Material
                 {
                     if (!modelID.Equals(""))
                     {
-                        MTRLFile = String.Format(Strings.WeapMtrlFile, modelID, item.PrimaryModelBody, part);
-                        MTRLFolder = item.PrimaryMTRLFolder.Substring(0, 14) + modelID + item.PrimaryMTRLFolder.Substring(18);
+                        var isNumber = int.TryParse(type, out var n);
+                        if (isNumber)
+                        {
+                            MTRLFolder = item.PrimaryMTRLFolder.Substring(0, 14) + modelID + item.PrimaryMTRLFolder.Substring(18, 11) + n.ToString().PadLeft(4, '0') + item.PrimaryMTRLFolder.Substring(33);
+                            MTRLFile = String.Format(Strings.WeapMtrlFile, modelID, n.ToString().PadLeft(4, '0'), part);
+                        }
+                        else
+                        {
+                            MTRLFolder = item.PrimaryMTRLFolder.Substring(0, 14) + modelID + item.PrimaryMTRLFolder.Substring(18);
+                            MTRLFile = String.Format(Strings.WeapMtrlFile, modelID, item.PrimaryModelBody, part);
+                        }
                     }
                     else
                     {
@@ -590,6 +608,11 @@ namespace FFXIV_TexTools2.Material
                 string VFXFile = "";
 
                 ObservableCollection<ComboBoxInfo> cbi = new ObservableCollection<ComboBoxInfo>();
+
+                if (item.PrimaryModelID.Equals("9982"))
+                {
+                    MTRLFile = "guide_model.mtrl";
+                }
 
                 if (Helper.FileExists(FFCRC.GetHash(MTRLFile), FFCRC.GetHash(MTRLFolder + imcVersion)))
                 {
@@ -731,6 +754,11 @@ namespace FFXIV_TexTools2.Material
             {
                 decalFolder = Strings.EquipDecalFolder;
                 decalFile = String.Format(Strings.EquipDecalFile, decalNum.PadLeft(3, '0'));
+
+                if (decalFile.Contains("stigma"))
+                {
+                    decalFile = "_stigma.tex";
+                }
             }
 
             return Helper.GetItemOffset(FFCRC.GetHash(decalFolder), FFCRC.GetHash(decalFile));
@@ -800,6 +828,11 @@ namespace FFXIV_TexTools2.Material
                     int texHash = FFCRC.GetHash(fileName);
 
                     string mapName = GetMapName(fileName);
+
+                    //if (fileName.Contains("9982"))
+                    //{
+                    //    fileName = fileName.Replace("1301", "0101").Replace("met", "model");
+                    //}
 
                     if (fileName.Contains("_s.tex"))
                     {

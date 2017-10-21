@@ -609,7 +609,14 @@ namespace FFXIV_TexTools2.ViewModel
                     string part;
                     if (selectedItem.ItemName.Equals(Strings.Equipment_Decals))
                     {
-                        part = selectedPart.Name.PadLeft(3, '0');
+                        if (!SelectedPart.Name.Contains("stigma"))
+                        {
+                            part = selectedPart.Name.PadLeft(3, '0');
+                        }
+                        else
+                        {
+                            part = SelectedPart.Name;
+                        }
                     }
                     else
                     {

@@ -260,5 +260,10 @@ namespace FFXIV_TexTools2
             }
 
         }
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            App.Current.Shutdown();
+        }
     }
 }
