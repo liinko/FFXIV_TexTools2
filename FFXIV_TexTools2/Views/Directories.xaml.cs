@@ -15,6 +15,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using FolderSelect;
+using System.Diagnostics;
+using System.IO;
 using System.Windows;
 
 namespace FFXIV_TexTools2.Views
@@ -28,6 +30,12 @@ namespace FFXIV_TexTools2.Views
         {
             InitializeComponent();
             DataContext = Properties.Settings.Default;
+
+            var savePath = Path.GetFullPath(Properties.Settings.Default.Save_Directory);
+            saveDir.Text = savePath;
+
+            var ffxivPath = Path.GetFullPath(Properties.Settings.Default.FFXIV_Directory);
+            FFXIVDir.Text = ffxivPath;
         }
 
         private void FFXIVDirButton_Click(object sender, RoutedEventArgs e)

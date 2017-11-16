@@ -124,6 +124,33 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to action_0_{0}.exd.
+        /// </summary>
+        internal static string Action {
+            get {
+                return ResourceManager.GetString("Action", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to actioncategory_0_{0}.exd.
+        /// </summary>
+        internal static string ActionCategory {
+            get {
+                return ResourceManager.GetString("ActionCategory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Actions.
+        /// </summary>
+        internal static string Actions {
+            get {
+                return ResourceManager.GetString("Actions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to ALL.
         /// </summary>
         internal static string All {
@@ -138,6 +165,15 @@ namespace FFXIV_TexTools2.Resources {
         internal static string Au_Ra {
             get {
                 return ResourceManager.GetString("Au_Ra", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Beneficial.
+        /// </summary>
+        internal static string Beneficial {
+            get {
+                return ResourceManager.GetString("Beneficial", resourceCulture);
             }
         }
         
@@ -232,6 +268,24 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Buddy.
+        /// </summary>
+        internal static string Buddy {
+            get {
+                return ResourceManager.GetString("Buddy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to buddyaction_0_{0}.exd.
+        /// </summary>
+        internal static string BuddyAction {
+            get {
+                return ResourceManager.GetString("BuddyAction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Carbuncle.
         /// </summary>
         internal static string Carbuncle {
@@ -255,6 +309,51 @@ namespace FFXIV_TexTools2.Resources {
         internal static string ColorSet {
             get {
                 return ResourceManager.GetString("ColorSet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Companions.
+        /// </summary>
+        internal static string Companions {
+            get {
+                return ResourceManager.GetString("Companions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Company.
+        /// </summary>
+        internal static string Company {
+            get {
+                return ResourceManager.GetString("Company", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to companyaction_0_{0}.exd.
+        /// </summary>
+        internal static string CompanyAction {
+            get {
+                return ResourceManager.GetString("CompanyAction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Craft.
+        /// </summary>
+        internal static string Craft {
+            get {
+                return ResourceManager.GetString("Craft", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to craftaction_100000_{0}.exd.
+        /// </summary>
+        internal static string CraftAction {
+            get {
+                return ResourceManager.GetString("CraftAction", resourceCulture);
             }
         }
         
@@ -295,6 +394,15 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Detrimental.
+        /// </summary>
+        internal static string Detrimental {
+            get {
+                return ResourceManager.GetString("Detrimental", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Diffuse.
         /// </summary>
         internal static string Diffuse {
@@ -318,6 +426,24 @@ namespace FFXIV_TexTools2.Resources {
         internal static string Elezen {
             get {
                 return ResourceManager.GetString("Elezen", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Emote.
+        /// </summary>
+        internal static string Emote {
+            get {
+                return ResourceManager.GetString("Emote", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to emote_0_{0}.exd.
+        /// </summary>
+        internal static string EmoteEXD {
+            get {
+                return ResourceManager.GetString("EmoteEXD", resourceCulture);
             }
         }
         
@@ -466,6 +592,33 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Event.
+        /// </summary>
+        internal static string Event {
+            get {
+                return ResourceManager.GetString("Event", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to eventaction_0_{0}.exd.
+        /// </summary>
+        internal static string EventAction {
+            get {
+                return ResourceManager.GetString("EventAction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 0a0000.
+        /// </summary>
+        internal static string EXDDat {
+            get {
+                return ResourceManager.GetString("EXDDat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to exd.
         /// </summary>
         internal static string ExdFolder {
@@ -511,7 +664,7 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to mt_c{0}f{1}_{2}_a.mtrl.
+        ///   Looks up a localized string similar to mt_c{0}f{1}_{2}_{3}.mtrl.
         /// </summary>
         internal static string FaceMtrlFile {
             get {
@@ -579,6 +732,33 @@ namespace FFXIV_TexTools2.Resources {
         internal static string Garuda_Egi {
             get {
                 return ResourceManager.GetString("Garuda_Egi", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Gear.
+        /// </summary>
+        internal static string Gear {
+            get {
+                return ResourceManager.GetString("Gear", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to General.
+        /// </summary>
+        internal static string General {
+            get {
+                return ResourceManager.GetString("General", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to generalaction_0_{0}.exd.
+        /// </summary>
+        internal static string GeneralAction {
+            get {
+                return ResourceManager.GetString("GeneralAction", resourceCulture);
             }
         }
         
@@ -673,6 +853,33 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ui/icon/{0}.
+        /// </summary>
+        internal static string IconFolder {
+            get {
+                return ResourceManager.GetString("IconFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ui/icon/{0}/hq.
+        /// </summary>
+        internal static string IconHQFolder {
+            get {
+                return ResourceManager.GetString("IconHQFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ui/icon/{0}/{1}.
+        /// </summary>
+        internal static string IconLangFolder {
+            get {
+                return ResourceManager.GetString("IconLangFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Ifrit Egi.
         /// </summary>
         internal static string Ifrit_Egi {
@@ -705,6 +912,33 @@ namespace FFXIV_TexTools2.Resources {
         internal static string itemFile {
             get {
                 return ResourceManager.GetString("itemFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Items.
+        /// </summary>
+        internal static string Items {
+            get {
+                return ResourceManager.GetString("Items", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 040000.
+        /// </summary>
+        internal static string ItemsDat {
+            get {
+                return ResourceManager.GetString("ItemsDat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to itemuicategory_0_{0}.exd.
+        /// </summary>
+        internal static string ItemUICategory {
+            get {
+                return ResourceManager.GetString("ItemUICategory", resourceCulture);
             }
         }
         
@@ -763,6 +997,15 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to -nowloading_base{0}.tex.
+        /// </summary>
+        internal static string LoadingImage {
+            get {
+                return ResourceManager.GetString("LoadingImage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Main Hand.
         /// </summary>
         internal static string Main_Hand {
@@ -786,6 +1029,78 @@ namespace FFXIV_TexTools2.Resources {
         internal static string Male {
             get {
                 return ResourceManager.GetString("Male", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to map_0.exd.
+        /// </summary>
+        internal static string MapExd {
+            get {
+                return ResourceManager.GetString("MapExd", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0}_{1}.tex.
+        /// </summary>
+        internal static string MapFile1 {
+            get {
+                return ResourceManager.GetString("MapFile1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0}d.tex.
+        /// </summary>
+        internal static string MapFile2 {
+            get {
+                return ResourceManager.GetString("MapFile2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0}m_{1}.tex.
+        /// </summary>
+        internal static string MapFile3 {
+            get {
+                return ResourceManager.GetString("MapFile3", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ui/map/{0}.
+        /// </summary>
+        internal static string MapFolder {
+            get {
+                return ResourceManager.GetString("MapFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Maps.
+        /// </summary>
+        internal static string Maps {
+            get {
+                return ResourceManager.GetString("Maps", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Marker.
+        /// </summary>
+        internal static string Marker {
+            get {
+                return ResourceManager.GetString("Marker", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to marker_0_{0}.exd.
+        /// </summary>
+        internal static string MarkerEXD {
+            get {
+                return ResourceManager.GetString("MarkerEXD", resourceCulture);
             }
         }
         
@@ -961,11 +1276,38 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Other.
+        /// </summary>
+        internal static string Other {
+            get {
+                return ResourceManager.GetString("Other", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to pet_0_{0}.exd.
+        /// </summary>
+        internal static string PetEXD {
+            get {
+                return ResourceManager.GetString("PetEXD", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Pets.
         /// </summary>
         internal static string Pets {
             get {
                 return ResourceManager.GetString("Pets", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to placename_0_{0}.exd.
+        /// </summary>
+        internal static string PlaceName {
+            get {
+                return ResourceManager.GetString("PlaceName", resourceCulture);
             }
         }
         
@@ -1051,6 +1393,24 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Status.
+        /// </summary>
+        internal static string Status {
+            get {
+                return ResourceManager.GetString("Status", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to status_0_{0}.exd.
+        /// </summary>
+        internal static string StatusExd {
+            get {
+                return ResourceManager.GetString("StatusExd", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Tail.
         /// </summary>
         internal static string Tail {
@@ -1110,6 +1470,24 @@ namespace FFXIV_TexTools2.Resources {
         internal static string Two_Handed {
             get {
                 return ResourceManager.GetString("Two_Handed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 060000.
+        /// </summary>
+        internal static string UIDat {
+            get {
+                return ResourceManager.GetString("UIDat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0}.tex.
+        /// </summary>
+        internal static string UIFile {
+            get {
+                return ResourceManager.GetString("UIFile", resourceCulture);
             }
         }
         

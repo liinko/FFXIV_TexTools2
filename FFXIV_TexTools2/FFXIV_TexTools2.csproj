@@ -157,6 +157,7 @@
     <Compile Include="IO\SaveModel.cs" />
     <Compile Include="IO\SaveTex.cs" />
     <Compile Include="FileTypes\ModelContainers\Mesh.cs" />
+    <Compile Include="Model\TreeNode.cs" />
     <Compile Include="Model\ModelMeshData.cs" />
     <Compile Include="FileTypes\ModelContainers\MeshDataInfo.cs" />
     <Compile Include="FileTypes\ModelContainers\MeshPart.cs" />
@@ -185,7 +186,6 @@
     <Compile Include="Helpers\Info.cs" />
     <Compile Include="Model\ItemData.cs" />
     <Compile Include="ViewModel\Composite3DViewModel.cs" />
-    <Compile Include="ViewModel\ItemViewModel.cs" />
     <Compile Include="ViewModel\ListViewModel.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="ViewModel\ModelSearchViewModel.cs" />
@@ -194,7 +194,6 @@
     <Compile Include="ViewModel\ModListViewModel.cs" />
     <Compile Include="Custom\ObservableObject.cs" />
     <Compile Include="ViewModel\TextureViewModel.cs" />
-    <Compile Include="ViewModel\TreeViewItemViewModel.cs" />
     <Compile Include="IO\CreateDat.cs" />
     <Compile Include="IO\ExdReader.cs" />
     <Compile Include="FileTypes\IMC.cs" />
@@ -379,6 +378,7 @@
     <Content Include="Custom\Custom.fx" />
     <Content Include="Custom\Material.fx" />
     <Resource Include="Resources\3DModel.png" />
+    <None Include="Resources\uldpaths.txt" />
     <Content Include="sharpdx_direct3d11_1_effects_arm.dll" />
     <Content Include="sharpdx_direct3d11_1_effects_x64.dll" />
     <Content Include="sharpdx_direct3d11_1_effects_x86.dll" />

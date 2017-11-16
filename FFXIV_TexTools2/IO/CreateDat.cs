@@ -31,16 +31,22 @@ namespace FFXIV_TexTools2
         {
             try
             {
-                using (FileStream fs = File.Create(Info.datDir + "4"))
+                foreach(var modFile in Info.ModDatDict)
                 {
-                    using (BinaryWriter bw = new BinaryWriter(fs))
-                    {
-                        bw.BaseStream.Seek(0, SeekOrigin.Begin);
+                    var modDatPath = string.Format(Info.datDir, modFile.Key, modFile.Value);
 
-                        WriteSqPackHeader(bw);
-                        WriteDatHeader(bw);
+                    using (FileStream fs = File.Create(modDatPath))
+                    {
+                        using (BinaryWriter bw = new BinaryWriter(fs))
+                        {
+                            bw.BaseStream.Seek(0, SeekOrigin.Begin);
+
+                            WriteSqPackHeader(bw);
+                            WriteDatHeader(bw);
+                        }
                     }
                 }
+
             }
             catch (Exception e)
             {
@@ -53,31 +59,39 @@ namespace FFXIV_TexTools2
         /// </summary>
         public static void ChangeDatAmounts()
         {
-            try
+
+            foreach (var indexFile in Info.ModIndexDict)
             {
-                using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(Info.indexDir)))
+
+                var indexPath = string.Format(Info.indexDir, indexFile.Key);
+                var index2Path = string.Format(Info.index2Dir, indexFile.Key);
+
+                try
                 {
-                    bw.BaseStream.Seek(1104, SeekOrigin.Begin);
-                    bw.Write((byte)5);
+                    using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(indexPath)))
+                    {
+                        bw.BaseStream.Seek(1104, SeekOrigin.Begin);
+                        bw.Write((byte)indexFile.Value);
+                    }
                 }
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show("[Create] Error Accessing Index File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+                catch (Exception e)
+                {
+                    MessageBox.Show("[Create] Error Accessing Index File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
 
 
-            try
-            {
-                using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(Info.index2Dir)))
+                try
                 {
-                    bw.BaseStream.Seek(1104, SeekOrigin.Begin);
-                    bw.Write((byte)5);
+                    using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(index2Path)))
+                    {
+                        bw.BaseStream.Seek(1104, SeekOrigin.Begin);
+                        bw.Write((byte)indexFile.Value);
+                    }
                 }
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show("[Create] Error Accessing Index 2 File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                catch (Exception e)
+                {
+                    MessageBox.Show("[Create] Error Accessing Index 2 File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 

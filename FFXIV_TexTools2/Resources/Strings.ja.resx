@@ -118,13 +118,19 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Accessory" xml:space="preserve">
-    <value>Accessory</value>
+    <value>アクセサリ</value>
+  </data>
+  <data name="Actions" xml:space="preserve">
+    <value>アクション</value>
   </data>
   <data name="All" xml:space="preserve">
     <value>すべて</value>
   </data>
   <data name="Au_Ra" xml:space="preserve">
     <value>アウラ</value>
+  </data>
+  <data name="Beneficial" xml:space="preserve">
+    <value>強化</value>
   </data>
   <data name="Bishop_Autoturret" xml:space="preserve">
     <value>オートタレット・ビショップ</value>
@@ -144,6 +150,9 @@
   <data name="Body_Legs_Feet" xml:space="preserve">
     <value>胴 + 脚 + 足</value>
   </data>
+  <data name="Buddy" xml:space="preserve">
+    <value>バディ</value>
+  </data>
   <data name="Carbuncle" xml:space="preserve">
     <value>カーバンクル</value>
   </data>
@@ -152,6 +161,18 @@
   </data>
   <data name="ColorSet" xml:space="preserve">
     <value>ColorSet</value>
+  </data>
+  <data name="Companions" xml:space="preserve">
+    <value>バディ</value>
+  </data>
+  <data name="Company" xml:space="preserve">
+    <value>カンパニー</value>
+  </data>
+  <data name="Craft" xml:space="preserve">
+    <value>製作</value>
+  </data>
+  <data name="Detrimental" xml:space="preserve">
+    <value>弱体</value>
   </data>
   <data name="Diffuse" xml:space="preserve">
     <value>Diffuse</value>
@@ -162,11 +183,14 @@
   <data name="Elezen" xml:space="preserve">
     <value>エレゼン</value>
   </data>
+  <data name="Emote" xml:space="preserve">
+    <value>エモート</value>
+  </data>
   <data name="Eos" xml:space="preserve">
     <value>フェアリー・エオス</value>
   </data>
   <data name="Equipment_Decals" xml:space="preserve">
-    <value>Equipment Decals</value>
+    <value>クレスト</value>
   </data>
   <data name="Error_DirectoryError" xml:space="preserve">
     <value>Directory Error</value>
@@ -176,6 +200,9 @@
   </data>
   <data name="Etc" xml:space="preserve">
     <value>Etc</value>
+  </data>
+  <data name="Event" xml:space="preserve">
+    <value>イベント</value>
   </data>
   <data name="Face" xml:space="preserve">
     <value>顔</value>
@@ -190,10 +217,16 @@
     <value>女性</value>
   </data>
   <data name="Food" xml:space="preserve">
-    <value>Food</value>
+    <value>調理品</value>
   </data>
   <data name="Garuda_Egi" xml:space="preserve">
     <value>ガルーダ・エギ</value>
+  </data>
+  <data name="Gear" xml:space="preserve">
+    <value>装備</value>
+  </data>
+  <data name="General" xml:space="preserve">
+    <value>全般</value>
   </data>
   <data name="Hair" xml:space="preserve">
     <value>髪</value>
@@ -219,6 +252,9 @@
   <data name="Iris" xml:space="preserve">
     <value>Iris</value>
   </data>
+  <data name="Items" xml:space="preserve">
+    <value>アイテム</value>
+  </data>
   <data name="Lalafell" xml:space="preserve">
     <value>ララフェル</value>
   </data>
@@ -243,11 +279,17 @@
   <data name="Male" xml:space="preserve">
     <value>男性</value>
   </data>
+  <data name="Maps" xml:space="preserve">
+    <value>マップ</value>
+  </data>
+  <data name="Marker" xml:space="preserve">
+    <value>マーカー</value>
+  </data>
   <data name="Mask" xml:space="preserve">
     <value>Mask</value>
   </data>
   <data name="Minions" xml:space="preserve">
-    <value>Minions</value>
+    <value>ミニオン</value>
   </data>
   <data name="Miqote" xml:space="preserve">
     <value>ミコッテ</value>
@@ -256,7 +298,7 @@
     <value>Monster</value>
   </data>
   <data name="Mounts" xml:space="preserve">
-    <value>Mounts</value>
+    <value>マウント</value>
   </data>
   <data name="Neck" xml:space="preserve">
     <value>首</value>
@@ -266,6 +308,9 @@
   </data>
   <data name="Off_Hand" xml:space="preserve">
     <value>サブアーム</value>
+  </data>
+  <data name="Other" xml:space="preserve">
+    <value>その他</value>
   </data>
   <data name="Pets" xml:space="preserve">
     <value>ペット</value>
@@ -290,6 +335,9 @@
   </data>
   <data name="Specular" xml:space="preserve">
     <value>Specular</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>ステータス</value>
   </data>
   <data name="Tail" xml:space="preserve">
     <value>尾</value>

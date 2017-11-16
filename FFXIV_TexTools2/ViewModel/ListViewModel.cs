@@ -68,7 +68,7 @@ namespace FFXIV_TexTools2.ViewModel
             ModListModel mlm = new ModListModel();
             string race, map, part, type;
 
-            if (entry.fullPath.Contains("weapon") || entry.fullPath.Contains("accessory") || entry.fullPath.Contains("decal") || entry.fullPath.Contains("vfx"))
+            if (entry.fullPath.Contains("weapon") || entry.fullPath.Contains("accessory") || entry.fullPath.Contains("decal") || entry.fullPath.Contains("vfx") || entry.fullPath.Contains("ui/"))
             {
                 race = Strings.All;
             }
@@ -123,6 +123,10 @@ namespace FFXIV_TexTools2.ViewModel
             else if (entry.fullPath.Contains("model"))
             {
                 map = "3D";
+            }
+            else if (entry.fullPath.Contains("ui/"))
+            {
+                map = "UI";
             }
             else
             {
@@ -206,17 +210,24 @@ namespace FFXIV_TexTools2.ViewModel
 
                 if (entry.fullPath.Contains("vfx"))
                 {
-                    texData = TEX.GetVFX(entry.modOffset);
+                    texData = TEX.GetVFX(entry.modOffset, entry.datFile);
                 }
                 else
                 {
-                    texData = TEX.GetTex(entry.modOffset);
+                    if (entry.fullPath.Contains("icon"))
+                    {
+                        texData = TEX.GetTex(entry.modOffset, entry.datFile);
+                    }
+                    else
+                    {
+                        texData = TEX.GetTex(entry.modOffset, entry.datFile);
+                    }
                 }
 
                 mlm.BMP = Imaging.CreateBitmapSourceFromHBitmap(texData.BMP.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
             }
 
-            var offset = Helper.GetItemOffset(FFCRC.GetHash(entry.fullPath.Substring(0, entry.fullPath.LastIndexOf("/"))), FFCRC.GetHash(Path.GetFileName(entry.fullPath)));
+            var offset = Helper.GetDataOffset(FFCRC.GetHash(entry.fullPath.Substring(0, entry.fullPath.LastIndexOf("/"))), FFCRC.GetHash(Path.GetFileName(entry.fullPath)), entry.datFile);
 
             if(offset == entry.modOffset)
             {

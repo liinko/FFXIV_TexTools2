@@ -145,13 +145,11 @@ namespace FFXIV_TexTools2.Material
 
             fullPath = MDLFolder + "/" + MDLFile;
 
-            int offset = Helper.GetItemOffset(FFCRC.GetHash(MDLFolder), FFCRC.GetHash(MDLFile));
+            int offset = Helper.GetDataOffset(FFCRC.GetHash(MDLFolder), FFCRC.GetHash(MDLFile), Strings.ItemsDat);
 
             int datNum = ((offset / 8) & 0x000f) / 2;
-                 
-            offset = Helper.OffsetCorrection(datNum, offset);
      
-            var MDLDatData = Helper.GetType3DecompressedData(offset, datNum);
+            var MDLDatData = Helper.GetType3DecompressedData(offset, datNum, Strings.ItemsDat);
 
             using (BinaryReader br = new BinaryReader(new MemoryStream(MDLDatData.Item1)))
             {
@@ -429,7 +427,9 @@ namespace FFXIV_TexTools2.Material
                     var colorsList = new Color4Collection();
                     var indexList = new IntCollection();
                     var blendWeightList = new List<float>();
+                    var blendWeightList2 = new List<float[]>();
                     var blendIndicesList = new List<int>();
+                    var blendIndicesList2 = new List<int[]>();
                     var weightCounts = new List<int>();
 
 
@@ -478,6 +478,7 @@ namespace FFXIV_TexTools2.Material
                         {
                             br1.BaseStream.Seek(j * mesh.MeshInfo.VertexSizes[meshDataInfoList[vertex].VertexDataBlock] + meshDataInfoList[vertex].Offset, SeekOrigin.Begin);
 
+                            Vector3 vVector = new Vector3();
                             if (meshDataInfoList[vertex].DataType == 13 || meshDataInfoList[vertex].DataType == 14)
                             {
                                 System.Half h1 = System.Half.ToHalf((ushort)br1.ReadInt16());
@@ -488,18 +489,25 @@ namespace FFXIV_TexTools2.Material
                                 float y = HalfHelper.HalfToSingle(h2);
                                 float z = HalfHelper.HalfToSingle(h3);
 
+                                vVector = new Vector3(x, y, z);
                                 objBytes.Add("v " + x.ToString("N5") + " " + y.ToString("N5") + " " + z.ToString("N5") + " ");
-                                vertexList.Add(new Vector3(x, y, z));
                             }
                             else if (meshDataInfoList[vertex].DataType == 2)
                             {
-                                float x = br1.ReadSingle();
-                                float y = br1.ReadSingle();
-                                float z = br1.ReadSingle();
+                                //float x = br1.ReadSingle();
+                                //float y = br1.ReadSingle();
+                                //float z = br1.ReadSingle();
 
+                                var x = BitConverter.ToSingle(br1.ReadBytes(4), 0);
+                                var y = BitConverter.ToSingle(br1.ReadBytes(4), 0);
+                                var z = BitConverter.ToSingle(br1.ReadBytes(4), 0);
+
+                                vVector = new Vector3(x, y, z);
                                 objBytes.Add("v " + x.ToString("N5") + " " + y.ToString("N5") + " " + z.ToString("N5") + " ");
-                                vertexList.Add(new Vector3(x, y, z));
+
                             }
+
+                            vertexList.Add(vVector);
                         }
                     }
 
@@ -538,6 +546,24 @@ namespace FFXIV_TexTools2.Material
                                     }
                                 }
                             }
+
+                            if(count == 1)
+                            {
+                                blendWeightList2.Add(new float[] { x });
+                            }
+                            else if(count == 2)
+                            {
+                                blendWeightList2.Add(new float[] { x, y });
+                            }
+                            else if (count == 3)
+                            {
+                                blendWeightList2.Add(new float[] { x, y, z });
+                            }
+                            else if (count == 4)
+                            {
+                                blendWeightList2.Add(new float[] { x, y, z, w });
+                            }
+
                             weightCounts.Add(count);
                         }
                     }
@@ -556,17 +582,22 @@ namespace FFXIV_TexTools2.Material
                             if(weightCounts[j] == 1)
                             {
                                 blendIndicesList.Add(x);
+                                blendIndicesList2.Add(new int[] { x });
                             }
                             else if (weightCounts[j] == 2)
                             {
                                 blendIndicesList.Add(x);
                                 blendIndicesList.Add(y);
+                                blendIndicesList2.Add(new int[] { x, y });
+
                             }
                             else if (weightCounts[j] == 3)
                             {
                                 blendIndicesList.Add(x);
                                 blendIndicesList.Add(y);
                                 blendIndicesList.Add(z);
+                                blendIndicesList2.Add(new int[] { x, y, z });
+
                             }
                             else if (weightCounts[j] == 4)
                             {
@@ -574,6 +605,8 @@ namespace FFXIV_TexTools2.Material
                                 blendIndicesList.Add(y);
                                 blendIndicesList.Add(z);
                                 blendIndicesList.Add(w);
+                                blendIndicesList2.Add(new int[] { x, y, z, w });
+
                             }
                         }
                     }
@@ -589,8 +622,11 @@ namespace FFXIV_TexTools2.Material
 
                             float x = HalfHelper.HalfToSingle(h1);
                             float y = HalfHelper.HalfToSingle(h2);
-                            
-                            objBytes.Add("vt " + x.ToString("N5") + " " + (y * -1f).ToString("N5") + " ");
+
+                            var ox = x - Math.Truncate(x);
+                            var oy = y - Math.Truncate(y);
+
+                            objBytes.Add("vt " + ox.ToString("N5") + " " + (1 - y).ToString("N5") + " ");
                             texCoordList.Add(new Vector2(x, y));
                         }
                     }
@@ -672,7 +708,9 @@ namespace FFXIV_TexTools2.Material
                         BlendWeights = blendWeightList,
                         BlendIndices = blendIndicesList,
                         WeightCounts = weightCounts,
-                        MeshPartList = mesh.MeshPartList
+                        MeshPartList = mesh.MeshPartList,
+                        BlendIndicesArrayList = blendIndicesList2,
+                        BlendWeightsArrayList = blendWeightList2
                     };
 
                     meshList.Add(modelMeshData);

@@ -93,6 +93,7 @@ namespace FFXIV_TexTools2.ViewModel
         public void UpdateModel(ItemData item, string category)
         {
             CompositeVM.Dispose();
+            disposing = true;
             cbi.Clear();
 
             selectedItem = item;
@@ -144,7 +145,7 @@ namespace FFXIV_TexTools2.ViewModel
                     MDLFile = string.Format(Strings.EquipMDLFile, "{0}", selectedItem.PrimaryModelID, Info.slotAbr[selectedCategory]);
                 }
 
-                var fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(MDLFolder));
+                var fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(MDLFolder), Strings.ItemsDat);
 
                 if (!categoryType.Equals("weapon") && !categoryType.Equals("monster"))
                 {
@@ -162,7 +163,7 @@ namespace FFXIV_TexTools2.ViewModel
                                 }
 
 
-                                if (Helper.FolderExists(FFCRC.GetHash(mdlFolder)))
+                                if (Helper.FolderExists(FFCRC.GetHash(mdlFolder), Strings.ItemsDat))
                                 {
                                     cbi.Add(new ComboBoxInfo() { Name = Info.IDRace[raceID], ID = raceID, IsNum = false });
                                     break;
@@ -196,7 +197,8 @@ namespace FFXIV_TexTools2.ViewModel
             }
             catch (Exception ex)
             {
-                MessageBox.Show("[Main] tab 3D Error \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("[Main] Model Error \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                Debug.WriteLine(ex.StackTrace);
             }
         }
 
@@ -282,7 +284,7 @@ namespace FFXIV_TexTools2.ViewModel
             {
                 try
                 {
-                    SaveModel.SaveCollada(selectedCategory, modelName, SelectedMesh.ID, selectedItem.ItemName, meshData, meshList);
+                    SaveModel.SaveCollada(selectedCategory, modelName, selectedItem.ItemName, meshData, meshList);
                     Import3DEnabled = true;
                 }
                 catch (Exception ex)
@@ -355,15 +357,15 @@ namespace FFXIV_TexTools2.ViewModel
                 if (ActiveToggle.Equals("Enable"))
                 {
                     offset = modEntry.modOffset;
-                    Helper.UpdateIndex(offset, fullPath);
-                    Helper.UpdateIndex2(offset, fullPath);
+                    Helper.UpdateIndex(offset, fullPath, Strings.ItemsDat);
+                    Helper.UpdateIndex2(offset, fullPath, Strings.ItemsDat);
                     ActiveToggle = "Disable";
                 }
                 else if (ActiveToggle.Equals("Disable"))
                 {
                     offset = modEntry.originalOffset;
-                    Helper.UpdateIndex(offset, fullPath);
-                    Helper.UpdateIndex2(offset, fullPath);
+                    Helper.UpdateIndex(offset, fullPath, Strings.ItemsDat);
+                    Helper.UpdateIndex2(offset, fullPath, Strings.ItemsDat);
                     ActiveToggle = "Enable";
                 }
             }
@@ -377,7 +379,7 @@ namespace FFXIV_TexTools2.ViewModel
         /// </summary>
         public void Dispose()
         {
-            if(selectedItem != null)
+            if (selectedItem != null)
             {
                 selectedItem = null;
                 meshList = null;
@@ -488,7 +490,7 @@ namespace FFXIV_TexTools2.ViewModel
                 {
                     string folder = String.Format(MDLFolder, i.ToString().PadLeft(4, '0'));
 
-                    if (Helper.FolderExists(FFCRC.GetHash(folder)))
+                    if (Helper.FolderExists(FFCRC.GetHash(folder), Strings.ItemsDat))
                     {
                         cbi.Add(new ComboBoxInfo() { Name = i.ToString(), ID = i.ToString(), IsNum = true });
 
@@ -596,7 +598,7 @@ namespace FFXIV_TexTools2.ViewModel
                     abrParts = new string[1] { "til" };
                 }
 
-                var fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(MDLFolder));
+                var fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(MDLFolder), Strings.ItemsDat);
 
                 foreach (string abrPart in abrParts)
                 {
@@ -630,26 +632,7 @@ namespace FFXIV_TexTools2.ViewModel
 
                 abrParts = new string[5] { "met", "glv", "dwn", "sho", "top" };
 
-                var fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(MDLFolder));
-
-                foreach (string abrPart in abrParts)
-                {
-                    var file = String.Format(MDLFile, abrPart);
-
-                    if (fileHashList.Contains(FFCRC.GetHash(file)))
-                    {
-                        cbi.Add(new ComboBoxInfo() { Name = Info.slotAbr.FirstOrDefault(x => x.Value == abrPart).Key, ID = abrPart, IsNum = false });
-                    }
-                }
-            }
-            else if (selectedItem.PrimaryModelID.Equals("9900"))
-            {
-                MDLFolder = string.Format(Strings.EquipMDLFolder, selectedItem.PrimaryModelID);
-                MDLFile = string.Format(Strings.EquipMDLFile, SelectedRace.ID, selectedItem.PrimaryModelID, "{0}");
-
-                abrParts = new string[5] { "met", "glv", "dwn", "sho", "top" };
-
-                var fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(MDLFolder));
+                var fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(MDLFolder), Strings.ItemsDat);
 
                 foreach (string abrPart in abrParts)
                 {
@@ -678,6 +661,25 @@ namespace FFXIV_TexTools2.ViewModel
             else if(type.Equals("monster"))
             {
                 cbi.Add(new ComboBoxInfo() { Name = "1", ID = "1", IsNum = false });
+            }
+            else if (selectedItem.PrimaryModelID.Equals("9900"))
+            {
+                MDLFolder = string.Format(Strings.EquipMDLFolder, selectedItem.PrimaryModelID);
+                MDLFile = string.Format(Strings.EquipMDLFile, SelectedRace.ID, selectedItem.PrimaryModelID, "{0}");
+
+                abrParts = new string[5] { "met", "glv", "dwn", "sho", "top" };
+
+                var fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(MDLFolder), Strings.ItemsDat);
+
+                foreach (string abrPart in abrParts)
+                {
+                    var file = String.Format(MDLFile, abrPart);
+
+                    if (fileHashList.Contains(FFCRC.GetHash(file)))
+                    {
+                        cbi.Add(new ComboBoxInfo() { Name = Info.slotAbr.FirstOrDefault(x => x.Value == abrPart).Key, ID = abrPart, IsNum = false });
+                    }
+                }
             }
             else
             {
@@ -838,8 +840,8 @@ namespace FFXIV_TexTools2.ViewModel
                         {
                             if(mtrlData.MaskPath != null)
                             {
-                                normalData = TEX.GetTex(mtrlData.NormalOffset);
-                                maskData = TEX.GetTex(mtrlData.MaskOffset);
+                                normalData = TEX.GetTex(mtrlData.NormalOffset, Strings.ItemsDat);
+                                maskData = TEX.GetTex(mtrlData.MaskOffset, Strings.ItemsDat);
                                 var colorBmp = TEX.TextureToBitmap(mtrlData.ColorData, 9312, 4, 16);
                                 colorBMP = Imaging.CreateBitmapSourceFromHBitmap(colorBmp.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
 
@@ -855,12 +857,12 @@ namespace FFXIV_TexTools2.ViewModel
                             }
                             else
                             {
-                                normalData = TEX.GetTex(mtrlData.NormalOffset);
-                                specularData = TEX.GetTex(mtrlData.SpecularOffset);
+                                normalData = TEX.GetTex(mtrlData.NormalOffset, Strings.ItemsDat);
+                                specularData = TEX.GetTex(mtrlData.SpecularOffset, Strings.ItemsDat);
 
                                 if (mtrlData.DiffusePath != null)
                                 {
-                                    diffuseData = TEX.GetTex(mtrlData.DiffuseOffset);
+                                    diffuseData = TEX.GetTex(mtrlData.DiffuseOffset, Strings.ItemsDat);
                                 }
 
                                 var maps = TexHelper.MakeCharacterMaps(normalData, diffuseData, null, specularData);
@@ -881,9 +883,9 @@ namespace FFXIV_TexTools2.ViewModel
 
                         if (selectedItem.ItemName.Equals(Strings.Body))
                         {
-                            normalData = TEX.GetTex(mtrlData.NormalOffset);
+                            normalData = TEX.GetTex(mtrlData.NormalOffset, Strings.ItemsDat);
                             //specularTI = TEX.GetTex(mInfo.SpecularOffset);
-                            diffuseData = TEX.GetTex(mtrlData.DiffuseOffset);
+                            diffuseData = TEX.GetTex(mtrlData.DiffuseOffset, Strings.ItemsDat);
 
                             isBody = true;
                             diffuseBMP = Imaging.CreateBitmapSourceFromHBitmap(diffuseData.BMP.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
@@ -892,12 +894,12 @@ namespace FFXIV_TexTools2.ViewModel
 
                         if (selectedItem.ItemName.Equals(Strings.Face))
                         {
-                            normalData = TEX.GetTex(mtrlData.NormalOffset);
+                            normalData = TEX.GetTex(mtrlData.NormalOffset, Strings.ItemsDat);
 
                             if (materialStrings[i].Contains("_fac_"))
                             {
-                                specularData = TEX.GetTex(mtrlData.SpecularOffset);
-                                diffuseData = TEX.GetTex(mtrlData.DiffuseOffset);
+                                specularData = TEX.GetTex(mtrlData.SpecularOffset, Strings.ItemsDat);
+                                diffuseData = TEX.GetTex(mtrlData.DiffuseOffset, Strings.ItemsDat);
 
                                 var maps = TexHelper.MakeCharacterMaps(normalData, diffuseData, null, specularData);
 
@@ -912,7 +914,7 @@ namespace FFXIV_TexTools2.ViewModel
                             }
                             else
                             {
-                                specularData = TEX.GetTex(mtrlData.SpecularOffset);
+                                specularData = TEX.GetTex(mtrlData.SpecularOffset, Strings.ItemsDat);
                                 var maps = TexHelper.MakeCharacterMaps(normalData, diffuseData, null, specularData);
 
                                 diffuseBMP = maps[0];
@@ -932,18 +934,18 @@ namespace FFXIV_TexTools2.ViewModel
 
                         if (mtrlData.NormalOffset != 0)
                         {
-                            normalData = TEX.GetTex(mtrlData.NormalOffset);
+                            normalData = TEX.GetTex(mtrlData.NormalOffset, Strings.ItemsDat);
                         }
 
                         if (mtrlData.MaskOffset != 0)
                         {
-                            maskData = TEX.GetTex(mtrlData.MaskOffset);
+                            maskData = TEX.GetTex(mtrlData.MaskOffset, Strings.ItemsDat);
                             maskBMP = Imaging.CreateBitmapSourceFromHBitmap(maskData.BMP.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
                         }
 
                         if (mtrlData.DiffuseOffset != 0)
                         {
-                            diffuseData = TEX.GetTex(mtrlData.DiffuseOffset);
+                            diffuseData = TEX.GetTex(mtrlData.DiffuseOffset, Strings.ItemsDat);
                             if (mtrlData.DiffusePath.Contains("human") && !mtrlData.DiffusePath.Contains("demi"))
                             {
                                 isBody = true;
@@ -954,7 +956,7 @@ namespace FFXIV_TexTools2.ViewModel
 
                         if (mtrlData.SpecularOffset != 0)
                         {
-                            specularData = TEX.GetTex(mtrlData.SpecularOffset);
+                            specularData = TEX.GetTex(mtrlData.SpecularOffset, Strings.ItemsDat);
                             specularBMP = Imaging.CreateBitmapSourceFromHBitmap(specularData.BMP.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
                         }
 
@@ -1028,55 +1030,47 @@ namespace FFXIV_TexTools2.ViewModel
                     Import3DEnabled = false;
                 }
 
-                if (Properties.Settings.Default.Mod_List == 0)
+                string line;
+                JsonEntry modEntry = null;
+                bool inModList = false;
+                try
                 {
-                    string line;
-                    JsonEntry modEntry = null;
-                    bool inModList = false;
-                    try
+                    using (StreamReader sr = new StreamReader(Info.modListDir))
                     {
-                        using (StreamReader sr = new StreamReader(Info.modListDir))
+                        while ((line = sr.ReadLine()) != null)
                         {
-                            while ((line = sr.ReadLine()) != null)
+                            modEntry = JsonConvert.DeserializeObject<JsonEntry>(line);
+                            if (modEntry.fullPath.Equals(fullPath))
                             {
-                                modEntry = JsonConvert.DeserializeObject<JsonEntry>(line);
-                                if (modEntry.fullPath.Equals(fullPath))
-                                {
-                                    inModList = true;
-                                    break;
-                                }
+                                inModList = true;
+                                break;
                             }
                         }
                     }
-                    catch (Exception ex)
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("[Main] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+
+                if (inModList)
+                {
+                    var currOffset = Helper.GetDataOffset(FFCRC.GetHash(modEntry.fullPath.Substring(0, modEntry.fullPath.LastIndexOf("/"))), FFCRC.GetHash(Path.GetFileName(modEntry.fullPath)), Strings.ItemsDat);
+
+                    if (currOffset == modEntry.modOffset)
                     {
-                        MessageBox.Show("[Main] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        ActiveToggle = "Disable";
                     }
-
-                    if (inModList)
+                    else if (currOffset == modEntry.originalOffset)
                     {
-                        var currOffset = Helper.GetItemOffset(FFCRC.GetHash(modEntry.fullPath.Substring(0, modEntry.fullPath.LastIndexOf("/"))), FFCRC.GetHash(Path.GetFileName(modEntry.fullPath)));
-
-                        if (currOffset == modEntry.modOffset)
-                        {
-                            ActiveToggle = "Disable";
-                        }
-                        else if (currOffset == modEntry.originalOffset)
-                        {
-                            ActiveToggle = "Enable";
-                        }
-                        else
-                        {
-                            ActiveToggle = "Error";
-                        }
-
-                        ActiveEnabled = true;
+                        ActiveToggle = "Enable";
                     }
                     else
                     {
-                        ActiveEnabled = false;
-                        ActiveToggle = "Enable/Disable";
+                        ActiveToggle = "Error";
                     }
+
+                    ActiveEnabled = true;
                 }
                 else
                 {
@@ -1129,8 +1123,9 @@ namespace FFXIV_TexTools2.ViewModel
                             var mtrlFolder = string.Format(Strings.HairMtrlFolder, race, hairNum);
                             slotAbr = materialStrings[mesh].Substring(materialStrings[mesh].LastIndexOf("_") - 3, 3);
                             slotAbr = Info.HairTypes.FirstOrDefault(x => x.Value == slotAbr).Key;
+                            var part = materialStrings[mesh].Substring(materialStrings[mesh].LastIndexOf("_") + 1, 1);
 
-                            var hairInfo = MTRL.GetMTRLDatafromType(selectedItem, SelectedRace, hairNum, slotAbr, itemVersion, selectedCategory);
+                            var hairInfo = MTRL.GetMTRLDatafromType(selectedItem, SelectedRace, hairNum, slotAbr, itemVersion, selectedCategory, part);
                             return hairInfo.Item1;
                         }
                         else if (materialStrings[mesh].Contains("f0"))
@@ -1139,8 +1134,9 @@ namespace FFXIV_TexTools2.ViewModel
                             var mtrlFolder = string.Format(Strings.FaceMtrlFolder, race, faceNum);
                             slotAbr = materialStrings[mesh].Substring(materialStrings[mesh].LastIndexOf("_") - 3, 3);
                             slotAbr = Info.FaceTypes.FirstOrDefault(x => x.Value == slotAbr).Key;
+                            var part = materialStrings[mesh].Substring(materialStrings[mesh].LastIndexOf("_") + 1, 1);
 
-                            var faceInfo = MTRL.GetMTRLDatafromType(selectedItem, SelectedRace, faceNum, slotAbr, itemVersion, selectedCategory);
+                            var faceInfo = MTRL.GetMTRLDatafromType(selectedItem, SelectedRace, faceNum, slotAbr, itemVersion, selectedCategory, part);
                             return faceInfo.Item1;
                         }
                         else
@@ -1153,7 +1149,7 @@ namespace FFXIV_TexTools2.ViewModel
                         slotAbr = selectedPart.Name;
                     }
 
-                    var info = MTRL.GetMTRLDatafromType(selectedItem, SelectedRace, selectedPart.Name, slotAbr, itemVersion, selectedCategory);
+                    var info = MTRL.GetMTRLDatafromType(selectedItem, SelectedRace, selectedPart.Name, slotAbr, itemVersion, selectedCategory, "a");
                     mtrlData = info.Item1;
                 }
                 else
@@ -1186,7 +1182,7 @@ namespace FFXIV_TexTools2.ViewModel
 
                                     var mtrlFile = materialStrings[mesh].Substring(1);
 
-                                    return MTRL.GetMTRLInfo(Helper.GetItemOffset(FFCRC.GetHash(mtrlFolder), FFCRC.GetHash(mtrlFile)), true);
+                                    return MTRL.GetMTRLInfo(Helper.GetDataOffset(FFCRC.GetHash(mtrlFolder), FFCRC.GetHash(mtrlFile), Strings.ItemsDat), true);
                                 }
                             }
                         }

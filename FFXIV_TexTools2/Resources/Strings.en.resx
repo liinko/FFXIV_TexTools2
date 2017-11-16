@@ -291,6 +291,9 @@
   <data name="Specular" xml:space="preserve">
     <value>Specular</value>
   </data>
+  <data name="String1" xml:space="preserve">
+    <value />
+  </data>
   <data name="Tail" xml:space="preserve">
     <value>Tail</value>
   </data>

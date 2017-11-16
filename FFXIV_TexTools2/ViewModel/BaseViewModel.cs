@@ -12,6 +12,7 @@ namespace FFXIV_TexTools2.ViewModel
     using HelixToolkit.Wpf.SharpDX;
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.IO;
 
     /// <summary>

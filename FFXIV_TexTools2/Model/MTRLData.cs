@@ -46,7 +46,6 @@ namespace FFXIV_TexTools2.Model
         /// </summary>
         public int SpecularOffset { get; set; }
 
-
         /// <summary>
         /// The items internal Mask Map path
         /// </summary>
@@ -86,5 +85,25 @@ namespace FFXIV_TexTools2.Model
         /// The items Color Flags
         /// </summary>
         public byte[] ColorFlags { get; set; }
+
+        /// <summary>
+        /// The items internal Icon path
+        /// </summary>
+        public string UIPath { get; set; }
+
+        /// <summary>
+        /// The items internal Icon path
+        /// </summary>
+        public string UIHQPath { get; set; }
+
+        /// <summary>
+        /// The items Icon data offset
+        /// </summary>
+        public int UIOffset { get; set; }
+
+        /// <summary>
+        /// The items Icon data offset
+        /// </summary>
+        public int UIHQOffset { get; set; }
     }
 }

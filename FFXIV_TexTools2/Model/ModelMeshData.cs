@@ -81,9 +81,19 @@ namespace FFXIV_TexTools2.Material
         public List<int> BlendIndices = new List<int>();
 
         /// <summary>
+        /// The list of blend indices
+        /// </summary>
+        public List<int[]> BlendIndicesArrayList = new List<int[]>();
+
+        /// <summary>
         /// The list of blend weights
         /// </summary>
         public List<float> BlendWeights = new List<float>();
+
+        /// <summary>
+        /// The list of blend weights
+        /// </summary>
+        public List<float[]> BlendWeightsArrayList = new List<float[]>();
 
         /// <summary>
         /// The list of weight coutns

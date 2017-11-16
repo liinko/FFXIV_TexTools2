@@ -16,6 +16,7 @@
 
 
 using System;
+using System.ComponentModel;
 
 namespace FFXIV_TexTools2.Model
 {
@@ -30,6 +31,11 @@ namespace FFXIV_TexTools2.Model
         /// The category for the item
         /// </summary>
         public string ItemCategory { get; set; }
+
+        /// <summary>
+        /// The subcategory for the item
+        /// </summary>
+        public string ItemSubCategory { get; set; }
 
         /// <summary>
         /// The ID from the primary model data
@@ -70,6 +76,16 @@ namespace FFXIV_TexTools2.Model
         /// The MTRL folder for the item
         /// </summary>
         public string SecondaryMTRLFolder { get; set; }
+
+        /// <summary>
+        /// The icon number for the item
+        /// </summary>
+        public string Icon { get; set; }
+
+        /// <summary>
+        /// The UI Path for the item
+        /// </summary>
+        public string UIPath { get; set; }
 
         /// <summary>
         /// Compares Item names for sorting

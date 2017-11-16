@@ -14,51 +14,119 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using FFXIV_TexTools2.Helpers;
 using FFXIV_TexTools2.Model;
-using FFXIV_TexTools2.Resources;
-using System.Collections.Generic;
+using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 
 namespace FFXIV_TexTools2.ViewModel
 {
-    public class CategoryViewModel : TreeViewItemViewModel
+    public class CategoryViewModel : INotifyPropertyChanged
     {
-        readonly string _category;
-        ObservableCollection<ItemData> _itemList;
+        ObservableCollection<CategoryViewModel> _children;
+        CategoryViewModel _parent;
+        TreeNode _nodeData;
 
-        /// <summary>
-        /// View model that attaches the items to their respective category 
-        /// </summary>
-        /// <param name="category">The current category to have items assigned to</param>
-        /// <param name="itemList">The list of items obtained from the exd file</param>
-        public CategoryViewModel(string category, ObservableCollection<ItemData> itemList) : base(null, false)
+        bool _isExpanded;
+        bool _isSelected;
+
+        public CategoryViewModel(TreeNode categoryData) : this(categoryData, null)
         {
-            _category = category;
-            _itemList = itemList;
 
-            IEnumerable<ItemData> filteredItems;
+        }
 
-            //for aesthetic purposes the items in the character and pets category are not sorted by name
-            if (!CategoryName.Equals(Strings.Character) && !CategoryName.Equals(Strings.Pets))
-            {
-                filteredItems = from item in _itemList where item.ItemCategory.Equals(Info.IDSlot[CategoryName]) orderby item.ItemName select item;
-            }
-            else
-            {
-                filteredItems = from item in _itemList where item.ItemCategory.Equals(Info.IDSlot[CategoryName]) select item;
-            }
+        private CategoryViewModel(TreeNode categoryData, CategoryViewModel parent)
+        {
+            _nodeData = categoryData;
+            _parent = parent;
 
-            foreach (ItemData item in filteredItems)
+            _children = new ObservableCollection<CategoryViewModel>((from child in _nodeData.SubNode select new CategoryViewModel(child, this)).ToList<CategoryViewModel>());
+        }
+
+        public ObservableCollection<CategoryViewModel> Children
+        {
+            get { return _children; }
+            set { _children = value; OnPropertyChanged("Children"); }
+        }
+
+        public string Name
+        {
+            get { return _nodeData.Name; }
+        }
+
+        public ItemData ItemData
+        {
+            get { return _nodeData.ItemData; }
+        }
+
+        public bool IsExpanded
+        {
+            get { return _isExpanded; }
+            set
             {
-                Children.Add(new ItemViewModel(item, this));
+                if (value != _isExpanded)
+                {
+                    _isExpanded = value;
+                    this.OnPropertyChanged("IsExpanded");
+                }
+
+                // Expand all the way up to the root.
+                if (_isExpanded && _parent != null)
+                    _parent.IsExpanded = true;
             }
         }
 
-        public string CategoryName
+        public bool IsSelected
         {
-            get { return _category; }
+            get { return _isSelected; }
+            set
+            {
+                if (value != _isSelected)
+                {
+                    _isSelected = value;
+                    this.OnPropertyChanged("IsSelected");
+                }
+            }
+        }
+
+        public void ExpandAll()
+        {
+            IsExpanded = true;
+            if(_children != null)
+            {
+                foreach(var c in _children)
+                {
+                    c.ExpandAll();
+                }
+            }
+        }
+
+        public CategoryViewModel Parent
+        {
+            get { return _parent; }
+            set
+            {
+                _parent = value;
+                OnPropertyChanged("Parent");
+            }
+        }
+
+        public bool NameContainsText(string text)
+        {
+            if (String.IsNullOrEmpty(text) || String.IsNullOrEmpty(this.Name))
+                return false;
+
+            return this.Name.IndexOf(text, StringComparison.InvariantCultureIgnoreCase) > -1;
+        }
+
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            if (this.PropertyChanged != null)
+                this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

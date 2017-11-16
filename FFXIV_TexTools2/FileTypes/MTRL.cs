@@ -61,7 +61,7 @@ namespace FFXIV_TexTools2.Material
                     racesDict.Add(FFCRC.GetHash(MTRLFolder), race);
                 }
 
-                 cbiList = new ObservableCollection<ComboBoxInfo>(Helper.FolderExistsListRace(racesDict));
+                 cbiList = new ObservableCollection<ComboBoxInfo>(Helper.FolderExistsListRace(racesDict, Strings.ItemsDat));
             }
             else if (item.ItemName.Equals(Strings.Face))
             {
@@ -77,7 +77,7 @@ namespace FFXIV_TexTools2.Material
                     racesDict.Add(FFCRC.GetHash(MTRLFolder), race);
                 }
 
-                cbiList = new ObservableCollection<ComboBoxInfo>(Helper.FolderExistsListRace(racesDict));
+                cbiList = new ObservableCollection<ComboBoxInfo>(Helper.FolderExistsListRace(racesDict, Strings.ItemsDat));
             }
             else if (item.ItemName.Equals(Strings.Hair))
             {
@@ -88,7 +88,7 @@ namespace FFXIV_TexTools2.Material
                     racesDict.Add(FFCRC.GetHash(MTRLFolder), race);
                 }
 
-                cbiList = new ObservableCollection<ComboBoxInfo>(Helper.FolderExistsListRace(racesDict));
+                cbiList = new ObservableCollection<ComboBoxInfo>(Helper.FolderExistsListRace(racesDict, Strings.ItemsDat));
             }
             else if (item.ItemName.Equals(Strings.Tail))
             {
@@ -99,7 +99,7 @@ namespace FFXIV_TexTools2.Material
                     racesDict.Add(FFCRC.GetHash(MTRLFolder), race);
                 }
 
-                cbiList = new ObservableCollection<ComboBoxInfo>(Helper.FolderExistsListRace(racesDict));
+                cbiList = new ObservableCollection<ComboBoxInfo>(Helper.FolderExistsListRace(racesDict, Strings.ItemsDat));
             }
             else if (item.ItemName.Equals(Strings.Face_Paint) || item.ItemName.Equals(Strings.Equipment_Decals) || item.ItemCategory.Equals("9901"))
             {
@@ -119,7 +119,7 @@ namespace FFXIV_TexTools2.Material
 
                 ObservableCollection<ComboBoxInfo> cbiInfo = new ObservableCollection<ComboBoxInfo>();
 
-                var fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion));
+                var fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion), Strings.ItemsDat);
 
                 if (type.Equals("weapon") || type.Equals("accessory") || type.Equals("food"))
                 {
@@ -169,7 +169,7 @@ namespace FFXIV_TexTools2.Material
                     MTRLDict.Add(FFCRC.GetHash(MTRLFolder), i);
                 }
 
-                cbiList = new List<ComboBoxInfo>(Helper.FolderExistsList(MTRLDict));
+                cbiList = new List<ComboBoxInfo>(Helper.FolderExistsList(MTRLDict, Strings.ItemsDat));
             }
             else if (item.ItemName.Equals(Strings.Face))
             {
@@ -180,7 +180,7 @@ namespace FFXIV_TexTools2.Material
                     MTRLDict.Add(FFCRC.GetHash(MTRLFolder), i);
                 }
 
-                cbiList = new List<ComboBoxInfo>(Helper.FolderExistsList(MTRLDict));
+                cbiList = new List<ComboBoxInfo>(Helper.FolderExistsList(MTRLDict, Strings.ItemsDat));
             }
             else if (item.ItemName.Equals(Strings.Hair))
             {
@@ -191,7 +191,7 @@ namespace FFXIV_TexTools2.Material
                     MTRLDict.Add(FFCRC.GetHash(MTRLFolder), i);
                 }
 
-                cbiList = new List<ComboBoxInfo>(Helper.FolderExistsList(MTRLDict));
+                cbiList = new List<ComboBoxInfo>(Helper.FolderExistsList(MTRLDict, Strings.ItemsDat));
             }
             else if (item.ItemName.Equals(Strings.Tail))
             {
@@ -202,11 +202,11 @@ namespace FFXIV_TexTools2.Material
                     MTRLDict.Add(FFCRC.GetHash(MTRLFolder), i);
                 }
 
-                cbiList = new List<ComboBoxInfo>(Helper.FolderExistsList(MTRLDict));
+                cbiList = new List<ComboBoxInfo>(Helper.FolderExistsList(MTRLDict, Strings.ItemsDat));
             }
             else if (item.ItemName.Equals(Strings.Face_Paint))
             {
-                fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(Strings.FacePaintFolder));
+                fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(Strings.FacePaintFolder), Strings.ItemsDat);
                 cbiList = new List<ComboBoxInfo>();
 
                 for (int i = 1; i < 100; i++)
@@ -221,7 +221,7 @@ namespace FFXIV_TexTools2.Material
             }
             else if (item.ItemName.Equals(Strings.Equipment_Decals))
             {
-                fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(Strings.EquipDecalFolder));
+                fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(Strings.EquipDecalFolder), Strings.ItemsDat);
                 cbiList = new List<ComboBoxInfo>();
 
                 for (int i = 1; i < 300; i++)
@@ -252,7 +252,7 @@ namespace FFXIV_TexTools2.Material
                     MTRLDict.Add(FFCRC.GetHash(MTRLFolder), i);
                 }
 
-                cbiList = new List<ComboBoxInfo>(Helper.FolderExistsList(MTRLDict));
+                cbiList = new List<ComboBoxInfo>(Helper.FolderExistsList(MTRLDict, Strings.ItemsDat));
             }
             else if (selectedCategory.Equals(Strings.Mounts))
             {
@@ -267,7 +267,7 @@ namespace FFXIV_TexTools2.Material
                     Dictionary<string, int> mountMTRLDict = new Dictionary<string, int>();
                     string[] parts = { "a", "b", "c", "d", "e" };
 
-                    fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion));
+                    fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion), Strings.ItemsDat);
 
                     foreach (string c in parts)
                     {
@@ -286,7 +286,7 @@ namespace FFXIV_TexTools2.Material
                 string[] parts = { "a", "b", "c", "d", "e" };
                 cbiList = new List<ComboBoxInfo>();
 
-                fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion));
+                fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion), Strings.ItemsDat);
 
                 foreach (string c in parts)
                 {
@@ -304,7 +304,7 @@ namespace FFXIV_TexTools2.Material
                 string[] parts = { "a", "b", "c", "d", "e" };
                 cbiList = new List<ComboBoxInfo>();
 
-                fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion));
+                fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion), Strings.ItemsDat);
 
                 foreach (string part in parts)
                 {
@@ -357,28 +357,68 @@ namespace FFXIV_TexTools2.Material
             ObservableCollection<ComboBoxInfo> cbiList;
             Tuple<MTRLData, ObservableCollection<ComboBoxInfo>> info;
             MTRLData mtrlInfo = null;
+            string[] partList = new string[] { "b", "c", "d" };
 
             if (item.ItemName.Equals(Strings.Face))
             {
                 MTRLFolder = String.Format(Strings.FaceMtrlFolder, raceID, part.PadLeft(4, '0'));
 
-                var fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(MTRLFolder));
+                var fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(MTRLFolder), Strings.ItemsDat);
 
                 cbiList = new ObservableCollection<ComboBoxInfo>();
 
-                if (fileHashList.Contains(FFCRC.GetHash(String.Format(Strings.FaceMtrlFile, raceID, part.PadLeft(4, '0'), "fac"))))
+                if (fileHashList.Contains(FFCRC.GetHash(String.Format(Strings.FaceMtrlFile, raceID, part.PadLeft(4, '0'), "fac", "a"))))
                 {
                     cbiList.Add(new ComboBoxInfo() { Name = Strings.Face, ID = "", IsNum = false });
                 }
+                else
+                {
+                    foreach(var p in partList)
+                    {
+                        var file = String.Format(Strings.FaceMtrlFile, raceID, part.PadLeft(4, '0'), "fac", p);
 
-                if (fileHashList.Contains(FFCRC.GetHash(String.Format(Strings.FaceMtrlFile, raceID, part.PadLeft(4, '0'), "iri"))))
+                        if (fileHashList.Contains(FFCRC.GetHash(file)))
+                        {
+                            cbiList.Add(new ComboBoxInfo() { Name = Strings.Face, ID = "", IsNum = false });
+                            break;
+                        }
+                    }
+                }
+
+                if (fileHashList.Contains(FFCRC.GetHash(String.Format(Strings.FaceMtrlFile, raceID, part.PadLeft(4, '0'), "iri", "a"))))
                 {
                     cbiList.Add(new ComboBoxInfo() { Name = Strings.Iris, ID = "", IsNum = false });
                 }
+                else
+                {
+                    foreach (var p in partList)
+                    {
+                        var file = String.Format(Strings.FaceMtrlFile, raceID, part.PadLeft(4, '0'), "iri", p);
 
-                if (fileHashList.Contains(FFCRC.GetHash(String.Format(Strings.FaceMtrlFile, raceID, part.PadLeft(4, '0'), "etc"))))
+                        if (fileHashList.Contains(FFCRC.GetHash(file)))
+                        {
+                            cbiList.Add(new ComboBoxInfo() { Name = Strings.Iris, ID = "", IsNum = false });
+                            break;
+                        }
+                    }
+                }
+
+                if (fileHashList.Contains(FFCRC.GetHash(String.Format(Strings.FaceMtrlFile, raceID, part.PadLeft(4, '0'), "etc", "a"))))
                 {
                     cbiList.Add(new ComboBoxInfo() { Name = Strings.Etc, ID = "", IsNum = false });
+                }
+                else
+                {
+                    foreach (var p in partList)
+                    {
+                        var file = String.Format(Strings.FaceMtrlFile, raceID, part.PadLeft(4, '0'), "etc", p);
+
+                        if (fileHashList.Contains(FFCRC.GetHash(file)))
+                        {
+                            cbiList.Add(new ComboBoxInfo() { Name = Strings.Etc, ID = "", IsNum = false });
+                            break;
+                        }
+                    }
                 }
 
                 info = new Tuple<MTRLData, ObservableCollection<ComboBoxInfo>>(mtrlInfo, cbiList);
@@ -388,9 +428,9 @@ namespace FFXIV_TexTools2.Material
                 MTRLFolder = String.Format(Strings.BodyMtrlFolder, raceID, part.PadLeft(4, '0'));
                 MTRLFile = String.Format(Strings.BodyMtrlFile, raceID, part.PadLeft(4, '0'));
 
-                if(Helper.FileExists(FFCRC.GetHash(MTRLFile), FFCRC.GetHash(MTRLFolder)))
+                if(Helper.FileExists(FFCRC.GetHash(MTRLFile), FFCRC.GetHash(MTRLFolder), Strings.ItemsDat))
                 {
-                    offset = Helper.GetItemOffset(FFCRC.GetHash(MTRLFolder), FFCRC.GetHash(MTRLFile));
+                    offset = Helper.GetDataOffset(FFCRC.GetHash(MTRLFolder), FFCRC.GetHash(MTRLFile), Strings.ItemsDat);
 
                     mtrlInfo = GetMTRLInfo(offset, true);
 
@@ -406,7 +446,7 @@ namespace FFXIV_TexTools2.Material
             {
                 MTRLFolder = String.Format(Strings.HairMtrlFolder, raceID, part.PadLeft(4, '0'));
 
-                var fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(MTRLFolder));
+                var fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(MTRLFolder), Strings.ItemsDat);
 
                 cbiList = new ObservableCollection<ComboBoxInfo>();
 
@@ -459,9 +499,9 @@ namespace FFXIV_TexTools2.Material
                 MTRLFolder = String.Format(Strings.TailMtrlFolder, raceID, part.PadLeft(4, '0'));
                 MTRLFile = string.Format(Strings.TailMtrlFile, raceID, part.PadLeft(4, '0'));
 
-                if (Helper.FileExists(FFCRC.GetHash(MTRLFile), FFCRC.GetHash(MTRLFolder)))
+                if (Helper.FileExists(FFCRC.GetHash(MTRLFile), FFCRC.GetHash(MTRLFolder), Strings.ItemsDat))
                 {
-                    offset = Helper.GetItemOffset(FFCRC.GetHash(MTRLFolder), FFCRC.GetHash(MTRLFile));
+                    offset = Helper.GetDataOffset(FFCRC.GetHash(MTRLFolder), FFCRC.GetHash(MTRLFile), Strings.ItemsDat);
 
                     mtrlInfo = GetMTRLInfo(offset, true);
 
@@ -484,9 +524,9 @@ namespace FFXIV_TexTools2.Material
                 MTRLFolder = String.Format(Strings.MonsterMtrlFolder, Info.petID[item.ItemName], p.ToString().PadLeft(4, '0')) + part.PadLeft(4, '0');
                 MTRLFile = String.Format(Strings.MonsterMtrlFile, Info.petID[item.ItemName], p.ToString().PadLeft(4, '0'), "a");
 
-                if (Helper.FileExists(FFCRC.GetHash(MTRLFile), FFCRC.GetHash(MTRLFolder)))
+                if (Helper.FileExists(FFCRC.GetHash(MTRLFile), FFCRC.GetHash(MTRLFolder), Strings.ItemsDat))
                 {
-                    offset = Helper.GetItemOffset(FFCRC.GetHash(MTRLFolder), FFCRC.GetHash(MTRLFile));
+                    offset = Helper.GetDataOffset(FFCRC.GetHash(MTRLFolder), FFCRC.GetHash(MTRLFile), Strings.ItemsDat);
 
                     mtrlInfo = GetMTRLInfo(offset, false);
                     mtrlInfo.MTRLPath = MTRLFolder + "/" + MTRLFile;
@@ -505,7 +545,7 @@ namespace FFXIV_TexTools2.Material
                 {
                     SortedSet<ComboBoxInfo> typeSet = new SortedSet<ComboBoxInfo>();
 
-                    var fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion));
+                    var fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion), Strings.ItemsDat);
 
                     foreach (string abr in Info.slotAbr.Values)
                     {
@@ -523,9 +563,9 @@ namespace FFXIV_TexTools2.Material
                 {
                     MTRLFile = String.Format(Strings.MonsterMtrlFile, item.PrimaryModelID.PadLeft(4, '0'), item.PrimaryModelBody.PadLeft(4, '0'), part);
 
-                    if (Helper.FileExists(FFCRC.GetHash(MTRLFile), FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion)))
+                    if (Helper.FileExists(FFCRC.GetHash(MTRLFile), FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion), Strings.ItemsDat))
                     {
-                        offset = Helper.GetItemOffset(FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion), FFCRC.GetHash(MTRLFile));
+                        offset = Helper.GetDataOffset(FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion), FFCRC.GetHash(MTRLFile), Strings.ItemsDat);
                         mtrlInfo = GetMTRLInfo(offset, false);
                         mtrlInfo.MTRLPath = item.PrimaryMTRLFolder + IMCVersion + "/" + MTRLFile;
                         mtrlInfo.MTRLOffset = offset;
@@ -542,9 +582,9 @@ namespace FFXIV_TexTools2.Material
             {
                 MTRLFile = String.Format(Strings.MonsterMtrlFile, item.PrimaryModelID.PadLeft(4, '0'), item.PrimaryModelBody.PadLeft(4, '0'), part);
 
-                if (Helper.FileExists(FFCRC.GetHash(MTRLFile), FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion)))
+                if (Helper.FileExists(FFCRC.GetHash(MTRLFile), FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion), Strings.ItemsDat))
                 {
-                    offset = Helper.GetItemOffset(FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion), FFCRC.GetHash(MTRLFile));
+                    offset = Helper.GetDataOffset(FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion), FFCRC.GetHash(MTRLFile), Strings.ItemsDat);
                     mtrlInfo = GetMTRLInfo(offset, false);
                     mtrlInfo.MTRLPath = item.PrimaryMTRLFolder + IMCVersion + "/" + MTRLFile;
                     mtrlInfo.MTRLOffset = offset;
@@ -614,9 +654,9 @@ namespace FFXIV_TexTools2.Material
                     MTRLFile = "guide_model.mtrl";
                 }
 
-                if (Helper.FileExists(FFCRC.GetHash(MTRLFile), FFCRC.GetHash(MTRLFolder + imcVersion)))
+                if (Helper.FileExists(FFCRC.GetHash(MTRLFile), FFCRC.GetHash(MTRLFolder + imcVersion), Strings.ItemsDat))
                 {
-                    offset = Helper.GetItemOffset(FFCRC.GetHash(MTRLFolder + imcVersion), FFCRC.GetHash(MTRLFile));
+                    offset = Helper.GetDataOffset(FFCRC.GetHash(MTRLFolder + imcVersion), FFCRC.GetHash(MTRLFile), Strings.ItemsDat);
 
                     mtrlInfo = GetMTRLInfo(offset, false);
                     mtrlInfo.MTRLPath = MTRLFolder + imcVersion + "/" + MTRLFile;
@@ -629,8 +669,49 @@ namespace FFXIV_TexTools2.Material
                 }
                 else
                 {
-                    return null;
+                    if (Helper.FileExists(FFCRC.GetHash(MTRLFile), FFCRC.GetHash(MTRLFolder + "0001"), Strings.ItemsDat))
+                    {
+                        offset = Helper.GetDataOffset(FFCRC.GetHash(MTRLFolder + "0001"), FFCRC.GetHash(MTRLFile), Strings.ItemsDat);
+
+                        mtrlInfo = GetMTRLInfo(offset, false);
+                        mtrlInfo.MTRLPath = MTRLFolder + imcVersion + "/" + MTRLFile;
+                        mtrlInfo.MTRLOffset = offset;
+
+                        foreach (var texMap in mtrlInfo.TextureMaps)
+                        {
+                            cbi.Add(texMap);
+                        }
+                    }
+                    else
+                    {
+                        return null;
+                    }
                 }
+
+                if(item.Icon != null)
+                {
+                    var iconBaseNum = item.Icon.Substring(0, 2).PadRight(item.Icon.Length, '0');
+                    var iconFolder = string.Format(Strings.IconFolder, iconBaseNum.PadLeft(6, '0'));
+                    var iconHQFolder = string.Format(Strings.IconHQFolder, iconBaseNum.PadLeft(6, '0'));
+                    var iconFile = string.Format(Strings.UIFile, item.Icon.PadLeft(6, '0'));
+
+                    mtrlInfo.UIPath = iconFolder + "/" + iconFile;
+                    mtrlInfo.UIHQPath = iconHQFolder + "/" + iconFile;
+
+                    mtrlInfo.UIOffset = Helper.GetDataOffset(FFCRC.GetHash(iconFolder), FFCRC.GetHash(iconFile), Strings.UIDat);
+                    mtrlInfo.UIHQOffset = Helper.GetDataOffset(FFCRC.GetHash(iconHQFolder), FFCRC.GetHash(iconFile), Strings.UIDat);
+
+                    if (mtrlInfo.UIOffset != 0)
+                    {
+                        cbi.Add(new ComboBoxInfo() { Name = "Icon", ID = "Icon", IsNum = false });
+                    }
+
+                    if (mtrlInfo.UIHQOffset != 0)
+                    {
+                        cbi.Add(new ComboBoxInfo() { Name = "HQ Icon", ID = "HQIcon", IsNum = false });
+                    }
+                }
+
 
                 if (!VFXVersion.Equals("0000"))
                 {
@@ -645,9 +726,9 @@ namespace FFXIV_TexTools2.Material
                         VFXFile = string.Format(Strings.WeapVFXFile, VFXVersion);
                     }
 
-                    if (Helper.FileExists(FFCRC.GetHash(VFXFile), FFCRC.GetHash(VFXFolder)))
+                    if (Helper.FileExists(FFCRC.GetHash(VFXFile), FFCRC.GetHash(VFXFolder), Strings.ItemsDat))
                     {
-                        offset = Helper.GetItemOffset(FFCRC.GetHash(VFXFolder), FFCRC.GetHash(VFXFile));
+                        offset = Helper.GetDataOffset(FFCRC.GetHash(VFXFolder), FFCRC.GetHash(VFXFile), Strings.ItemsDat);
 
                         var vfxData = GetVFXData(offset);
 
@@ -670,44 +751,59 @@ namespace FFXIV_TexTools2.Material
         /// </summary>
         /// <param name="item">currently selected item</param>
         /// <param name="race">currently selected race</param>
-        /// <param name="part">currently selected part</param>
+        /// <param name="partNum">currently selected part</param>
         /// <param name="type">currently selected type</param>
         /// <param name="IMCVersion">version of the selected item</param>
         /// <param name="selectedCategory">The category of the item</param>
         /// <returns>A tuple containing the MTRLInfo and Observable Collection containing texture map names</returns>
-        public static Tuple<MTRLData, ObservableCollection<ComboBoxInfo>> GetMTRLDatafromType(ItemData item, ComboBoxInfo race, string part, string type, string IMCVersion, string selectedCategory)
+        public static Tuple<MTRLData, ObservableCollection<ComboBoxInfo>> GetMTRLDatafromType(ItemData item, ComboBoxInfo race, string partNum, string type, string IMCVersion, string selectedCategory, string part)
         {
             string MTRLFolder, MTRLFile;
             string MTRLPath = "";
             bool isUncompressed = true;
             int offset = 0;
+            string[] partList = new string[] { "a", "b", "c", "d" };
 
             if (item.ItemName.Equals(Strings.Face))
             {
-                MTRLFolder = String.Format(Strings.FaceMtrlFolder, race.ID, part.PadLeft(4, '0'));
-                MTRLFile = String.Format(Strings.FaceMtrlFile, race.ID, part.PadLeft(4, '0'), Info.FaceTypes[type]);
-                offset = Helper.GetItemOffset(FFCRC.GetHash(MTRLFolder), FFCRC.GetHash(MTRLFile));
+                MTRLFolder = String.Format(Strings.FaceMtrlFolder, race.ID, partNum.PadLeft(4, '0'));
+                MTRLFile = String.Format(Strings.FaceMtrlFile, race.ID, partNum.PadLeft(4, '0'), Info.FaceTypes[type], part);
+                offset = Helper.GetDataOffset(FFCRC.GetHash(MTRLFolder), FFCRC.GetHash(MTRLFile), Strings.ItemsDat);
+                if(offset == 0)
+                {
+                    foreach(var p in partList)
+                    {
+                        MTRLFile = String.Format(Strings.FaceMtrlFile, race.ID, partNum.PadLeft(4, '0'), Info.FaceTypes[type], p);
+                        offset = Helper.GetDataOffset(FFCRC.GetHash(MTRLFolder), FFCRC.GetHash(MTRLFile), Strings.ItemsDat);
+
+                        if(offset != 0)
+                        {
+                            break;
+                        }
+                    }
+                }
+
                 MTRLPath = MTRLFolder + "/" + MTRLFile;
 
                 isUncompressed = true;
             }
             else if (item.ItemName.Equals(Strings.Hair))
             {
-                MTRLFolder = String.Format(Strings.HairMtrlFolder, race.ID, part.PadLeft(4, '0'));
+                MTRLFolder = String.Format(Strings.HairMtrlFolder, race.ID, partNum.PadLeft(4, '0'));
                 isUncompressed = true;
 
                 if (type.Equals(Strings.Accessory))
                 {
-                    MTRLFile = String.Format(Strings.HairMtrlFile, race.ID, part.PadLeft(4, '0'), Info.HairTypes[type], "b");
+                    MTRLFile = String.Format(Strings.HairMtrlFile, race.ID, partNum.PadLeft(4, '0'), Info.HairTypes[type], "b");
                 }
                 else
                 {
-                    MTRLFile = String.Format(Strings.HairMtrlFile, race.ID, part.PadLeft(4, '0'), Info.HairTypes[type], "a");
+                    MTRLFile = String.Format(Strings.HairMtrlFile, race.ID, partNum.PadLeft(4, '0'), Info.HairTypes[type], "a");
                 }
 
                 MTRLPath = MTRLFolder + "/" + MTRLFile;
 
-                offset = Helper.GetItemOffset(FFCRC.GetHash(MTRLFolder), FFCRC.GetHash(MTRLFile));
+                offset = Helper.GetDataOffset(FFCRC.GetHash(MTRLFolder), FFCRC.GetHash(MTRLFile), Strings.ItemsDat);
             }
             else if (selectedCategory.Equals(Strings.Mounts))
             {
@@ -719,12 +815,12 @@ namespace FFXIV_TexTools2.Material
                 }
                 else
                 {
-                    MTRLFile = String.Format(Strings.MonsterMtrlFile, item.PrimaryModelID.PadLeft(4, '0'), item.PrimaryModelBody.PadLeft(4, '0'), part);
+                    MTRLFile = String.Format(Strings.MonsterMtrlFile, item.PrimaryModelID.PadLeft(4, '0'), item.PrimaryModelBody.PadLeft(4, '0'), partNum);
                 }
 
                 MTRLPath = item.PrimaryMTRLFolder + IMCVersion + "/" + MTRLFile;
 
-                offset = Helper.GetItemOffset(FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion), FFCRC.GetHash(MTRLFile));
+                offset = Helper.GetDataOffset(FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion), FFCRC.GetHash(MTRLFile), Strings.ItemsDat);
             }
 
             var mtrlInfo = GetMTRLInfo(offset, isUncompressed);
@@ -761,7 +857,7 @@ namespace FFXIV_TexTools2.Material
                 }
             }
 
-            return Helper.GetItemOffset(FFCRC.GetHash(decalFolder), FFCRC.GetHash(decalFile));
+            return Helper.GetDataOffset(FFCRC.GetHash(decalFolder), FFCRC.GetHash(decalFile), Strings.ItemsDat);
         }
 
 
@@ -777,7 +873,7 @@ namespace FFXIV_TexTools2.Material
 
             MTRLData mtrlInfo = new MTRLData();
 
-            var decompData = Helper.GetType2DecompressedData(offset, datNum);
+            var decompData = Helper.GetType2DecompressedData(offset, datNum, Strings.ItemsDat);
 
             using (BinaryReader br = new BinaryReader(new MemoryStream(decompData)))
             {
@@ -816,7 +912,7 @@ namespace FFXIV_TexTools2.Material
                         {
                             fileName = fileName.Insert(0, "--");
 
-                            int mtrlOffset = Helper.GetItemOffset(FFCRC.GetHash(fullPath.Substring(0, fullPath.LastIndexOf("/"))), FFCRC.GetHash(fileName));
+                            int mtrlOffset = Helper.GetDataOffset(FFCRC.GetHash(fullPath.Substring(0, fullPath.LastIndexOf("/"))), FFCRC.GetHash(fileName), Strings.ItemsDat);
 
                             if (mtrlOffset == 0)
                             {
@@ -838,25 +934,25 @@ namespace FFXIV_TexTools2.Material
                     {
                         mtrlInfo.SpecularPath = fullPath.Substring(0, fullPath.LastIndexOf("/")) + "/" + fileName;
                         mtrlInfo.TextureMaps.Add(new ComboBoxInfo() { Name = mapName, ID = "", IsNum = false });
-                        mtrlInfo.SpecularOffset =  Helper.GetItemOffset(FFCRC.GetHash(fullPath.Substring(0, fullPath.LastIndexOf("/"))), FFCRC.GetHash(fileName));
+                        mtrlInfo.SpecularOffset =  Helper.GetDataOffset(FFCRC.GetHash(fullPath.Substring(0, fullPath.LastIndexOf("/"))), FFCRC.GetHash(fileName), Strings.ItemsDat);
                     }
                     else if (fileName.Contains("_d.tex"))
                     {
                         mtrlInfo.DiffusePath = fullPath.Substring(0, fullPath.LastIndexOf("/")) + "/" + fileName;
                         mtrlInfo.TextureMaps.Add(new ComboBoxInfo() { Name = mapName, ID = "", IsNum = false });
-                        mtrlInfo.DiffuseOffset = Helper.GetItemOffset(FFCRC.GetHash(fullPath.Substring(0, fullPath.LastIndexOf("/"))), FFCRC.GetHash(fileName));
+                        mtrlInfo.DiffuseOffset = Helper.GetDataOffset(FFCRC.GetHash(fullPath.Substring(0, fullPath.LastIndexOf("/"))), FFCRC.GetHash(fileName), Strings.ItemsDat);
                     }
                     else if (fileName.Contains("_n.tex"))
                     {
                         mtrlInfo.NormalPath = fullPath.Substring(0, fullPath.LastIndexOf("/")) + "/" + fileName;
                         mtrlInfo.TextureMaps.Add(new ComboBoxInfo() { Name = mapName, ID = "", IsNum = false });
-                        mtrlInfo.NormalOffset = Helper.GetItemOffset(FFCRC.GetHash(fullPath.Substring(0, fullPath.LastIndexOf("/"))), FFCRC.GetHash(fileName));
+                        mtrlInfo.NormalOffset = Helper.GetDataOffset(FFCRC.GetHash(fullPath.Substring(0, fullPath.LastIndexOf("/"))), FFCRC.GetHash(fileName), Strings.ItemsDat);
                     }
                     else if (fileName.Contains("_m.tex"))
                     {
                         mtrlInfo.MaskPath = fullPath.Substring(0, fullPath.LastIndexOf("/")) + "/" + fileName;
                         mtrlInfo.TextureMaps.Add(new ComboBoxInfo() { Name = mapName, ID = "", IsNum = false });
-                        mtrlInfo.MaskOffset = Helper.GetItemOffset(FFCRC.GetHash(fullPath.Substring(0, fullPath.LastIndexOf("/"))), FFCRC.GetHash(fileName));
+                        mtrlInfo.MaskOffset = Helper.GetDataOffset(FFCRC.GetHash(fullPath.Substring(0, fullPath.LastIndexOf("/"))), FFCRC.GetHash(fileName), Strings.ItemsDat);
                     }
                 }
 
@@ -887,7 +983,7 @@ namespace FFXIV_TexTools2.Material
 
             int datNum = ((offset / 8) & 0x000f) / 2;
 
-            var decompBytes = Helper.GetType2DecompressedData(offset, datNum);
+            var decompBytes = Helper.GetType2DecompressedData(offset, datNum, Strings.ItemsDat);
 
             using (BinaryReader br = new BinaryReader(new MemoryStream(decompBytes)))
             {
@@ -926,6 +1022,160 @@ namespace FFXIV_TexTools2.Material
             return vfxData;
         }
 
+        public static Tuple<MTRLData, ObservableCollection<ComboBoxInfo>> GetUIData(ItemData item)
+        {
+            MTRLData mtrlData = new MTRLData();
+            ObservableCollection<ComboBoxInfo> cbi = new ObservableCollection<ComboBoxInfo>();
+
+            if (item.ItemCategory.Equals(Strings.Items))
+            {
+                var iconBaseNum = item.Icon.Substring(0, 2).PadRight(item.Icon.Length, '0');
+                var iconFolder = string.Format(Strings.IconFolder, iconBaseNum.PadLeft(6, '0'));
+                var iconHQFolder = string.Format(Strings.IconHQFolder, iconBaseNum.PadLeft(6, '0'));
+                var iconFile = string.Format(Strings.UIFile, item.Icon.PadLeft(6, '0'));
+
+                mtrlData.UIPath = iconFolder + "/" + iconFile;
+                mtrlData.UIHQPath = iconHQFolder + "/" + iconFile;
+
+                mtrlData.UIOffset = Helper.GetDataOffset(FFCRC.GetHash(iconFolder), FFCRC.GetHash(iconFile), Strings.UIDat);
+                mtrlData.UIHQOffset = Helper.GetDataOffset(FFCRC.GetHash(iconHQFolder), FFCRC.GetHash(iconFile), Strings.UIDat);
+
+                if (mtrlData.UIOffset != 0)
+                {
+                    cbi.Add(new ComboBoxInfo() { Name = "Icon", ID = "Icon", IsNum = false });
+                }
+
+                if (mtrlData.UIHQOffset != 0)
+                {
+                    cbi.Add(new ComboBoxInfo() { Name = "HQ Icon", ID = "HQIcon", IsNum = false });
+                }
+            }
+            else if (item.ItemCategory.Equals(Strings.Maps))
+            {
+                var mapFolder = string.Format(Strings.MapFolder, item.UIPath);
+                var mapName = item.UIPath.Replace("/", "");
+
+                var fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(mapFolder), Strings.UIDat);
+
+                mtrlData.UIPath = mapFolder + "/" + mapName + "{0}.tex" ;
+
+                int offset = 0;
+
+                var mapFile = string.Format(Strings.MapFile1, mapName, "m");
+
+                if (fileHashList.Contains(FFCRC.GetHash(mapFile)))
+                {
+                    offset = Helper.GetDataOffset(FFCRC.GetHash(mapFolder), FFCRC.GetHash(mapFile), Strings.UIDat);
+                    cbi.Add(new ComboBoxInfo() { Name = "HighRes Map", ID = offset.ToString(), IsNum = false });
+                }
+
+                mapFile = string.Format(Strings.MapFile1, mapName, "s");
+
+                if (fileHashList.Contains(FFCRC.GetHash(mapFile)))
+                {
+                    offset = Helper.GetDataOffset(FFCRC.GetHash(mapFolder), FFCRC.GetHash(mapFile), Strings.UIDat);
+                    cbi.Add(new ComboBoxInfo() { Name = "LowRes Map", ID = offset.ToString(), IsNum = false });
+                }
+
+                if (fileHashList.Count > 2)
+                {
+                    mapFile = string.Format(Strings.MapFile2, mapName);
+
+                    if (fileHashList.Contains(FFCRC.GetHash(mapFile)))
+                    {
+                        offset = Helper.GetDataOffset(FFCRC.GetHash(mapFolder), FFCRC.GetHash(mapFile), Strings.UIDat);
+                        cbi.Add(new ComboBoxInfo() { Name = "PoI", ID = offset.ToString(), IsNum = false });
+                    }
+
+                    mapFile = string.Format(Strings.MapFile3, mapName, "m");
+
+                    if (fileHashList.Contains(FFCRC.GetHash(mapFile)))
+                    {
+                        offset = Helper.GetDataOffset(FFCRC.GetHash(mapFolder), FFCRC.GetHash(mapFile), Strings.UIDat);
+                        cbi.Add(new ComboBoxInfo() { Name = "HighRes Mask", ID = offset.ToString(), IsNum = false });
+                    }
+
+                    mapFile = string.Format(Strings.MapFile3, mapName, "s");
+
+                    if (fileHashList.Contains(FFCRC.GetHash(mapFile)))
+                    {
+                        offset = Helper.GetDataOffset(FFCRC.GetHash(mapFolder), FFCRC.GetHash(mapFile), Strings.UIDat);
+                        cbi.Add(new ComboBoxInfo() { Name = "LowRes Mask", ID = offset.ToString(), IsNum = false });
+                    }
+                }
+            }
+            else if (item.ItemCategory.Equals(Strings.Actions))
+            {
+                var iconBaseNum = "0";
+                if(int.Parse(item.Icon) > 1000)
+                {
+                    if(int.Parse(item.Icon) > 10000)
+                    {
+                        iconBaseNum = item.Icon.Substring(0, 2).PadRight(item.Icon.Length, '0');
+                    }
+                    else
+                    {
+                        iconBaseNum = item.Icon.Substring(0, 1).PadRight(item.Icon.Length, '0');
+                    }
+                }
+
+                var iconFolder = string.Format(Strings.IconFolder, iconBaseNum.PadLeft(6, '0'));
+                var iconFile = string.Format(Strings.UIFile, item.Icon.PadLeft(6, '0'));
+
+                mtrlData.UIPath = iconFolder + "/" + iconFile;
+
+                mtrlData.UIOffset = Helper.GetDataOffset(FFCRC.GetHash(iconFolder), FFCRC.GetHash(iconFile), Strings.UIDat);
+
+                if (mtrlData.UIOffset != 0)
+                {
+                    cbi.Add(new ComboBoxInfo() { Name = "Icon", ID = "Icon", IsNum = false });
+                }
+            }
+            else if (item.ItemCategory.Equals("HUD"))
+            {
+                mtrlData.UIPath = item.UIPath;
+                var HUDFolder = "ui/uld";
+                var HUDFile = Path.GetFileName(item.UIPath);
+
+                mtrlData.UIOffset = Helper.GetDataOffset(FFCRC.GetHash(HUDFolder), FFCRC.GetHash(HUDFile), Strings.UIDat);
+
+                if (mtrlData.UIOffset != 0)
+                {
+                    cbi.Add(new ComboBoxInfo() { Name = "Texture", ID = "Texture", IsNum = false });
+                }
+            }
+            else if (item.ItemCategory.Equals("LoadingImage"))
+            {
+                mtrlData.UIPath = item.UIPath;
+                var LIFolder = "ui/loadingimage";
+                var LIFile = Path.GetFileName(item.UIPath);
+
+                mtrlData.UIOffset = Helper.GetDataOffset(FFCRC.GetHash(LIFolder), FFCRC.GetHash(LIFile), Strings.UIDat);
+
+                if (mtrlData.UIOffset != 0)
+                {
+                    cbi.Add(new ComboBoxInfo() { Name = "Texture", ID = "Texture", IsNum = false });
+                }
+            }
+            else if (item.ItemCategory.Equals(Strings.Status))
+            {
+                var iconBaseNum = item.Icon.Substring(0, 2).PadRight(item.Icon.Length, '0');
+                var iconFolder = string.Format(Strings.IconFolder, iconBaseNum.PadLeft(6, '0'));
+                var iconFile = string.Format(Strings.UIFile, item.Icon.PadLeft(6, '0'));
+
+                mtrlData.UIPath = iconFolder + "/" + iconFile;
+
+                mtrlData.UIOffset = Helper.GetDataOffset(FFCRC.GetHash(iconFolder), FFCRC.GetHash(iconFile), Strings.UIDat);
+
+                if (mtrlData.UIOffset != 0)
+                {
+                    cbi.Add(new ComboBoxInfo() { Name = "Icon", ID = "Icon", IsNum = false });
+                }
+            }
+
+            return new Tuple<MTRLData, ObservableCollection<ComboBoxInfo>>(mtrlData, cbi);
+        }
+
         /// <summary>
         /// Gets the bitmap from the colorset data
         /// </summary>
@@ -936,7 +1186,7 @@ namespace FFXIV_TexTools2.Material
             int datNum = ((offset / 8) & 0x000f) / 2;
             byte[] colorData = null;
 
-            using (BinaryReader br = new BinaryReader(new MemoryStream(Helper.GetType2DecompressedData(offset, datNum))))
+            using (BinaryReader br = new BinaryReader(new MemoryStream(Helper.GetType2DecompressedData(offset, datNum, Strings.ItemsDat))))
             {
                 br.BaseStream.Seek(6, SeekOrigin.Begin);
                 short colorDataSize = br.ReadInt16();

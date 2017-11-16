@@ -14,10 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using FFXIV_TexTools2.Helpers;
 using FFXIV_TexTools2.Model;
 using FFXIV_TexTools2.Resources;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Windows.Media.Imaging;
 
@@ -35,21 +39,36 @@ namespace FFXIV_TexTools2.IO
         /// <param name="selectedItem">The currently selected item</param>
         /// <param name="internalFilePath">The internal file path of the texture map</param>
         /// <param name="selectedBitmap">The bitmap of the texturemap currently being displayed</param>
-        public static void SaveImage(string selectedCategory, string selectedItem, string internalFilePath, BitmapSource selectedBitmap)
+        public static void SaveImage(string selectedCategory, string selectedItem, string internalFilePath, BitmapSource selectedBitmap, Bitmap saveClone, string textureMap, string subCategory)
         {
-            string savePath = Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selectedItem;
+
+            string savePath = "";
+            if (selectedCategory.Equals("UI"))
+            {
+                savePath = Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + subCategory + "/" + selectedItem;
+            }
+            else
+            {
+                savePath = Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selectedItem;
+            }
             Directory.CreateDirectory(savePath);
 
             var fullSavePath = Path.Combine(savePath, (Path.GetFileNameWithoutExtension(internalFilePath) + ".bmp"));
 
-            using (var fileStream = new FileStream(fullSavePath, FileMode.Create))
+            if (textureMap.Equals(Strings.ColorSet))
             {
-                BitmapEncoder encoder = new BmpBitmapEncoder();
-                encoder.Frames.Add(BitmapFrame.Create(selectedBitmap));
-                encoder.Save(fileStream);
+                using (var fileStream = new FileStream(fullSavePath, FileMode.Create))
+                {
+                    BitmapEncoder encoder = new BmpBitmapEncoder();
+                    encoder.Frames.Add(BitmapFrame.Create(selectedBitmap));
+                    encoder.Save(fileStream);
+                }
+            }
+            else
+            {
+                saveClone.Save(fullSavePath, ImageFormat.Bmp);
             }
         }
-
 
 
         /// <summary>
@@ -61,9 +80,17 @@ namespace FFXIV_TexTools2.IO
         /// <param name="textureMap">The name of the currently selected texture map.</param>
         /// <param name="mtrlData">The items mtrl file data</param>
         /// <param name="texData">The items tex file data</param>
-        public static void SaveDDS(string selectedCategory, string selectedItem, string internalFilePath, string textureMap, MTRLData mtrlData, TEXData texData)
+        public static void SaveDDS(string selectedCategory, string selectedItem, string internalFilePath, string textureMap, MTRLData mtrlData, TEXData texData, string subCategory)
         {
-            string savePath = Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selectedItem;
+            string savePath = "";
+            if (selectedCategory.Equals("UI"))
+            {
+                savePath = Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + subCategory + "/" + selectedItem;
+            }
+            else
+            {
+                savePath = Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selectedItem;
+            }
             Directory.CreateDirectory(savePath);
 
             var fullSavePath = Path.Combine(savePath, (Path.GetFileNameWithoutExtension(internalFilePath) + ".dds"));
@@ -123,17 +150,21 @@ namespace FFXIV_TexTools2.IO
             header.AddRange(BitConverter.GetBytes(dwWidth));
 
             // The pitch or number of bytes per scan line in an uncompressed texture; the total number of bytes in the top level texture for a compressed texture.
-            if (texData.Type == 9312)
+            if (texData.Type == TextureTypes.A16B16G16R16F)
             {
                 dwPitchOrLinearSize = 512;
             }
-            else if (texData.Type == 5200)
+            else if (texData.Type == TextureTypes.A8R8G8B8)
             {
                 dwPitchOrLinearSize = (uint)((dwHeight * dwWidth) * 4);
             }
-            else if (texData.Type == 13344)
+            else if (texData.Type == TextureTypes.DXT1)
             {
                 dwPitchOrLinearSize = (uint)((dwHeight * dwWidth) / 2);
+            }
+            else if (texData.Type == TextureTypes.A4R4G4B4 || texData.Type == TextureTypes.A1R5G5B5)
+            {
+                dwPitchOrLinearSize = (uint)((dwHeight * dwWidth) * 2);
             }
             else
             {
@@ -162,9 +193,13 @@ namespace FFXIV_TexTools2.IO
             header.AddRange(BitConverter.GetBytes(pfSize));
 
             // Values which indicate what type of data is in the surface.
-            if (texData.Type == 5200)
+            if (texData.Type == TextureTypes.A8R8G8B8 || texData.Type == TextureTypes.A4R4G4B4 || texData.Type == TextureTypes.A1R5G5B5)
             {
                 pfFlags = 65;
+            }
+            else if (texData.Type == TextureTypes.A8)
+            {
+                pfFlags = 2;
             }
             else
             {
@@ -173,23 +208,23 @@ namespace FFXIV_TexTools2.IO
             header.AddRange(BitConverter.GetBytes(pfFlags));
 
             // Four-character codes for specifying compressed or custom formats.
-            if (texData.Type == 13344)
+            if (texData.Type == TextureTypes.DXT1)
             {
                 dwFourCC = 0x31545844;
             }
-            else if (texData.Type == 13361)
+            else if (texData.Type == TextureTypes.DXT5)
             {
                 dwFourCC = 0x35545844;
             }
-            else if (texData.Type == 13360)
+            else if (texData.Type == TextureTypes.DXT3)
             {
                 dwFourCC = 0x33545844;
             }
-            else if (texData.Type == 9312)
+            else if (texData.Type == TextureTypes.A16B16G16R16F)
             {
                 dwFourCC = 0x71;
             }
-            else if (texData.Type == 5200)
+            else if (texData.Type == TextureTypes.A8R8G8B8 || texData.Type == TextureTypes.A8 || texData.Type == TextureTypes.A4R4G4B4 || texData.Type == TextureTypes.A1R5G5B5)
             {
                 dwFourCC = 0;
             }
@@ -199,7 +234,7 @@ namespace FFXIV_TexTools2.IO
             }
             header.AddRange(BitConverter.GetBytes(dwFourCC));
 
-            if (texData.Type == 5200)
+            if (texData.Type == TextureTypes.A8R8G8B8)
             {
                 // Number of bits in an RGB (possibly including alpha) format.
                 uint dwRGBBitCount = 32;
@@ -232,6 +267,105 @@ namespace FFXIV_TexTools2.IO
                 byte[] blank1 = new byte[16];
                 header.AddRange(blank1);
 
+            }
+            else if(texData.Type == TextureTypes.A8)
+            {
+                // Number of bits in an RGB (possibly including alpha) format.
+                uint dwRGBBitCount = 8;
+                header.AddRange(BitConverter.GetBytes(dwRGBBitCount));
+
+                // Red (or lumiannce or Y) mask for reading color data. 
+                uint dwRBitMask = 0;
+                header.AddRange(BitConverter.GetBytes(dwRBitMask));
+
+                // Green (or U) mask for reading color data.
+                uint dwGBitMask = 0;
+                header.AddRange(BitConverter.GetBytes(dwGBitMask));
+
+                // Blue (or V) mask for reading color data.
+                uint dwBBitMask = 0;
+                header.AddRange(BitConverter.GetBytes(dwBBitMask));
+
+                // Alpha mask for reading alpha data.
+                uint dwABitMask = 255;
+                header.AddRange(BitConverter.GetBytes(dwABitMask));
+
+                // DDS_PIXELFORMAT End
+
+                // Specifies the complexity of the surfaces stored.
+                uint dwCaps = 4096;
+                header.AddRange(BitConverter.GetBytes(dwCaps));
+
+                // dwCaps2, dwCaps3, dwCaps4, dwReserved2.
+                // Unused.
+                byte[] blank1 = new byte[16];
+                header.AddRange(blank1);
+            }
+            else if (texData.Type == TextureTypes.A1R5G5B5)
+            {
+                // Number of bits in an RGB (possibly including alpha) format.
+                uint dwRGBBitCount = 16;
+                header.AddRange(BitConverter.GetBytes(dwRGBBitCount));
+
+                // Red (or lumiannce or Y) mask for reading color data. 
+                uint dwRBitMask = 31744;
+                header.AddRange(BitConverter.GetBytes(dwRBitMask));
+
+                // Green (or U) mask for reading color data.
+                uint dwGBitMask = 992;
+                header.AddRange(BitConverter.GetBytes(dwGBitMask));
+
+                // Blue (or V) mask for reading color data.
+                uint dwBBitMask = 31;
+                header.AddRange(BitConverter.GetBytes(dwBBitMask));
+
+                // Alpha mask for reading alpha data.
+                uint dwABitMask = 32768;
+                header.AddRange(BitConverter.GetBytes(dwABitMask));
+
+                // DDS_PIXELFORMAT End
+
+                // Specifies the complexity of the surfaces stored.
+                uint dwCaps = 4096;
+                header.AddRange(BitConverter.GetBytes(dwCaps));
+
+                // dwCaps2, dwCaps3, dwCaps4, dwReserved2.
+                // Unused.
+                byte[] blank1 = new byte[16];
+                header.AddRange(blank1);
+            }
+            else if (texData.Type == TextureTypes.A4R4G4B4)
+            {
+                // Number of bits in an RGB (possibly including alpha) format.
+                uint dwRGBBitCount = 16;
+                header.AddRange(BitConverter.GetBytes(dwRGBBitCount));
+
+                // Red (or lumiannce or Y) mask for reading color data. 
+                uint dwRBitMask = 3840;
+                header.AddRange(BitConverter.GetBytes(dwRBitMask));
+
+                // Green (or U) mask for reading color data.
+                uint dwGBitMask = 240;
+                header.AddRange(BitConverter.GetBytes(dwGBitMask));
+
+                // Blue (or V) mask for reading color data.
+                uint dwBBitMask = 15;
+                header.AddRange(BitConverter.GetBytes(dwBBitMask));
+
+                // Alpha mask for reading alpha data.
+                uint dwABitMask = 61440;
+                header.AddRange(BitConverter.GetBytes(dwABitMask));
+
+                // DDS_PIXELFORMAT End
+
+                // Specifies the complexity of the surfaces stored.
+                uint dwCaps = 4096;
+                header.AddRange(BitConverter.GetBytes(dwCaps));
+
+                // dwCaps2, dwCaps3, dwCaps4, dwReserved2.
+                // Unused.
+                byte[] blank1 = new byte[16];
+                header.AddRange(blank1);
             }
             else
             {

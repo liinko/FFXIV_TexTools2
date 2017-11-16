@@ -343,7 +343,7 @@
     <value>exd</value>
   </data>
   <data name="FaceMtrlFile" xml:space="preserve">
-    <value>mt_c{0}f{1}_{2}_a.mtrl</value>
+    <value>mt_c{0}f{1}_{2}_{3}.mtrl</value>
   </data>
   <data name="FaceMtrlFolder" xml:space="preserve">
     <value>chara/human/c{0}/obj/face/f{1}/material</value>
@@ -500,5 +500,131 @@
   </data>
   <data name="Weapon" xml:space="preserve">
     <value>Weapon</value>
+  </data>
+  <data name="UIFile" xml:space="preserve">
+    <value>{0}.tex</value>
+  </data>
+  <data name="IconFolder" xml:space="preserve">
+    <value>ui/icon/{0}</value>
+  </data>
+  <data name="IconHQFolder" xml:space="preserve">
+    <value>ui/icon/{0}/hq</value>
+  </data>
+  <data name="IconLangFolder" xml:space="preserve">
+    <value>ui/icon/{0}/{1}</value>
+  </data>
+  <data name="EXDDat" xml:space="preserve">
+    <value>0a0000</value>
+  </data>
+  <data name="ItemsDat" xml:space="preserve">
+    <value>040000</value>
+  </data>
+  <data name="UIDat" xml:space="preserve">
+    <value>060000</value>
+  </data>
+  <data name="Action" xml:space="preserve">
+    <value>action_0_{0}.exd</value>
+  </data>
+  <data name="ActionCategory" xml:space="preserve">
+    <value>actioncategory_0_{0}.exd</value>
+  </data>
+  <data name="BuddyAction" xml:space="preserve">
+    <value>buddyaction_0_{0}.exd</value>
+  </data>
+  <data name="CompanyAction" xml:space="preserve">
+    <value>companyaction_0_{0}.exd</value>
+  </data>
+  <data name="CraftAction" xml:space="preserve">
+    <value>craftaction_100000_{0}.exd</value>
+  </data>
+  <data name="EmoteEXD" xml:space="preserve">
+    <value>emote_0_{0}.exd</value>
+  </data>
+  <data name="EventAction" xml:space="preserve">
+    <value>eventaction_0_{0}.exd</value>
+  </data>
+  <data name="GeneralAction" xml:space="preserve">
+    <value>generalaction_0_{0}.exd</value>
+  </data>
+  <data name="ItemUICategory" xml:space="preserve">
+    <value>itemuicategory_0_{0}.exd</value>
+  </data>
+  <data name="MapFile1" xml:space="preserve">
+    <value>{0}_{1}.tex</value>
+  </data>
+  <data name="MapFile2" xml:space="preserve">
+    <value>{0}d.tex</value>
+  </data>
+  <data name="MapFile3" xml:space="preserve">
+    <value>{0}m_{1}.tex</value>
+  </data>
+  <data name="MapFolder" xml:space="preserve">
+    <value>ui/map/{0}</value>
+  </data>
+  <data name="MapExd" xml:space="preserve">
+    <value>map_0.exd</value>
+  </data>
+  <data name="MarkerEXD" xml:space="preserve">
+    <value>marker_0_{0}.exd</value>
+  </data>
+  <data name="PlaceName" xml:space="preserve">
+    <value>placename_0_{0}.exd</value>
+  </data>
+  <data name="StatusExd" xml:space="preserve">
+    <value>status_0_{0}.exd</value>
+  </data>
+  <data name="PetEXD" xml:space="preserve">
+    <value>pet_0_{0}.exd</value>
+  </data>
+  <data name="Actions" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="Beneficial" xml:space="preserve">
+    <value>Beneficial</value>
+  </data>
+  <data name="Buddy" xml:space="preserve">
+    <value>Buddy</value>
+  </data>
+  <data name="Companions" xml:space="preserve">
+    <value>Companions</value>
+  </data>
+  <data name="Company" xml:space="preserve">
+    <value>Company</value>
+  </data>
+  <data name="Craft" xml:space="preserve">
+    <value>Craft</value>
+  </data>
+  <data name="Detrimental" xml:space="preserve">
+    <value>Detrimental</value>
+  </data>
+  <data name="Emote" xml:space="preserve">
+    <value>Emote</value>
+  </data>
+  <data name="Event" xml:space="preserve">
+    <value>Event</value>
+  </data>
+  <data name="Gear" xml:space="preserve">
+    <value>Gear</value>
+  </data>
+  <data name="General" xml:space="preserve">
+    <value>General</value>
+  </data>
+  <data name="Items" xml:space="preserve">
+    <value>Items</value>
+  </data>
+  <data name="Maps" xml:space="preserve">
+    <value>Maps</value>
+  </data>
+  <data name="Marker" xml:space="preserve">
+    <value>Marker</value>
+  </data>
+  <data name="Other" xml:space="preserve">
+    <value>Other</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="LoadingImage" xml:space="preserve">
+    <value>-nowloading_base{0}.tex</value>
   </data>
 </root>

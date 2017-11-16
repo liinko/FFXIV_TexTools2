@@ -156,7 +156,6 @@ namespace FFXIV_TexTools2.Helpers
                     Marshal.Copy(diffData.Scan0, diffusePixels, 0, bitmapLength);
                     diffuseTexData.BMP.UnlockBits(diffData);
                 }
-
             }
 
             if (specularTexData != null)
@@ -230,9 +229,19 @@ namespace FFXIV_TexTools2.Helpers
                 }
                 else
                 {
-                    B = diffusePixels[i - 3];
-                    G = diffusePixels[i - 2];
-                    R = diffusePixels[i - 1];
+                    if(diffusePixels != null)
+                    {
+
+                        B = diffusePixels[i - 3];
+                        G = diffusePixels[i - 2];
+                        R = diffusePixels[i - 1];
+                    }
+                    else
+                    {
+                        B = 255;
+                        G = 255;
+                        R = 255;
+                    }
 
                     B1 = specularPixels[i - 2];
                     G1 = specularPixels[i - 2];
@@ -294,6 +303,12 @@ namespace FFXIV_TexTools2.Helpers
             {
                 specularTexData.Dispose();
             }
+
+            foreach (var tb in texBitmaps)
+            {
+                tb.Freeze();
+            }
+
 
             return texBitmaps;
         }
@@ -536,6 +551,11 @@ namespace FFXIV_TexTools2.Helpers
             if (specularTexData != null)
             {
                 specularTexData.Dispose();
+            }
+
+            foreach(var tb in texBitmaps)
+            {
+                tb.Freeze();
             }
 
             return texBitmaps;

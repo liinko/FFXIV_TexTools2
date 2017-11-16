@@ -53,5 +53,10 @@ namespace FFXIV_TexTools2.Helpers
         /// When importing a previously modified texture, this value is used to determine whether the modified data will be overwritten
         /// </remarks>
         public int modSize { get; set; }
+
+        /// <summary>
+        /// The dat file where the modified item is located
+        /// </summary>
+        public string datFile { get; set; }
     }
 }

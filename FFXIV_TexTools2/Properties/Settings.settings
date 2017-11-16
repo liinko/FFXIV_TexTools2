@@ -14,9 +14,6 @@
     <Setting Name="DX_Ver" Type="System.String" Scope="User">
       <Value Profile="(Default)">DX11</Value>
     </Setting>
-    <Setting Name="Mod_List" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">0</Value>
-    </Setting>
     <Setting Name="FFXIV_Ver" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>

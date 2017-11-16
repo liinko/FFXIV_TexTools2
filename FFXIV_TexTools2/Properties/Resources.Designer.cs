@@ -19,7 +19,7 @@ namespace FFXIV_TexTools2.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -67,6 +67,39 @@ namespace FFXIV_TexTools2.Properties {
             get {
                 object obj = ResourceManager.GetObject("_custom", resourceCulture);
                 return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Achievement.tex
+        ///ActionBar.tex
+        ///ActionContents.tex
+        ///ActionCross.tex
+        ///ActionCrossEditor.tex
+        ///ActionMenu.tex
+        ///AdventureNoteBook.tex
+        ///Alliance.tex
+        ///AquariumSetting.tex
+        ///AquariumSettingLocation.tex
+        ///AreaMap.tex
+        ///ArmouryBoard.tex
+        ///ArmouryBoard_Panel_Corner.tex
+        ///ArmouryBoard_Panel_H.tex
+        ///ArmouryBoard_Panel_HV.tex
+        ///ArmouryBoard_Panel_V.tex
+        ///BagStatus.tex
+        ///BalloonMessage.tex
+        ///Bank.tex
+        ///Basketball.tex
+        ///BattleTalk.tex
+        ///BattleTalk_Timer.tex
+        ///BeastTribeSupplyList.tex
+        ///BeginnerChannelInviteImage.tex
+        ///BeginnersRoomMainWi [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string uldpaths {
+            get {
+                return ResourceManager.GetString("uldpaths", resourceCulture);
             }
         }
     }

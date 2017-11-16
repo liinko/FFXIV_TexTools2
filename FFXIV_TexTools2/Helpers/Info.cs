@@ -14,24 +14,52 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using FFXIV_TexTools2.IO;
 using FFXIV_TexTools2.Resources;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
 
 namespace FFXIV_TexTools2.Helpers
 {
     public static class Info
     {
-        public static string aIndexDir = Properties.Settings.Default.FFXIV_Directory + "/0a0000.win32.index";
-        public static string aDatDir = Properties.Settings.Default.FFXIV_Directory + "/0a0000.win32.dat0";
+        public static string EXDDatNum = "0";
 
-        public static string indexDir = Properties.Settings.Default.FFXIV_Directory + "/040000.win32.index";
-        public static string index2Dir = Properties.Settings.Default.FFXIV_Directory + "/040000.win32.index2";
-        public static string datDir = Properties.Settings.Default.FFXIV_Directory + "/040000.win32.dat";
+        public static string indexDir = Properties.Settings.Default.FFXIV_Directory + "/{0}.win32.index";
+        public static string index2Dir = Properties.Settings.Default.FFXIV_Directory + "/{0}.win32.index2";
+        public static string datDir = Properties.Settings.Default.FFXIV_Directory + "/{0}.win32.dat{1}";
+        public static int modelMultiplier = 10;
 
-        public static string modListDir = Properties.Settings.Default.FFXIV_Directory + "/040000.modlist";
-        public static string modDatDir = Properties.Settings.Default.FFXIV_Directory + "/040000.win32.dat4";
+        public static string modListDir = Directory.GetCurrentDirectory() + "/TexTools.modlist";
+        public static string modDatDir = Properties.Settings.Default.FFXIV_Directory + "/{0}.win32.dat{1}";
 
+        public static Dictionary<string, string> ModDatDict = new Dictionary<string, string>
+        {
+            {Strings.ItemsDat, "4" },
+            {Strings.UIDat, "1" }
+        };
 
+        public static Dictionary<string, int> ModIndexDict = new Dictionary<string, int>
+        {
+            {Strings.ItemsDat, 5 },
+            {Strings.UIDat, 2 }
+        };
+
+        public static ObservableCollection<string> SubCategoryList = new ObservableCollection<string>
+        {
+            Strings.Items, Strings.Maps, Strings.Actions, "HUD", Strings.Status
+        };
+
+        public static ObservableCollection<string> MainCategoryList = new ObservableCollection<string>
+        {
+            Strings.Gear, Strings.Character, Strings.Companions, "UI"
+        };
+
+        public static ObservableCollection<string> CharCategoryList = new ObservableCollection<string>
+        {
+            Strings.Hair, Strings.Face, Strings.Body, Strings.Tail, Strings.Face_Paint, Strings.Equipment_Decals
+        };
 
         public static Dictionary<string, string> raceID = new Dictionary<string, string>
         {
@@ -65,7 +93,7 @@ namespace FFXIV_TexTools2.Helpers
             {Strings.Au_Ra + " " + Strings.Female + " NPC", "1404"},
             {"NPC " + Strings.Male,  "9104"},
             {"NPC " + Strings.Female, "9204"},
-            {"ALL", "ALL"}
+            {Strings.All, Strings.All}
         };
 
 
@@ -170,6 +198,7 @@ namespace FFXIV_TexTools2.Helpers
             {Strings.Face, "fac"},
             {Strings.Iris, "iri"},
             {Strings.Etc, "etc"},
+            {Strings.Accessory, "acc"}
 
         };
 
@@ -208,6 +237,36 @@ namespace FFXIV_TexTools2.Helpers
             {Strings.Mounts, "23"},
             {Strings.Minions, "24"},
             {Strings.Food, "0"}
+        };
+
+        public static Dictionary<string, string> IDSlotName = new Dictionary<string, string>
+        {
+            {"25", Strings.Character },
+            {"1", Strings.Main_Hand },
+            {"2", Strings.Off_Hand },
+            {"3", Strings.Head },
+            {"4", Strings.Body },
+            {"5", Strings.Hands },
+            {"6", Strings.Waist },
+            {"7", Strings.Legs },
+            {"8", Strings.Feet },
+            {"9", Strings.Ears },
+            {"10", Strings.Neck },
+            {"11", Strings.Wrists },
+            {"12", Strings.Rings },
+            {"13", Strings.Two_Handed },
+            {"14", Strings.Main_Off },
+            {"15", Strings.Head_Body },
+            {"16", Strings.Body_Hands_Legs_Feet },
+            {"17", Strings.Soul_Crystal },
+            {"18", Strings.Legs_Feet },
+            {"19", Strings.All },
+            {"20", Strings.Body_Hands_Legs },
+            {"21", Strings.Body_Legs_Feet },
+            {"22", Strings.Pets },
+            {"23", Strings.Mounts },
+            {"24", Strings.Minions },
+            {"0", Strings.Food }
         };
 
 

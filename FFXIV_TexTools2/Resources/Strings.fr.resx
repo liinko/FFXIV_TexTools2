@@ -118,13 +118,19 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Accessory" xml:space="preserve">
-    <value>Accessory</value>
+    <value>Accessoires</value>
+  </data>
+  <data name="Actions" xml:space="preserve">
+    <value>Actions</value>
   </data>
   <data name="All" xml:space="preserve">
     <value>Tous</value>
   </data>
   <data name="Au_Ra" xml:space="preserve">
     <value>Ao Ra</value>
+  </data>
+  <data name="Beneficial" xml:space="preserve">
+    <value>Renforcement</value>
   </data>
   <data name="Bishop_Autoturret" xml:space="preserve">
     <value>Auto-tourelle Fou</value>
@@ -144,6 +150,9 @@
   <data name="Body_Legs_Feet" xml:space="preserve">
     <value>Torse + Jambes + Pieds</value>
   </data>
+  <data name="Buddy" xml:space="preserve">
+    <value>Compagnon</value>
+  </data>
   <data name="Carbuncle" xml:space="preserve">
     <value>Carbuncle</value>
   </data>
@@ -152,6 +161,18 @@
   </data>
   <data name="ColorSet" xml:space="preserve">
     <value>ColorSet</value>
+  </data>
+  <data name="Companions" xml:space="preserve">
+    <value>Compagnon</value>
+  </data>
+  <data name="Company" xml:space="preserve">
+    <value>Compagnie</value>
+  </data>
+  <data name="Craft" xml:space="preserve">
+    <value>Artisanat</value>
+  </data>
+  <data name="Detrimental" xml:space="preserve">
+    <value>Fragilisation</value>
   </data>
   <data name="Diffuse" xml:space="preserve">
     <value>Diffuse</value>
@@ -162,11 +183,14 @@
   <data name="Elezen" xml:space="preserve">
     <value>Élézen</value>
   </data>
+  <data name="Emote" xml:space="preserve">
+    <value>Emotes</value>
+  </data>
   <data name="Eos" xml:space="preserve">
     <value>Eos</value>
   </data>
   <data name="Equipment_Decals" xml:space="preserve">
-    <value>Equipment Decals</value>
+    <value>Blason</value>
   </data>
   <data name="Error_DirectoryError" xml:space="preserve">
     <value>Directory Error</value>
@@ -176,6 +200,9 @@
   </data>
   <data name="Etc" xml:space="preserve">
     <value>Etc</value>
+  </data>
+  <data name="Event" xml:space="preserve">
+    <value>Événement</value>
   </data>
   <data name="Face" xml:space="preserve">
     <value>Visage</value>
@@ -190,10 +217,16 @@
     <value>Femme</value>
   </data>
   <data name="Food" xml:space="preserve">
-    <value>Food</value>
+    <value>Plat ou boisson</value>
   </data>
   <data name="Garuda_Egi" xml:space="preserve">
     <value>Garuda Egi</value>
+  </data>
+  <data name="Gear" xml:space="preserve">
+    <value>Équipement</value>
+  </data>
+  <data name="General" xml:space="preserve">
+    <value>Général</value>
   </data>
   <data name="Hair" xml:space="preserve">
     <value>Cheveux</value>
@@ -219,6 +252,9 @@
   <data name="Iris" xml:space="preserve">
     <value>Iris</value>
   </data>
+  <data name="Items" xml:space="preserve">
+    <value>Objets</value>
+  </data>
   <data name="Lalafell" xml:space="preserve">
     <value>Lalafell</value>
   </data>
@@ -239,6 +275,12 @@
   </data>
   <data name="Male" xml:space="preserve">
     <value>Homme</value>
+  </data>
+  <data name="Maps" xml:space="preserve">
+    <value>Carte</value>
+  </data>
+  <data name="Marker" xml:space="preserve">
+    <value>Signes</value>
   </data>
   <data name="Mask" xml:space="preserve">
     <value>Mask</value>
@@ -264,6 +306,9 @@
   <data name="Off_Hand" xml:space="preserve">
     <value>Main non directrice</value>
   </data>
+  <data name="Other" xml:space="preserve">
+    <value>Autre</value>
+  </data>
   <data name="Pets" xml:space="preserve">
     <value>Familiers</value>
   </data>
@@ -287,6 +332,9 @@
   </data>
   <data name="Specular" xml:space="preserve">
     <value>Specular</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>États</value>
   </data>
   <data name="Tail" xml:space="preserve">
     <value>Queue</value>

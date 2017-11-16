@@ -25,10 +25,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Xml;
@@ -43,7 +41,9 @@ namespace FFXIV_TexTools2.ViewModel
         List<ItemData> itemList;
         ObservableCollection<ItemData> oItemList;
         ObservableCollection<CategoryViewModel> _categories;
+        ObservableCollection<CategoryViewModel> oCategory;
         List<string> categoryList = new List<string>();
+        Dictionary<string, ObservableCollection<ItemData>> UIDict;
         bool modListOnEnabled, modListOnChecked, modListOffEnabled, modListOffChecked;
 
         public bool IsEnglish { get { return Properties.Settings.Default.Language.Equals("en"); } }
@@ -62,12 +62,6 @@ namespace FFXIV_TexTools2.ViewModel
         public bool DX9Enabled { get { return !Properties.Settings.Default.DX_Ver.Equals("DX9"); } }
         public bool DX11Enabled { get { return !Properties.Settings.Default.DX_Ver.Equals("DX11"); } }
 
-        public bool ModlistOnEnabled { get { return modListOnEnabled; } set { modListOnEnabled = value; NotifyPropertyChanged("ModlistOnEnabled"); } }
-        public bool ModlistOnChecked { get { return modListOnChecked; } set { modListOnChecked = value; NotifyPropertyChanged("ModlistOnChecked"); } }
-        public bool ModlistOffEnabled { get { return modListOffEnabled; } set { modListOffEnabled = value; NotifyPropertyChanged("ModlistOffEnabled"); } }
-        public bool ModlistOffChecked { get { return modListOffChecked; } set { modListOffChecked = value; NotifyPropertyChanged("ModlistOffChecked"); } }
-
-
         public TextureViewModel TextureVM { get { return TVM; } set { TVM = value; NotifyPropertyChanged("TextureVM"); } }
         public ModelViewModel ModelVM { get { return MVM; } set { MVM = value; NotifyPropertyChanged("ModelVM"); } }
 
@@ -79,16 +73,17 @@ namespace FFXIV_TexTools2.ViewModel
         /// </summary>
         public MainViewModel()
         {
-            SetDirectories();
-
-            while (!Properties.Settings.Default.FFXIV_Directory.Contains("sqpack"))
-            {
-                SetDirectories();
-            }
 
             CultureInfo ci = new CultureInfo(Properties.Settings.Default.Language);
             CultureInfo.DefaultThreadCurrentCulture = ci;
             CultureInfo.DefaultThreadCurrentUICulture = ci;
+
+            if (!Properties.Settings.Default.FFXIV_Directory.Contains("ffxiv"))
+            {
+                SetDirectories();
+            }
+
+            CheckForModList();
 
             var gameDir = Properties.Settings.Default.FFXIV_Directory.Substring(0, Properties.Settings.Default.FFXIV_Directory.LastIndexOf("sqpack"));
             var versionFile = File.ReadAllLines(gameDir + "/ffxivgame.ver");
@@ -105,15 +100,14 @@ namespace FFXIV_TexTools2.ViewModel
                 {
                     Directory.CreateDirectory(Directory.GetCurrentDirectory() + "/Index_Backups");
 
-                    if (Properties.Settings.Default.Mod_List == 0)
-                    {
-                        RevertAllMods();
-                    }
+                    RevertAllMods();
 
                     try
                     {
                         File.Copy(Properties.Settings.Default.FFXIV_Directory + "/040000.win32.index", Directory.GetCurrentDirectory() + "/Index_Backups/040000.win32.index", true);
                         File.Copy(Properties.Settings.Default.FFXIV_Directory + "/040000.win32.index2", Directory.GetCurrentDirectory() + "/Index_Backups/040000.win32.index2", true);
+                        File.Copy(Properties.Settings.Default.FFXIV_Directory + "/060000.win32.index", Directory.GetCurrentDirectory() + "/Index_Backups/060000.win32.index", true);
+                        File.Copy(Properties.Settings.Default.FFXIV_Directory + "/060000.win32.index2", Directory.GetCurrentDirectory() + "/Index_Backups/060000.win32.index2", true);
                     }
                     catch(Exception e)
                     {
@@ -140,15 +134,14 @@ namespace FFXIV_TexTools2.ViewModel
                         Properties.Settings.Default.FFXIV_Ver = ffxivVersion.ToString();
                         Properties.Settings.Default.Save();
 
-                        if (Properties.Settings.Default.Mod_List == 0)
-                        {
-                            RevertAllMods();
-                        }
+                        RevertAllMods();
 
                         try
                         {
                             File.Copy(Properties.Settings.Default.FFXIV_Directory + "/040000.win32.index", Directory.GetCurrentDirectory() + "/Index_Backups/040000.win32.index", true);
                             File.Copy(Properties.Settings.Default.FFXIV_Directory + "/040000.win32.index2", Directory.GetCurrentDirectory() + "/Index_Backups/040000.win32.index2", true);
+                            File.Copy(Properties.Settings.Default.FFXIV_Directory + "/060000.win32.index", Directory.GetCurrentDirectory() + "/Index_Backups/060000.win32.index", true);
+                            File.Copy(Properties.Settings.Default.FFXIV_Directory + "/060000.win32.index2", Directory.GetCurrentDirectory() + "/Index_Backups/060000.win32.index2", true);
                         }
                         catch (Exception e)
                         {
@@ -158,45 +151,9 @@ namespace FFXIV_TexTools2.ViewModel
                 }
             }
 
-
-            if(Properties.Settings.Default.Mod_List == 0)
-            {
-                ModlistOnEnabled = false;
-                ModlistOnChecked = true;
-
-                ModlistOffEnabled = true;
-                ModlistOffChecked = false;
-            }
-            else
-            {
-                ModlistOnEnabled = true;
-                ModlistOnChecked = false;
-
-                ModlistOffEnabled = false;
-                ModlistOffChecked = true;
-
-            }
-
             CheckVersion();
             MakeModContainers();
             FillTree();
-            SetEventHandler();
-        }
-
-        /// <summary>
-        /// Command for the ModList Menu
-        /// </summary>
-        public ICommand ModListOnCommand
-        {
-            get { return new RelayCommand(ModlistOn); }
-        }
-
-        /// <summary>
-        /// Command for the ModList Menu
-        /// </summary>
-        public ICommand ModListOffCommand
-        {
-            get { return new RelayCommand(ModlistOff); }
         }
 
         /// <summary>
@@ -207,29 +164,32 @@ namespace FFXIV_TexTools2.ViewModel
             get { return new RelayCommand(IDSearch); }
         }
 
-        private void ModlistOff(object obj)
+        private void CheckForModList()
         {
-            Properties.Settings.Default.Mod_List = 1;
-            Properties.Settings.Default.Save();
+            var oldModListDir = Properties.Settings.Default.FFXIV_Directory + "/040000.modlist";
 
-            ModlistOnEnabled = true;
-            ModlistOnChecked = false;
+            if (File.Exists(oldModListDir))
+            {
+                string[] lines = File.ReadAllLines(oldModListDir);
+                List<string> lineList = new List<string>();
 
-            ModlistOffEnabled = false;
-            ModlistOffChecked = true;
-        }
+                if (lines.Length > 0)
+                {
+                    foreach (var l in lines)
+                    {
+                        var modEntry = JsonConvert.DeserializeObject<JsonEntry>(l);
+                        modEntry.datFile = Strings.ItemsDat;
 
-        private void ModlistOn(object obj)
-        {
+                        lineList.Add(JsonConvert.SerializeObject(modEntry));
+                    }
+                    File.WriteAllLines(Info.modListDir, lineList);
+                }
 
-            Properties.Settings.Default.Mod_List = 0;
-            Properties.Settings.Default.Save();
+                File.Delete(oldModListDir);
 
-            ModlistOnEnabled = false;
-            ModlistOnChecked = true;
-
-            ModlistOffEnabled = true;
-            ModlistOffChecked = false;
+                MessageBox.Show("TexTools discovered an old modlist in the ffxiv directory. \n\n" +
+                    "A new modlist (TexTools.modlist) with the same data has been created and is located in the TexTools folder. ", "ModList Change.", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
         }
 
 
@@ -245,40 +205,62 @@ namespace FFXIV_TexTools2.ViewModel
         /// </summary>
         private void SetDirectories()
         {
+            string[] commonInstallDirectories = new string[]
+            {
+                "C:/Program Files (x86)/SquareEnix/FINAL FANTASY XIV - A Realm Reborn/game/sqpack/ffxiv",
+                "C:/Program Files/SquareEnix/FINAL FANTASY XIV - A Realm Reborn/game/sqpack/ffxiv",
+                "C:/Program Files/Steam/SteamApps/common/FINAL FANTASY XIV - A Realm Reborn/game/sqpack/ffxiv",
+                "C:/Program Files (x86)/Steam/SteamApps/common/FINAL FANTASY XIV - A Realm Reborn/game/sqpack/ffxiv"
+            };
+
             if (Properties.Settings.Default.FFXIV_Directory.Equals(""))
             {
                 Properties.Settings.Default.Save_Directory = Directory.GetCurrentDirectory() + "/Saved";
-                FolderSelectDialog folderSelect = new FolderSelectDialog()
+
+                var installDirectory = "";
+                foreach (var i in commonInstallDirectories)
                 {
-                    Title = "Select sqpack/ffxiv Folder"
-                };
-                bool result = folderSelect.ShowDialog();
-                if (result)
-                {
-                    Properties.Settings.Default.FFXIV_Directory = folderSelect.FileName;
-                    Properties.Settings.Default.Save();
-                }
-                else
-                {
-                    Environment.Exit(0);
+                    if (Directory.Exists(i))
+                    {
+                        if (MessageBox.Show("FFXIV install directory found at \n\n" + i + "\n\nUse this directory? ", "Install Directory Found", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                        {
+                            installDirectory = i;
+                            Properties.Settings.Default.FFXIV_Directory = installDirectory;
+                            Properties.Settings.Default.Save();
+                        }
+
+                        break;
+                    }
                 }
 
-            }
-            else if (!Properties.Settings.Default.FFXIV_Directory.Contains("sqpack"))
-            {
-                FolderSelectDialog folderSelect = new FolderSelectDialog()
+                if (installDirectory.Equals(""))
                 {
-                    Title = "Select sqpack/ffxiv Folder"
-                };
-                bool result = folderSelect.ShowDialog();
-                if (result)
-                {
-                    Properties.Settings.Default.FFXIV_Directory = folderSelect.FileName;
-                    Properties.Settings.Default.Save();
-                }
-                else
-                {
-                    Environment.Exit(0);
+                    if (MessageBox.Show("Please locate the following directory. \n\n .../FINAL FANTASY XIV - A Realm Reborn/game/sqpack/ffxiv", "Install Directory Not Found", MessageBoxButton.OK, MessageBoxImage.Question) == MessageBoxResult.OK)
+                    {
+                        while (!installDirectory.Contains("ffxiv"))
+                        {
+                            FolderSelectDialog folderSelect = new FolderSelectDialog()
+                            {
+                                Title = "Select sqpack/ffxiv Folder"
+                            };
+                            bool result = folderSelect.ShowDialog();
+                            if (result)
+                            {
+                                installDirectory = folderSelect.FileName;
+                            }
+                            else
+                            {
+                                Environment.Exit(0);
+                            }
+                        }
+
+                        Properties.Settings.Default.FFXIV_Directory = installDirectory;
+                        Properties.Settings.Default.Save();
+                    }
+                    else
+                    {
+                        Environment.Exit(0);
+                    }
                 }
             }
         }
@@ -352,13 +334,18 @@ namespace FFXIV_TexTools2.ViewModel
         /// </summary>
         private void MakeModContainers()
         {
-            if (!File.Exists(Info.modDatDir))
+            foreach(var datName in Info.ModDatDict)
             {
-                CreateDat.MakeDat();
-                CreateDat.ChangeDatAmounts();
+                var datPath = string.Format(Info.datDir, datName.Key, datName.Value);
+
+                if (!File.Exists(datPath))
+                {
+                    CreateDat.MakeDat();
+                    CreateDat.ChangeDatAmounts();
+                }
             }
 
-            if (!File.Exists(Info.modListDir) && Properties.Settings.Default.Mod_List == 0)
+            if (!File.Exists(Info.modListDir))
             {
                 CreateDat.CreateModList();
             }
@@ -370,121 +357,28 @@ namespace FFXIV_TexTools2.ViewModel
         /// </summary>
         public void FillTree()
         {
-            itemList = ExdReader.MakeItemsList();
+            var exdDict = ExdReader.GetEXDData();
 
-            itemList.AddRange(ExdReader.MakeMountsList());
-
-            itemList.AddRange(ExdReader.MakeMinionsList());
-
-            var characterCategory = "25";
-
-            ItemData item = new ItemData(){ ItemName = Strings.Body, ItemCategory = characterCategory };
-            itemList.Add(item);
-
-            item = new ItemData(){ ItemName = Strings.Face, ItemCategory = characterCategory };
-            itemList.Add(item);
-
-            item = new ItemData() { ItemName = Strings.Hair, ItemCategory = characterCategory };
-            itemList.Add(item);
-
-            item = new ItemData() { ItemName = Strings.Tail, ItemCategory = characterCategory };
-            itemList.Add(item);
-
-            item = new ItemData() { ItemName = Strings.Face_Paint, ItemCategory = characterCategory };
-            itemList.Add(item);
-
-            item = new ItemData() { ItemName = Strings.Equipment_Decals, ItemCategory = characterCategory };
-            itemList.Add(item);
-
-            var petCategory = "22";
-
-            item = new ItemData(){ ItemName = Strings.Eos, ItemCategory = petCategory };
-            itemList.Add(item);
-
-            item = new ItemData() { ItemName = Strings.Selene, ItemCategory = petCategory };
-            itemList.Add(item);
-
-            item = new ItemData() { ItemName = Strings.Carbuncle, ItemCategory = petCategory };
-            itemList.Add(item);
-
-            item = new ItemData() { ItemName = Strings.Ifrit_Egi, ItemCategory = petCategory };
-            itemList.Add(item);
-
-            item = new ItemData() { ItemName = Strings.Titan_Egi, ItemCategory = petCategory };
-            itemList.Add(item);
-
-            item = new ItemData() { ItemName = Strings.Garuda_Egi, ItemCategory = petCategory };
-            itemList.Add(item);
-
-            item = new ItemData() { ItemName = Strings.Ramuh_Egi, ItemCategory = petCategory };
-            itemList.Add(item);
-
-            item = new ItemData() { ItemName = Strings.Rook_Autoturret, ItemCategory = petCategory };
-            itemList.Add(item);
-
-            item = new ItemData() { ItemName = Strings.Bishop_Autoturret, ItemCategory = petCategory };
-            itemList.Add(item);
-
-            oItemList = new ObservableCollection<ItemData>(itemList);
-
-            foreach (string slot in Info.IDSlot.Keys)
+            foreach(var cat in Info.MainCategoryList)
             {
-                if (!slot.Equals(Strings.Waist) && !slot.Equals(Strings.Soul_Crystal))
+
+                TreeNode cm = new TreeNode
                 {
-                    categoryList.Add(slot);
+                    Name = cat,
+                    _subNode = exdDict[cat]
+                };
+                if (Category == null)
+                {
+                    Category = new ObservableCollection<CategoryViewModel>();
                 }
+
+                var cvm = new CategoryViewModel(cm);
+                Category.Add(cvm);
             }
 
-            Category = new ObservableCollection<CategoryViewModel>((from category in categoryList select new CategoryViewModel(category, oItemList)).ToList());
+            oCategory = Category;
         }
 
-        /// <summary>
-        /// Sets the event handler for each item in order to detect item selection on treeview
-        /// </summary>
-        private void SetEventHandler()
-        {
-            foreach (var category in Category)
-            {
-                foreach (var item in category.Children)
-                {
-                    item.PropertyChanged += new PropertyChangedEventHandler(TreeView_SelectionChanged);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Sets the View Model for the Texture and Model tab when an item is selected from the treeview
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void TreeView_SelectionChanged(object sender, PropertyChangedEventArgs e)
-        {
-            var itemVM = sender as ItemViewModel;
-
-            if (itemVM.IsSelected)
-            {
-                //dispose of the data from the previously selected item
-                if(ModelVM != null)
-                {
-                    ModelVM.Dispose();
-                }
-
-                TextureVM.UpdateTexture(itemVM.Item, ((CategoryViewModel)itemVM.Parent).CategoryName);
-
-                if(itemVM.ItemName.Equals(Strings.Face_Paint) || itemVM.ItemName.Equals(Strings.Equipment_Decals))
-                {
-                    if(ModelVM != null)
-                    {
-                        ModelVM.ModelTabEnabled = false;
-                    }
-                }
-                else
-                {
-                    ModelVM.UpdateModel(itemVM.Item, ((CategoryViewModel)itemVM.Parent).CategoryName);
-                    ModelVM.ModelTabEnabled = true;
-                }
-            }
-        }
 
         public void OpenID(ItemData item, string race, string category, string part, string variant)
         {
@@ -513,7 +407,6 @@ namespace FFXIV_TexTools2.ViewModel
             }
         }
 
-
         /// <summary>
         /// Data bound to the search textbox text field
         /// </summary>
@@ -535,28 +428,97 @@ namespace FFXIV_TexTools2.ViewModel
         {
             if (SearchText.Length > 2)
             {
-                IEnumerable<ItemData> matchingItems = from item in itemList where item.ItemName.ToLower().Contains(SearchText.ToLower()) orderby item.ItemName select item;
-                HashSet<string> categories = new HashSet<string>();
+                Dictionary<string, TreeNode> catDict = new Dictionary<string, TreeNode>();
 
-                foreach (ItemData item in matchingItems)
+                foreach (var c in oCategory)
                 {
-                    var key = Info.IDSlot.FirstOrDefault(x => x.Value == item.ItemCategory).Key;
-                    categories.Add(key);
+                    catDict.Add(c.Name, new TreeNode() { Name = c.Name });
+                    Dictionary<string, TreeNode> subCatDict = new Dictionary<string, TreeNode>();
+
+                    foreach (var ch in c.Children)
+                    {
+                        foreach (var ch1 in ch.Children)
+                        {
+                            if (ch1.Children.Count > 0)
+                            {
+                                Dictionary<string, TreeNode> subSubCatDict = new Dictionary<string, TreeNode>();
+
+                                foreach (var ch2 in ch1.Children)
+                                {
+                                    if (ch2.Name.ToLower().Contains(searchText.ToLower()))
+                                    {
+                                        var itemNode = new TreeNode() { Name = ch2.Name, ItemData = ch2.ItemData };
+
+                                        if (subSubCatDict.ContainsKey(ch1.Name))
+                                        {
+                                            subSubCatDict[ch1.Name]._subNode.Add(itemNode);
+                                        }
+                                        else
+                                        {
+                                            subSubCatDict.Add(ch1.Name, new TreeNode { Name = ch1.Name });
+                                            subSubCatDict[ch1.Name]._subNode.Add(itemNode);
+                                        }
+                                    }
+                                }
+
+                                if (subSubCatDict.Values.Count > 0)
+                                {
+                                    if (!subCatDict.ContainsKey(ch.Name))
+                                    {
+                                        subCatDict.Add(ch.Name, new TreeNode() { Name = ch.Name });
+                                    }
+
+                                    foreach (var s in subSubCatDict.Values)
+                                    {
+                                        subCatDict[ch.Name]._subNode.Add(s);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                if (ch1.Name.ToLower().Contains(searchText.ToLower()))
+                                {
+                                    var itemNode = new TreeNode() { Name = ch1.Name, ItemData = ch1.ItemData };
+                                    if (subCatDict.ContainsKey(ch.Name))
+                                    {
+                                        subCatDict[ch.Name]._subNode.Add(itemNode);
+                                    }
+                                    else
+                                    {
+                                        subCatDict.Add(ch.Name, new TreeNode() { Name = ch.Name });
+                                        subCatDict[ch.Name]._subNode.Add(itemNode);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if(subCatDict.Values.Count > 0)
+                    {
+                        foreach(var s in subCatDict.Values)
+                        {
+                            catDict[c.Name]._subNode.Add(s);
+                        }
+                    }
                 }
 
-                Category = new ObservableCollection<CategoryViewModel>((from category in categories select new CategoryViewModel(category, new ObservableCollection<ItemData>(matchingItems))).ToList());
+                Category = new ObservableCollection<CategoryViewModel>();
 
-                foreach (var c in Category)
+                foreach (var c in catDict.Values)
                 {
-                    c.IsExpanded = true;
+                    if(c.SubNode.Count > 0)
+                    {
+                        var cvm = new CategoryViewModel(c);
+                        Category.Add(cvm);
+                        cvm.ExpandAll();
+                    }
+
                 }
             }
             else
             {
-                Category = new ObservableCollection<CategoryViewModel>((from category in categoryList select new CategoryViewModel(category, oItemList)).ToList());
+                Category = oCategory;
             }
-
-            SetEventHandler();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -580,8 +542,8 @@ namespace FFXIV_TexTools2.ViewModel
                     while ((line = sr.ReadLine()) != null)
                     {
                         modEntry = JsonConvert.DeserializeObject<JsonEntry>(line);
-                        Helper.UpdateIndex(modEntry.originalOffset, modEntry.fullPath);
-                        Helper.UpdateIndex2(modEntry.originalOffset, modEntry.fullPath);
+                        Helper.UpdateIndex(modEntry.originalOffset, modEntry.fullPath, modEntry.datFile);
+                        Helper.UpdateIndex2(modEntry.originalOffset, modEntry.fullPath, modEntry.datFile);
                     }
                 }
             }

@@ -393,6 +393,7 @@ namespace FFXIV_TexTools2.ViewModel
                     }
                 }
                 disposed = true;
+
                 base.Dispose(disposing);
             }
         }

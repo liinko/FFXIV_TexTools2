@@ -37,9 +37,11 @@ namespace FFXIV_TexTools2.Material
         /// </summary>
         /// <param name="offset">The offset of the item</param>
         /// <returns>The texture data</returns>
-        public static TEXData GetTex(int offset)
+        public static TEXData GetTex(int offset, string datName)
         {
             int datNum = ((offset / 8) & 0x0F) / 2;
+
+            var datPath = string.Format(Info.datDir, datName, datNum);
 
             offset = Helper.OffsetCorrection(datNum, offset);
            
@@ -47,7 +49,7 @@ namespace FFXIV_TexTools2.Material
 
             TEXData texData = new TEXData();
 
-            using (BinaryReader br = new BinaryReader(File.OpenRead(Info.datDir + datNum)))
+            using (BinaryReader br = new BinaryReader(File.OpenRead(datPath)))
             {
                 br.BaseStream.Seek(offset, SeekOrigin.Begin);
 
@@ -169,15 +171,16 @@ namespace FFXIV_TexTools2.Material
             texData.BMP = TextureToBitmap(decompressedData.ToArray(), texData.Type, texData.Width, texData.Height);
             texData.TypeString = Info.TextureTypes[texData.Type];
             texData.RawTexData = decompressedData.ToArray();
+            texData.TEXDatName = datName;
 
             return texData;
         }
 
-        public static TEXData GetVFX(int offset)
+        public static TEXData GetVFX(int offset, string datName)
         {
             int datNum = ((offset / 8) & 0x0F) / 2;
 
-            var VFXData = Helper.GetType2DecompressedData(offset, datNum);
+            var VFXData = Helper.GetType2DecompressedData(offset, datNum, datName);
 
             TEXData texData = new TEXData();
 
@@ -199,6 +202,7 @@ namespace FFXIV_TexTools2.Material
 
                 texData.TypeString = Info.TextureTypes[texData.Type];
                 texData.BMP = TextureToBitmap(texData.RawTexData, texData.Type, texData.Width, texData.Height);
+                texData.TEXDatName = datName;
             }
 
             return texData;
@@ -246,6 +250,7 @@ namespace FFXIV_TexTools2.Material
 
                 case TextureTypes.A1R5G5B5:
                     bmp = Read5551Image(decompressedData, width, height);
+                    //bmp = new Bitmap(width, height, width * 2, System.Drawing.Imaging.PixelFormat.Format16bppArgb1555, Marshal.UnsafeAddrOfPinnedArrayElement(decompressedData, 0));
                     break;
 
                 case TextureTypes.A8R8G8B8:
@@ -383,9 +388,9 @@ namespace FFXIV_TexTools2.Material
                         {
                             int pixel = br.ReadUInt16() & 0xFFFF;
                             int red = ((pixel & 0xF)) * 16;
-                            int green = ((pixel & 0xF0 >> 4)) * 16;
-                            int blue = ((pixel & 0xF00 >> 8)) * 16;
-                            int alpha = ((pixel & 0xF000 >> 12)) * 16;
+                            int green = ((pixel & 0xF0) >> 4) * 16;
+                            int blue = ((pixel & 0xF00) >> 8) * 16;
+                            int alpha = ((pixel & 0xF000) >> 12) * 16;
 
                             bmp.SetPixel(x, y, Color.FromArgb(alpha, red, green, blue));
                         }
@@ -414,10 +419,10 @@ namespace FFXIV_TexTools2.Material
                         for (int x = 0; x < width; x++)
                         {
                             int pixel = br.ReadUInt16() & 0xFFFF;
-                            int red = ((pixel & 0x7E00 >> 10)) * 8;
-                            int green = ((pixel & 0x3E0 >> 5)) * 8;
+                            int red = ((pixel & 0x7E00) >> 10) * 8;
+                            int green = ((pixel & 0x3E0) >> 5) * 8;
                             int blue = ((pixel & 0x1F)) * 8;
-                            int alpha = ((pixel & 0x80000 >> 15)) * 255;
+                            int alpha = ((pixel & 0x8000) >> 15) * 255;
 
                             bmp.SetPixel(x, y, Color.FromArgb(alpha, red, green, blue));
                         }

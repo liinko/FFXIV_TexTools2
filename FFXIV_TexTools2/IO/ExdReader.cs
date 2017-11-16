@@ -28,18 +28,134 @@ namespace FFXIV_TexTools2.IO
 {
     public static class ExdReader
     {
+        static TreeNode itemIconNode = new TreeNode() { Name = Strings.Items };
+
+        public static Dictionary<string, List<TreeNode>> GetEXDData()
+        {
+            Dictionary<string, List<TreeNode>> exdDict = new Dictionary<string, List<TreeNode>>
+            {
+                { Strings.Gear, MakeItemsList() },
+                { Strings.Character, MakeCharacterList() },
+                { Strings.Companions, MakeCompanionsList() },
+                { "UI", MakeUIList() }
+            };
+
+            return exdDict;
+        }
+
+        private static List<TreeNode> MakeCharacterList()
+        {
+            List<TreeNode> nodeList = new List<TreeNode>();
+
+            foreach(var charCategory in Info.CharCategoryList)
+            {
+                nodeList.Add(new TreeNode() { Name = charCategory, ItemData = new ItemData() { ItemName = charCategory, ItemCategory = "25" } });
+            }
+
+            return nodeList;
+        }
+
+        private static List<TreeNode> MakeCompanionsList()
+        {
+            List<TreeNode> companionNodes = new List<TreeNode>()
+            {
+                MakeMinionsList(), MakeMountsList(), MakePetsList()
+            };
+
+            return companionNodes;
+        }
+
+        private static List<TreeNode> MakeUIList()
+        {
+            List<TreeNode> UINodes = new List<TreeNode>()
+            {
+                MakeMapsList(), MakeActionsList(), itemIconNode, MakeStatusList(), MakeHUDList(), MakeLoadingImageList()
+            };
+
+            return UINodes;
+        }
+
+        private static TreeNode MakePetsList()
+        {
+            TreeNode petNode = new TreeNode() { Name = Strings.Pets };
+            List<string> petNames = new List<string>();
+
+            var petFile = String.Format(Strings.PetEXD, Strings.Language);
+            var petBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(petFile)));
+
+            using (BinaryReader br = new BinaryReader(new MemoryStream(petBytes)))
+            {
+                br.ReadBytes(8);
+                int offsetTableSize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                for (int i = 0; i < offsetTableSize; i += 8)
+                {
+                    br.BaseStream.Seek(i + 32, SeekOrigin.Begin);
+                    int index = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+                    int tableOffset = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                    br.BaseStream.Seek(tableOffset, SeekOrigin.Begin);
+
+                    int entrySize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                    br.ReadBytes(18);
+
+                    var nameSize = (entrySize - 16);
+
+                    if(nameSize > 2)
+                    {
+                        var petName = Encoding.UTF8.GetString(br.ReadBytes((entrySize - 18) + 2)).Replace("\0", "");
+
+                        if (petName.Contains(Strings.Carbuncle))
+                        {
+                            petName = Strings.Carbuncle;
+                        }
+
+                        if (!petNames.Contains(petName))
+                        {
+                            petNames.Add(petName);
+
+                            ItemData item = new ItemData()
+                            {
+                                ItemName = petName,
+                                ItemCategory = "22"
+                            };
+
+                            TreeNode itemNode = new TreeNode() { Name = petName, ItemData = item };
+
+                            petNode._subNode.Add(itemNode);
+                        }
+
+                    }
+                }
+
+                ItemData extraItem = new ItemData()
+                {
+                    ItemName = Strings.Ramuh_Egi,
+                    ItemCategory = "22"
+                };
+
+                TreeNode extraItemNode = new TreeNode() { Name = extraItem.ItemName, ItemData = extraItem };
+
+                petNode._subNode.Add(extraItemNode);
+
+                return petNode;
+            }
+        }
+
+
         /// <summary>
         /// Creates a list of minions contained in companion_(num)_(language).exd 
         /// </summary>
         /// <returns>List<Items> Items:Item data associated with Minion</returns>
-        public static List<ItemData> MakeMinionsList()
+        public static TreeNode MakeMinionsList()
         {
             string minionFile = String.Format(Strings.MinionFile, Strings.Language);
 
             byte[] minionsBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(minionFile)));
             byte[] modelChara = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(Strings.ModelCharaFile)));
 
-            List<ItemData> minionsDict = new List<ItemData>();
+            TreeNode minionNode = new TreeNode() { Name = Strings.Minions};
 
             using (BinaryReader br = new BinaryReader(new MemoryStream(minionsBytes)))
             {
@@ -100,7 +216,8 @@ namespace FFXIV_TexTools2.IO
 
                                     if(!item.PrimaryModelID.Equals("0000"))
                                     {
-                                        minionsDict.Add(item);
+                                        var itemNode = new TreeNode() { Name = item.ItemName, ItemData = item };
+                                        minionNode._subNode.Add(itemNode);
                                     }
                                     break;
                                 }
@@ -109,21 +226,793 @@ namespace FFXIV_TexTools2.IO
                     }
                 }
             }
-            return minionsDict;
+            minionNode._subNode.Sort();
+            return minionNode;
         }
+
+        public static TreeNode MakeMapsList()
+        {
+            string placeNameFile = String.Format(Strings.PlaceName, Strings.Language);
+
+            byte[] placeNameBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(placeNameFile)));
+            byte[] mapBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(Strings.MapExd)));
+
+            //SortedSet<ItemData> mapList = new SortedSet<ItemData>();
+            TreeNode mapNode = new TreeNode() { Name = Strings.Maps };
+
+            Dictionary<string, TreeNode> regionNodes = new Dictionary<string, TreeNode>();
+
+            using (BinaryReader br = new BinaryReader(new MemoryStream(mapBytes)))
+            {
+                using (BinaryReader br1 = new BinaryReader(new MemoryStream(placeNameBytes)))
+                {
+                    br.ReadBytes(8);
+                    int offsetTableSize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                    br1.ReadBytes(8);
+                    int offsetTableSize1 = BitConverter.ToInt32(br1.ReadBytes(4).Reverse().ToArray(), 0);
+
+                    for (int i = 0; i < offsetTableSize; i += 8)
+                    {
+                        br.BaseStream.Seek(i + 32, SeekOrigin.Begin);
+                        int index = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+                        int tableOffset = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                        br.BaseStream.Seek(tableOffset, SeekOrigin.Begin);
+
+                        int entrySize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                        br.ReadBytes(14);
+
+                        int regionIndex = BitConverter.ToInt16(br.ReadBytes(2).Reverse().ToArray(), 0);
+                        int mapIndex = BitConverter.ToInt16(br.ReadBytes(2).Reverse().ToArray(), 0);
+
+                        if(mapIndex > 1)
+                        {
+                            br.ReadBytes(16);
+
+                            ItemData item = new ItemData();
+
+                            byte[] mapPathNameBytes = br.ReadBytes(entrySize - 32);
+                            if(mapPathNameBytes.Length > 2)
+                            {
+                                item.UIPath = Encoding.UTF8.GetString(mapPathNameBytes).Replace("\0", "");
+                                item.ItemCategory = Strings.Maps;
+                                int mapNum = int.Parse(item.UIPath.Substring(item.UIPath.LastIndexOf("/") + 1, 2));
+
+                                bool mName = false;
+                                bool rName = false;
+
+                                TreeNode itemNode = null;
+
+                                for (int j = 0; j < offsetTableSize1; j += 8)
+                                {
+                                    br1.BaseStream.Seek(j + 32, SeekOrigin.Begin);
+
+                                    uint index1 = BitConverter.ToUInt32(br1.ReadBytes(4).Reverse().ToArray(), 0);
+
+                                    if (index1 == mapIndex)
+                                    {
+                                        int tableOffset1 = BitConverter.ToInt32(br1.ReadBytes(4).Reverse().ToArray(), 0);
+
+                                        br1.BaseStream.Seek(tableOffset1, SeekOrigin.Begin);
+
+                                        br1.ReadBytes(12);
+
+                                        int nameStringOffset = BitConverter.ToInt16(br1.ReadBytes(2).Reverse().ToArray(), 0);
+
+                                        if (nameStringOffset > 1)
+                                        {
+                                            br1.ReadBytes(16);
+
+                                            byte[] mapNameBytes = br1.ReadBytes(nameStringOffset);
+                                            if (mapNum > 0)
+                                            {
+                                                item.ItemName = Helper.ToTitleCase((Encoding.UTF8.GetString(mapNameBytes)).Replace("\0", "")) + " [" + mapNum + "]";
+                                            }
+                                            else
+                                            {
+                                                item.ItemName = Helper.ToTitleCase((Encoding.UTF8.GetString(mapNameBytes)).Replace("\0", ""));
+                                            }
+                                        }
+                                        else
+                                        {
+                                            item.ItemName = item.UIPath;
+                                        }
+
+                                        itemNode = new TreeNode() { Name = item.ItemName };
+                                        mName = true;
+                                    }
+                                    else if(index1 == regionIndex)
+                                    {
+                                        int tableOffset1 = BitConverter.ToInt32(br1.ReadBytes(4).Reverse().ToArray(), 0);
+
+                                        br1.BaseStream.Seek(tableOffset1, SeekOrigin.Begin);
+
+                                        br1.ReadBytes(12);
+
+                                        int nameStringOffset = BitConverter.ToInt16(br1.ReadBytes(2).Reverse().ToArray(), 0);
+
+                                        if (nameStringOffset > 1)
+                                        {
+                                            br1.ReadBytes(16);
+
+                                            byte[] mapNameBytes = br1.ReadBytes(nameStringOffset);
+
+                                            item.ItemSubCategory = Helper.ToTitleCase((Encoding.UTF8.GetString(mapNameBytes)).Replace("\0", ""));
+
+                                            if (!regionNodes.ContainsKey(item.ItemSubCategory))
+                                            {
+                                                regionNodes.Add(item.ItemSubCategory, new TreeNode() { Name = item.ItemSubCategory });
+                                            }
+                                        }
+                                        rName = true;
+                                    }
+                                    
+                                    if(mName && rName)
+                                    {
+                                        itemNode.ItemData = item;
+                                        regionNodes[item.ItemSubCategory]._subNode.Add(itemNode);
+                                        break;
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            foreach(var regionNode in regionNodes.Values)
+            {
+                regionNode._subNode.Sort();
+                mapNode._subNode.Add(regionNode);
+            }
+
+            mapNode._subNode.Sort();
+
+            return mapNode;
+        }
+
+        public static TreeNode MakeHUDList()
+        {
+            var uldList = Properties.Resources.uldpaths.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+
+            var uldFolder = "ui/uld/";
+
+            TreeNode HUDNode = new TreeNode() { Name = "HUD" };
+            Dictionary<string, TreeNode> HUDDict = new Dictionary<string, TreeNode>();
+
+            foreach (var uld in uldList)
+            {
+                ItemData item = new ItemData();
+
+                item.ItemCategory = "HUD";
+                if (uld.ToLower().Contains("subtitle"))
+                {
+                    item.ItemSubCategory = "Subtitles";
+                }
+                else if (uld.ToLower().Contains("title"))
+                {
+                    item.ItemSubCategory = "Titles";
+                }
+                else if (uld.ToLower().Contains("window"))
+                {
+                    item.ItemSubCategory = "Windows";
+                }
+                else if (uld.ToLower().Contains("gcarmy"))
+                {
+                    item.ItemSubCategory = "GC Army";
+                }
+                else if (uld.ToLower().Contains("job"))
+                {
+                    item.ItemSubCategory = "Jobs";
+                }
+                else
+                {
+                    item.ItemSubCategory = "Other";
+                }
+
+
+                item.UIPath = uldFolder + uld.ToLower();
+                item.ItemName = Path.GetFileNameWithoutExtension(item.UIPath);
+                TreeNode itemNode = new TreeNode() { Name = item.ItemName, ItemData = item };
+
+
+                if (HUDDict.ContainsKey(item.ItemSubCategory))
+                {
+                    HUDDict[item.ItemSubCategory]._subNode.Add(itemNode);
+                }
+                else
+                {
+                    HUDDict.Add(item.ItemSubCategory, new TreeNode() { Name = item.ItemSubCategory, _subNode = { itemNode } });
+                }
+            }
+
+            foreach(var i in HUDDict.Values)
+            {
+                HUDNode._subNode.Add(i);
+            }
+
+            return HUDNode;
+        }
+
+        public static TreeNode MakeLoadingImageList()
+        {
+            var loadingImageFolder = "ui/loadingimage/";
+            var loadingImageFile = string.Format(Strings.LoadingImage, "");
+
+            var folders = Helper.GetAllFilesInFolder(FFCRC.GetHash(loadingImageFolder.Substring(0, 15)), Strings.UIDat);
+
+            TreeNode LINode = new TreeNode() { Name = "Loading Image" };
+
+            for (int i = 0; i < 20; i++)
+            {
+                ItemData item = new ItemData();
+
+                loadingImageFile = string.Format(Strings.LoadingImage, i.ToString().PadLeft(2, '0'));
+
+                if (i == 0)
+                {
+                    loadingImageFile = string.Format(Strings.LoadingImage, "");
+                }
+
+                if (folders.Contains(FFCRC.GetHash(loadingImageFile)))
+                {
+                    item.UIPath = loadingImageFolder + loadingImageFile;
+                    item.ItemName = Path.GetFileNameWithoutExtension(item.UIPath);
+                    item.ItemCategory = "LoadingImage";
+                    TreeNode itemNode = new TreeNode() { Name = item.ItemName, ItemData = item };
+                    LINode._subNode.Add(itemNode);
+                }
+            }
+
+            return LINode;
+        }
+
+        public static TreeNode MakeActionsList()
+        {
+            var ActionCategoryDict = ActionCategory();
+
+            TreeNode actionsNode = new TreeNode() { Name = Strings.Actions };
+
+            string actionFile = String.Format(Strings.Action, Strings.Language);
+
+            byte[] actionBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(actionFile)));
+
+            TreeNode actionNode = new TreeNode();
+
+            using (BinaryReader br = new BinaryReader(new MemoryStream(actionBytes)))
+            {
+                br.ReadBytes(8);
+                int offsetTableSize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                for (int i = 0; i < offsetTableSize; i += 8)
+                {
+                    br.BaseStream.Seek(i + 32, SeekOrigin.Begin);
+                    int index = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+                    int tableOffset = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                    br.BaseStream.Seek(tableOffset, SeekOrigin.Begin);
+
+                    int entrySize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                    br.ReadBytes(10);
+
+                    int iconNum = BitConverter.ToUInt16(br.ReadBytes(2).Reverse().ToArray(), 0);
+
+                    if(iconNum != 405)
+                    {
+                        if(iconNum != 0)
+                        {
+                            ItemData item = new ItemData();
+
+                            item.Icon = iconNum.ToString();
+
+                            br.ReadBytes(16);
+                            var subcat = br.ReadByte();
+                            if (subcat != 0)
+                            {
+                                item.ItemSubCategory = ActionCategoryDict[subcat];
+                            }
+                            else
+                            {
+                                item.ItemSubCategory = "None";
+                            }
+
+                            actionNode.Name = item.ItemSubCategory;
+
+
+                            br.ReadBytes(25);
+
+                            var actionName = Encoding.UTF8.GetString(br.ReadBytes(entrySize - 52)).Replace("\0", "");
+
+                            if(actionName.Length > 1)
+                            {
+                                item.ItemName = actionName;
+                                item.ItemCategory = Strings.Actions;
+
+                                TreeNode itemNode = new TreeNode() { Name = item.ItemName, ItemData = item };
+                                actionNode._subNode.Add(itemNode);
+
+                            }
+                        }
+
+                    }
+
+                }
+                actionNode._subNode.Sort();
+                actionsNode._subNode.Add(actionNode);
+            }
+
+            actionFile = String.Format(Strings.GeneralAction, Strings.Language);
+            actionBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(actionFile)));
+
+            TreeNode generalNode = new TreeNode() { Name = Strings.General };
+
+            using (BinaryReader br = new BinaryReader(new MemoryStream(actionBytes)))
+            {
+                br.ReadBytes(8);
+                int offsetTableSize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                for (int i = 0; i < offsetTableSize; i += 8)
+                {
+                    br.BaseStream.Seek(i + 32, SeekOrigin.Begin);
+                    int index = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+                    int tableOffset = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                    br.BaseStream.Seek(tableOffset, SeekOrigin.Begin);
+
+                    int entrySize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                    br.ReadBytes(9);
+
+                    int stringSize = br.ReadByte();
+
+                    br.ReadBytes(2);
+
+                    int iconNum = BitConverter.ToUInt16(br.ReadBytes(2).Reverse().ToArray(), 0);
+
+                    if (iconNum != 0)
+                    {
+                        ItemData item = new ItemData();
+
+                        item.Icon = iconNum.ToString();
+
+                        br.ReadBytes(8);
+
+                        item.ItemSubCategory = Strings.General;
+
+                        var actionName = Encoding.UTF8.GetString(br.ReadBytes(stringSize)).Replace("\0", "");
+
+                        if (actionName.Length > 1)
+                        {
+                            item.ItemName = actionName;
+                            item.ItemCategory = Strings.Actions;
+
+                            TreeNode itemNode = new TreeNode() { Name = item.ItemName, ItemData = item };
+                            generalNode._subNode.Add(itemNode);
+                        }
+                    }
+                }
+
+            }
+            generalNode._subNode.Sort();
+            actionsNode._subNode.Add(generalNode);
+
+
+            actionFile = String.Format(Strings.BuddyAction, Strings.Language);
+            actionBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(actionFile)));
+
+            TreeNode buddyNode = new TreeNode() { Name = Strings.Buddy };
+            using (BinaryReader br = new BinaryReader(new MemoryStream(actionBytes)))
+            {
+                br.ReadBytes(8);
+                int offsetTableSize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                for (int i = 0; i < offsetTableSize; i += 8)
+                {
+                    br.BaseStream.Seek(i + 32, SeekOrigin.Begin);
+                    int index = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+                    int tableOffset = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                    br.BaseStream.Seek(tableOffset, SeekOrigin.Begin);
+
+                    int entrySize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                    br.ReadBytes(9);
+
+                    int stringSize = br.ReadByte();
+
+                    br.ReadBytes(2);
+
+                    int iconNum = BitConverter.ToUInt16(br.ReadBytes(2).Reverse().ToArray(), 0);
+
+                    if (iconNum != 0)
+                    {
+                        ItemData item = new ItemData();
+
+                        item.Icon = iconNum.ToString();
+
+                        br.ReadBytes(8);
+
+                        item.ItemSubCategory = Strings.Buddy;
+
+                        var actionName = Encoding.UTF8.GetString(br.ReadBytes(stringSize)).Replace("\0", "");
+
+                        if (actionName.Length > 1)
+                        {
+                            item.ItemName = actionName;
+                            item.ItemCategory = Strings.Actions;
+                            TreeNode itemNode = new TreeNode() { Name = item.ItemName, ItemData = item };
+
+                            buddyNode._subNode.Add(itemNode);
+                        }
+                    }
+                }
+            }
+            buddyNode._subNode.Sort();
+            actionsNode._subNode.Add(buddyNode);
+
+            actionFile = String.Format(Strings.CompanyAction, Strings.Language);
+            actionBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(actionFile)));
+
+            TreeNode companyNode = new TreeNode() { Name = Strings.Company };
+
+            using (BinaryReader br = new BinaryReader(new MemoryStream(actionBytes)))
+            {
+                br.ReadBytes(8);
+                int offsetTableSize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                for (int i = 0; i < offsetTableSize; i += 8)
+                {
+                    br.BaseStream.Seek(i + 32, SeekOrigin.Begin);
+                    int index = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+                    int tableOffset = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                    br.BaseStream.Seek(tableOffset, SeekOrigin.Begin);
+
+                    int entrySize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                    br.ReadBytes(9);
+
+                    int stringSize = br.ReadByte();
+
+                    br.ReadBytes(6);
+
+                    int iconNum = BitConverter.ToUInt16(br.ReadBytes(2).Reverse().ToArray(), 0);
+
+                    if (iconNum != 0)
+                    {
+                        ItemData item = new ItemData();
+
+                        item.Icon = iconNum.ToString();
+
+                        br.ReadBytes(4);
+
+                        item.ItemSubCategory = Strings.Company;
+
+                        var actionName = Encoding.UTF8.GetString(br.ReadBytes(stringSize)).Replace("\0", "");
+
+                        if (actionName.Length > 1)
+                        {
+                            item.ItemName = actionName;
+                            item.ItemCategory = Strings.Actions;
+                            TreeNode itemNode = new TreeNode() { Name = item.ItemName, ItemData = item };
+
+                            companyNode._subNode.Add(itemNode);
+                        }
+                    }
+                }
+            }
+            companyNode._subNode.Sort();
+            actionsNode._subNode.Add(companyNode);
+
+            actionFile = String.Format(Strings.CraftAction, Strings.Language);
+            actionBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(actionFile)));
+            TreeNode craftNode = new TreeNode() { Name = Strings.Craft };
+
+            using (BinaryReader br = new BinaryReader(new MemoryStream(actionBytes)))
+            {
+                br.ReadBytes(8);
+                int offsetTableSize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                for (int i = 0; i < offsetTableSize; i += 8)
+                {
+                    br.BaseStream.Seek(i + 32, SeekOrigin.Begin);
+                    int index = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+                    int tableOffset = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                    br.BaseStream.Seek(tableOffset, SeekOrigin.Begin);
+
+                    int entrySize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                    br.ReadBytes(9);
+
+                    int stringSize = br.ReadByte();
+
+                    br.ReadBytes(40);
+
+                    int iconNum = BitConverter.ToUInt16(br.ReadBytes(2).Reverse().ToArray(), 0);
+
+                    if (iconNum != 0)
+                    {
+                        ItemData item = new ItemData();
+
+                        item.Icon = iconNum.ToString();
+
+                        br.ReadBytes(10);
+
+                        item.ItemSubCategory = Strings.Craft;
+
+                        var actionName = Encoding.UTF8.GetString(br.ReadBytes(stringSize)).Replace("\0", "");
+
+                        if (actionName.Length > 1)
+                        {
+                            item.ItemName = actionName;
+                            item.ItemCategory = Strings.Actions;
+                            TreeNode itemNode = new TreeNode() { Name = item.ItemName, ItemData = item };
+
+                            craftNode._subNode.Add(itemNode);
+                        }
+                    }
+                }
+            }
+            craftNode._subNode.Sort();
+            actionsNode._subNode.Add(craftNode);
+
+
+            actionFile = String.Format(Strings.EventAction, Strings.Language);
+            actionBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(actionFile)));
+
+            TreeNode eventNode = new TreeNode() { Name = Strings.Event };
+
+            using (BinaryReader br = new BinaryReader(new MemoryStream(actionBytes)))
+            {
+                br.ReadBytes(8);
+                int offsetTableSize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                for (int i = 0; i < offsetTableSize; i += 8)
+                {
+                    br.BaseStream.Seek(i + 32, SeekOrigin.Begin);
+                    int index = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+                    int tableOffset = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                    br.BaseStream.Seek(tableOffset, SeekOrigin.Begin);
+
+                    int entrySize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                    br.ReadBytes(6);
+
+                    int iconNum = BitConverter.ToUInt16(br.ReadBytes(2).Reverse().ToArray(), 0);
+
+                    if (iconNum != 0)
+                    {
+                        ItemData item = new ItemData();
+
+                        item.Icon = iconNum.ToString();
+
+                        br.ReadBytes(10);
+
+                        item.ItemSubCategory = Strings.Event;
+
+                        var actionName = Encoding.UTF8.GetString(br.ReadBytes(entrySize - 16)).Replace("\0", "");
+
+                        if (actionName.Length > 1)
+                        {
+                            item.ItemName = actionName;
+                            item.ItemCategory = Strings.Actions;
+                            TreeNode itemNode = new TreeNode() { Name = item.ItemName, ItemData = item };
+
+                            eventNode._subNode.Add(itemNode);
+                        }
+                    }
+                }
+            }
+            eventNode._subNode.Sort();
+            actionsNode._subNode.Add(eventNode);
+
+            actionFile = String.Format(Strings.EmoteEXD, Strings.Language);
+            actionBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(actionFile)));
+
+            TreeNode emoteNode = new TreeNode() { Name = Strings.Emote };
+
+            using (BinaryReader br = new BinaryReader(new MemoryStream(actionBytes)))
+            {
+                br.ReadBytes(8);
+                int offsetTableSize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                for (int i = 0; i < offsetTableSize; i += 8)
+                {
+                    br.BaseStream.Seek(i + 32, SeekOrigin.Begin);
+                    int index = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+                    int tableOffset = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                    br.BaseStream.Seek(tableOffset, SeekOrigin.Begin);
+
+                    int entrySize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                    br.ReadBytes(28);
+
+                    int iconNum = BitConverter.ToUInt16(br.ReadBytes(2).Reverse().ToArray(), 0);
+
+                    if (iconNum != 0)
+                    {
+                        ItemData item = new ItemData();
+
+                        item.Icon = iconNum.ToString();
+
+                        br.ReadBytes(8);
+
+                        item.ItemSubCategory = Strings.Emote;
+
+                        var actionName = Encoding.UTF8.GetString(br.ReadBytes(entrySize - 36)).Replace("\0", "");
+
+                        if (actionName.Length > 1)
+                        {
+                            item.ItemName = actionName;
+                            item.ItemCategory = Strings.Actions;
+                            TreeNode itemNode = new TreeNode() { Name = item.ItemName, ItemData = item };
+
+                            emoteNode._subNode.Add(itemNode);
+                        }
+                    }
+                }
+            }
+            emoteNode._subNode.Sort();
+            actionsNode._subNode.Add(emoteNode);
+
+            actionFile = String.Format(Strings.MarkerEXD, Strings.Language);
+            actionBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(actionFile)));
+
+            TreeNode markerNode = new TreeNode() { Name = Strings.Marker };
+
+            using (BinaryReader br = new BinaryReader(new MemoryStream(actionBytes)))
+            {
+                br.ReadBytes(8);
+                int offsetTableSize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                for (int i = 0; i < offsetTableSize; i += 8)
+                {
+                    br.BaseStream.Seek(i + 32, SeekOrigin.Begin);
+                    int index = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+                    int tableOffset = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                    br.BaseStream.Seek(tableOffset, SeekOrigin.Begin);
+
+                    int entrySize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                    br.ReadBytes(8);
+
+                    int iconNum = BitConverter.ToUInt16(br.ReadBytes(2).Reverse().ToArray(), 0);
+
+                    if (iconNum != 0)
+                    {
+                        ItemData item = new ItemData();
+
+                        item.Icon = iconNum.ToString();
+
+                        item.ItemSubCategory = Strings.Marker;
+
+                        var actionName = Encoding.UTF8.GetString(br.ReadBytes(entrySize - 8)).Replace("\0", "");
+
+                        if (actionName.Length > 1)
+                        {
+                            item.ItemName = actionName;
+                            item.ItemCategory = Strings.Actions;
+                            TreeNode itemNode = new TreeNode() { Name = item.ItemName, ItemData = item };
+
+                            markerNode._subNode.Add(itemNode);
+
+                        }
+                    }
+                }
+            }
+            markerNode._subNode.Sort();
+            actionsNode._subNode.Add(markerNode);
+
+            return actionsNode;
+        }
+
+        public static TreeNode MakeStatusList()
+        {
+            var statusFile = String.Format(Strings.StatusExd, Strings.Language);
+            var statusBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(statusFile)));
+            Dictionary<string, TreeNode> statusDict = new Dictionary<string, TreeNode>();
+
+            TreeNode statusNode = new TreeNode() { Name = Strings.Status };
+
+            using (BinaryReader br = new BinaryReader(new MemoryStream(statusBytes)))
+            {
+                br.ReadBytes(8);
+                int offsetTableSize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                for (int i = 0; i < offsetTableSize; i += 8)
+                {
+                    br.BaseStream.Seek(i + 32, SeekOrigin.Begin);
+                    int index = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+                    int tableOffset = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                    br.BaseStream.Seek(tableOffset, SeekOrigin.Begin);
+
+                    int entrySize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                    br.ReadBytes(8);
+
+                    int statusNameSize = BitConverter.ToUInt16(br.ReadBytes(2).Reverse().ToArray(), 0);
+
+                    int statusIconNum = BitConverter.ToUInt16(br.ReadBytes(2).Reverse().ToArray(), 0);
+
+                    br.ReadBytes(3);
+
+                    int statusType = br.ReadByte();
+
+                    br.ReadBytes(10);
+
+                    if (statusIconNum != 0)
+                    {
+                        ItemData item = new ItemData();
+
+                        item.Icon = statusIconNum.ToString();
+
+                        if (statusType == 0)
+                        {
+                            item.ItemSubCategory = Strings.General;
+                        }
+                        else if (statusType == 1)
+                        {
+                            item.ItemSubCategory = Strings.Beneficial;
+                        }
+                        else if (statusType == 2)
+                        {
+                            item.ItemSubCategory = Strings.Detrimental;
+                        }
+                        else
+                        {
+                            item.ItemSubCategory = "Unknown";
+                        }
+
+                        var statusName = Encoding.UTF8.GetString(br.ReadBytes(statusNameSize)).Replace("\0", "");
+
+                        if (statusName.Length > 1)
+                        {
+                            item.ItemName = statusName;
+                            item.ItemCategory = Strings.Status;
+
+                            TreeNode itemNode = new TreeNode() { Name = item.ItemName, ItemData = item };
+
+                            if (statusDict.ContainsKey(item.ItemSubCategory))
+                            {
+                                statusDict[item.ItemSubCategory]._subNode.Add(itemNode);
+                            }
+                            else
+                            {
+                                statusDict.Add(item.ItemSubCategory, new TreeNode() { Name = item.ItemSubCategory, _subNode = { itemNode } });
+                            }
+                        }
+                    }
+                }
+                foreach(var i in statusDict.Values)
+                {
+                    statusNode._subNode.Add(i);
+                }
+                return statusNode;
+            }
+        }
+
 
         /// <summary>
         /// Creates a list of Mounts contained in mount_(num)_(language).exd 
         /// </summary>
         /// <returns>List<Items> Items:Item data associated with Mount</returns>
-        public static SortedSet<ItemData> MakeMountsList()
+        public static TreeNode MakeMountsList()
         {
             string mountFile = String.Format(Strings.MountFile, Strings.Language);
 
             byte[] mountBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(mountFile)));
             byte[] modelchara = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(Strings.ModelCharaFile)));
 
-            SortedSet<ItemData> mountsDict = new SortedSet<ItemData>();
+            TreeNode mountNode = new TreeNode() { Name = Strings.Mounts };
 
             using (BinaryReader br = new BinaryReader(new MemoryStream(mountBytes)))
             {
@@ -187,7 +1076,8 @@ namespace FFXIV_TexTools2.IO
                                         item.PrimaryMTRLFolder = String.Format(Strings.MonsterMtrlFolder, item.PrimaryModelID, item.PrimaryModelBody);
                                     }
 
-                                    mountsDict.Add(item);
+                                    var itemNode = new TreeNode() { Name = item.ItemName, ItemData = item };
+                                    mountNode._subNode.Add(itemNode);
 
                                     break;
                                 }
@@ -196,17 +1086,96 @@ namespace FFXIV_TexTools2.IO
                     }
                 }
             }
-            return mountsDict;
+            mountNode._subNode.Sort();
+            return mountNode;
+        }
+
+        public static Dictionary<int, string> ItemUICategory()
+        {
+            string itemUICatFile = String.Format(Strings.ItemUICategory, Strings.Language);
+
+            byte[] itemUICatBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(itemUICatFile)));
+
+            Dictionary<int, string> UICategories = new Dictionary<int, string>();
+
+            using (BinaryReader br = new BinaryReader(new MemoryStream(itemUICatBytes)))
+            {
+                br.ReadBytes(8);
+                int offsetTableSize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                for (int i = 0; i < offsetTableSize; i += 8)
+                {
+                    br.BaseStream.Seek(i + 32, SeekOrigin.Begin);
+                    int index = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+                    int tableOffset = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                    br.BaseStream.Seek(tableOffset, SeekOrigin.Begin);
+
+                    int entrySize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                    br.ReadBytes(14);
+
+                    var catName = Encoding.UTF8.GetString(br.ReadBytes(entrySize - 12)).Replace("\0", "");
+
+                    if(catName.Length > 0 && !catName.Equals("  "))
+                    {
+                        UICategories.Add(index, catName);
+                    }
+                }
+
+            }
+            return UICategories;
+        }
+
+        public static Dictionary<int, string> ActionCategory()
+        {
+            string actionCatFile = String.Format(Strings.ActionCategory, Strings.Language);
+
+            byte[] actionCatBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(actionCatFile)));
+
+            Dictionary<int, string> actionCategories = new Dictionary<int, string>();
+
+            using (BinaryReader br = new BinaryReader(new MemoryStream(actionCatBytes)))
+            {
+                br.ReadBytes(8);
+                int offsetTableSize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                for (int i = 0; i < offsetTableSize; i += 8)
+                {
+                    br.BaseStream.Seek(i + 32, SeekOrigin.Begin);
+                    int index = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+                    int tableOffset = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                    br.BaseStream.Seek(tableOffset, SeekOrigin.Begin);
+
+                    int entrySize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                    br.ReadBytes(6);
+
+                    var catName = Encoding.UTF8.GetString(br.ReadBytes(entrySize - 4)).Replace("\0", "");
+
+                    if (catName.Length > 0 && !catName.Equals("  "))
+                    {
+                        actionCategories.Add(index, catName);
+                    }
+                }
+
+            }
+            return actionCategories;
         }
 
         /// <summary>
         /// Creates a list of Items contained in item_(num)_(language).exd 
         /// </summary>
         /// <returns>Dictionary<string, Items> String:Item Name  Items:Item data associated with Item</returns>
-        public static List<ItemData> MakeItemsList()
+        public static List<TreeNode> MakeItemsList()
         {
-            List<ItemData> itemsDict = new List<ItemData>();
+            SortedSet<ItemData> itemIconList = new SortedSet<ItemData>();
             List<int> itemOffsetList = new List<int>();
+            Dictionary<string, TreeNode> itemDict = new Dictionary<string, TreeNode>();
+            Dictionary<string, TreeNode> itemIconDict = new Dictionary<string, TreeNode>();
+
+            var UICategoryDict = ItemUICategory();
 
             var smallClothesMTRL = "chara/equipment/e0000/material/v";
 
@@ -219,7 +1188,10 @@ namespace FFXIV_TexTools2.IO
                 PrimaryModelVariant = "1",
                 PrimaryMTRLFolder = smallClothesMTRL
             };
-            itemsDict.Add(item);
+
+            var catName = Info.IDSlotName[item.ItemCategory];
+            var scNode = new TreeNode() { Name = item.ItemName, ItemData = item };
+            itemDict.Add(catName, new TreeNode() { Name = catName, _subNode = new List<TreeNode>() { scNode } });
 
             item = new ItemData()
             {
@@ -229,7 +1201,9 @@ namespace FFXIV_TexTools2.IO
                 PrimaryModelVariant = "1",
                 PrimaryMTRLFolder = smallClothesMTRL
             };
-            itemsDict.Add(item);
+            catName = Info.IDSlotName[item.ItemCategory];
+            scNode = new TreeNode() { Name = item.ItemName, ItemData = item };
+            itemDict.Add(catName, new TreeNode() { Name = catName, _subNode = new List<TreeNode>() { scNode } });
 
             item = new ItemData()
             {
@@ -239,7 +1213,10 @@ namespace FFXIV_TexTools2.IO
                 PrimaryModelVariant = "1",
                 PrimaryMTRLFolder = smallClothesMTRL
             };
-            itemsDict.Add(item);
+            catName = Info.IDSlotName[item.ItemCategory];
+            scNode = new TreeNode() { Name = item.ItemName, ItemData = item };
+            itemDict.Add(catName, new TreeNode() { Name = catName, _subNode = new List<TreeNode>() { scNode } });
+
 
             //searches item files which increase in increments of 500 in 0a0000 index until one does not exist
             for (int i = 0; ; i += 500)
@@ -280,6 +1257,7 @@ namespace FFXIV_TexTools2.IO
                         if (lastText > 10)
                         {
                             item = new ItemData();
+                            TreeNode category = new TreeNode();
 
                             bool hasSecondary = false;
                             br.ReadBytes(7);
@@ -322,14 +1300,22 @@ namespace FFXIV_TexTools2.IO
                                     br.ReadBytes(2);
                                 }
 
+                                int icon = 0;
+
                                 if (!hasSecondary)
                                 {
-                                    br.ReadBytes(108);
+                                    br.ReadBytes(90);
+                                    icon = BitConverter.ToUInt16(br.ReadBytes(2).Reverse().ToArray(), 0);
                                 }
                                 else
                                 {
-                                    br.ReadBytes(104);
+                                    br.ReadBytes(86);
+                                    icon = BitConverter.ToUInt16(br.ReadBytes(2).Reverse().ToArray(), 0);
                                 }
+
+                                item.Icon = icon.ToString();
+
+                                br.ReadBytes(16);
 
                                 byte[] slotBytes = br.ReadBytes(4).ToArray();
                                 item.ItemCategory = slotBytes[0].ToString();
@@ -359,12 +1345,66 @@ namespace FFXIV_TexTools2.IO
 
                                 try
                                 {
-                                    itemsDict.Add(item);
+                                    var itemNode = new TreeNode { Name = item.ItemName, ItemData = item };
+                                    var itemCatName = Info.IDSlotName[item.ItemCategory];
+
+                                    if (!item.ItemCategory.Equals("6"))
+                                    {
+                                        if (itemDict.ContainsKey(itemCatName))
+                                        {
+                                            itemDict[itemCatName]._subNode.Add(itemNode);
+                                        }
+                                        else
+                                        {
+                                            itemDict.Add(itemCatName, new TreeNode() { Name = itemCatName, _subNode = new List<TreeNode>() { itemNode } });
+                                        }
+                                    }
                                 }
                                 catch (Exception e)
                                 {
                                     Debug.WriteLine("EXD_MakeItemListError " + e);
                                 }
+                            }
+                            else
+                            {
+                                br.ReadBytes(98);
+
+                                item.Icon = BitConverter.ToUInt16(br.ReadBytes(2).Reverse().ToArray(), 0).ToString();
+
+                                br.ReadBytes(14);
+
+                                var someByte = br.ReadByte();
+                                //Debug.WriteLine("someByte " + someByte);
+                                item.ItemSubCategory = UICategoryDict[someByte];
+
+                                br.ReadBytes(7);
+
+                                br.ReadBytes(lastText);
+
+                                item.ItemName = Encoding.UTF8.GetString(br.ReadBytes(entrySize - (lastText + 152))).Replace("\0", "");
+
+                                item.ItemCategory = Strings.Items;
+
+                                try
+                                {
+                                    TreeNode itemNode = new TreeNode() { Name = item.ItemName, ItemData = item };
+
+                                    itemIconList.Add(item);
+                                    if (itemIconDict.ContainsKey(item.ItemSubCategory))
+                                    {
+                                        itemIconDict[item.ItemSubCategory]._subNode.Add(itemNode);
+                                    }
+                                    else
+                                    {
+                                        itemIconDict.Add(item.ItemSubCategory, new TreeNode() { Name = item.ItemSubCategory, _subNode = { itemNode } });
+                                    }
+
+                                }
+                                catch (Exception e)
+                                {
+                                    Debug.WriteLine("EXD_MakeItemListError " + e);
+                                }
+
                             }
 
                         }
@@ -372,8 +1412,19 @@ namespace FFXIV_TexTools2.IO
 
                 }
             }
+            foreach(var i in itemDict.Values)
+            {
+                i._subNode.Sort();
+            }
 
-            return itemsDict;
+            foreach(var i in itemIconDict.Values)
+            {
+                i._subNode.Sort();
+                itemIconNode._subNode.Add(i);
+            }
+            itemIconNode._subNode.Sort();
+
+            return itemDict.Values.ToList();
         }
     }
 }

@@ -69,8 +69,8 @@ namespace FFXIV_TexTools2.Views
 
             }
 
-            Helper.UpdateIndex(offset, selected.Entry.fullPath);
-            Helper.UpdateIndex2(offset, selected.Entry.fullPath);
+            Helper.UpdateIndex(offset, selected.Entry.fullPath, selected.Entry.datFile);
+            Helper.UpdateIndex2(offset, selected.Entry.fullPath, selected.Entry.datFile);
 
         }
 

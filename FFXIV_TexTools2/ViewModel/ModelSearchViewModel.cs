@@ -283,7 +283,7 @@ namespace FFXIV_TexTools2.ViewModel
                 {
                     var folderCheck = string.Format(folder, searchText.PadLeft(4, '0')) + i.ToString().PadLeft(4, '0');
 
-                    if (Helper.FolderExists(FFCRC.GetHash(folderCheck)))
+                    if (Helper.FolderExists(FFCRC.GetHash(folderCheck), Strings.ItemsDat))
                     {
                         variantList.Add(i);
                     }
@@ -299,7 +299,7 @@ namespace FFXIV_TexTools2.ViewModel
                         slotList.Add(v, new List<string>());
                         var eFolder = string.Format(folder, searchText.PadLeft(4, '0')) + v.ToString().PadLeft(4, '0');
 
-                        var files = Helper.GetAllFilesInFolder(FFCRC.GetHash(eFolder));
+                        var files = Helper.GetAllFilesInFolder(FFCRC.GetHash(eFolder), Strings.ItemsDat);
 
                         if (SelectedType.Name.Equals(Strings.Accessory))
                         {
@@ -361,14 +361,14 @@ namespace FFXIV_TexTools2.ViewModel
 
                     var folderCheck = string.Format(folder, searchText.PadLeft(4, '0'));
 
-                    if (Helper.FolderExists(FFCRC.GetHash(folderCheck)))
+                    if (Helper.FolderExists(FFCRC.GetHash(folderCheck), Strings.ItemsDat))
                     {
                         variantList.Add(1);
                     }
 
                     slotList.Add(1, new List<string>());
 
-                    var files = Helper.GetAllFilesInFolder(FFCRC.GetHash(folderCheck));
+                    var files = Helper.GetAllFilesInFolder(FFCRC.GetHash(folderCheck), Strings.ItemsDat);
 
                     if (SelectedType.Name.Equals(Strings.Accessory))
                     {
@@ -425,7 +425,7 @@ namespace FFXIV_TexTools2.ViewModel
                     {
                         var folderCheck = string.Format(folder, searchText.PadLeft(4, '0'), i.ToString().PadLeft(4, '0')) + "0001";
 
-                        if (Helper.FolderExists(FFCRC.GetHash(folderCheck)))
+                        if (Helper.FolderExists(FFCRC.GetHash(folderCheck), Strings.ItemsDat))
                         {
                             bodyList.Add(i);
                         }
@@ -439,7 +439,7 @@ namespace FFXIV_TexTools2.ViewModel
                         {
                             var wmFolder = string.Format(folder, searchText.PadLeft(4, '0'), bodyList[i].ToString().PadLeft(4, '0')) + j.ToString().PadLeft(4, '0');
 
-                            var files = Helper.GetAllFilesInFolder(FFCRC.GetHash(wmFolder));
+                            var files = Helper.GetAllFilesInFolder(FFCRC.GetHash(wmFolder), Strings.ItemsDat);
 
                             foreach (var p in parts)
                             {
@@ -469,7 +469,7 @@ namespace FFXIV_TexTools2.ViewModel
                     {
                         var folderCheck = string.Format(folder, searchText.PadLeft(4, '0'), i.ToString().PadLeft(4, '0')) + "0001";
 
-                        if (Helper.FolderExists(FFCRC.GetHash(folderCheck)))
+                        if (Helper.FolderExists(FFCRC.GetHash(folderCheck), Strings.ItemsDat))
                         {
                             bodyList.Add(i);
                         }
@@ -483,7 +483,7 @@ namespace FFXIV_TexTools2.ViewModel
                         {
                             var wmFolder = string.Format(folder, searchText.PadLeft(4, '0'), bodyList[i].ToString().PadLeft(4, '0')) + j.ToString().PadLeft(4, '0');
 
-                            var files = Helper.GetAllFilesInFolder(FFCRC.GetHash(wmFolder));
+                            var files = Helper.GetAllFilesInFolder(FFCRC.GetHash(wmFolder), Strings.ItemsDat);
 
                             foreach (var eq in eqSlots)
                             {

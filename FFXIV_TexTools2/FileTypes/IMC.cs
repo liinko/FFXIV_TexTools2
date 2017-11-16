@@ -61,24 +61,24 @@ namespace FFXIV_TexTools2.Material
                 int offset = 0;
                 if (type.Equals("monster"))
                 {
-                    offset = Helper.GetItemOffset(FFCRC.GetHash(string.Format(Strings.MonsterIMCFolder, itemID, body)), FFCRC.GetHash(string.Format(Strings.MonsterIMCFile, body)));
+                    offset = Helper.GetDataOffset(FFCRC.GetHash(string.Format(Strings.MonsterIMCFolder, itemID, body)), FFCRC.GetHash(string.Format(Strings.MonsterIMCFile, body)), Strings.ItemsDat);
                 }
                 else if (type.Equals("food") || type.Equals("weapon"))
                 {
-                    offset = Helper.GetItemOffset(FFCRC.GetHash(string.Format(Strings.WeapIMCFolder, itemID, body)), FFCRC.GetHash(string.Format(Strings.WeapIMCFile, body)));
+                    offset = Helper.GetDataOffset(FFCRC.GetHash(string.Format(Strings.WeapIMCFolder, itemID, body)), FFCRC.GetHash(string.Format(Strings.WeapIMCFile, body)), Strings.ItemsDat);
                 }
                 else if (type.Equals("equipment"))
                 {
-                    offset = Helper.GetItemOffset(FFCRC.GetHash(string.Format(Strings.EquipIMCFolder, itemID)), FFCRC.GetHash(string.Format(Strings.EquipIMCFile, itemID)));
+                    offset = Helper.GetDataOffset(FFCRC.GetHash(string.Format(Strings.EquipIMCFolder, itemID)), FFCRC.GetHash(string.Format(Strings.EquipIMCFile, itemID)), Strings.ItemsDat);
 
                 }
                 else if (type.Equals("accessory"))
                 {
-                    offset = Helper.GetItemOffset(FFCRC.GetHash(string.Format(Strings.AccIMCFolder, itemID)), FFCRC.GetHash(string.Format(Strings.AccIMCFile, itemID)));
+                    offset = Helper.GetDataOffset(FFCRC.GetHash(string.Format(Strings.AccIMCFolder, itemID)), FFCRC.GetHash(string.Format(Strings.AccIMCFile, itemID)), Strings.ItemsDat);
                 }
                 else
                 {
-                    offset = Helper.GetItemOffset(FFCRC.GetHash("chara/" + type + "/" + type.Substring(0, 1) + itemID), FFCRC.GetHash(type.Substring(0, 1) + itemID + ".imc"));
+                    offset = Helper.GetDataOffset(FFCRC.GetHash("chara/" + type + "/" + type.Substring(0, 1) + itemID), FFCRC.GetHash(type.Substring(0, 1) + itemID + ".imc"), Strings.ItemsDat);
                 }
 
                 if (offset != 0)
@@ -110,7 +110,7 @@ namespace FFXIV_TexTools2.Material
 
             int datNum = ((offset / 8) & 0x000f) / 2;
 
-            using (BinaryReader br = new BinaryReader(new MemoryStream(Helper.GetType2DecompressedData(offset, datNum))))
+            using (BinaryReader br = new BinaryReader(new MemoryStream(Helper.GetType2DecompressedData(offset, datNum, Strings.ItemsDat))))
             {
                 if (type.Equals("weapon") || type.Equals("food") || type.Equals("monster"))
                 {

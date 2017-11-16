@@ -14,13 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using FFXIV_TexTools2.Custom.Interop;
 using FFXIV_TexTools2.Helpers;
+using FFXIV_TexTools2.Resources;
 using FFXIV_TexTools2.ViewModel;
 using FFXIV_TexTools2.Views;
 using Newtonsoft.Json;
 using System;
-using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Windows;
 
@@ -31,18 +31,17 @@ namespace FFXIV_TexTools2
     /// </summary>
     public partial class MainWindow : Window
     {
+        MainViewModel mViewModel;
+
         public MainWindow()
         {
             InitializeComponent();
-            MainViewModel mViewModel = new MainViewModel();
+            mViewModel = new MainViewModel();
             this.DataContext = mViewModel;
 
             DXVerStatus.Content = "DX Version: " + Properties.Settings.Default.DX_Ver.Substring(2);
 
             //HavokInterop.InitializeSTA();
-
-            //searchTextBox.Text = Strings.SearchBox;
-            //searchTextBox.Foreground = System.Windows.Media.Brushes.Gray;
         }
 
         private void Menu_DX9_Click(object sender, RoutedEventArgs e)
@@ -58,10 +57,10 @@ namespace FFXIV_TexTools2
 
                 DXVerStatus.Content = "DX Version: 9";
 
-                if((ItemViewModel)textureTreeView.SelectedItem != null)
+                if ((CategoryViewModel)textureTreeView.SelectedItem != null)
                 {
-                    var itemSelected = (ItemViewModel)textureTreeView.SelectedItem;
-                    ((ItemViewModel)textureTreeView.SelectedItem).IsSelected = false;
+                    var itemSelected = (CategoryViewModel)textureTreeView.SelectedItem;
+                    ((CategoryViewModel)textureTreeView.SelectedItem).IsSelected = false;
                     itemSelected.IsSelected = true;
                 }
             }
@@ -84,10 +83,10 @@ namespace FFXIV_TexTools2
 
                 DXVerStatus.Content = "DX Version: 11";
 
-                if ((ItemViewModel)textureTreeView.SelectedItem != null)
+                if ((CategoryViewModel)textureTreeView.SelectedItem != null)
                 {
-                    var itemSelected = (ItemViewModel)textureTreeView.SelectedItem;
-                    ((ItemViewModel)textureTreeView.SelectedItem).IsSelected = false;
+                    var itemSelected = (CategoryViewModel)textureTreeView.SelectedItem;
+                    ((CategoryViewModel)textureTreeView.SelectedItem).IsSelected = false;
                     itemSelected.IsSelected = true;
                 }
             }
@@ -210,29 +209,34 @@ namespace FFXIV_TexTools2
 
         private void Menu_RevertAll_Click(object sender, RoutedEventArgs e)
         {
-            JsonEntry modEntry = null;
-            string line;
-
             try
             {
-                using (StreamReader sr = new StreamReader(Info.modListDir))
-                {
-                    while ((line = sr.ReadLine()) != null)
-                    {
-                        modEntry = JsonConvert.DeserializeObject<JsonEntry>(line);
-                        if(modEntry.originalOffset != 0)
-                        {
-                            Helper.UpdateIndex(modEntry.originalOffset, modEntry.fullPath);
-                            Helper.UpdateIndex2(modEntry.originalOffset, modEntry.fullPath);
-                        }
-                    }
-                }
+                RevertAll();
             }
             catch (Exception ex)
             {
                 MessageBox.Show("[Main] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
+        }
+
+        private void RevertAll()
+        {
+            JsonEntry modEntry = null;
+            string line;
+
+            using (StreamReader sr = new StreamReader(Info.modListDir))
+            {
+                while ((line = sr.ReadLine()) != null)
+                {
+                    modEntry = JsonConvert.DeserializeObject<JsonEntry>(line);
+                    if (modEntry.originalOffset != 0)
+                    {
+                        Helper.UpdateIndex(modEntry.originalOffset, modEntry.fullPath, modEntry.datFile);
+                        Helper.UpdateIndex2(modEntry.originalOffset, modEntry.fullPath, modEntry.datFile);
+                    }
+                }
+            }
         }
 
         private void Menu_ReapplyAll_Click(object sender, RoutedEventArgs e)
@@ -248,8 +252,8 @@ namespace FFXIV_TexTools2
                         modEntry = JsonConvert.DeserializeObject<JsonEntry>(line);
                         if(modEntry.originalOffset != 0)
                         {
-                            Helper.UpdateIndex(modEntry.modOffset, modEntry.fullPath);
-                            Helper.UpdateIndex2(modEntry.modOffset, modEntry.fullPath);
+                            Helper.UpdateIndex(modEntry.modOffset, modEntry.fullPath, modEntry.datFile);
+                            Helper.UpdateIndex2(modEntry.modOffset, modEntry.fullPath, modEntry.datFile);
                         }
                     }
                 }
@@ -264,6 +268,127 @@ namespace FFXIV_TexTools2
         private void Window_Closed(object sender, EventArgs e)
         {
             App.Current.Shutdown();
+        }
+
+        private void textureTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            var item = e.NewValue as CategoryViewModel;
+            CategoryViewModel topLevel = null;
+            if(item!= null)
+            {
+                Save_All_DDS.IsEnabled = true;
+                var itemParent = item.Parent;
+
+                while (itemParent != null)
+                {
+                    topLevel = itemParent;
+                    itemParent = itemParent.Parent;
+                }
+
+                if (item.ItemData != null)
+                {
+                    if (!topLevel.Name.Equals("UI"))
+                    {
+                        mViewModel.TextureVM.UpdateTexture(item.ItemData, item.Parent.Name);
+
+                        if (item.Name.Equals(Strings.Face_Paint) || item.Name.Equals(Strings.Equipment_Decals))
+                        {
+                            tabControl.SelectedIndex = 0;
+                            if (mViewModel.ModelVM != null)
+                            {
+                                mViewModel.ModelVM.ModelTabEnabled = false;
+                            }
+                        }
+                        else
+                        {
+                            mViewModel.ModelVM.UpdateModel(item.ItemData, item.Parent.Name);
+                            mViewModel.ModelVM.ModelTabEnabled = true;
+                        }
+                    }
+                    else
+                    {
+                        tabControl.SelectedIndex = 0;
+                        mViewModel.TextureVM.UpdateTexture(item.ItemData, "UI");
+                        mViewModel.ModelVM.ModelTabEnabled = false;
+                    }
+
+                }
+
+            }
+            else
+            {
+                Save_All_DDS.IsEnabled = false;
+            }
+        }
+
+        private void Save_All_DDS_Click(object sender, RoutedEventArgs e)
+        {
+            mViewModel.TextureVM.SaveAllDDS();
+        }
+
+        private void Menu_StartOver_Click(object sender, RoutedEventArgs e)
+        {
+            if (MessageBox.Show("Starting over will:\n\n" +
+                "Restore index files to their original state.\n" +
+                "Delete all mods and create new .dat files.\n" +
+                "Delete all .modlist file entries.\n\n" +
+                "Do you want to start over?", "Start Over", MessageBoxButton.YesNo, MessageBoxImage.Information) == MessageBoxResult.Yes)
+            {
+
+                RevertAll();
+
+                string[] indexFiles = new string[]
+                {
+                    Directory.GetCurrentDirectory() + "/Index_Backups/040000.win32.index",
+                    Directory.GetCurrentDirectory() + "/Index_Backups/040000.win32.index2",
+                    Directory.GetCurrentDirectory() + "/Index_Backups/060000.win32.index",
+                    Directory.GetCurrentDirectory() + "/Index_Backups/060000.win32.index2"
+                };
+
+                foreach(var i in indexFiles)
+                {
+                    if (File.Exists(i))
+                    {
+                        File.Copy(i, Properties.Settings.Default.FFXIV_Directory + "/" + Path.GetFileName(i), true);
+                    }
+                }
+
+                foreach (var datName in Info.ModDatDict)
+                {
+                    var datPath = string.Format(Info.datDir, datName.Key, datName.Value);
+
+                    if (File.Exists(datPath))
+                    {
+                        File.Delete(datPath);
+                    }
+                }
+
+                File.Delete(Info.modListDir);
+
+                MakeModContainers();
+            }
+        }
+
+        /// <summary>
+        /// Creates files that will contain modded information
+        /// </summary>
+        private void MakeModContainers()
+        {
+            foreach (var datName in Info.ModDatDict)
+            {
+                var datPath = string.Format(Info.datDir, datName.Key, datName.Value);
+
+                if (!File.Exists(datPath))
+                {
+                    CreateDat.MakeDat();
+                    CreateDat.ChangeDatAmounts();
+                }
+            }
+
+            if (!File.Exists(Info.modListDir))
+            {
+                CreateDat.CreateModList();
+            }
         }
     }
 }

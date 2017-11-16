@@ -120,11 +120,17 @@
   <data name="Accessory" xml:space="preserve">
     <value>Accessory</value>
   </data>
+  <data name="Actions" xml:space="preserve">
+    <value>Kommandos</value>
+  </data>
   <data name="All" xml:space="preserve">
     <value>Alle</value>
   </data>
   <data name="Au_Ra" xml:space="preserve">
     <value>Au Ra</value>
+  </data>
+  <data name="Beneficial" xml:space="preserve">
+    <value>Stärkung</value>
   </data>
   <data name="Bishop_Autoturret" xml:space="preserve">
     <value>Selbstschuss-Gyrocopter LÄUFER</value>
@@ -144,6 +150,9 @@
   <data name="Body_Legs_Feet" xml:space="preserve">
     <value>Rumpf + Beine + Füße</value>
   </data>
+  <data name="Buddy" xml:space="preserve">
+    <value>Mitstreiter</value>
+  </data>
   <data name="Carbuncle" xml:space="preserve">
     <value>Karfunkel</value>
   </data>
@@ -152,6 +161,18 @@
   </data>
   <data name="ColorSet" xml:space="preserve">
     <value>ColorSet</value>
+  </data>
+  <data name="Companions" xml:space="preserve">
+    <value>Mitstreiter</value>
+  </data>
+  <data name="Company" xml:space="preserve">
+    <value>Gesellschaft</value>
+  </data>
+  <data name="Craft" xml:space="preserve">
+    <value>Synthese</value>
+  </data>
+  <data name="Detrimental" xml:space="preserve">
+    <value>Schwächung</value>
   </data>
   <data name="Diffuse" xml:space="preserve">
     <value>Diffuse</value>
@@ -162,11 +183,14 @@
   <data name="Elezen" xml:space="preserve">
     <value>Elezen</value>
   </data>
+  <data name="Emote" xml:space="preserve">
+    <value>Emotes</value>
+  </data>
   <data name="Eos" xml:space="preserve">
     <value>Eos</value>
   </data>
   <data name="Equipment_Decals" xml:space="preserve">
-    <value>Equipment Decals</value>
+    <value>Wappen</value>
   </data>
   <data name="Error_DirectoryError" xml:space="preserve">
     <value>Directory Error</value>
@@ -176,6 +200,9 @@
   </data>
   <data name="Etc" xml:space="preserve">
     <value>Etc</value>
+  </data>
+  <data name="Event" xml:space="preserve">
+    <value>Ereignis</value>
   </data>
   <data name="Face" xml:space="preserve">
     <value>Gesicht</value>
@@ -190,10 +217,16 @@
     <value>Weiblich</value>
   </data>
   <data name="Food" xml:space="preserve">
-    <value>Food</value>
+    <value>Gericht</value>
   </data>
   <data name="Garuda_Egi" xml:space="preserve">
     <value>Garuda Egi</value>
+  </data>
+  <data name="Gear" xml:space="preserve">
+    <value>Ausrüstung</value>
+  </data>
+  <data name="General" xml:space="preserve">
+    <value>Allgemein</value>
   </data>
   <data name="Hair" xml:space="preserve">
     <value>Haar</value>
@@ -219,6 +252,9 @@
   <data name="Iris" xml:space="preserve">
     <value>Iris</value>
   </data>
+  <data name="Items" xml:space="preserve">
+    <value>Gegenständen</value>
+  </data>
   <data name="Lalafell" xml:space="preserve">
     <value>Lalafell</value>
   </data>
@@ -239,6 +275,12 @@
   </data>
   <data name="Male" xml:space="preserve">
     <value>Männlich</value>
+  </data>
+  <data name="Maps" xml:space="preserve">
+    <value>Karte</value>
+  </data>
+  <data name="Marker" xml:space="preserve">
+    <value>Markierung</value>
   </data>
   <data name="Mask" xml:space="preserve">
     <value>Mask</value>
@@ -264,6 +306,9 @@
   <data name="Off_Hand" xml:space="preserve">
     <value>Nebenhand</value>
   </data>
+  <data name="Other" xml:space="preserve">
+    <value>Anderes</value>
+  </data>
   <data name="Pets" xml:space="preserve">
     <value>Familiare</value>
   </data>
@@ -287,6 +332,9 @@
   </data>
   <data name="Specular" xml:space="preserve">
     <value>Specular</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>Status</value>
   </data>
   <data name="Tail" xml:space="preserve">
     <value>Schwanz</value>

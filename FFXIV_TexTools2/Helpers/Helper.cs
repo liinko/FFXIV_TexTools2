@@ -41,7 +41,9 @@ namespace FFXIV_TexTools2.Helpers
         {
             List<byte> decompressedData = new List<byte>();
 
-            using (BinaryReader br = new BinaryReader(File.OpenRead(Info.aDatDir)))
+            var EXDDatPath = string.Format(Info.datDir, Strings.EXDDat, Info.EXDDatNum);
+
+            using (BinaryReader br = new BinaryReader(File.OpenRead(EXDDatPath)))
             {
                 br.BaseStream.Seek(offset, SeekOrigin.Begin);
 
@@ -112,7 +114,7 @@ namespace FFXIV_TexTools2.Helpers
         /// <param name="offset">Offset to the texture data.</param>
         /// <param name="datNum">The .dat number to read from.</param>
         /// <returns>The decompressed data.</returns>
-        public static byte[] GetType4DecompressedData(int offset, int datNum)
+        public static byte[] GetType4DecompressedData(int offset, int datNum, string datName)
         {
             int textureType, width, height, mipMapCount;
 
@@ -120,7 +122,9 @@ namespace FFXIV_TexTools2.Helpers
 
             offset = OffsetCorrection(datNum, offset);
 
-            using (BinaryReader br = new BinaryReader(File.OpenRead(Info.datDir + datNum)))
+            var datPath = string.Format(Info.datDir, datName, datNum);
+
+            using (BinaryReader br = new BinaryReader(File.OpenRead(datPath)))
             {
                 br.BaseStream.Seek(offset, SeekOrigin.Begin);
 
@@ -252,14 +256,16 @@ namespace FFXIV_TexTools2.Helpers
         /// <param name="offset">Offset to the type 2 data.</param>
         /// <param name="datNum">The .dat number to read from.</param>
         /// <returns>The decompressed data.</returns>
-        public static byte[] GetType2DecompressedData(int offset, int datNum)
+        public static byte[] GetType2DecompressedData(int offset, int datNum, string datName)
         {
             offset = OffsetCorrection(datNum, offset);
-            byte[] decompressedData;
 
+            var datPath = string.Format(Info.datDir, datName, datNum);
+
+            byte[] decompressedData;
             List<byte> type2Bytes = new List<byte>();
 
-            using(BinaryReader br = new BinaryReader(File.OpenRead(Info.datDir + datNum)))
+            using(BinaryReader br = new BinaryReader(File.OpenRead(datPath)))
             {
                 br.BaseStream.Seek(offset, SeekOrigin.Begin);
 
@@ -316,12 +322,15 @@ namespace FFXIV_TexTools2.Helpers
         /// <param name="offset">Offset to the type 3 data.</param>
         /// <param name="datNum">The .dat number to read from.</param>
         /// <returns></returns>
-        public static Tuple<byte[], int, int> GetType3DecompressedData(int offset, int datNum)
+        public static Tuple<byte[], int, int> GetType3DecompressedData(int offset, int datNum, string datName)
         {
+            offset = OffsetCorrection(datNum, offset);
+            var datPath = string.Format(Info.datDir, datName, datNum);
+
             List<byte> byteList = new List<byte>();
             int meshCount, materialCount;
 
-            using (BinaryReader br = new BinaryReader(File.OpenRead(Info.datDir + datNum)))
+            using (BinaryReader br = new BinaryReader(File.OpenRead(datPath)))
             {
                 br.BaseStream.Seek(offset, SeekOrigin.Begin);
 
@@ -437,13 +446,15 @@ namespace FFXIV_TexTools2.Helpers
         /// <param name="folderHash">The hash value of the internal folder path.</param>
         /// <param name="fileHash">The hash value of the internal file path.</param>
         /// <returns>The offset in which the items data is located</returns>
-        public static int GetItemOffset(int folderHash, int fileHash)
+        public static int GetDataOffset(int folderHash, int fileHash, string indexName)
         {
             int itemOffset = 0;
 
+            var indexPath = string.Format(Info.indexDir, indexName);
+
             try
             {
-                using (BinaryReader br = new BinaryReader(File.OpenRead(Info.indexDir)))
+                using (BinaryReader br = new BinaryReader(File.OpenRead(indexPath)))
                 {
                     br.BaseStream.Seek(1036, SeekOrigin.Begin);
                     int numOfFiles = br.ReadInt32();
@@ -492,9 +503,11 @@ namespace FFXIV_TexTools2.Helpers
         {
             int exdOffset = 0;
 
+            var indexPath = string.Format(Info.indexDir, Strings.EXDDat);
+
             try
             {
-                using (BinaryReader br = new BinaryReader(File.OpenRead(Info.aIndexDir)))
+                using (BinaryReader br = new BinaryReader(File.OpenRead(indexPath)))
                 {
                     br.BaseStream.Seek(1036, SeekOrigin.Begin);
                     int numOfFiles = br.ReadInt32();
@@ -534,68 +547,23 @@ namespace FFXIV_TexTools2.Helpers
             return exdOffset;
         }
 
-
-        /// <summary>
-        /// Gets the offset given only a file name hash.
-        /// </summary>
-        /// <remarks>
-        /// Not in use due to the fact that the same file name can exist in differnt folders
-        /// </remarks>
-        /// <param name="fileHash">The hash value of the internal file path.</param>
-        /// <returns>The offset in which the data is located</returns>
-        public static int GetOffset(int fileHash)
-        {
-            int fileOffset = 0;
-
-            try
-            {
-                using (BinaryReader br = new BinaryReader(File.OpenRead(Info.indexDir)))
-                {
-                    br.BaseStream.Seek(1036, SeekOrigin.Begin);
-                    int totalFiles = br.ReadInt32();
-
-                    br.BaseStream.Seek(2048, SeekOrigin.Begin);
-                    for (int i = 0; i < totalFiles; br.ReadBytes(4), i += 16)
-                    {
-                        int tempFileOffset = br.ReadInt32();
-
-                        if (tempFileOffset == fileHash)
-                        {
-                            br.ReadBytes(4);
-                            byte[] offset = br.ReadBytes(4);
-                            fileOffset = BitConverter.ToInt32(offset, 0) * 8;
-                            break;
-                        }
-                        else
-                        {
-                            br.ReadBytes(8);
-                        }
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show("[Helper] Error Accessing Index File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-
-            return fileOffset;
-        }
-
         /// <summary>
         /// Updates the .index files offset for a given item.
         /// </summary>
         /// <param name="offset">The new offset to be used.</param>
         /// <param name="fullPath">The internal path of the file whos offset is to be updated.</param>
         /// <returns>The offset which was replaced.</returns>
-        public static int UpdateIndex(long offset, string fullPath)
+        public static int UpdateIndex(long offset, string fullPath, string indexName)
         {
             var folderHash = FFCRC.GetHash(fullPath.Substring(0, fullPath.LastIndexOf("/")));
             var fileHash = FFCRC.GetHash(Path.GetFileName(fullPath));
             int oldOffset = 0;
 
+            var indexPath = string.Format(Info.indexDir, indexName);
+
             try
             {
-                using (var index = File.Open(Info.indexDir, FileMode.Open))
+                using (var index = File.Open(indexPath, FileMode.Open))
                 {
                     using (BinaryReader br = new BinaryReader(index))
                     {
@@ -648,13 +616,15 @@ namespace FFXIV_TexTools2.Helpers
         /// <param name="offset">The new offset to be used.</param>
         /// <param name="fullPath">The internal path of the file whos offset is to be updated.</param>
         /// <returns>The offset which was replaced.</returns>
-        public static void UpdateIndex2(long offset, string fullPath)
+        public static void UpdateIndex2(long offset, string fullPath, string indexName)
         {
             var pathHash = FFCRC.GetHash(fullPath);
 
+            var index2Path = string.Format(Info.index2Dir, indexName);
+
             try
             {
-                using (var index = File.Open(Info.index2Dir, FileMode.Open))
+                using (var index = File.Open(index2Path, FileMode.Open))
                 {
                     using (BinaryReader br = new BinaryReader(index))
                     {
@@ -697,11 +667,14 @@ namespace FFXIV_TexTools2.Helpers
         /// </summary>
         /// <param name="folderHash">The hash value of the internal folder path.</param>
         /// <returns></returns>
-        public static bool FolderExists(int folderHash)
+        public static bool FolderExists(int folderHash, string indexName)
         {
+
+            var indexPath = string.Format(Info.indexDir, indexName);
+
             try
             {
-                using (BinaryReader br = new BinaryReader(File.OpenRead(Info.indexDir)))
+                using (BinaryReader br = new BinaryReader(File.OpenRead(indexPath)))
                 {
                     br.BaseStream.Seek(1036, SeekOrigin.Begin);
                     int numOfFiles = br.ReadInt32();
@@ -738,11 +711,13 @@ namespace FFXIV_TexTools2.Helpers
         /// <param name="fileHash">The hash value of the internal file path.</param>
         /// <param name="folderHash">The hash value of the internal file name.</param>
         /// <returns></returns>
-        public static bool FileExists(int fileHash, int folderHash)
+        public static bool FileExists(int fileHash, int folderHash, string indexName)
         {
+            var indexPath = string.Format(Info.indexDir, indexName);
+
             try
             {
-                using (BinaryReader br = new BinaryReader(File.OpenRead(Info.indexDir)))
+                using (BinaryReader br = new BinaryReader(File.OpenRead(indexPath)))
                 {
                     br.BaseStream.Seek(1036, SeekOrigin.Begin);
                     int numOfFiles = br.ReadInt32();
@@ -785,13 +760,15 @@ namespace FFXIV_TexTools2.Helpers
         /// </summary>
         /// <param name="pathPart">A dictionary containing folder path hashes and their associated part number.</param>
         /// <returns>A sorted set of part numbers whos folder path was found.</returns>
-        public static SortedSet<ComboBoxInfo> FolderExistsList(Dictionary<int, int> pathPart)
+        public static SortedSet<ComboBoxInfo> FolderExistsList(Dictionary<int, int> pathPart, string indexName)
         {
             SortedSet<ComboBoxInfo> parts = new SortedSet<ComboBoxInfo>();
 
+            var indexPath = string.Format(Info.indexDir, indexName);
+
             try
             {
-                using (BinaryReader br = new BinaryReader(File.OpenRead(Info.indexDir)))
+                using (BinaryReader br = new BinaryReader(File.OpenRead(indexPath)))
                 {
                     br.BaseStream.Seek(1036, SeekOrigin.Begin);
                     int numOfFiles = br.ReadInt32();
@@ -823,13 +800,16 @@ namespace FFXIV_TexTools2.Helpers
         /// </summary>
         /// <param name="pathRace">A dictionary containing folder path hashes and their associated race.</param>
         /// <returns>A sorted set of races whos folder path was found.</returns>
-        public static SortedSet<ComboBoxInfo> FolderExistsListRace(Dictionary<int, string> pathRace)
+        public static SortedSet<ComboBoxInfo> FolderExistsListRace(Dictionary<int, string> pathRace, string indexName)
         {
             SortedSet<ComboBoxInfo> raceList = new SortedSet<ComboBoxInfo>();
 
+            var indexPath = string.Format(Info.indexDir, indexName);
+
+
             try
             {
-                using (BinaryReader br = new BinaryReader(File.OpenRead(Info.indexDir)))
+                using (BinaryReader br = new BinaryReader(File.OpenRead(indexPath)))
                 {
                     br.BaseStream.Seek(1036, SeekOrigin.Begin);
                     int numOfFiles = br.ReadInt32();
@@ -862,13 +842,15 @@ namespace FFXIV_TexTools2.Helpers
         /// </summary>
         /// <param name="folderHash">The hash value of the internal folder path.</param>
         /// <returns>A list of file hashes</returns>
-        public static List<int> GetAllFilesInFolder(int folderHash)
+        public static List<int> GetAllFilesInFolder(int folderHash, string indexName)
         {
             List<int> fileOffsetDict = new List<int>();
 
+            var indexPath = string.Format(Info.indexDir, indexName);
+
             try
             {
-                using (BinaryReader br = new BinaryReader(File.OpenRead(Info.indexDir)))
+                using (BinaryReader br = new BinaryReader(File.OpenRead(indexPath)))
                 {
                     br.BaseStream.Seek(1036, SeekOrigin.Begin);
                     int totalFiles = br.ReadInt32();
@@ -907,42 +889,48 @@ namespace FFXIV_TexTools2.Helpers
         {
             bool problemFound = false;
 
-            try
+            foreach(var indexFile in Info.ModIndexDict)
             {
-                using (BinaryReader br = new BinaryReader(File.OpenRead(Info.indexDir)))
+                var indexPath = string.Format(Info.indexDir, indexFile.Key);
+                var index2Path = string.Format(Info.index2Dir, indexFile.Key);
+
+                try
                 {
-                    br.BaseStream.Seek(1104, SeekOrigin.Begin);
-
-                    var numDats = br.ReadInt16();
-
-                    if (numDats != 5)
+                    using (BinaryReader br = new BinaryReader(File.OpenRead(indexPath)))
                     {
-                        problemFound = true;
+                        br.BaseStream.Seek(1104, SeekOrigin.Begin);
+
+                        var numDats = br.ReadInt16();
+
+                        if (numDats != indexFile.Value)
+                        {
+                            problemFound = true;
+                        }
                     }
                 }
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show("[Helper] Error Accessing Index File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-
-            try
-            {
-                using (BinaryReader br = new BinaryReader(File.OpenRead(Info.index2Dir)))
+                catch (Exception e)
                 {
-                    br.BaseStream.Seek(1104, SeekOrigin.Begin);
+                    MessageBox.Show("[Helper] Error Accessing Index File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
 
-                    var numDats = br.ReadInt16();
-
-                    if (numDats != 5)
+                try
+                {
+                    using (BinaryReader br = new BinaryReader(File.OpenRead(index2Path)))
                     {
-                        problemFound = true;
+                        br.BaseStream.Seek(1104, SeekOrigin.Begin);
+
+                        var numDats = br.ReadInt16();
+
+                        if (numDats != indexFile.Value)
+                        {
+                            problemFound = true;
+                        }
                     }
                 }
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show("[Helper] Error Accessing Index 2 File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                catch (Exception e)
+                {
+                    MessageBox.Show("[Helper] Error Accessing Index 2 File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
 
             return problemFound;
@@ -953,32 +941,37 @@ namespace FFXIV_TexTools2.Helpers
         /// </summary>
         public static void FixIndex()
         {
-            try
+            foreach (var indexFile in Info.ModIndexDict)
             {
-                using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(Info.indexDir)))
+                var indexPath = string.Format(Info.indexDir, indexFile.Key);
+                var index2Path = string.Format(Info.index2Dir, indexFile.Key);
+
+                try
                 {
-                    bw.BaseStream.Seek(1104, SeekOrigin.Begin);
-                    bw.Write((byte)5);
+                    using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(indexPath)))
+                    {
+                        bw.BaseStream.Seek(1104, SeekOrigin.Begin);
+                        bw.Write((byte)indexFile.Value);
+                    }
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show("[Helper] Error Accessing Index File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+
+                try
+                {
+                    using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(index2Path)))
+                    {
+                        bw.BaseStream.Seek(1104, SeekOrigin.Begin);
+                        bw.Write((byte)indexFile.Value);
+                    }
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show("[Helper] Error Accessing Index File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
-            catch (Exception e)
-            {
-                MessageBox.Show("[Helper] Error Accessing Index File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-
-            try
-            {
-                using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(Info.index2Dir)))
-                {
-                    bw.BaseStream.Seek(1104, SeekOrigin.Begin);
-                    bw.Write((byte)5);
-                }
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show("[Helper] Error Accessing Index File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-
         }
         #endregion IO
 

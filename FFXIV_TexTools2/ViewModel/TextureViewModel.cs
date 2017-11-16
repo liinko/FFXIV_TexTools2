@@ -43,7 +43,7 @@ namespace FFXIV_TexTools2.ViewModel
         TEXData texData;
         MTRLData mtrlData;
         ColorChannels imageEffect;
-        ColorChannels CC = new ColorChannels();
+        Bitmap saveClone;
 
         string activeToggle = "Enable/Disable";
         string selectedCategory, imcVersion, fullPath, textureType, textureDimensions, fullPathString, VFXVersion;
@@ -51,7 +51,7 @@ namespace FFXIV_TexTools2.ViewModel
         int raceIndex, mapIndex, typeIndex, partIndex, currMap;
 
         bool redChecked = true, greenChecked = true, blueChecked = true;
-        bool alphaChecked, raceEnabled, mapEnabled, typeEnabled, partEnabled, importEnabled, activeEnabled, saveEnabled;
+        bool alphaChecked, raceEnabled, mapEnabled, typeEnabled, partEnabled, importEnabled, activeEnabled, saveEnabled, channelsEnabled;
 
 
         private ObservableCollection<ComboBoxInfo> raceComboInfo = new ObservableCollection<ComboBoxInfo>();
@@ -75,10 +75,11 @@ namespace FFXIV_TexTools2.ViewModel
         public ColorChannels ImageEffect { get { return imageEffect; } set { imageEffect = value; NotifyPropertyChanged("ImageEffect"); } }
         public BitmapSource ImageSource { get { return imageSource; } set { imageSource = value; NotifyPropertyChanged("ImageSource"); } }
 
-        public bool RedChecked { get { return redChecked; } set { redChecked = value; NotifyPropertyChanged("RedChecked"); SetColorChannelFilter(); } }
-        public bool GreenChecked { get { return greenChecked; } set { greenChecked = value; NotifyPropertyChanged("GreenChecked"); SetColorChannelFilter(); } }
-        public bool BlueChecked { get { return blueChecked; } set { blueChecked = value; NotifyPropertyChanged("BlueChecked"); SetColorChannelFilter(); } }
-        public bool AlphaChecked { get { return alphaChecked; } set { alphaChecked = value; NotifyPropertyChanged("AlphaChecked"); SetColorChannelFilter(); } }
+        public bool ChannelsEnabled { get { return channelsEnabled; } set { channelsEnabled = value; NotifyPropertyChanged("ChannelsEnabled"); } }
+        public bool RedChecked { get { return redChecked; } set { redChecked = value; NotifyPropertyChanged("RedChecked"); SetColorChannelFilter(imageEffect); } }
+        public bool GreenChecked { get { return greenChecked; } set { greenChecked = value; NotifyPropertyChanged("GreenChecked"); SetColorChannelFilter(imageEffect); } }
+        public bool BlueChecked { get { return blueChecked; } set { blueChecked = value; NotifyPropertyChanged("BlueChecked"); SetColorChannelFilter(imageEffect); } }
+        public bool AlphaChecked { get { return alphaChecked; } set { alphaChecked = value; NotifyPropertyChanged("AlphaChecked"); SetColorChannelFilter(imageEffect); } }
 
         public bool RaceEnabled { get { return raceEnabled; } set { raceEnabled = value;NotifyPropertyChanged("RaceEnabled"); } }
         public bool MapEnabled { get { return mapEnabled; } set { mapEnabled = value; NotifyPropertyChanged("MapEnabled"); } }
@@ -101,12 +102,20 @@ namespace FFXIV_TexTools2.ViewModel
             selectedItem = item;
             selectedCategory = category;
 
-            var imcData = IMC.GetVersion(selectedCategory, selectedItem, false);
+            if (!category.Equals("UI"))
+            {
+                var imcData = IMC.GetVersion(selectedCategory, selectedItem, false);
 
-            imcVersion = imcData.Item1;
-            VFXVersion = imcData.Item2;
+                imcVersion = imcData.Item1;
+                VFXVersion = imcData.Item2;
 
-            RaceComboBox = MTRL.GetMTRLRaces(selectedItem, selectedCategory, imcVersion);
+                RaceComboBox = MTRL.GetMTRLRaces(selectedItem, selectedCategory, imcVersion);
+            }
+            else
+            {
+                RaceComboBox = new ObservableCollection<ComboBoxInfo>() { new ComboBoxInfo() { Name = "-", ID = "-", IsNum = false } };
+            }
+
 
             if (RaceComboBox.Count > 1)
             {
@@ -193,7 +202,7 @@ namespace FFXIV_TexTools2.ViewModel
         /// <param name="obj"></param>
         private void SaveDDS(object obj)
         {
-            SaveTex.SaveDDS(selectedCategory, selectedItem.ItemName, fullPath, SelectedMap.Name, mtrlData, texData);
+            SaveTex.SaveDDS(selectedCategory, selectedItem.ItemName, fullPath, SelectedMap.Name, mtrlData, texData, selectedItem.ItemCategory);
             ImportEnabled = true;
         }
 
@@ -203,9 +212,142 @@ namespace FFXIV_TexTools2.ViewModel
         /// <param name="obj"></param>
         public void SavePNG(object obj)
         {
-            SaveTex.SaveImage(selectedCategory, selectedItem.ItemName, fullPath, ImageSource);
+            SaveTex.SaveImage(selectedCategory, selectedItem.ItemName, fullPath, ImageSource, saveClone, SelectedMap.Name, selectedItem.ItemCategory);
         }
 
+        public void SaveAllDDS()
+        {
+            foreach(var m in MapComboBox)
+            {
+                int offset = 0;
+
+                if (m.Name.Equals(Strings.Normal))
+                {
+                    fullPath = mtrlData.NormalPath;
+                    offset = mtrlData.NormalOffset;
+                }
+                else if (m.Name.Equals(Strings.Specular))
+                {
+                    fullPath = mtrlData.SpecularPath;
+                    offset = mtrlData.SpecularOffset;
+                }
+                else if (m.Name.Equals(Strings.Diffuse))
+                {
+                    fullPath = mtrlData.DiffusePath;
+                    offset = mtrlData.DiffuseOffset;
+                }
+                else if (m.Name.Equals(Strings.Mask) || m.Name.Equals(Strings.Skin))
+                {
+                    if (selectedItem.ItemName.Equals(Strings.Face_Paint) || selectedItem.ItemName.Equals(Strings.Equipment_Decals))
+                    {
+                        string part;
+                        if (selectedItem.ItemName.Equals(Strings.Equipment_Decals))
+                        {
+                            if (!SelectedPart.Name.Contains("stigma"))
+                            {
+                                part = selectedPart.Name.PadLeft(3, '0');
+                            }
+                            else
+                            {
+                                part = SelectedPart.Name;
+                            }
+                        }
+                        else
+                        {
+                            part = selectedPart.Name;
+                        }
+
+                        fullPath = String.Format(mtrlData.MaskPath, part);
+                        offset = MTRL.GetDecalOffset(selectedItem.ItemName, selectedPart.Name);
+                    }
+                    else
+                    {
+                        fullPath = mtrlData.MaskPath;
+                        offset = mtrlData.MaskOffset;
+                    }
+                }
+                else if (m.Name.Equals(Strings.ColorSet))
+                {
+                    fullPath = mtrlData.MTRLPath;
+                }
+                else if (m.Name.Contains("Icon"))
+                {
+                    if (m.Name.Contains("HQ"))
+                    {
+                        fullPath = mtrlData.UIHQPath;
+                        offset = mtrlData.UIHQOffset;
+                    }
+                    else
+                    {
+                        fullPath = mtrlData.UIPath;
+                        offset = mtrlData.UIOffset;
+                    }
+                }
+                else if (selectedItem.ItemCategory.Equals(Strings.Maps))
+                {
+                    if (selectedMap.Name.Contains("HighRes Map"))
+                    {
+                        fullPath = string.Format(mtrlData.UIPath, "_m");
+                        offset = mtrlData.UIOffset = int.Parse(selectedMap.ID);
+                    }
+                    else if (selectedMap.Name.Contains("LowRes Map"))
+                    {
+                        fullPath = string.Format(mtrlData.UIPath, "_s");
+                        offset = mtrlData.UIOffset = int.Parse(selectedMap.ID);
+                    }
+                    else if (selectedMap.Name.Contains("PoI"))
+                    {
+                        fullPath = string.Format(mtrlData.UIPath, "d");
+                        offset = mtrlData.UIOffset = int.Parse(selectedMap.ID);
+                    }
+                    else if (selectedMap.Name.Contains("HighRes Mask"))
+                    {
+                        fullPath = string.Format(mtrlData.UIPath, "m_m");
+                        offset = mtrlData.UIOffset = int.Parse(selectedMap.ID);
+                    }
+                    else if (selectedMap.Name.Contains("LowRes Mask"))
+                    {
+                        fullPath = string.Format(mtrlData.UIPath, "m_s");
+                        offset = mtrlData.UIOffset = int.Parse(selectedMap.ID);
+                    }
+                }
+                else if (selectedItem.ItemCategory.Equals("HUD"))
+                {
+                    fullPath = mtrlData.UIPath;
+                    offset = mtrlData.UIOffset;
+                }
+                else
+                {
+                    fullPath = SelectedMap.ID;
+                    var VFXFolder = fullPath.Substring(0, fullPath.LastIndexOf("/"));
+                    var VFXFile = fullPath.Substring(fullPath.LastIndexOf("/") + 1);
+
+                    offset = Helper.GetDataOffset(FFCRC.GetHash(VFXFolder), FFCRC.GetHash(VFXFile), Strings.ItemsDat);
+                }
+
+                if(offset != 0)
+                {
+                    if (m.ID.Contains("vfx"))
+                    {
+                        texData = TEX.GetVFX(offset, Strings.ItemsDat);
+                    }
+                    else
+                    {
+                        if (m.Name.Contains("Icon"))
+                        {
+                            texData = TEX.GetTex(offset, Strings.UIDat);
+                        }
+                        else
+                        {
+                            texData = TEX.GetTex(offset, Strings.ItemsDat);
+                        }
+                    }
+                }
+
+
+                SaveTex.SaveDDS(selectedCategory, selectedItem.ItemName, fullPath, m.Name, mtrlData, texData, selectedItem.ItemCategory);
+            }
+        }
 
 
         /// <summary>
@@ -260,6 +402,17 @@ namespace FFXIV_TexTools2.ViewModel
                     {
                         mtrlData.MaskOffset = newOffset;
                     }
+                    else if (SelectedMap.Name.Contains("Icon"))
+                    {
+                        if (SelectedMap.Name.Contains("HQ"))
+                        {
+                            mtrlData.UIHQOffset = newOffset;
+                        }
+                        else
+                        {
+                            mtrlData.UIOffset = newOffset;
+                        }
+                    }
                 }
             }
         }
@@ -299,15 +452,15 @@ namespace FFXIV_TexTools2.ViewModel
                 if (ActiveToggle.Equals("Enable"))
                 {
                     offset = modEntry.modOffset;
-                    Helper.UpdateIndex(offset, fullPath);
-                    Helper.UpdateIndex2(offset, fullPath);
+                    Helper.UpdateIndex(offset, fullPath, modEntry.datFile);
+                    Helper.UpdateIndex2(offset, fullPath, modEntry.datFile);
                     ActiveToggle = "Disable";
                 }
                 else if (ActiveToggle.Equals("Disable"))
                 {
                     offset = modEntry.originalOffset;
-                    Helper.UpdateIndex(offset, fullPath);
-                    Helper.UpdateIndex2(offset, fullPath);
+                    Helper.UpdateIndex(offset, fullPath, modEntry.datFile);
+                    Helper.UpdateIndex2(offset, fullPath, modEntry.datFile);
                     ActiveToggle = "Enable";
                 }
 
@@ -377,9 +530,17 @@ namespace FFXIV_TexTools2.ViewModel
         /// </summary>
         private void RaceComboBoxChanged()
         {
-            PartComboBox = MTRL.GetMTRLParts(selectedItem, SelectedRace.ID, imcVersion, selectedCategory);
+            if(selectedCategory != "UI")
+            {
+                PartComboBox = MTRL.GetMTRLParts(selectedItem, SelectedRace.ID, imcVersion, selectedCategory);
+            }
+            else
+            {
+                PartComboBox = new ObservableCollection<ComboBoxInfo>() { new ComboBoxInfo() { Name = "-", ID = "-", IsNum = false } };
 
-            if(PartComboBox.Count > 1)
+            }
+
+            if (PartComboBox.Count > 1)
             {
                 PartEnabled = true;
             }
@@ -423,34 +584,66 @@ namespace FFXIV_TexTools2.ViewModel
         /// </summary>
         private void PartComboBoxChanged()
         {
-            var info = MTRL.GetMTRLData(selectedItem, selectedRace.ID, selectedCategory, selectedPart.Name, imcVersion, "", "", VFXVersion);
-            mtrlData = info.Item1;
-
-            if (selectedItem.ItemName.Equals(Strings.Face) || selectedItem.ItemName.Equals(Strings.Hair))
+            if (selectedCategory != "UI")
             {
-                TypeComboBox = info.Item2;
-                TypeIndex = 0;
-            }
-            else if (selectedCategory.Equals(Strings.Mounts))
-            {
-                bool isDemiHuman = selectedItem.PrimaryMTRLFolder.Contains("demihuman");
+                var info = MTRL.GetMTRLData(selectedItem, selectedRace.ID, selectedCategory, selectedPart.Name, imcVersion, "", "", VFXVersion);
+                mtrlData = info.Item1;
 
-                if (isDemiHuman)
+                if (selectedItem.ItemName.Equals(Strings.Face) || selectedItem.ItemName.Equals(Strings.Hair))
                 {
                     TypeComboBox = info.Item2;
                     TypeIndex = 0;
                 }
+                else if (selectedCategory.Equals(Strings.Mounts))
+                {
+                    bool isDemiHuman = selectedItem.PrimaryMTRLFolder.Contains("demihuman");
+
+                    if (isDemiHuman)
+                    {
+                        TypeComboBox = info.Item2;
+                        TypeIndex = 0;
+                    }
+                    else
+                    {
+                        MapComboBox = info.Item2;
+                        if(MapComboBox.Count < (currMap + 1))
+                        {
+                            MapIndex = 0;
+                        }
+                        else
+                        {
+                            MapIndex = currMap;
+                        }
+                    }
+                }
                 else
                 {
                     MapComboBox = info.Item2;
-                    MapIndex = currMap;
+                    if (MapComboBox.Count < (currMap + 1))
+                    {
+                        MapIndex = 0;
+                    }
+                    else
+                    {
+                        MapIndex = currMap;
+                    }
                 }
             }
             else
             {
+                var info = MTRL.GetUIData(selectedItem);
+                mtrlData = info.Item1;
                 MapComboBox = info.Item2;
-                MapIndex = currMap;
+                if (MapComboBox.Count < (currMap + 1))
+                {
+                    MapIndex = 0;
+                }
+                else
+                {
+                    MapIndex = currMap;
+                }
             }
+
 
             if (TypeComboBox.Count > 1)
             {
@@ -523,7 +716,7 @@ namespace FFXIV_TexTools2.ViewModel
                 type = selectedType.Name;
             }
 
-            var info = MTRL.GetMTRLDatafromType(selectedItem, selectedRace, selectedPart.Name, type, imcVersion, selectedCategory);
+            var info = MTRL.GetMTRLDatafromType(selectedItem, selectedRace, selectedPart.Name, type, imcVersion, selectedCategory, "a");
             mtrlData = info.Item1;
 
             MapComboBox = info.Item2;
@@ -537,7 +730,7 @@ namespace FFXIV_TexTools2.ViewModel
                 MapEnabled = false;
             }
 
-            if (MapComboBox.Count >= (currMap + 1))
+            if (MapComboBox.Count < (currMap + 1))
             {
                 MapIndex = currMap;
             }
@@ -580,27 +773,34 @@ namespace FFXIV_TexTools2.ViewModel
         /// </summary>
         private void MapComboBoxChanged()
         {
+            if(saveClone != null)
+            {
+                //saveClone.UnlockBits(cloneLock);
+                saveClone.Dispose();
+            }
+
             Bitmap colorBmp = null;
             int offset = 0;
             bool isVFX = false;
+            bool isUI = false;
 
             if (selectedMap.Name.Equals(Strings.Normal))
             {
                 fullPath = mtrlData.NormalPath;
                 offset = mtrlData.NormalOffset;
-                FullPathString = fullPath + " [" + FFCRC.GetHash(fullPath) + "]";
+                FullPathString = fullPath;
             }
             else if (selectedMap.Name.Equals(Strings.Specular))
             {
                 fullPath = mtrlData.SpecularPath;
                 offset = mtrlData.SpecularOffset;
-                FullPathString = fullPath + " [" + FFCRC.GetHash(fullPath) + "]";
+                FullPathString = fullPath;
             }
             else if (selectedMap.Name.Equals(Strings.Diffuse))
             {
                 fullPath = mtrlData.DiffusePath;
                 offset = mtrlData.DiffuseOffset;
-                FullPathString = fullPath + " [" + FFCRC.GetHash(fullPath) + "]";
+                FullPathString = fullPath;
             }
             else if (selectedMap.Name.Equals(Strings.Mask) || selectedMap.Name.Equals(Strings.Skin))
             {
@@ -625,20 +825,72 @@ namespace FFXIV_TexTools2.ViewModel
 
                     fullPath = String.Format(mtrlData.MaskPath, part);
                     offset = MTRL.GetDecalOffset(selectedItem.ItemName, selectedPart.Name);
-                    FullPathString = fullPath + " [" + FFCRC.GetHash(fullPath) + "]";
                 }
                 else
                 {
                     fullPath = mtrlData.MaskPath;
                     offset = mtrlData.MaskOffset;
-                    FullPathString = fullPath + " [" + FFCRC.GetHash(fullPath) + "]";
                 }
+                FullPathString = fullPath;
             }
             else if (selectedMap.Name.Equals(Strings.ColorSet))
             {
                 colorBmp = TEX.TextureToBitmap(mtrlData.ColorData, 9312, 4, 16);
                 fullPath = mtrlData.MTRLPath;
-                FullPathString = fullPath + " [" + FFCRC.GetHash(fullPath) + "]";
+                FullPathString = fullPath;
+            }
+            else if (SelectedMap.Name.Contains("Icon"))
+            {
+                if (SelectedMap.Name.Contains("HQ"))
+                {
+                    fullPath = mtrlData.UIHQPath;
+                    offset = mtrlData.UIHQOffset;
+                }
+                else
+                {
+                    fullPath = mtrlData.UIPath;
+                    offset = mtrlData.UIOffset;
+                }
+                FullPathString = fullPath;
+                isUI = true;
+            }
+            else if (selectedItem.ItemCategory.Equals(Strings.Maps))
+            {
+                if(selectedMap.Name.Contains("HighRes Map"))
+                {
+                    fullPath = string.Format(mtrlData.UIPath, "_m");
+                    offset = mtrlData.UIOffset = int.Parse(selectedMap.ID);
+                }
+                else if (selectedMap.Name.Contains("LowRes Map"))
+                {
+                    fullPath = string.Format(mtrlData.UIPath, "_s");
+                    offset = mtrlData.UIOffset = int.Parse(selectedMap.ID);
+                }
+                else if (selectedMap.Name.Contains("PoI"))
+                {
+                    fullPath = string.Format(mtrlData.UIPath, "d");
+                    offset = mtrlData.UIOffset = int.Parse(selectedMap.ID);
+                }
+                else if (selectedMap.Name.Contains("HighRes Mask"))
+                {
+                    fullPath = string.Format(mtrlData.UIPath, "m_m");
+                    offset = mtrlData.UIOffset = int.Parse(selectedMap.ID);
+                }
+                else if (selectedMap.Name.Contains("LowRes Mask"))
+                {
+                    fullPath = string.Format(mtrlData.UIPath, "m_s");
+                    offset = mtrlData.UIOffset = int.Parse(selectedMap.ID);
+                }
+                FullPathString = fullPath;
+                isUI = true;
+            }
+            else if (selectedItem.ItemCategory.Equals("HUD") || selectedItem.ItemCategory.Equals("LoadingImage"))
+            {
+                fullPath = mtrlData.UIPath;
+                offset = mtrlData.UIOffset;
+                FullPathString = fullPath;
+
+                isUI = true;
             }
             else
             {
@@ -646,62 +898,54 @@ namespace FFXIV_TexTools2.ViewModel
                 var VFXFolder = fullPath.Substring(0, fullPath.LastIndexOf("/"));
                 var VFXFile = fullPath.Substring(fullPath.LastIndexOf("/") + 1);
 
-                offset = Helper.GetItemOffset(FFCRC.GetHash(VFXFolder), FFCRC.GetHash(VFXFile));
+                offset = Helper.GetDataOffset(FFCRC.GetHash(VFXFolder), FFCRC.GetHash(VFXFile), Strings.ItemsDat);
 
                 FullPathString = fullPath;
 
                 isVFX = true;
             }
 
-            if (Properties.Settings.Default.Mod_List == 0)
+            string line;
+            JsonEntry modEntry = null;
+            bool inModList = false;
+            try
             {
-                string line;
-                JsonEntry modEntry = null;
-                bool inModList = false;
-                try
+                using (StreamReader sr = new StreamReader(Info.modListDir))
                 {
-                    using (StreamReader sr = new StreamReader(Info.modListDir))
+                    while ((line = sr.ReadLine()) != null)
                     {
-                        while ((line = sr.ReadLine()) != null)
+                        modEntry = JsonConvert.DeserializeObject<JsonEntry>(line);
+                        if (modEntry.fullPath.Equals(fullPath))
                         {
-                            modEntry = JsonConvert.DeserializeObject<JsonEntry>(line);
-                            if (modEntry.fullPath.Equals(fullPath))
-                            {
-                                inModList = true;
-                                break;
-                            }
+                            inModList = true;
+                            break;
                         }
                     }
                 }
-                catch (Exception ex)
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("[Main] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+            if (inModList)
+            {
+                var currOffset = Helper.GetDataOffset(FFCRC.GetHash(modEntry.fullPath.Substring(0, modEntry.fullPath.LastIndexOf("/"))), FFCRC.GetHash(Path.GetFileName(modEntry.fullPath)), modEntry.datFile);
+
+                if (currOffset == modEntry.modOffset)
                 {
-                    MessageBox.Show("[Main] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    ActiveToggle = "Disable";
                 }
-
-                if (inModList)
+                else if (currOffset == modEntry.originalOffset)
                 {
-                    var currOffset = Helper.GetItemOffset(FFCRC.GetHash(modEntry.fullPath.Substring(0, modEntry.fullPath.LastIndexOf("/"))), FFCRC.GetHash(Path.GetFileName(modEntry.fullPath)));
-
-                    if (currOffset == modEntry.modOffset)
-                    {
-                        ActiveToggle = "Disable";
-                    }
-                    else if (currOffset == modEntry.originalOffset)
-                    {
-                        ActiveToggle = "Enable";
-                    }
-                    else
-                    {
-                        ActiveToggle = "Error";
-                    }
-
-                    ActiveEnabled = true;
+                    ActiveToggle = "Enable";
                 }
                 else
                 {
-                    ActiveEnabled = false;
-                    ActiveToggle = "Enable/Disable";
+                    ActiveToggle = "Error";
                 }
+
+                ActiveEnabled = true;
             }
             else
             {
@@ -719,10 +963,12 @@ namespace FFXIV_TexTools2.ViewModel
 
 
                 alphaBitmap = Imaging.CreateBitmapSourceFromHBitmap(colorBmp.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                alphaBitmap.Freeze();
 
                 var removeAlphaBitmap = SetAlpha(colorBmp, 255);
 
                 noAlphaBitmap = Imaging.CreateBitmapSourceFromHBitmap(removeAlphaBitmap.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                noAlphaBitmap.Freeze();
 
                 colorBmp.Dispose();
                 removeAlphaBitmap.Dispose();
@@ -731,42 +977,71 @@ namespace FFXIV_TexTools2.ViewModel
             {
                 if (!isVFX)
                 {
-                    texData = TEX.GetTex(offset);
+                    if (!isUI)
+                    {
+                        texData = TEX.GetTex(offset, Strings.ItemsDat);
+                    }
+                    else
+                    {
+                        texData = TEX.GetTex(offset, Strings.UIDat);
+                    }
                 }
                 else
                 {
-                    texData = TEX.GetVFX(offset);
+                    texData = TEX.GetVFX(offset, Strings.ItemsDat);
                 }
 
                 TextureType = texData.TypeString;
 
                 TextureDimensions = "(" + texData.Width + " x " + texData.Height + ")";
 
+                var clonerect = new Rectangle(0, 0, texData.Width, texData.Height);
+                saveClone = texData.BMP.Clone(new Rectangle(0, 0, texData.Width, texData.Height), PixelFormat.Format32bppArgb);
+
                 alphaBitmap = Imaging.CreateBitmapSourceFromHBitmap(texData.BMP.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                alphaBitmap.Freeze();
 
-                var removeAlphaBitmap = SetAlpha(texData.BMP, 255);
-
-                noAlphaBitmap = Imaging.CreateBitmapSourceFromHBitmap(removeAlphaBitmap.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-
-                removeAlphaBitmap.Dispose();
-
-            }
-
-            try
-            {
-                ImageEffect = new ColorChannels()
+                if (!isUI)
                 {
-                    Channel = new System.Windows.Media.Media3D.Point4D(1.0f, 1.0f, 1.0f, 0.0f)
-                };
+                    var removeAlphaBitmap = SetAlpha(texData.BMP, 255);
+
+                    noAlphaBitmap = Imaging.CreateBitmapSourceFromHBitmap(removeAlphaBitmap.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                    noAlphaBitmap.Freeze();
+
+                    removeAlphaBitmap.Dispose();
+                }
             }
-            catch (Exception ex)
+
+            if (!isUI)
             {
-                Debug.WriteLine(ex.StackTrace);
+                try
+                {
+                    ImageEffect = new ColorChannels()
+                    {
+                        Channel = new System.Windows.Media.Media3D.Point4D(1.0f, 1.0f, 1.0f, 0.0f)
+                    };
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex.StackTrace);
+                }
+
+                ImageSource = noAlphaBitmap;
+
+                SetColorChannelFilter(imageEffect);
+
+                ChannelsEnabled = true;
             }
+            else
+            {
+                if(ImageEffect != null)
+                {
+                    ImageEffect = null;
+                }
+                ImageSource = alphaBitmap;
 
-            ImageSource = noAlphaBitmap;
-
-            SetColorChannelFilter();
+                ChannelsEnabled = false;
+            }
 
             SaveEnabled = true;
 
@@ -834,10 +1109,12 @@ namespace FFXIV_TexTools2.ViewModel
                 TextureDimensions = "(4 x 16)";
 
                 alphaBitmap = Imaging.CreateBitmapSourceFromHBitmap(colorBMP.Item1.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                alphaBitmap.Freeze();
 
                 var removeAlphaBitmap = SetAlpha(colorBMP.Item1, 255);
 
                 noAlphaBitmap = Imaging.CreateBitmapSourceFromHBitmap(removeAlphaBitmap.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                noAlphaBitmap.Freeze();
 
                 mtrlData.ColorData = colorBMP.Item2;
 
@@ -848,11 +1125,18 @@ namespace FFXIV_TexTools2.ViewModel
             {
                 if (SelectedMap.ID.Contains("vfx"))
                 {
-                    texData = TEX.GetVFX(offset);
+                    texData = TEX.GetVFX(offset, Strings.ItemsDat);
                 }
                 else
                 {
-                    texData = TEX.GetTex(offset);
+                    if (selectedMap.Name.Contains("Icon"))
+                    {
+                        texData = TEX.GetTex(offset, Strings.UIDat);
+                    }
+                    else
+                    {
+                        texData = TEX.GetTex(offset, Strings.ItemsDat);
+                    }              
                 }
 
                 TextureType = texData.TypeString;
@@ -882,7 +1166,7 @@ namespace FFXIV_TexTools2.ViewModel
         /// <summary>
         /// Sets the color channel filter on currently displayed image based on selected color checkboxes.
         /// </summary>
-        private void SetColorChannelFilter()
+        private void SetColorChannelFilter(ColorChannels CC)
         {
             float r = RedChecked == true ? 1.0f : 0.0f;
             float g = GreenChecked == true ? 1.0f : 0.0f;

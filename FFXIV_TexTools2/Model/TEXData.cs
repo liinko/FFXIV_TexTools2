@@ -56,6 +56,11 @@ namespace FFXIV_TexTools2.Model
         public Bitmap BMP { get; set; }
 
         /// <summary>
+        /// The texture dat name
+        /// </summary>
+        public string TEXDatName { get; set; }
+
+        /// <summary>
         /// Disposes of the texture bitmap
         /// </summary>
         public virtual void Dispose()
