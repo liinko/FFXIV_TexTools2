@@ -205,71 +205,6 @@ namespace FFXIV_TexTools2.IO
                 }
             }
 
-
-            //var nMeshDataList = new List<ModelMeshData>();
-
-
-            //foreach(var m in meshList)
-            //{
-            //    var nVertex = new Vector3Collection();
-            //    var nNormal = new Vector3Collection();
-            //    var nTangent = new Vector3Collection();
-            //    var nBiTangent = new Vector3Collection();
-            //    var nTexCoord = new Vector2Collection();
-            //    var nIndex = new IntCollection();
-            //    var nBlendIndex = new List<int>();
-            //    var nBlendWeights = new List<float>();
-            //    var nWeightCounts = new List<int>();
-
-            //    foreach (var i in m.Indices)
-            //    {
-            //        nVertex.Add(m.Vertices[i]);
-            //        nNormal.Add(m.Normals[i]);
-            //        nTangent.Add(m.Tangents[i]);
-            //        nBiTangent.Add(m.BiTangents[i]);
-            //        nTexCoord.Add(m.TextureCoordinates[i]);
-            //        nWeightCounts.Add(m.WeightCounts[i]);
-
-            //        foreach(var bi in m.BlendIndicesArrayList[i])
-            //        {
-            //            nBlendIndex.Add(bi);
-            //        }
-
-            //        foreach(var bw in m.BlendWeightsArrayList[i])
-            //        {
-            //            nBlendWeights.Add(bw);
-            //        }
-            //    }
-
-            //    for (int i = 0; i < nVertex.Count; i++)
-            //    {
-            //        nIndex.Add(i);
-            //    }
-
-            //    var mmd = new ModelMeshData()
-            //    {
-            //        Vertices = nVertex,
-            //        Normals = nNormal,
-            //        Tangents = nTangent,
-            //        BiTangents = nBiTangent,
-            //        TextureCoordinates = nTexCoord,
-            //        Indices = nIndex,
-            //        MeshPartList = m.MeshPartList,
-            //        BlendIndices = nBlendIndex,
-            //        BlendWeights = nBlendWeights,
-            //        WeightCounts = nWeightCounts,
-            //        BoneIndices = m.BoneIndices,
-            //        BoneStrings = m.BoneStrings,
-            //        BoneTransforms = m.BoneTransforms,
-            //        VertexColors = m.VertexColors,
-            //        OBJFileData = m.OBJFileData
-                    
-            //    };
-
-            //    nMeshDataList.Add(mmd);
-            //}
-
-
             XmlWriterSettings xmlWriterSettings = new XmlWriterSettings()
             {
                 Indent = true,
@@ -357,7 +292,7 @@ namespace FFXIV_TexTools2.IO
 
             //<up_axis>
             xmlWriter.WriteStartElement("up_axis");
-            xmlWriter.WriteString("Z_UP");
+            xmlWriter.WriteString("Y_UP");
             xmlWriter.WriteEndElement();
             //</up_axis>
 
@@ -856,7 +791,7 @@ namespace FFXIV_TexTools2.IO
 
                         foreach (var v in positions)
                         {
-                            xmlWriter.WriteString((v.X * Info.modelMultiplier).ToString("N8") + " " + (v.Y * Info.modelMultiplier).ToString("N8") + " " + (v.Z * Info.modelMultiplier).ToString("N8") + " ");
+                            xmlWriter.WriteString((v.X * Info.modelMultiplier).ToString() + " " + (v.Y * Info.modelMultiplier).ToString() + " " + (v.Z * Info.modelMultiplier).ToString() + " ");
                         }
 
                         xmlWriter.WriteEndElement();
@@ -916,7 +851,7 @@ namespace FFXIV_TexTools2.IO
 
                         foreach (var n in normals)
                         {
-                            xmlWriter.WriteString(n.X.ToString("N8") + " " + n.Y.ToString("N8") + " " + n.Z.ToString("N8") + " ");
+                            xmlWriter.WriteString(n.X.ToString() + " " + n.Y.ToString() + " " + n.Z.ToString() + " ");
                         }
 
                         xmlWriter.WriteEndElement();
@@ -972,11 +907,12 @@ namespace FFXIV_TexTools2.IO
                         xmlWriter.WriteAttributeString("id", "geom-" + modelName + "_" + i + partString + "-map0-array");
                         xmlWriter.WriteAttributeString("count", (totalCount * 2).ToString());
 
+                        //var texCoords = meshList[i].TextureCoordinates.GetRange(totalVertices, totalCount);
                         var texCoords = meshList[i].TextureCoordinates.GetRange(totalVertices, totalCount);
 
                         foreach (var tc in texCoords)
                         {
-                            xmlWriter.WriteString(tc.X.ToString("N8") + " " + (tc.Y * -1).ToString("N8") + " ");
+                            xmlWriter.WriteString(tc.X.ToString() + " " + (tc.Y * -1).ToString() + " ");
                         }
 
                         xmlWriter.WriteEndElement();
@@ -1030,7 +966,7 @@ namespace FFXIV_TexTools2.IO
 
                         foreach (var tan in tangents)
                         {
-                            xmlWriter.WriteString(tan.X.ToString("N8") + " " + tan.Y.ToString("N8") + " " + tan.Z.ToString("N8") + " ");
+                            xmlWriter.WriteString(tan.X.ToString() + " " + tan.Y.ToString() + " " + tan.Z.ToString() + " ");
                         }
 
                         xmlWriter.WriteEndElement();
@@ -1092,7 +1028,7 @@ namespace FFXIV_TexTools2.IO
 
                         foreach (var bn in biNormals)
                         {
-                            xmlWriter.WriteString(bn.X.ToString("N8") + " " + bn.Y.ToString("N8") + " " + bn.Z.ToString("N8") + " ");
+                            xmlWriter.WriteString(bn.X.ToString() + " " + bn.Y.ToString() + " " + bn.Z.ToString() + " ");
                         }
 
                         xmlWriter.WriteEndElement();

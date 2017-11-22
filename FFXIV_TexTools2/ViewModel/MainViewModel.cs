@@ -84,6 +84,8 @@ namespace FFXIV_TexTools2.ViewModel
             }
 
             CheckForModList();
+            CheckVersion();
+            MakeModContainers();
 
             var gameDir = Properties.Settings.Default.FFXIV_Directory.Substring(0, Properties.Settings.Default.FFXIV_Directory.LastIndexOf("sqpack"));
             var versionFile = File.ReadAllLines(gameDir + "/ffxivgame.ver");
@@ -151,8 +153,6 @@ namespace FFXIV_TexTools2.ViewModel
                 }
             }
 
-            CheckVersion();
-            MakeModContainers();
             FillTree();
         }
 

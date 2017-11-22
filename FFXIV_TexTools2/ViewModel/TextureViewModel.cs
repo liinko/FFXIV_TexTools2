@@ -333,7 +333,7 @@ namespace FFXIV_TexTools2.ViewModel
                     }
                     else
                     {
-                        if (m.Name.Contains("Icon"))
+                        if (selectedCategory.Equals("UI"))
                         {
                             texData = TEX.GetTex(offset, Strings.UIDat);
                         }
@@ -379,7 +379,7 @@ namespace FFXIV_TexTools2.ViewModel
             }
             else
             {
-                int newOffset = ImportTex.ImportTexture(texData, selectedCategory, selectedItem.ItemName, fullPath);
+                int newOffset = ImportTex.ImportTexture(texData, selectedCategory, selectedItem.ItemCategory, selectedItem.ItemName, fullPath);
                 if (newOffset != 0)
                 {
                     UpdateImage(newOffset, false);
@@ -402,7 +402,7 @@ namespace FFXIV_TexTools2.ViewModel
                     {
                         mtrlData.MaskOffset = newOffset;
                     }
-                    else if (SelectedMap.Name.Contains("Icon"))
+                    else if (selectedCategory.Equals("UI"))
                     {
                         if (SelectedMap.Name.Contains("HQ"))
                         {
@@ -442,7 +442,7 @@ namespace FFXIV_TexTools2.ViewModel
             }
             catch (Exception ex)
             {
-                MessageBox.Show("[Main] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("[TVM] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
             if (modEntry != null)
@@ -925,7 +925,7 @@ namespace FFXIV_TexTools2.ViewModel
             }
             catch (Exception ex)
             {
-                MessageBox.Show("[Main] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("[TVM] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
             if (inModList)
@@ -1049,7 +1049,13 @@ namespace FFXIV_TexTools2.ViewModel
 
             string dxPath = Path.GetFileNameWithoutExtension(fullPath);
 
-            if (File.Exists(Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selectedItem.ItemName + "/" + dxPath + ".dds"))
+            string savePath = Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selectedItem.ItemName + "/" + dxPath + ".dds";
+            if (selectedCategory.Equals("UI"))
+            {
+                savePath = Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selectedItem.ItemCategory + "/" + selectedItem.ItemName + "/" + dxPath + ".dds";
+            }
+
+            if (File.Exists(savePath))
             {
                 ImportEnabled = true;
             }
@@ -1129,7 +1135,7 @@ namespace FFXIV_TexTools2.ViewModel
                 }
                 else
                 {
-                    if (selectedMap.Name.Contains("Icon"))
+                    if (selectedCategory.Equals("UI"))
                     {
                         texData = TEX.GetTex(offset, Strings.UIDat);
                     }

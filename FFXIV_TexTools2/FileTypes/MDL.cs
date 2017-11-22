@@ -617,11 +617,25 @@ namespace FFXIV_TexTools2.Material
                         {
                             br1.BaseStream.Seek(j * mesh.MeshInfo.VertexSizes[meshDataInfoList[coordinates].VertexDataBlock] + meshDataInfoList[coordinates].Offset, SeekOrigin.Begin);
 
-                            System.Half h1 = System.Half.ToHalf((ushort)br1.ReadInt16());
-                            System.Half h2 = System.Half.ToHalf((ushort)br1.ReadInt16());
+                            float x = 0;
+                            float y = 0;
+                            if (meshDataInfoList[coordinates].DataType == 13 || meshDataInfoList[coordinates].DataType == 14)
+                            {
+                                var sx = (ushort)br1.ReadInt16();
+                                var sy = (ushort)br1.ReadInt16();
 
-                            float x = HalfHelper.HalfToSingle(h1);
-                            float y = HalfHelper.HalfToSingle(h2);
+                                var h1 = new SharpDX.Half(sx);
+                                var h2 = new SharpDX.Half(sy);
+
+                                x = h1;
+                                y = h2;
+                            }
+                            else
+                            {
+                                x = br1.ReadSingle();
+                                y = br1.ReadSingle();
+                            }
+
 
                             var ox = x - Math.Truncate(x);
                             var oy = y - Math.Truncate(y);
@@ -637,12 +651,30 @@ namespace FFXIV_TexTools2.Material
                         {
                             br1.BaseStream.Seek(j * mesh.MeshInfo.VertexSizes[meshDataInfoList[normals].VertexDataBlock] + meshDataInfoList[normals].Offset, SeekOrigin.Begin);
 
-                            System.Half h1 = System.Half.ToHalf((ushort)br1.ReadInt16());
-                            System.Half h2 = System.Half.ToHalf((ushort)br1.ReadInt16());
-                            System.Half h3 = System.Half.ToHalf((ushort)br1.ReadInt16());
+                            float x = 0;
+                            float y = 0;
+                            float z = 0;
 
-                            objBytes.Add("vn " + HalfHelper.HalfToSingle(h1).ToString("N5") + " " + HalfHelper.HalfToSingle(h2).ToString("N5") + " " + HalfHelper.HalfToSingle(h3).ToString("N5") + " ");
-                            normalList.Add(new Vector3(HalfHelper.HalfToSingle(h1), HalfHelper.HalfToSingle(h2), HalfHelper.HalfToSingle(h3)));
+                            if (meshDataInfoList[normals].DataType == 13 || meshDataInfoList[normals].DataType == 14)
+                            {
+                                System.Half h1 = System.Half.ToHalf((ushort)br1.ReadInt16());
+                                System.Half h2 = System.Half.ToHalf((ushort)br1.ReadInt16());
+                                System.Half h3 = System.Half.ToHalf((ushort)br1.ReadInt16());
+
+                                x = HalfHelper.HalfToSingle(h1);
+                                y = HalfHelper.HalfToSingle(h2);
+                                z = HalfHelper.HalfToSingle(h3);
+                            }
+                            else
+                            {
+                                x = br1.ReadSingle();
+                                y = br1.ReadSingle();
+                                z = br1.ReadSingle();
+                            }
+
+
+                            objBytes.Add("vn " + x.ToString("N5") + " " + y.ToString("N5") + " " + z.ToString("N5") + " ");
+                            normalList.Add(new Vector3(x, y, z));
                         }
                     }
 

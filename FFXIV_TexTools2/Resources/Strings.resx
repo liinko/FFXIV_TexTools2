@@ -627,4 +627,19 @@
   <data name="LoadingImage" xml:space="preserve">
     <value>-nowloading_base{0}.tex</value>
   </data>
+  <data name="MapSymbol" xml:space="preserve">
+    <value>Map Symbols</value>
+  </data>
+  <data name="OnlineStatus" xml:space="preserve">
+    <value>Online Status</value>
+  </data>
+  <data name="OnlineStatusEXD" xml:space="preserve">
+    <value>onlinestatus_0_{0}.exd</value>
+  </data>
+  <data name="Weather" xml:space="preserve">
+    <value>Weather</value>
+  </data>
+  <data name="WeatherEXD" xml:space="preserve">
+    <value>weather_0_{0}.exd</value>
+  </data>
 </root>

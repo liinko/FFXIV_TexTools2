@@ -424,16 +424,16 @@ namespace FFXIV_TexTools2.IO
 					Vector3Collection Tangents = new Vector3Collection();
 					Vector3Collection BiNormals = new Vector3Collection();
 					IntCollection Indices = new IntCollection();
-					List<byte[]> blendIndices2 = new List<byte[]>();
-					List<byte[]> blendWeights2 = new List<byte[]>();
+					List<byte[]> blendIndices = new List<byte[]>();
+					List<byte[]> blendWeights = new List<byte[]>();
 					List<string> boneStringList = new List<string>();
 
 
-					//Vector3Collection nVertex = new Vector3Collection();
-					//Vector2Collection nTexCoord = new Vector2Collection();
-					//Vector3Collection nNormals = new Vector3Collection();
-					//Vector3Collection nTangents = new Vector3Collection();
-					//Vector3Collection nBiNormals = new Vector3Collection();
+					Vector3Collection nVertex = new Vector3Collection();
+					Vector2Collection nTexCoord = new Vector2Collection();
+					Vector3Collection nNormals = new Vector3Collection();
+					Vector3Collection nTangents = new Vector3Collection();
+					Vector3Collection nBiNormals = new Vector3Collection();
 					List<byte[]> nBlendIndices = new List<byte[]>();
 					List<byte[]> nBlendWeights = new List<byte[]>();
 
@@ -468,22 +468,22 @@ namespace FFXIV_TexTools2.IO
 						TexCoord.Add(new SharpDX.Vector2(cd.texCoord[i], cd.texCoord[i + 1]));
 					}
 
-					for (int i = 0; i < cd.index.Count; i += 4)
+					//for (int i = 0; i < cd.index.Count; i += 4)
+					//{
+					//	Indices.Add(cd.index[i]);
+					//}
+
+					//if (Vertex.Count < Normals.Count)
+					//{
+					//    MessageBox.Show("[Import] The number of Vertices, Normals, and Texture Coordinates should be equal. \n", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+					//    return;
+					//}
+
+					if (Vertex.Count != TexCoord.Count)
 					{
-						Indices.Add(cd.index[i]);
+						MessageBox.Show("You are importing a mesh which has more Texture Coordinates than there are Vertices. \n\n" +
+							"This is known to cause issues with texture mapping, as there are more texture seams than mesh borders.", "Mesh Import Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
 					}
-
-					//if (Vertex.Count != Normals.Count)
-					//{
-					//	MessageBox.Show("[Import] The number of Vertices, Normals, and Texture Coordinates should be equal. \n", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-					//	return;
-					//}
-
-					//if (Vertex.Count != TexCoord.Count)
-					//{
-					//	MessageBox.Show("[Import] The number of Vertices, Normals, and Texture Coordinates should be equal. \n", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-					//	return;
-					//}
 
 					//if (cd.biNormal.Count > 0)
 					//{
@@ -542,8 +542,8 @@ namespace FFXIV_TexTools2.IO
 							}
 						}
 
-						blendIndices2.Add(biList.ToArray());
-						blendWeights2.Add(bwList.ToArray());
+						blendIndices.Add(biList.ToArray());
+						blendWeights.Add(bwList.ToArray());
 						vTrack += bCount;
 					}
 
@@ -560,40 +560,46 @@ namespace FFXIV_TexTools2.IO
 							"TexTools removed the smallest weight counts from the following: \n\n" + errorString, "Over Weight Count", MessageBoxButton.OK, MessageBoxImage.Information);
 					}
 
-					//for (int i = 0; i < cd.index.Count; i++)
-					//{
-					//	if (!Indices.Contains(cd.index[i]))
-					//	{
-					//		Indices.Add(cd.index[i]);
-					//		nVertex.Add(Vertex[cd.index[i]]);
-					//		i++;
-					//		nNormals.Add(Normals[cd.index[i]]);
-					//		i++;
-					//		nTexCoord.Add(TexCoord[cd.index[i]]);
-					//		i++;
-					//		nTangents.Add(Tangents[cd.index[i]]);
-					//		nBiNormals.Add(BiNormals[cd.index[i]]);
-					//	}
-					//	else
-					//	{
-					//		i += 3;
-					//	}
+					Dictionary<int, int> indexDict = new Dictionary<int, int>();
+					var inCount = 0;
 
-					//}
+					for (int i = 0; i < cd.index.Count; i++)
+					{
+						if (!indexDict.ContainsKey(cd.index[i]))
+						{
+							indexDict.Add(cd.index[i], inCount);
+							nVertex.Add(Vertex[cd.index[i]]);
+							nBlendIndices.Add(blendIndices[cd.index[i]]);
+							nBlendWeights.Add(blendWeights[cd.index[i]]);
+							i++;
+							nNormals.Add(Normals[cd.index[i]]);
+							i++;
+							nTexCoord.Add(TexCoord[cd.index[i]]);
+							i++;
+							nTangents.Add(Tangents[cd.index[i]]);
+							nBiNormals.Add(BiNormals[cd.index[i]]);
+							inCount++;
+						}
+						else
+						{
+							i += 3;
+						}
+					}
 
-					//Indices.Clear();
+					Indices.Clear();
 
-					//for(int i = 0; i < cd.index.Count; i += 4)
-					//{
-					//	Indices.Add(cd.index[i]);
-					//}
+					for (int i = 0; i < cd.index.Count; i+= 4)
+					{
+						var nIndex = indexDict[cd.index[i]];
+						Indices.Add(nIndex);
+					}
 
 					MeshGeometry3D mg = new MeshGeometry3D
 					{
-						Positions = Vertex,
+						Positions = nVertex,
 						Indices = Indices,
-						Normals = Normals,
-						TextureCoordinates = TexCoord
+						Normals = nNormals,
+						TextureCoordinates = nTexCoord
 					};
 					MeshBuilder.ComputeTangents(mg);
 
@@ -608,8 +614,8 @@ namespace FFXIV_TexTools2.IO
 					//}
 
 					cmd.meshGeometry = mg;
-					cmd.blendIndices = blendIndices2;
-					cmd.blendWeights = blendWeights2;
+					cmd.blendIndices = nBlendIndices;
+					cmd.blendWeights = nBlendWeights;
 					cmd.partsDict = cd.partsDict;
 
 					cmdList.Add(cmd);
@@ -617,6 +623,27 @@ namespace FFXIV_TexTools2.IO
 
 				Create(cmdList, internalPath, selectedMesh, category, itemName);
 			}
+		}
+
+		public static double RoundUp(double input, int places)
+		{
+			bool isNeg = false;
+
+			if(input < 0)
+			{
+				input = input * -1;
+				isNeg = true;
+			}
+
+			double multiplier = Math.Pow(10, Convert.ToDouble(places));
+			var result = Math.Ceiling(input * multiplier) / multiplier;
+
+			if (isNeg)
+			{
+				result = result * -1;
+			}
+
+			return result;
 		}
 
 		public static void Create(List<ColladaMeshData> cmdList, string internalPath, string selectedMesh, string category, string itemName)
@@ -692,56 +719,51 @@ namespace FFXIV_TexTools2.IO
 					{
 						id.dataSet1.Add(bw);
 					}
-					//id.dataSet1.Add(cmd.blendWeights[bc]);
-					//id.dataSet1.Add(cmd.blendWeights[bc + 1]);
-					//id.dataSet1.Add(cmd.blendWeights[bc + 2]);
-					//id.dataSet1.Add(cmd.blendWeights[bc + 3]);
 
 					//blend index
 					foreach(var bi in cmd.blendIndices[bc])
 					{
 						id.dataSet1.Add(bi);
 					}
-					//id.dataSet1.Add(cmd.blendIndices[bc]);
-					//id.dataSet1.Add(cmd.blendIndices[bc + 1]);
-					//id.dataSet1.Add(cmd.blendIndices[bc + 2]);
-					//id.dataSet1.Add(cmd.blendIndices[bc + 3]);
 
 					//bc += 4;
 					bc++;
 				}
 
+				int amount = 0;
+				int lastdigit = 0;
+				string numString, decimals;
 
 				for (int i = 0; i < mg.Normals.Count; i++)
 				{
 					//Normal X (Half)
-					var hx = Half.Parse(mg.Normals[i].X.ToString());
-					id.dataSet2.AddRange(Half.GetBytes(hx));
+					float nX = mg.Normals[i].X;
+
+					id.dataSet2.AddRange(BitConverter.GetBytes(nX));
 
 					//Normal Y (Half)
-					var hy = Half.Parse(mg.Normals[i].Y.ToString());
-					id.dataSet2.AddRange(Half.GetBytes(hy));
+					float nY = mg.Normals[i].Y;
+
+					id.dataSet2.AddRange(BitConverter.GetBytes(nY));
 
 					//Normal Z (Half)
-					var hz = Half.Parse(mg.Normals[i].Z.ToString());
-					id.dataSet2.AddRange(Half.GetBytes(hz));
+					float nZ = mg.Normals[i].Z;
 
-					//Normal W (Half)
-					id.dataSet2.AddRange(new byte[2]);
+					id.dataSet2.AddRange(BitConverter.GetBytes(nZ));
+
+					////Normal W (Half)
+					//id.dataSet2.AddRange(new byte[2]);
 
 
 					//tangent X
-					//byte tx = (byte)(((255 * (mg.BiTangents[i].X)) + 255) / 2);
 					byte tx = (byte)(((255 * (mg.BiTangents[i].X * -1)) + 255) / 2);
 					id.dataSet2.Add(tx);
 
 					//tangent Y
-					//byte ty = (byte)(((255 * (mg.BiTangents[i].Y)) + 255) / 2);
 					byte ty = (byte)(((255 * (mg.BiTangents[i].Y * -1)) + 255) / 2);
 					id.dataSet2.Add(ty);
 
 					//tangent Z
-					//byte tz = (byte)(((255 * (mg.BiTangents[i].Z)) + 255) / 2);
 					byte tz = (byte)(((255 * (mg.BiTangents[i].Z * -1)) + 255) / 2);
 					id.dataSet2.Add(tz);
 
@@ -752,15 +774,67 @@ namespace FFXIV_TexTools2.IO
 					id.dataSet2.AddRange(BitConverter.GetBytes(4294967295));
 
 					//TexCoord X
-					var tcx = Half.Parse(mg.TextureCoordinates[i].X.ToString());
-					id.dataSet2.AddRange(Half.GetBytes(tcx));
+					float x = mg.TextureCoordinates[i].X;
+
+					amount = 0;
+					if(x != 0F && x != 1F && x != -1F)
+					{
+						numString = x.ToString("F20").TrimEnd("0".ToCharArray());
+						decimals = numString.Substring(numString.LastIndexOf(".") + 1);
+						lastdigit = int.Parse(decimals) % 10;
+						amount = decimals.Length - 1;
+
+						if (decimals.Length > 4 && lastdigit == 5)
+						{
+							lastdigit = 0;
+						}
+					}
+
+					float nx = 0;
+					if (amount > 1 && lastdigit != 5)
+					{
+						nx = (float)RoundUp(x, amount);
+					}
+					else
+					{
+						nx = x;
+					}
+					var tcx = new SharpDX.Half(nx);
+
+					id.dataSet2.AddRange(BitConverter.GetBytes(x));
 
 					//TexCoord Y
-					var tcy = Half.Parse(mg.TextureCoordinates[i].Y.ToString()) * -1;
-					id.dataSet2.AddRange(Half.GetBytes(tcy));
+					float y = mg.TextureCoordinates[i].Y * -1;
 
-					id.dataSet2.AddRange(BitConverter.GetBytes((short)0));
-					id.dataSet2.AddRange(BitConverter.GetBytes((short)15360));
+					amount = 0;
+					if(y != 0F && y != 1F && y != -1F)
+					{
+						numString = y.ToString("F20").TrimEnd("0".ToCharArray());
+						decimals = numString.Substring(numString.LastIndexOf(".") + 1);
+						lastdigit = int.Parse(decimals) % 10;
+						amount = decimals.Length - 1;
+
+						if (decimals.Length > 4 && lastdigit == 5)
+						{
+							lastdigit = 0;
+						}
+					}
+
+					float ny = 0;
+					if (amount > 1 && lastdigit != 5)
+					{
+						ny = (float)RoundUp(y, amount);
+					}
+					else
+					{
+						ny = y;
+					}
+
+					var tcy = new SharpDX.Half(ny);
+					id.dataSet2.AddRange(BitConverter.GetBytes(y));
+
+					//id.dataSet2.AddRange(BitConverter.GetBytes((short)0));
+					//id.dataSet2.AddRange(BitConverter.GetBytes((short)15360));
 				}
 
 				foreach (var i in mg.Indices)
@@ -807,20 +881,14 @@ namespace FFXIV_TexTools2.IO
 				int compVertexInfoSize;
 
 				//vertex info section
-				int vertexInfoSize = MDLDatData.Item2 * 136;
+
+				//changed texcoordinates to Float2
+				List<byte> section1 = new List<byte>();
+				List<byte> section2 = new List<byte>();
+
+				int vertexInfoSize = (MDLDatData.Item2) * 136;
 				vertexInfoBlock.AddRange(br.ReadBytes(vertexInfoSize));
-				var compVertexInfo = Compressor(vertexInfoBlock.ToArray());
 
-				compressedData.AddRange(BitConverter.GetBytes(16));
-				compressedData.AddRange(BitConverter.GetBytes(0));
-				compressedData.AddRange(BitConverter.GetBytes(compVertexInfo.Length));
-				compressedData.AddRange(BitConverter.GetBytes(vertexInfoBlock.Count));
-				compressedData.AddRange(compVertexInfo);
-
-				var padding = 128 - ((compVertexInfo.Length + 16) % 128);
-
-				compressedData.AddRange(new byte[padding]);
-				compVertexInfoSize = compVertexInfo.Length + 16 + padding;
 
 				/* 
 				 * -------------------------------
@@ -951,7 +1019,7 @@ namespace FFXIV_TexTools2.IO
 						for(int m = 0; m < cmdList.Count; m++)
 						{
 							var mg = cmdList[m].meshGeometry;
-							vertSize += (mg.Positions.Count * vDataSize) + (mg.Positions.Count * 24);
+							vertSize += (mg.Positions.Count * vDataSize) + (mg.Positions.Count * 28);
 						}
 
 						lod.VertexDataSize = vertSize;
@@ -1037,8 +1105,44 @@ namespace FFXIV_TexTools2.IO
 					lodList.Add(lod);
 				}
 
-				//Meshes
+				//Replace Half with Floats and compress VertexInfo data
+				for(int i = 0; i < lodList[0].MeshCount; i++)
+				{
+					var normType = (136 * i) + 26;
+					var bnOffset = (136 * i) + 33;
+					var clrOffset = (136 * i) + 41;
+					var tcOffset = (136 * i) + 49;
+					var tcType = (136 * i) + 50;
 
+					vertexInfoBlock.RemoveAt(normType);
+					vertexInfoBlock.Insert(normType, 2);
+
+					vertexInfoBlock.RemoveAt(bnOffset);
+					vertexInfoBlock.Insert(bnOffset, 12);
+
+					vertexInfoBlock.RemoveAt(clrOffset);
+					vertexInfoBlock.Insert(clrOffset, 16);
+
+					vertexInfoBlock.RemoveAt(tcOffset);
+					vertexInfoBlock.Insert(tcOffset, 20);
+
+					vertexInfoBlock.RemoveAt(tcType);
+					vertexInfoBlock.Insert(tcType, 1);
+				}
+
+				var compVertexInfo = Compressor(vertexInfoBlock.ToArray());
+				compressedData.AddRange(BitConverter.GetBytes(16));
+				compressedData.AddRange(BitConverter.GetBytes(0));
+				compressedData.AddRange(BitConverter.GetBytes(compVertexInfo.Length));
+				compressedData.AddRange(BitConverter.GetBytes(vertexInfoBlock.Count));
+				compressedData.AddRange(compVertexInfo);
+
+				var padding = 128 - ((compVertexInfo.Length + 16) % 128);
+
+				compressedData.AddRange(new byte[padding]);
+				compVertexInfoSize = compVertexInfo.Length + 16 + padding;
+
+				//Meshes
 				Dictionary<int, List<MeshInfo>> meshInfoDict = new Dictionary<int, List<MeshInfo>>();
 
 				for(int i = 0; i < lodList.Count; i++)
@@ -1063,6 +1167,7 @@ namespace FFXIV_TexTools2.IO
 
 						if (i == 0)
 						{
+							meshInfo.VertexSizes[1] = meshInfo.VertexSizes[1] + 4;
 							try
 							{
 								var mg = cmdList[j].meshGeometry;
@@ -1177,10 +1282,8 @@ namespace FFXIV_TexTools2.IO
 
 						//vertex data size[0] (byte)
 						modelDataBlock.Add((byte)meshInfo.VertexSizes[0]);
-
 						//vertex data size[1] (byte)
 						modelDataBlock.Add((byte)meshInfo.VertexSizes[1]);
-
 						//vertex data size[2] (byte)
 						modelDataBlock.Add((byte)meshInfo.VertexSizes[2]);
 

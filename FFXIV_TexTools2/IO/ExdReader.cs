@@ -69,7 +69,7 @@ namespace FFXIV_TexTools2.IO
         {
             List<TreeNode> UINodes = new List<TreeNode>()
             {
-                MakeMapsList(), MakeActionsList(), itemIconNode, MakeStatusList(), MakeHUDList(), MakeLoadingImageList()
+                MakeMapsList(), MakeActionsList(), itemIconNode, MakeStatusList(), MakeHUDList(), MakeLoadingImageList(), MakeMapSymbolList(), MakeOnlineStatusList(), MakeWeatherList()
             };
 
             return UINodes;
@@ -469,6 +469,196 @@ namespace FFXIV_TexTools2.IO
 
             return LINode;
         }
+
+
+        public static TreeNode MakeMapSymbolList()
+        {
+            TreeNode mapSymbolNode = new TreeNode() { Name = Strings.MapSymbol };
+
+            string mapSymbolFile = "mapsymbol_0.exd";
+            byte[] mapSymbolBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(mapSymbolFile)));
+
+            string placeNameFile = String.Format(Strings.PlaceName, Strings.Language);
+            byte[] placeNameBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(placeNameFile)));
+
+            using (BinaryReader br = new BinaryReader(new MemoryStream(mapSymbolBytes)))
+            {
+                using (BinaryReader br1 = new BinaryReader(new MemoryStream(placeNameBytes)))
+                {
+                    br.ReadBytes(8);
+                    int offsetTableSize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                    br1.ReadBytes(8);
+                    int offsetTableSize1 = BitConverter.ToInt32(br1.ReadBytes(4).Reverse().ToArray(), 0);
+
+                    for (int i = 0; i < offsetTableSize; i += 8)
+                    {
+                        br.BaseStream.Seek(i + 32, SeekOrigin.Begin);
+                        int index = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+                        int tableOffset = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                        br.BaseStream.Seek(tableOffset, SeekOrigin.Begin);
+
+                        int entrySize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                        br.ReadBytes(2);
+
+                        int iconNum = BitConverter.ToUInt16(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                        int pnIndex = BitConverter.ToUInt16(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                        if (iconNum != 0)
+                        {
+                            ItemData item = new ItemData();
+
+                            item.Icon = iconNum.ToString();
+
+                            for (int j = 0; j < offsetTableSize1; j += 8)
+                            {
+                                br1.BaseStream.Seek(j + 32, SeekOrigin.Begin);
+
+                                uint index1 = BitConverter.ToUInt32(br1.ReadBytes(4).Reverse().ToArray(), 0);
+
+                                if (index1 == pnIndex)
+                                {
+                                    int tableOffset1 = BitConverter.ToInt32(br1.ReadBytes(4).Reverse().ToArray(), 0);
+
+                                    br1.BaseStream.Seek(tableOffset1, SeekOrigin.Begin);
+
+                                    br1.ReadBytes(12);
+
+                                    int nameStringOffset = BitConverter.ToInt16(br1.ReadBytes(2).Reverse().ToArray(), 0);
+
+                                    if (nameStringOffset > 1)
+                                    {
+                                        br1.ReadBytes(16);
+
+                                        byte[] mapNameBytes = br1.ReadBytes(nameStringOffset);
+
+                                        item.ItemName = Helper.ToTitleCase((Encoding.UTF8.GetString(mapNameBytes)).Replace("\0", ""));
+                                        item.ItemCategory = Strings.MapSymbol;
+                                        TreeNode itemNode = new TreeNode() { Name = item.ItemName, ItemData = item };
+                                        mapSymbolNode._subNode.Add(itemNode);
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+
+                    }
+                    mapSymbolNode._subNode.Sort();
+                    return mapSymbolNode;
+                }
+
+            }
+        }
+
+
+        public static TreeNode MakeOnlineStatusList()
+        {
+            TreeNode OnlineStatusNode = new TreeNode() { Name = Strings.OnlineStatus };
+
+            string onlineStatusFile = String.Format(Strings.OnlineStatusEXD, Strings.Language);
+            byte[] onlineStatusBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(onlineStatusFile)));
+
+            using (BinaryReader br = new BinaryReader(new MemoryStream(onlineStatusBytes)))
+            {
+
+                br.ReadBytes(8);
+                int offsetTableSize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                for (int i = 0; i < offsetTableSize; i += 8)
+                {
+                    br.BaseStream.Seek(i + 32, SeekOrigin.Begin);
+                    int index = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+                    int tableOffset = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                    br.BaseStream.Seek(tableOffset, SeekOrigin.Begin);
+
+                    int entrySize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                    br.ReadBytes(6);
+
+                    int iconNum = BitConverter.ToUInt16(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                    if(iconNum != 0)
+                    {
+                        ItemData item = new ItemData();
+                        item.Icon = iconNum.ToString();
+
+                        br.ReadBytes(4);
+
+                        byte[] osNameBytes = br.ReadBytes(entrySize - 12);
+
+                        item.ItemName = Helper.ToTitleCase((Encoding.UTF8.GetString(osNameBytes)).Replace("\0", ""));
+                        item.ItemCategory = Strings.OnlineStatus;
+                        TreeNode itemNode = new TreeNode() { Name = item.ItemName, ItemData = item };
+                        OnlineStatusNode._subNode.Add(itemNode);
+                    }
+
+
+
+
+                }
+                OnlineStatusNode._subNode.Sort();
+                return OnlineStatusNode;
+            }
+        }
+
+
+        public static TreeNode MakeWeatherList()
+        {
+            TreeNode weatherNode = new TreeNode() { Name = Strings.Weather };
+
+            string weatherFile = String.Format(Strings.WeatherEXD, Strings.Language);
+            byte[] weatherBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(weatherFile)));
+
+            List<int> weatherIcons = new List<int>();
+
+            using (BinaryReader br = new BinaryReader(new MemoryStream(weatherBytes)))
+            {
+                br.ReadBytes(8);
+                int offsetTableSize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                for (int i = 0; i < offsetTableSize; i += 8)
+                {
+                    br.BaseStream.Seek(i + 32, SeekOrigin.Begin);
+                    int index = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+                    int tableOffset = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                    br.BaseStream.Seek(tableOffset, SeekOrigin.Begin);
+
+                    int entrySize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                    br.ReadBytes(6);
+
+                    int nameSize = BitConverter.ToUInt16(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                    int iconNum = BitConverter.ToUInt16(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                    if (iconNum != 0)
+                    {
+                        if (!weatherIcons.Contains(iconNum))
+                        {
+                            ItemData item = new ItemData();
+                            item.Icon = iconNum.ToString();
+
+                            byte[] wNameBytes = br.ReadBytes(nameSize);
+
+                            item.ItemName = Helper.ToTitleCase((Encoding.UTF8.GetString(wNameBytes)).Replace("\0", ""));
+                            item.ItemCategory = Strings.Weather;
+                            TreeNode itemNode = new TreeNode() { Name = item.ItemName, ItemData = item };
+                            weatherNode._subNode.Add(itemNode);
+                            weatherIcons.Add(iconNum);
+                        }
+
+                    }
+                }
+                weatherNode._subNode.Sort();
+                return weatherNode;
+            }
+        }
+
 
         public static TreeNode MakeActionsList()
         {
@@ -1374,7 +1564,7 @@ namespace FFXIV_TexTools2.IO
                                 br.ReadBytes(14);
 
                                 var someByte = br.ReadByte();
-                                //Debug.WriteLine("someByte " + someByte);
+
                                 item.ItemSubCategory = UICategoryDict[someByte];
 
                                 br.ReadBytes(7);

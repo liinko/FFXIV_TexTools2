@@ -347,7 +347,7 @@ namespace FFXIV_TexTools2.ViewModel
             }
             catch (Exception ex)
             {
-                MessageBox.Show("[Main] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("[MVM] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
             if (modEntry != null)
@@ -1050,7 +1050,7 @@ namespace FFXIV_TexTools2.ViewModel
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("[Main] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("[MVM] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
 
                 if (inModList)

@@ -1087,6 +1087,15 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Map Symbols.
+        /// </summary>
+        internal static string MapSymbol {
+            get {
+                return ResourceManager.GetString("MapSymbol", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Marker.
         /// </summary>
         internal static string Marker {
@@ -1272,6 +1281,24 @@ namespace FFXIV_TexTools2.Resources {
         internal static string Off_Hand {
             get {
                 return ResourceManager.GetString("Off_Hand", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Online Status.
+        /// </summary>
+        internal static string OnlineStatus {
+            get {
+                return ResourceManager.GetString("OnlineStatus", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to onlinestatus_0_{0}.exd.
+        /// </summary>
+        internal static string OnlineStatusEXD {
+            get {
+                return ResourceManager.GetString("OnlineStatusEXD", resourceCulture);
             }
         }
         
@@ -1578,6 +1605,24 @@ namespace FFXIV_TexTools2.Resources {
         internal static string WeapVFXFolder {
             get {
                 return ResourceManager.GetString("WeapVFXFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Weather.
+        /// </summary>
+        internal static string Weather {
+            get {
+                return ResourceManager.GetString("Weather", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to weather_0_{0}.exd.
+        /// </summary>
+        internal static string WeatherEXD {
+            get {
+                return ResourceManager.GetString("WeatherEXD", resourceCulture);
             }
         }
         

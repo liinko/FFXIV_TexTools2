@@ -40,7 +40,7 @@ namespace FFXIV_TexTools2.IO
         /// <param name="itemName">The items name</param>
         /// <param name="internalFilePath">The internal file path of the texture map</param>
         /// <returns>The offset in which the data was placed</returns>
-        public static int ImportTexture(TEXData texData, string category, string itemName, string internalFilePath)
+        public static int ImportTexture(TEXData texData, string category, string subCategory, string itemName, string internalFilePath)
         {
             int textureType, lineNum = 0, offset = 0;
             bool inModList = false;
@@ -48,6 +48,12 @@ namespace FFXIV_TexTools2.IO
 
             string dxPath = Path.GetFileNameWithoutExtension(internalFilePath);
             var savePath = Properties.Settings.Default.Save_Directory + "/" + category + "/" + itemName + "/" + dxPath + ".dds";
+
+            if (category.Equals("UI"))
+            {
+                savePath = Properties.Settings.Default.Save_Directory + "/" + category + "/" + subCategory + "/" + itemName + "/" + dxPath + ".dds";
+            }
+
 
             if (File.Exists(savePath))
             {
@@ -71,7 +77,7 @@ namespace FFXIV_TexTools2.IO
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("[Main] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("[Import] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
 
                 using (BinaryReader br = new BinaryReader(File.OpenRead(savePath)))
@@ -312,7 +318,7 @@ namespace FFXIV_TexTools2.IO
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("[Main] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("[Import] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
 
 

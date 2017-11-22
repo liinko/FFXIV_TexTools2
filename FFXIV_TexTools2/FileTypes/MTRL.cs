@@ -1104,7 +1104,7 @@ namespace FFXIV_TexTools2.Material
                     }
                 }
             }
-            else if (item.ItemCategory.Equals(Strings.Actions))
+            else if (item.ItemCategory.Equals(Strings.Actions) || item.ItemCategory.Equals(Strings.MapSymbol) || item.ItemCategory.Equals(Strings.OnlineStatus) || item.ItemCategory.Equals(Strings.Weather))
             {
                 var iconBaseNum = "0";
                 if(int.Parse(item.Icon) > 1000)
@@ -1172,6 +1172,7 @@ namespace FFXIV_TexTools2.Material
                     cbi.Add(new ComboBoxInfo() { Name = "Icon", ID = "Icon", IsNum = false });
                 }
             }
+
 
             return new Tuple<MTRLData, ObservableCollection<ComboBoxInfo>>(mtrlData, cbi);
         }
