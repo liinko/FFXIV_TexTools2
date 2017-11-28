@@ -102,6 +102,9 @@
     <Reference Include="SharpDX.Mathematics, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
       <HintPath>..\packages\SharpDX.Mathematics.4.0.1\lib\net45\SharpDX.Mathematics.dll</HintPath>
     </Reference>
+    <Reference Include="Syncfusion.Shared.WPF, Version=15.4451.0.17, Culture=neutral, PublicKeyToken=3d67ed1f87d44c89, processorArchitecture=MSIL">
+      <HintPath>C:\Program Files (x86)\Syncfusion\Essential Studio\15.4.0.17\Assemblies\4.5.1\Syncfusion.Shared.WPF.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -115,6 +118,7 @@
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
+    <Reference Include="UIAutomationProvider" />
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -336,6 +340,7 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <None Include="app.manifest" />
+    <None Include="HelixToolkit.Wpf.SharpDX.1.0.0-unstable1826.nupkg" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
@@ -375,6 +380,7 @@
     <Resource Include="Resources\PaypalDonateButton.png" />
     <Resource Include="Resources\ffxivmeteorlogo.png" />
     <Resource Include="Resources\ffxiv2.ico" />
+    <Resource Include="Bullets-04-WF.png" />
     <Content Include="Custom\Custom.fx" />
     <Content Include="Custom\Material.fx" />
     <Resource Include="Resources\3DModel.png" />

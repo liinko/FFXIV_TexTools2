@@ -23,13 +23,14 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Windows;
+using Syncfusion.Windows.Shared;
 
 namespace FFXIV_TexTools2
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : ChromelessWindow
     {
         MainViewModel mViewModel;
 

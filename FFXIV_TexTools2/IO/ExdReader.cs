@@ -69,7 +69,7 @@ namespace FFXIV_TexTools2.IO
         {
             List<TreeNode> UINodes = new List<TreeNode>()
             {
-                MakeMapsList(), MakeActionsList(), itemIconNode, MakeStatusList(), MakeHUDList(), MakeLoadingImageList(), MakeMapSymbolList(), MakeOnlineStatusList(), MakeWeatherList()
+                MakeMapsList(), MakeActionsList(), itemIconNode, MakeStatusList(), MakeLoadingImageList(), MakeMapSymbolList(), MakeOnlineStatusList(), MakeWeatherList()
             };
 
             return UINodes;

@@ -17,7 +17,7 @@
 using FFXIV_TexTools2.Helpers;
 using FFXIV_TexTools2.Model;
 using FFXIV_TexTools2.ViewModel;
-using System.Windows;
+using System.Windows; using Syncfusion.Windows.Shared;
 using System.Windows.Media;
 
 namespace FFXIV_TexTools2.Views
@@ -25,7 +25,7 @@ namespace FFXIV_TexTools2.Views
     /// <summary>
     /// Interaction logic for ModList.xaml
     /// </summary>
-    public partial class ModList : Window
+    public partial class ModList : ChromelessWindow
     {
         public ModList()
         {

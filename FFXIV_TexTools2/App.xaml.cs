@@ -4,7 +4,8 @@ using System.Configuration;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows;
+using System.Windows; using Syncfusion.Windows.Shared;
+using System.Windows.Input;
 
 namespace FFXIV_TexTools2
 {
