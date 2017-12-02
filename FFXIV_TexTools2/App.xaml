@@ -6,6 +6,39 @@
              StartupUri="MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
+            <Style TargetType="{x:Type TabItem}">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type TabItem}">
+                            <Border>
+                                <Grid>
+                                    <Grid>
+                                        <Border x:Name="border" 
+                                            Background="#FF282828"/>
+                                    </Grid>
+                                    <ContentPresenter ContentSource="Header"
+                                                      HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                                </Grid>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver"
+                                     Value="True">
+                                    <Setter TargetName="border"
+                                        Property="Background"
+                                        Value="#FF282828" />
+                                </Trigger>
+                                <Trigger Property="IsSelected"
+                                     Value="True">
+                                    <Setter TargetName="border"
+                                        Property="Background"
+                                        Value="#FF282828" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
             <DrawingBrush x:Key="MixedGreen">
                 <DrawingBrush.Drawing>
                     <DrawingGroup>
@@ -212,27 +245,24 @@
                     </Trigger>
                 </ControlTemplate.Triggers>
             </ControlTemplate>
-            <LinearGradientBrush x:Key="TitleBarBackground" EndPoint="0.5,1" StartPoint="0.5,0">
-                <GradientStop Color="#FF132027" Offset="0"/>
-                <GradientStop Color="#FF4B6A7C" Offset="1"/>
-            </LinearGradientBrush>
+
 
             <ControlTemplate x:Key="Titlebartemplate" TargetType="{x:Type shared:TitleBar}">
-                <Border Name="border" Background="{StaticResource TitleBarBackground}" MinHeight="25" Height="{Binding ElementName=TitleBarHeight,Path=Value}" CornerRadius="{Binding ElementName=CornerRadiusSlider,Path=Value}"   >
-                    <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  />
+                <Border Name="border" Background="#FF282828" MinHeight="32" Height="32" CornerRadius="0" BorderThickness="0"  >
+                    <ContentPresenter  Margin="3,5,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  />
                 </Border>
             </ControlTemplate>
             <ControlTemplate x:Key="ChromelessWindowTemplate" TargetType="{x:Type shared:ChromelessWindow}">
-                <Border Name="OuterBorder" Background="#FF484848" BorderBrush="Black" BorderThickness="{Binding ElementName=ResizeThicknessSlider,Path=Value}" CornerRadius="{Binding ElementName=CornerRadiusSlider,Path=Value}"  >
+                <Border Name="OuterBorder" Background="#FF484848" BorderBrush="Black" BorderThickness="0" CornerRadius="0"  >
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
                         <shared:TitleBar Name="PART_TitleBar" Grid.Row="0" Template="{StaticResource Titlebartemplate}" Margin="0,-2,0,0" >
                             <Grid VerticalAlignment="Top" Height="20">
                                 <StackPanel Orientation="Horizontal">
-                                    <Image x:Name="PART_Icon" Source="{Binding RelativeSource={RelativeSource FindAncestor,  AncestorType={x:Type shared:ChromelessWindow}}, Path=Icon}" VerticalAlignment="Center"  HorizontalAlignment="Left" Margin="4,4,2,4"  MaxWidth="16" MaxHeight="16" MinWidth="16" MinHeight="16" />
+                                    <Image x:Name="PART_Icon" Source="{Binding RelativeSource={RelativeSource FindAncestor,  AncestorType={x:Type shared:ChromelessWindow}}, Path=Icon}" VerticalAlignment="Center"  HorizontalAlignment="Left" Margin="4,3,2,4"  MaxWidth="100" MaxHeight="25" MinWidth="100" MinHeight="25" />
                                     <ContentControl Foreground="{TemplateBinding Foreground}"  Content="{TemplateBinding Title}" VerticalAlignment="Center" HorizontalAlignment="Left" x:Name="TitlePresenter" Margin="5,5,5,5" />
                                 </StackPanel>
                                 <StackPanel   Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">

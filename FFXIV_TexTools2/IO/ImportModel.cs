@@ -27,12 +27,12 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Windows; using Syncfusion.Windows.Shared;
+using System.Windows;
+using Syncfusion.Windows.Shared;
 using System.Xml;
 
 namespace FFXIV_TexTools2.IO
 {
-
     public class ImportModel
     {
 
@@ -421,7 +421,6 @@ namespace FFXIV_TexTools2.IO
 
                     Vector3Collection Vertex = new Vector3Collection();
                     Vector2Collection TexCoord = new Vector2Collection();
-                    Vector2Collection NormTexCoord = new Vector2Collection();
                     Vector3Collection Normals = new Vector3Collection();
                     Vector3Collection Tangents = new Vector3Collection();
                     Vector3Collection BiNormals = new Vector3Collection();
@@ -434,12 +433,11 @@ namespace FFXIV_TexTools2.IO
                     Vector3Collection nVertex = new Vector3Collection();
                     Vector2Collection nTexCoord = new Vector2Collection();
                     Vector3Collection nNormals = new Vector3Collection();
-                    Vector2Collection nNormTexCoord = new Vector2Collection();
                     Vector3Collection nTangents = new Vector3Collection();
                     Vector3Collection nBiNormals = new Vector3Collection();
                     List<byte[]> nBlendIndices = new List<byte[]>();
                     List<byte[]> nBlendWeights = new List<byte[]>();
-                    
+
                     for (int i = 0; i < cd.vertex.Count; i += 3)
                     {
                         Vertex.Add(new SharpDX.Vector3((cd.vertex[i] / Info.modelMultiplier), (cd.vertex[i + 1] / Info.modelMultiplier), (cd.vertex[i + 2] / Info.modelMultiplier)));
@@ -468,11 +466,7 @@ namespace FFXIV_TexTools2.IO
 
                     for (int i = 0; i < cd.texCoord.Count; i += tcStride)
                     {
-
-                        TexCoord.Add(new SharpDX.Vector2(cd.texCoord[i], cd.texCoord[i + 1] ));
-
-                        NormTexCoord.Add(new SharpDX.Vector2(cd.texCoord[i] - (float)Math.Floor(cd.texCoord[i]), cd.texCoord[i + 1] + 1));
-                        //     Debug.WriteLine(NormTexCoord[con++]);
+                        TexCoord.Add(new SharpDX.Vector2(cd.texCoord[i], cd.texCoord[i + 1]));
                     }
 
                     //for (int i = 0; i < cd.index.Count; i += 4)
@@ -576,6 +570,7 @@ namespace FFXIV_TexTools2.IO
                     {
                         if (!indexDict.ContainsKey(cd.index[i]))
                         {
+                      
                             indexDict.Add(cd.index[i], inCount);
                             nVertex.Add(Vertex[cd.index[i]]);
                             nBlendIndices.Add(blendIndices[cd.index[i]]);
@@ -584,7 +579,6 @@ namespace FFXIV_TexTools2.IO
                             nNormals.Add(Normals[cd.index[i]]);
                             i++;
                             nTexCoord.Add(TexCoord[cd.index[i]]);
-                            nNormTexCoord.Add(TexCoord[cd.index[i]]);
                             i++;
                             nTangents.Add(Tangents[cd.index[i]]);
                             nBiNormals.Add(BiNormals[cd.index[i]]);
@@ -609,20 +603,19 @@ namespace FFXIV_TexTools2.IO
                         Positions = nVertex,
                         Indices = Indices,
                         Normals = nNormals,
-                        TextureCoordinates = nNormTexCoord
+                        TextureCoordinates = nTexCoord
                     };
                     MeshBuilder.ComputeTangents(mg);
 
                     //if (cd.biNormal.Count > 0)
                     //{
-                    //	mg.BiTangents = nBiNormals;
+                    //    mg.BiTangents = nBiNormals;
                     //}
 
                     //if (cd.tangent.Count > 0)
                     //{
                     //    mg.Tangents = Tangents;
                     //}
-                   
                     SharpDX.Vector3[] tan1 = new SharpDX.Vector3[Vertex.Count];
                     SharpDX.Vector3[] tan2 = new SharpDX.Vector3[Vertex.Count];
                     for (int a = 0; a < Indices.Count; a += 3)
@@ -657,21 +650,20 @@ namespace FFXIV_TexTools2.IO
                         tan2[i3] += tdir;
                     }
 
-                    List<SharpDX.Vector4> tangentsC = new List<SharpDX.Vector4>();
                     float d;
                     //iSharpDX.Vector3 tmpb;
-                    SharpDX.Vector4 tmpt;
+                    SharpDX.Vector3 tmpt;
                     for (int a = 0; a < nVertex.Count; ++a)
                     {
                         SharpDX.Vector3 n = SharpDX.Vector3.Normalize(nNormals[a]);
                         SharpDX.Vector3 t = SharpDX.Vector3.Normalize(tan1[a]);
-                        d = (SharpDX.Vector3.Dot(SharpDX.Vector3.Cross(n, t), tan2[a]) > 0.0f) ? -1.0f : 1.0f;
-                       // tmpb = SharpDX.Vector3.Cross(n, t);
-                        tmpt = new SharpDX.Vector4(t.X, t.Y, t.Z, d);
-                       // mg.BiTangents[a] = tmpb;
-                        cmd.TangentsC.Add(tmpt);
+                        d = (SharpDX.Vector3.Dot(SharpDX.Vector3.Cross(n, t), tan2[a]) < 0.0f) ? -1.0f : 1.0f;
+                        // tmpb = SharpDX.Vector3.Cross(n, t);
+                        tmpt = new SharpDX.Vector3(t.X, t.Y, t.Z);
+                        // mg.BiTangents[a] = tmpb;
+                        mg.BiTangents.Add(tmpt);
+                        cmd.handedness.Add((int)d);
                     }
-
                     cmd.meshGeometry = mg;
                     cmd.blendIndices = nBlendIndices;
                     cmd.blendWeights = nBlendWeights;
@@ -789,9 +781,10 @@ namespace FFXIV_TexTools2.IO
                     bc++;
                 }
 
-                //int amount = 0;
-                //int lastdigit = 0;
-                //string numString, decimals;
+                int amount = 0;
+                int lastdigit = 0;
+                string numString, decimals;
+
                 for (int i = 0; i < mg.Normals.Count; i++)
                 {
                     //Normal X (Half)
@@ -809,30 +802,27 @@ namespace FFXIV_TexTools2.IO
 
                     id.dataSet2.AddRange(BitConverter.GetBytes(nZ));
 
+                    //Debug.WriteLine(mg.Normals[i]);
+
                     ////Normal W (Half)
                     //id.dataSet2.AddRange(new byte[2]);
 
-                    //Bitangent Declarations
-                    SharpDX.Vector3 b = mg.BiTangents[i];
-                    float d = cmd.TangentsC[i].W;
-                    //SharpDX.Vector3 Flip = (SharpDX.Vector3)(-1,0,-1); //yz rotate 180 xy flip
-                    if (d < 0)
-                    {
-                        //b.X =-mg.Tangents[i].Y; b.Y=mg.Tangents[i].Z; b.Z=-mg.Tangents[i].X; 
-                        b = SharpDX.Vector3.Normalize(-b);
-                    }
-                    int c = id.dataSet2.Count;
-                    if (b.X < 0) { id.dataSet2.Add((byte)((Math.Abs(b.X) * 255 + 255) / 2)); }
-                    else { id.dataSet2.Add((byte)((-Math.Abs(b.X)-.014) * 255 / 2 - 255 / 2)); }
-                    if (b.Y < 0) { id.dataSet2.Add((byte)((Math.Abs(b.Y) * 255 + 255) / 2)); }
-                    else { id.dataSet2.Add((byte)((-Math.Abs(b.Y)-.014) * 255 / 2 - 255 / 2)); }
-                    if (b.Z < 0) { id.dataSet2.Add((byte)((Math.Abs(b.Z) * 255 + 255) / 2)); }
-                    else { id.dataSet2.Add((byte)((-Math.Abs(b.Z)-.014) * 255 / 2 - 255 / 2)); }
-                    Debug.WriteLine("X: " + id.dataSet2[c] + "  or  " + ((id.dataSet2[c]-1) * 2 / 255f - 1f)+" - "+((id.dataSet2[c]+1) * 2 / 255f - 1f) + "      Y: " + id.dataSet2[c + 1] + "  or  " + ((id.dataSet2[c + 1]-1) * 2 / 255f - 1f) + " - " + ((id.dataSet2[c+1] + 1) * 2 / 255f - 1f) + "      Z: " + id.dataSet2[c + 2] + "  or  " + ((id.dataSet2[c + 2] -1) * 2 / 255f - 1f) + " - " + ((id.dataSet2[c+2] + 1) * 2 / 255f - 1f));
-                    Debug.WriteLine("Bitangents    X:  " + b.X * d + "                  Y:  " + b.Y * d + "                    Z:  " + b.Z * d);
-
+                    var btn = mg.BiTangents[i];
+                    var h = cmd.handedness[i];
+                                        //SharpDX.Vector3 Flip = (SharpDX.Vector3)(-1,0,-1); //yz rotate 180 xy flip
+                    if (h > 0) { btn = SharpDX.Vector3.Normalize(-btn);  }                    int c = id.dataSet2.Count;                    if (btn.X < 0) { id.dataSet2.Add((byte)((Math.Abs(btn.X) * 255 + 255) / 2)); }                    else { id.dataSet2.Add((byte)((-Math.Abs(btn.X) - .014) * 255 / 2 - 255 / 2)); }                    if (btn.Y < 0) { id.dataSet2.Add((byte)((Math.Abs(btn.Y) * 255 + 255) / 2)); }                    else { id.dataSet2.Add((byte)((-Math.Abs(btn.Y) - .014) * 255 / 2 - 255 / 2)); }                    if (btn.Z < 0) { id.dataSet2.Add((byte)((Math.Abs(btn.Z) * 255 + 255) / 2)); }                    else { id.dataSet2.Add((byte)((-Math.Abs(btn.Z) - .014) * 255 / 2 - 255 / 2)); }                    Debug.WriteLine("X: " + id.dataSet2[c] + "  or  " + ((id.dataSet2[c] - 1) * 2 / 255f - 1f) + " - " + ((id.dataSet2[c] + 1) * 2 / 255f - 1f) + "      Y: " + id.dataSet2[c + 1] + "  or  " + ((id.dataSet2[c + 1] - 1) * 2 / 255f - 1f) + " - " + ((id.dataSet2[c + 1] + 1) * 2 / 255f - 1f) + "      Z: " + id.dataSet2[c + 2] + "  or  " + ((id.dataSet2[c + 2] - 1) * 2 / 255f - 1f) + " - " + ((id.dataSet2[c + 2] + 1) * 2 / 255f - 1f));                    Debug.WriteLine("Bitangents    X:  " + btn.X * h + "                  Y:  " + btn.Y * h + "                    Z:  " + btn.Z * h);
                     //tangent W
-                    id.dataSet2.Add((byte)1);
+                    byte tw = 0;
+                    if (h == 1)
+                    {
+                        tw = 255;
+                    }
+                    else if (h == -1)
+                    {
+                        tw = 0;
+                    }
+
+                    id.dataSet2.Add(tw);
 
                     //Color
                     id.dataSet2.AddRange(BitConverter.GetBytes(4294967295));
@@ -1993,7 +1983,7 @@ namespace FFXIV_TexTools2.IO
 
             public List<byte[]> blendIndices = new List<byte[]>();
             public List<byte[]> blendWeights = new List<byte[]>();
-            public List<SharpDX.Vector4> TangentsC = new List<SharpDX.Vector4>();
+            public List<int> handedness = new List<int>();
 
             public Dictionary<int, int> partsDict = new Dictionary<int, int>();
         }

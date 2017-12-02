@@ -8,7 +8,7 @@
              xmlns:custom="clr-namespace:HelixToolkit.Wpf.SharpDX"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
-    <Grid Background="White">
+    <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>

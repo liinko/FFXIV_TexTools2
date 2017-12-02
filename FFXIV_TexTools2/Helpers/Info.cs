@@ -29,7 +29,7 @@ namespace FFXIV_TexTools2.Helpers
         public static string indexDir = Properties.Settings.Default.FFXIV_Directory + "/{0}.win32.index";
         public static string index2Dir = Properties.Settings.Default.FFXIV_Directory + "/{0}.win32.index2";
         public static string datDir = Properties.Settings.Default.FFXIV_Directory + "/{0}.win32.dat{1}";
-        public static int modelMultiplier = 20;
+        public static int modelMultiplier = 10;
 
         public static string modListDir = Directory.GetCurrentDirectory() + "/TexTools.modlist";
         public static string modDatDir = Properties.Settings.Default.FFXIV_Directory + "/{0}.win32.dat{1}";
