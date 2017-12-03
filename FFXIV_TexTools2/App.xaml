@@ -14,7 +14,7 @@
                                 <Grid>
                                     <Grid>
                                         <Border x:Name="border" 
-                                            Background="#FF282828"/>
+                                            Background="#FF282828" />
                                     </Grid>
                                     <ContentPresenter ContentSource="Header"
                                                       HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
@@ -27,6 +27,7 @@
                                     <Setter TargetName="border"
                                         Property="Background"
                                         Value="#FF282828" />
+
                                 </Trigger>
                                 <Trigger Property="IsSelected"
                                      Value="True">
@@ -167,6 +168,8 @@
 
                 </ControlTemplate.Triggers>
             </ControlTemplate>
+            
+            
 
             <ControlTemplate x:Key="MaximizeIcon" TargetType="{x:Type Button}">
                 <Border Name="maxborder4" BorderThickness="1" CornerRadius="1" Background="Transparent" Height="20" Width="22" HorizontalAlignment="Right" Margin="1,2,1,5">
@@ -260,9 +263,9 @@
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
                         <shared:TitleBar Name="PART_TitleBar" Grid.Row="0" Template="{StaticResource Titlebartemplate}" Margin="0,-2,0,0" >
-                            <Grid VerticalAlignment="Top" Height="20">
+                            <Grid VerticalAlignment="Top" Height="32">
                                 <StackPanel Orientation="Horizontal">
-                                    <Image x:Name="PART_Icon" Source="{Binding RelativeSource={RelativeSource FindAncestor,  AncestorType={x:Type shared:ChromelessWindow}}, Path=Icon}" VerticalAlignment="Center"  HorizontalAlignment="Left" Margin="4,3,2,4"  MaxWidth="100" MaxHeight="25" MinWidth="100" MinHeight="25" />
+                                    <Image x:Name="PART_Icon" Source="{Binding RelativeSource={RelativeSource FindAncestor,  AncestorType={x:Type shared:ChromelessWindow}}, Path=Icon}" VerticalAlignment="Center"  HorizontalAlignment="Left" Margin="4,2,2,4" Width="225" Height="25"  MaxWidth="225" MaxHeight="25" MinWidth="225" MinHeight="25" />
                                     <ContentControl Foreground="{TemplateBinding Foreground}"  Content="{TemplateBinding Title}" VerticalAlignment="Center" HorizontalAlignment="Left" x:Name="TitlePresenter" Margin="5,5,5,5" />
                                 </StackPanel>
                                 <StackPanel   Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">

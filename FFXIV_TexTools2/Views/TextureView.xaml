@@ -35,7 +35,7 @@
         </Style>
     </UserControl.Resources>
     <Grid>
-        <GroupBox x:Name="groupBox" Header="Viewer" Margin="10,47,10,63">
+        <GroupBox x:Name="groupBox" Header="" Margin="10,47,10,63" BorderBrush="{x:Null}">
             <Border>
                 <Border.Background>
                     <DrawingBrush Viewport="0,0,20,20" ViewportUnits="Absolute" Stretch="None" TileMode="Tile">

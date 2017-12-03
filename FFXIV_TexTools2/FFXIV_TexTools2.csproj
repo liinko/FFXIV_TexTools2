@@ -385,6 +385,11 @@
     <Content Include="Custom\Material.fx" />
     <Resource Include="Resources\3DModel.png" />
     <None Include="Resources\uldpaths.txt" />
+    <Resource Include="NewIcon.png" />
+    <Resource Include="Resources\NewIcon.png" />
+    <Resource Include="Resources\Pixel.png" />
+    <Resource Include="Resources\Textures.png" />
+    <Resource Include="Resources\Models.png" />
     <Content Include="sharpdx_direct3d11_1_effects_arm.dll" />
     <Content Include="sharpdx_direct3d11_1_effects_x64.dll" />
     <Content Include="sharpdx_direct3d11_1_effects_x86.dll" />

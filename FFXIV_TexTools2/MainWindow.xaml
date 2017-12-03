@@ -3,6 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:FFXIV_TexTools2"
     xmlns:local1 ="clr-namespace:FFXIV_TexTools2.ViewModel"
     xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
     xmlns:hx="http://helix-toolkit.org/wpf/SharpDX"
@@ -10,7 +11,7 @@
     xmlns:views ="clr-namespace:FFXIV_TexTools2.Views"
     x:Class="FFXIV_TexTools2.MainWindow"
     mc:Ignorable="d"
-    Title="" Height="650" Width="1100" MinWidth="700" Icon="Resources/ffxiv2.ico"  BorderThickness="0"
+    Title="" Height="650" Width="1100" MinWidth="700"  Icon="Resources/ffxiv2.ico"  BorderThickness="0"
     WindowStartupLocation="CenterScreen" Closed="Window_Closed" Background="#FF282828" ResizeMode="CanResizeWithGrip"  
     CornerRadius="{Binding ElementName=CornerRadiusSlider,Path=Value}"    
 
@@ -18,7 +19,7 @@
     TitleBarTemplate="{StaticResource Titlebartemplate}" Margin="-5,-7,-5,0">
 
     <Window.Resources>
-
+        <local:FormatConverter x:Key="FormattingConverter"/>
         <SolidColorBrush x:Key="DarkSquareColor" Color="#CC000000" />
         <SolidColorBrush x:Key="LightSquareColor" Color="#BF000000" />
         <Style x:Key="{x:Type xctk:Zoombox}" TargetType="{x:Type xctk:Zoombox}">
@@ -47,100 +48,119 @@
         </Style>
     </Window.Resources>
 
-        <Grid Margin="-5" Background="#FF282828">
+    <Grid Margin="-5,0,-5,-5" Background="#FF282828">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <StatusBar Height="21" VerticalAlignment="Bottom" Margin="5,0,0,0" HorizontalAlignment="Left" Width="105" Background="{x:Null}">
+            <Viewbox>
+                <Label x:Name="DXVerStatus" Content="DX Ver: " Padding="0" Background="{x:Null}" Foreground="#FF58A6C3"/>
+            </Viewbox>
+        </StatusBar>
+        <Grid Margin="5,0,0,0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
+                <ColumnDefinition MinWidth="400"/>
+                <ColumnDefinition Width="15"/>
+                <ColumnDefinition Width="319.511"/>
             </Grid.ColumnDefinitions>
-            <StatusBar Height="21" VerticalAlignment="Bottom" Margin="5,0,0,0" HorizontalAlignment="Left" Width="105" Background="{x:Null}">
-                <Viewbox>
-                    <Label x:Name="DXVerStatus" Content="DX Ver: " Padding="0" Background="{x:Null}" Foreground="#FF58A6C3"/>
-                </Viewbox>
-            </StatusBar>
-            <Menu x:Name="menu" Height="22" VerticalAlignment="Top" Margin="0,-90,1,0" HorizontalAlignment="Right" Width="1092.6">
-                <MenuItem Header="Mods">
-                    <MenuItem x:Name="Menu_ModList" Header="Mod List" BorderThickness="1" Click="Menu_ModList_Click" IsEnabled="{Binding ModlistOffEnabled}"/>
-                    <MenuItem x:Name="Menu_Importer" Header="Importer" HorizontalAlignment="Left" Width="140" Click="Menu_Importer_Click" IsEnabled="False"/>
-                    <MenuItem x:Name="Menu_RevertAll" Header="Disable all Mods" Click="Menu_RevertAll_Click" IsEnabled="{Binding ModlistOffEnabled}"/>
-                    <MenuItem x:Name="Menu_ReapplyAll" Header="ReEnable All Mods" Click="Menu_ReapplyAll_Click" IsEnabled="{Binding ModlistOffEnabled}"/>
-                </MenuItem>
-                <MenuItem Header="Search" StaysOpenOnClick="True">
-                    <MenuItem Header="Model ID" Command="{Binding IDSearchCommand}"/>
-                </MenuItem>
-                <MenuItem Header="Options" StaysOpenOnClick="True" Height="22">
-                    <MenuItem x:Name="Menu_Directories" Header="Directories" Click="Menu_Directories_Click"/>
-                    <MenuItem Header="DX Version">
-                        <MenuItem x:Name="Menu_DX9" Header="DX9" HorizontalAlignment="Left" Click="Menu_DX9_Click" IsCheckable="True" IsChecked="{Binding IsDX9, Mode=OneWay}" IsEnabled="{Binding DX9Enabled}"/>
-                        <MenuItem x:Name="Menu_DX11" Header="DX11" HorizontalAlignment="Left" Click="Menu_DX11_Click" IsCheckable="True" IsChecked="{Binding IsDX11, Mode=OneWay}" IsEnabled="{Binding DX11Enabled}"/>
-                    </MenuItem>
-                    <MenuItem x:Name="Save_All_DDS" Header="Save All DDS" Click="Save_All_DDS_Click" IsEnabled="False"/>
-                </MenuItem>
-                <MenuItem Header="Help">
-                    <MenuItem x:Name="Menu_ProblemCheck" Header="Check For Problems" Click="Menu_ProblemCheck_Click"/>
-                    <MenuItem x:Name="Menu_StartOver" Header="Start Over" Click="Menu_StartOver_Click" />
-                    <MenuItem x:Name="Menu_BugReport" Header="Report Bug" HorizontalAlignment="Left" Width="188" Click="Menu_BugReport_Click"/>
-                </MenuItem>
-                <MenuItem Header="About">
-                    <MenuItem x:Name="Menu_About" Header="FFXIV TexTools" Click="Menu_About_Click"/>
-                </MenuItem>
-                <MenuItem Header="Language">
-                    <MenuItem x:Name="Menu_English" Header="English" HorizontalAlignment="Left" Width="140" IsCheckable="True" Click="Menu_English_Click" IsEnabled="{Binding EnglishEnabled}" IsChecked="{Binding IsEnglish, Mode=OneWay}"/>
-                    <MenuItem x:Name="Menu_Japanese" Header="Japanese" HorizontalAlignment="Left" Width="140" IsCheckable="True" Click="Menu_Japanese_Click" IsEnabled="{Binding JapaneseEnabled}" IsChecked="{Binding IsJapanese, Mode=OneWay}"/>
-                    <MenuItem x:Name="Menu_French" Header="French" HorizontalAlignment="Left" Width="140" IsCheckable="True" Click="Menu_French_Click" IsEnabled="{Binding FrenchEnabled}" IsChecked="{Binding IsFrench, Mode=OneWay}"/>
-                    <MenuItem x:Name="Menu_German" Header="German" HorizontalAlignment="Left" Width="140" IsCheckable="True" Click="Menu_German_Click" IsEnabled="{Binding GermanEnabled}" IsChecked="{Binding IsGerman, Mode=OneWay}"/>
-                </MenuItem>
-            </Menu>
-            <Grid Margin="5,0,0,0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition MinWidth="400"/>
-                    <ColumnDefinition Width="15"/>
-                    <ColumnDefinition Width="319.511"/>
-                </Grid.ColumnDefinitions>
-                <Grid Name="RightBG" Margin="0" Grid.Column="1" Background="#FF505050" Grid.ColumnSpan="2"/>
-                <GroupBox x:Name="TexturesGroup" Header="Textures" Margin="5,0" Grid.Column="2" BorderBrush="{x:Null}">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="18  "/>
-                            <RowDefinition Height="257*"/>
-                        </Grid.RowDefinitions>
-                        <TreeView x:Name="textureTreeView" ItemsSource="{Binding Category}"  Grid.Row="1" Margin="0"  SelectedItemChanged="textureTreeView_SelectedItemChanged" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FF58A6C3">
-                            <TreeView.ItemContainerStyle>
-                                <Style TargetType="{x:Type TreeViewItem}">
-                                    <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
-                                    <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
-                                    <Setter Property="FontWeight" Value="Normal"/>
-                                    <Style.Triggers>
-                                        <Trigger Property="IsSelected" Value="True">
-                                            <Setter Property="FontWeight" Value="Bold"/>
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TreeView.ItemContainerStyle>
 
-                            <TreeView.Resources>
-                                <HierarchicalDataTemplate DataType="{x:Type local1:CategoryViewModel}" ItemsSource="{Binding Children}">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="{Binding Name}" />
-                                    </StackPanel>
-                                </HierarchicalDataTemplate>
+            <Border x:Name="LeftBG"  Background="#FF717171" CornerRadius="15,0,0,15" Margin="85,0,-15,0"/>
 
-                            </TreeView.Resources>
-                        </TreeView>
-                        <Grid Margin="0">
-                            <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" TextWrapping="NoWrap" BorderBrush="{x:Null}" Background="{x:Null}"/>
-                        </Grid>
-                    </Grid>
-                </GroupBox>
-                <Grid x:Name="LeftBG" Background="#FF717171" Margin="110,0,0,0"/>
-                <TabControl x:Name="tabControl" Margin="5,10,0,10" TabStripPlacement="Left" Background="{x:Null}" BorderBrush="{x:Null}">
-                    <TabItem Header="Texture" Width="100" Margin="-6,-2,-2,0" DataContext="{Binding TextureVM}" Background="{x:Null}" BorderBrush="{x:Null}" >
-                        <views:TextureView/>
-                    </TabItem>
-                    <TabItem Header="3D Model" Width="100" Margin="-6,-2,-2,0" IsEnabled="{Binding ModelTabEnabled, FallbackValue=false}" DataContext="{Binding ModelVM}" Background="{x:Null}" BorderBrush="{x:Null}">
-                        <views:ModelView/>
-                    </TabItem>
-                </TabControl>
-                <GridSplitter x:Name="gridSplitter" Grid.Column="1" Width="30"  HorizontalAlignment="Center" Margin="0" Background="#FF505050"/>
-            </Grid>
+            <Border x:Name="RightBG" Margin="0" Grid.Column="1" CornerRadius="15,0,0,15" Background="#FF505050" Grid.ColumnSpan="2"/>
 
+            <GroupBox x:Name="TexturesGroup" Header="" Margin="0" Grid.Column="2" BorderBrush="{x:Null}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="18  "/>
+                        <RowDefinition Height="257*"/>
+                    </Grid.RowDefinitions>
+                    <TreeView x:Name="textureTreeView" ItemsSource="{Binding Category}"  Grid.Row="1" Margin="0" SelectedItemChanged="textureTreeView_SelectedItemChanged" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FF58A6C3" IsTextSearchEnabled="True">
+
+                        <TreeView.Resources>
+                            <HierarchicalDataTemplate DataType="{x:Type local1:CategoryViewModel}" ItemsSource="{Binding Children}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding Name}" />
+                                </StackPanel>
+                            </HierarchicalDataTemplate>
+
+                        </TreeView.Resources>
+
+                        <TreeView.ItemContainerStyle>
+                            <Style TargetType="{x:Type TreeViewItem}">
+                                <Setter Property="Foreground" Value="#FF58A6C3"/>
+                                <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
+                                <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
+                                <Setter Property="FontWeight" Value="Normal"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter Property="FontWeight" Value="Bold"/>
+                                    </Trigger>
+
+                                </Style.Triggers>
+                            </Style>
+                        </TreeView.ItemContainerStyle>
+
+                    </TreeView>
+                    <Border Margin="0,0,10,0" CornerRadius="3" Background="#FF313131">
+                        <TextBox  Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" TextWrapping="NoWrap" BorderBrush="{x:Null}" Background="#00000000" Margin="0">
+                            </TextBox>
+                    </Border>
+                </Grid>
+            </GroupBox>
+            <TabControl x:Name="tabControl" Margin="5,10,0,10" TabStripPlacement="Left" Background="{x:Null}" BorderBrush="{x:Null}">
+                <TabItem  Width="75" Margin="-6,-2,-2,0" DataContext="{Binding TextureVM}" Background="{x:Null}" BorderBrush="{x:Null}" Height="75" >
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <Image x:Name="Textures" Height="65" Width="65" Source="Resources/Textures.png" Margin="5,-10,0,0" />
+                        </StackPanel>
+                    </TabItem.Header>
+                    <views:TextureView/>
+                </TabItem>
+                <TabItem Width="75" Margin="-6,-2,-2,0" IsEnabled="{Binding ModelTabEnabled, FallbackValue=false}" DataContext="{Binding ModelVM}" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FF58A6C3" Height="75">
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <Image x:Name="Models" Height="65" Width="65" Source="Resources/Models.png" Margin="5,-10,0,0" />
+                        </StackPanel>
+                    </TabItem.Header>
+                    <views:ModelView/>
+                </TabItem>
+            </TabControl>
+
+            <GridSplitter x:Name="gridSplitter" Grid.Column="1" Width="30"  HorizontalAlignment="Center" Margin="0" Background="#00505050"/>
         </Grid>
+        <Menu x:Name="menu" Height="22" VerticalAlignment="Top" Margin="0,-90,1,0" HorizontalAlignment="Right" Width="1092.6">
+            <MenuItem Header="Mods">
+                <MenuItem x:Name="Menu_ModList" Header="Mod List" BorderThickness="1" Click="Menu_ModList_Click" IsEnabled="{Binding ModlistOffEnabled}"/>
+                <MenuItem x:Name="Menu_Importer" Header="Importer" HorizontalAlignment="Left" Width="140" Click="Menu_Importer_Click" IsEnabled="False"/>
+                <MenuItem x:Name="Menu_RevertAll" Header="Disable all Mods" Click="Menu_RevertAll_Click" IsEnabled="{Binding ModlistOffEnabled}"/>
+                <MenuItem x:Name="Menu_ReapplyAll" Header="ReEnable All Mods" Click="Menu_ReapplyAll_Click" IsEnabled="{Binding ModlistOffEnabled}"/>
+            </MenuItem>
+            <MenuItem Header="Search" StaysOpenOnClick="True">
+                <MenuItem Header="Model ID" Command="{Binding IDSearchCommand}"/>
+            </MenuItem>
+            <MenuItem Header="Options" StaysOpenOnClick="True" Height="22">
+                <MenuItem x:Name="Menu_Directories" Header="Directories" Click="Menu_Directories_Click"/>
+                <MenuItem Header="DX Version">
+                    <MenuItem x:Name="Menu_DX9" Header="DX9" HorizontalAlignment="Left" Click="Menu_DX9_Click" IsCheckable="True" IsChecked="{Binding IsDX9, Mode=OneWay}" IsEnabled="{Binding DX9Enabled}"/>
+                    <MenuItem x:Name="Menu_DX11" Header="DX11" HorizontalAlignment="Left" Click="Menu_DX11_Click" IsCheckable="True" IsChecked="{Binding IsDX11, Mode=OneWay}" IsEnabled="{Binding DX11Enabled}"/>
+                </MenuItem>
+                <MenuItem x:Name="Save_All_DDS" Header="Save All DDS" Click="Save_All_DDS_Click" IsEnabled="False"/>
+            </MenuItem>
+            <MenuItem Header="Help">
+                <MenuItem x:Name="Menu_ProblemCheck" Header="Check For Problems" Click="Menu_ProblemCheck_Click"/>
+                <MenuItem x:Name="Menu_StartOver" Header="Start Over" Click="Menu_StartOver_Click" />
+                <MenuItem x:Name="Menu_BugReport" Header="Report Bug" HorizontalAlignment="Left" Width="188" Click="Menu_BugReport_Click"/>
+            </MenuItem>
+            <MenuItem Header="About">
+                <MenuItem x:Name="Menu_About" Header="FFXIV TexTools" Click="Menu_About_Click"/>
+            </MenuItem>
+            <MenuItem Header="Language">
+                <MenuItem x:Name="Menu_English" Header="English" HorizontalAlignment="Left" Width="140" IsCheckable="True" Click="Menu_English_Click" IsEnabled="{Binding EnglishEnabled}" IsChecked="{Binding IsEnglish, Mode=OneWay}"/>
+                <MenuItem x:Name="Menu_Japanese" Header="Japanese" HorizontalAlignment="Left" Width="140" IsCheckable="True" Click="Menu_Japanese_Click" IsEnabled="{Binding JapaneseEnabled}" IsChecked="{Binding IsJapanese, Mode=OneWay}"/>
+                <MenuItem x:Name="Menu_French" Header="French" HorizontalAlignment="Left" Width="140" IsCheckable="True" Click="Menu_French_Click" IsEnabled="{Binding FrenchEnabled}" IsChecked="{Binding IsFrench, Mode=OneWay}"/>
+                <MenuItem x:Name="Menu_German" Header="German" HorizontalAlignment="Left" Width="140" IsCheckable="True" Click="Menu_German_Click" IsEnabled="{Binding GermanEnabled}" IsChecked="{Binding IsGerman, Mode=OneWay}"/>
+            </MenuItem>
+        </Menu>
+
+    </Grid>
 </syncfusion:ChromelessWindow>

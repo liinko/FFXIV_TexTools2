@@ -23,6 +23,8 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Windows;
+using System.Windows.Data;
+using System.ComponentModel;
 using Syncfusion.Windows.Shared;
 
 namespace FFXIV_TexTools2
@@ -271,6 +273,8 @@ namespace FFXIV_TexTools2
             App.Current.Shutdown();
         }
 
+
+ 
         private void textureTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             var item = e.NewValue as CategoryViewModel;
@@ -279,6 +283,20 @@ namespace FFXIV_TexTools2
             {
                 Save_All_DDS.IsEnabled = true;
                 var itemParent = item.Parent;
+
+                if (item.Children != null)
+                {
+                    if (item.IsExpanded != true)
+                    {
+                        item.IsExpanded = true;
+                        item.IsSelected = false;
+                    }
+                    else
+                    {
+                        item.IsExpanded = false;
+                        item.IsSelected = false;
+                    }
+                }
 
                 while (itemParent != null)
                 {
@@ -321,6 +339,8 @@ namespace FFXIV_TexTools2
                 Save_All_DDS.IsEnabled = false;
             }
         }
+
+  
 
         private void Save_All_DDS_Click(object sender, RoutedEventArgs e)
         {
@@ -392,4 +412,39 @@ namespace FFXIV_TexTools2
             }
         }
     }
+
+    #region Converter
+
+    /// <summary>
+    /// FormatConvertor class
+    /// </summary>
+    public class FormatConverter : IValueConverter
+    {
+        //Converter to display the values modified in slider to the textblock
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (parameter != null)
+            {
+                string strFormatString = parameter.ToString();
+                if (!string.IsNullOrEmpty(strFormatString))
+                    return string.Format(culture, strFormatString, value);
+            }
+            return value;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            TypeConverter objTypeConverter = TypeDescriptor.GetConverter(targetType);
+            object objReturnValue = null;
+
+            if (objTypeConverter.CanConvertFrom(value.GetType()))
+            {
+                objReturnValue = objTypeConverter.ConvertFrom(value);
+            }
+
+            return objReturnValue;
+        }
+    }
+
+    #endregion
 }
