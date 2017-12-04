@@ -93,6 +93,19 @@ namespace HelixToolkit.Wpf.SharpDX
         /// <summary>
         /// 
         /// </summary>
+        public static readonly DependencyProperty RenderEmissiveMapProperty =
+            DependencyProperty.Register("RenderEmissiveMap", typeof(bool), typeof(CustomMaterialGeometryModel3D), new AffectsRenderPropertyMetadata(true,
+                (d, e) =>
+                {
+                    var model = d as CustomMaterialGeometryModel3D;
+                    if (model.effectMaterial != null)
+                    {
+                        model.effectMaterial.RenderEmissiveMap = (bool)e.NewValue;
+                    }
+                }));
+        /// <summary>
+        /// 
+        /// </summary>
         public static readonly DependencyProperty MaterialProperty =
             DependencyProperty.Register("Material", typeof(Material), typeof(CustomMaterialGeometryModel3D), new AffectsRenderPropertyMetadata(null, MaterialChanged));
 
@@ -148,6 +161,15 @@ namespace HelixToolkit.Wpf.SharpDX
         {
             get { return (bool)this.GetValue(RenderSpecularMapProperty); }
             set { this.SetValue(RenderSpecularMapProperty, value); }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public bool RenderEmissiveMap
+        {
+            get { return (bool)this.GetValue(RenderEmissiveMapProperty); }
+            set { this.SetValue(RenderEmissiveMapProperty, value); }
         }
 
         /// <summary>
@@ -265,10 +287,11 @@ namespace HelixToolkit.Wpf.SharpDX
             private ShaderResourceView texNormalMapView;
             private ShaderResourceView texDisplacementMapView;
             private ShaderResourceView texSpecularMapView;
+            private ShaderResourceView texEmissiveMapView;
             private EffectVectorVariable vMaterialAmbientVariable, vMaterialDiffuseVariable, vMaterialEmissiveVariable, vMaterialSpecularVariable, vMaterialReflectVariable;
             private EffectScalarVariable sMaterialShininessVariable;
-            private EffectScalarVariable bHasDiffuseMapVariable, bHasNormalMapVariable, bHasDisplacementMapVariable, bHasDiffuseAlphaMapVariable, bHasSpecularMapVariable;
-            private EffectShaderResourceVariable texDiffuseMapVariable, texNormalMapVariable, texDisplacementMapVariable, texShadowMapVariable, texDiffuseAlphaMapVariable, texSpecularMapVariable;
+            private EffectScalarVariable bHasDiffuseMapVariable, bHasNormalMapVariable, bHasDisplacementMapVariable, bHasDiffuseAlphaMapVariable, bHasSpecularMapVariable, bHasEmissiveMapVariable;
+            private EffectShaderResourceVariable texDiffuseMapVariable, texNormalMapVariable, texDisplacementMapVariable, texShadowMapVariable, texDiffuseAlphaMapVariable, texSpecularMapVariable, texEmissiveMapVariable;
             public EffectScalarVariable bHasShadowMapVariable;
 
             public bool RenderDiffuseMap { set; get; } = true;
@@ -276,6 +299,7 @@ namespace HelixToolkit.Wpf.SharpDX
             public bool RenderNormalMap { set; get; } = true;
             public bool RenderDisplacementMap { set; get; } = true;
             public bool RenderSpecularMap { set; get; } = true;
+            public bool RenderEmissiveMap { set; get; } = true;
 
             public EffectMaterialVariables(Effect effect, CustomPhongMaterial material)
             {
@@ -293,12 +317,14 @@ namespace HelixToolkit.Wpf.SharpDX
                 this.bHasDisplacementMapVariable = effect.GetVariableByName("bHasDisplacementMap").AsScalar();
                 this.bHasShadowMapVariable = effect.GetVariableByName("bHasShadowMap").AsScalar();
                 this.bHasSpecularMapVariable = effect.GetVariableByName("bHasSpecularMap").AsScalar();
+                this.bHasEmissiveMapVariable = effect.GetVariableByName("bHasEmissiveMap").AsScalar();
                 this.texDiffuseMapVariable = effect.GetVariableByName("texDiffuseMap").AsShaderResource();
                 this.texNormalMapVariable = effect.GetVariableByName("texNormalMap").AsShaderResource();
                 this.texDisplacementMapVariable = effect.GetVariableByName("texDisplacementMap").AsShaderResource();
                 this.texShadowMapVariable = effect.GetVariableByName("texShadowMap").AsShaderResource();
                 this.texDiffuseAlphaMapVariable = effect.GetVariableByName("texAlphaMap").AsShaderResource();
                 this.texSpecularMapVariable = effect.GetVariableByName("texSpecularMap").AsShaderResource();
+                this.texEmissiveMapVariable = effect.GetVariableByName("texEmissiveMap").AsShaderResource();
 
             }
 
@@ -324,6 +350,10 @@ namespace HelixToolkit.Wpf.SharpDX
                 {
                     CreateTextureView(material.SpecularMap, ref this.texSpecularMapView);
                 }
+                else if (e.PropertyName.Equals(nameof(material.EmissiveMap)))
+                {
+                    CreateTextureView(material.EmissiveMap, ref this.texEmissiveMapView);
+                }
                 OnInvalidateRenderer?.Invoke(this, null);
             }
 
@@ -346,7 +376,7 @@ namespace HelixToolkit.Wpf.SharpDX
                     CreateTextureView(material.DisplacementMap, ref this.texDisplacementMapView);
                     CreateTextureView(material.DiffuseAlphaMap, ref this.texDiffuseAlphaMapView);
                     CreateTextureView(material.SpecularMap, ref this.texSpecularMapView);
-
+                    CreateTextureView(material.EmissiveMap, ref this.texEmissiveMapView);
                 }
                 else
                 {
@@ -355,7 +385,7 @@ namespace HelixToolkit.Wpf.SharpDX
                     Disposer.RemoveAndDispose(ref this.texDisplacementMapView);
                     Disposer.RemoveAndDispose(ref this.texDiffuseAlphaMapView);
                     Disposer.RemoveAndDispose(ref this.texSpecularMapView);
-
+                    Disposer.RemoveAndDispose(ref this.texEmissiveMapView);
                 }
             }
 
@@ -405,6 +435,14 @@ namespace HelixToolkit.Wpf.SharpDX
                 {
                     this.texSpecularMapVariable.SetResource(this.texSpecularMapView);
                 }
+
+                bool hasEmissiveMap = RenderEmissiveMap && this.texEmissiveMapView != null;
+                this.bHasEmissiveMapVariable.Set(hasEmissiveMap);
+                if (hasEmissiveMap)
+                {
+                    this.texEmissiveMapVariable.SetResource(this.texEmissiveMapView);
+                }
+
                 return true;
             }
 
@@ -424,15 +462,18 @@ namespace HelixToolkit.Wpf.SharpDX
                 Disposer.RemoveAndDispose(ref this.bHasShadowMapVariable);
                 Disposer.RemoveAndDispose(ref this.bHasDiffuseAlphaMapVariable);
                 Disposer.RemoveAndDispose(ref this.bHasSpecularMapVariable);
+                Disposer.RemoveAndDispose(ref this.bHasEmissiveMapVariable);
                 Disposer.RemoveAndDispose(ref this.texDiffuseMapVariable);
                 Disposer.RemoveAndDispose(ref this.texNormalMapVariable);
                 Disposer.RemoveAndDispose(ref this.texDisplacementMapVariable);
                 Disposer.RemoveAndDispose(ref this.texShadowMapVariable);
                 Disposer.RemoveAndDispose(ref this.texDiffuseAlphaMapVariable);
                 Disposer.RemoveAndDispose(ref this.texSpecularMapVariable);
+                Disposer.RemoveAndDispose(ref this.texEmissiveMapVariable);
                 Disposer.RemoveAndDispose(ref this.texDiffuseMapView);
                 Disposer.RemoveAndDispose(ref this.texNormalMapView);
                 Disposer.RemoveAndDispose(ref this.texSpecularMapView);
+                Disposer.RemoveAndDispose(ref this.texEmissiveMapView);
                 Disposer.RemoveAndDispose(ref this.texDisplacementMapView);
                 Disposer.RemoveAndDispose(ref this.texDiffuseAlphaMapView);
 

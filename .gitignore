@@ -278,6 +278,7 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+
 © 2017 GitHub, Inc.
 Terms
 Privacy
@@ -290,3 +291,6 @@ Training
 Shop
 Blog
 About
+
+/.localhistory
+

@@ -39,7 +39,10 @@ namespace FFXIV_TexTools2.ViewModel
                 {
                     JsonEntry entry = JsonConvert.DeserializeObject<JsonEntry>(line);
 
-                    categorySet.Add(entry.category);
+                    if (!entry.category.Equals(""))
+                    {
+                        categorySet.Add(entry.category);
+                    }
                 }
             }
             catch (Exception e)

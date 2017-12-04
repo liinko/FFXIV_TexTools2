@@ -58,7 +58,7 @@ namespace FFXIV_TexTools2.ViewModel
         bool disposing = false;
 
         List<MDLTEXData> mData;
-        Stream diffuse, normal, specular, alpha;
+        Stream diffuse, normal, specular, alpha, emissive;
 
         /// <summary>
         /// Sets up the View Model for the given mesh data
@@ -110,6 +110,7 @@ namespace FFXIV_TexTools2.ViewModel
             mg.Colors = mData[m].Mesh.VertexColors;
 
             MeshBuilder.ComputeTangents(mg);
+
             mg.BiTangents = mData[m].Mesh.BiTangents;
             mData[m].Mesh.Tangents = mg.Tangents;
 
@@ -153,6 +154,15 @@ namespace FFXIV_TexTools2.ViewModel
                 enc.Save(alpha);
             }
 
+            emissive = null;
+            if (mData[m].Emissive != null)
+            {
+                emissive = new MemoryStream();
+                var enc = new BmpBitmapEncoder();
+                enc.Frames.Add(BitmapFrame.Create(mData[m].Emissive));
+                enc.Save(emissive);
+            }
+
             if (mData.Count > 1)
             {
                 float specularShine = 30f;
@@ -170,7 +180,8 @@ namespace FFXIV_TexTools2.ViewModel
                         NormalMap = normal,
                         DiffuseMap = diffuse,
                         DiffuseAlphaMap = alpha,
-                        SpecularMap = specular
+                        SpecularMap = specular,
+                        EmissiveMap = emissive
                     };
                 }
                 else if (!mData[m].IsBody && !second)
@@ -184,7 +195,8 @@ namespace FFXIV_TexTools2.ViewModel
                         NormalMap = normal,
                         DiffuseMap = diffuse,
                         DiffuseAlphaMap = alpha,
-                        SpecularMap = specular
+                        SpecularMap = specular,
+                        EmissiveMap = emissive
                     };
 
                     second = true;
@@ -200,7 +212,8 @@ namespace FFXIV_TexTools2.ViewModel
                         NormalMap = normal,
                         DiffuseMap = diffuse,
                         DiffuseAlphaMap = alpha,
-                        SpecularMap = specular
+                        SpecularMap = specular,
+                        EmissiveMap = emissive
                     };
                 }
             }
@@ -218,7 +231,8 @@ namespace FFXIV_TexTools2.ViewModel
                     NormalMap = normal,
                     SpecularMap = specular,
                     DiffuseMap = diffuse,
-                    DiffuseAlphaMap = alpha
+                    DiffuseAlphaMap = alpha,
+                    EmissiveMap = emissive
                 };
             }
 

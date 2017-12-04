@@ -94,8 +94,18 @@
             <ComboBox x:Name="partComboBox" Grid.Column="2" Margin="5" IsSynchronizedWithCurrentItem="False" IsReadOnly="True" ItemsSource="{Binding PartComboBox}" DisplayMemberPath="Name" SelectedValuePath="Name" SelectedItem="{Binding SelectedPart}" SelectedIndex="{Binding PartIndex}" IsEnabled="{Binding PartEnabled, FallbackValue=false}" Background="#00000000" BorderBrush="{x:Null}"/>
             <ComboBox x:Name="typeComboBox" Grid.Column="3" Margin="5,5,6,5" IsSynchronizedWithCurrentItem="False" IsReadOnly="True" ItemsSource="{Binding TypeComboBox}" DisplayMemberPath="Name" SelectedValuePath="Name" SelectedItem="{Binding SelectedType}" SelectedIndex="{Binding TypeIndex}" IsEnabled="{Binding TypeEnabled, FallbackValue=false}" BorderBrush="{x:Null}" Background="#00000000"/>
         </Grid>
-        <TextBox x:Name="fullPathLabel" VerticalAlignment="Bottom" Margin="10,0,10,40" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}" HorizontalContentAlignment="Center" IsReadOnly="True" Text="{Binding FullPathString, Mode=OneWay}" TextChanged="fullPathLabel_TextChanged" >
-        </TextBox>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="20*"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+            <TextBox x:Name="fullPathLabel" Grid.Column="0" VerticalAlignment="Bottom" Margin="10,0,2,40" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}" HorizontalContentAlignment="Center" IsReadOnly="True" Text="{Binding FullPathString, Mode=OneWay}" TextChanged="fullPathLabel_TextChanged" />
+            <Button Grid.Column="1" Margin="0,0,0,40" VerticalAlignment="Bottom" MinWidth="20" MinHeight="20" MaxWidth="20" MaxHeight="20" Padding="0" Command="{Binding OpenFolderCommand}" IsEnabled="{Binding OpenEnabled, FallbackValue=false}">
+                <Button.Background>
+                    <ImageBrush ImageSource="/FFXIV TexTools 2;component/Resources/FolderOpen_16x.png" Stretch="Uniform"/>
+                </Button.Background>
+            </Button>
+        </Grid>
         <Grid x:Name="textureButtonGrid" Margin="10,0,10,0" Height="40" VerticalAlignment="Bottom">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>

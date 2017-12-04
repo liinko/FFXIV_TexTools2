@@ -106,6 +106,11 @@ namespace FFXIV_TexTools2.Material
         public string[] OBJFileData { get; set; }
 
         /// <summary>
+        /// The material number used by this mesh
+        /// </summary>
+        public int MaterialNum { get; set; }
+
+        /// <summary>
         /// The mesh parts list
         /// </summary>
         public List<MeshPart> MeshPartList { get; set; }

@@ -244,6 +244,5 @@
                 <MenuItem x:Name="Menu_German" Header="German" HorizontalAlignment="Left" Width="140" IsCheckable="True" Click="Menu_German_Click" IsEnabled="{Binding GermanEnabled}" IsChecked="{Binding IsGerman, Mode=OneWay}"/>
             </MenuItem>
         </Menu>
-
     </Grid>
 </Window>

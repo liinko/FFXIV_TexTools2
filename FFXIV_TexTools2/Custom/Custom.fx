@@ -16,31 +16,31 @@
 
 struct VSInputCustom
 {
-	float4 p : POSITION;
-	float4 c : COLOR;
-	float2 t : TEXCOORD;
-	float3 n : NORMAL;
-	float3 t1 : TANGENT;
-	float3 t2 : BINORMAL;
+	float4 p			: POSITION;
+	float4 c			: COLOR;
+	float2 t			: TEXCOORD;
+	float3 n			: NORMAL;
+	float3 t1			: TANGENT;
+	float3 t2			: BINORMAL;
 	float4 customParams : COLOR1;
-	float4 mr0 : TEXCOORD1;
-	float4 mr1 : TEXCOORD2;
-	float4 mr2 : TEXCOORD3;
-	float4 mr3 : TEXCOORD4;
+	float4 mr0			: TEXCOORD1;
+	float4 mr1			: TEXCOORD2;
+	float4 mr2			: TEXCOORD3;
+	float4 mr3			: TEXCOORD4;
 };
 
 //--------------------------------------------------------------------------------------
 struct PSInputCustom
 {
-	float4 p : SV_POSITION;
-	float4 wp : POSITION0;
-	float4 ws : POSITIONT;
-	float4 sp : TEXCOORD1;
-	float3 n : NORMAL; // normal
-	float2 t : TEXCOORD0; // tex coord	
-	float3 t1 : TANGENT; // tangent
-	float3 t2 : BINORMAL; // bi-tangent	
-	float4 c : COLOR; // solid color
+	float4 p			: SV_POSITION;
+	float4 wp			: POSITION0;
+	float4 ws			: POSITIONT;
+	float4 sp			: TEXCOORD1;
+	float3 n			: NORMAL;	    // normal
+	float2 t			: TEXCOORD0;	// tex coord	
+	float3 t1			: TANGENT;		// tangent
+	float3 t2			: BINORMAL;		// bi-tangent	
+	float4 c			: COLOR;		// solid color
 };
 
 //------------------------------------------------------------------------------------
@@ -49,135 +49,142 @@ struct PSInputCustom
 float4 PShaderCustom(PSInputCustom input) : SV_Target
 {
 	//convert a PSInputCustom to a PSInput
-	PSInput standardInput = (PSInput) 0;
+	PSInput standardInput = (PSInput)0;
 
-	standardInput.p = input.p;
-	standardInput.wp = input.wp;
-	standardInput.sp = input.sp;
-	standardInput.n = input.n;
-	standardInput.t = input.t;
-	standardInput.t1 = input.t1;
-	standardInput.t2 = input.t2;
-	standardInput.c = input.c;
+standardInput.p = input.p;
+standardInput.wp = input.wp;
+standardInput.sp = input.sp;
+standardInput.n = input.n;
+standardInput.t = input.t;
+standardInput.t1 = input.t1;
+standardInput.t2 = input.t2;
+standardInput.c = input.c;
 
-	//calculate lighting vectors - renormalize vectors	
-	input.n = calcNormal(standardInput);
+//calculate lighting vectors - renormalize vectors	
+input.n = calcNormal(standardInput);
 
-	// get per pixel vector to eye-position
-	float3 eye = normalize(vEyePos - input.wp.xyz);
-	
-	// get shadow color
-	float s = 1;
-	if (bHasShadowMap)
+// get per pixel vector to eye-position
+float3 eye = normalize(vEyePos - input.wp.xyz);
+
+// get shadow color
+float s = 1;
+if (bHasShadowMap)
+{
+	s = shadowStrength(input.sp);
+}
+
+float4 vMaterialTexture = 0.0f;
+float4 vSpecularColor = 0.0f;
+float4 shine = 1.0f;
+float alpha = 1.0f;
+float4 vEmissiveColor = 0.0f;
+
+// add diffuse sampling
+if (bHasDiffuseMap)
+{
+	//SamplerState is defined in Common.fx.
+	vMaterialTexture = texDiffuseMap.Sample(LinearSampler, input.t);
+}
+
+if (bHasAlphaMap)
+{
+	float4 color = texAlphaMap.Sample(LinearSampler, input.t);
+	alpha = color.r;
+	clip(alpha <= 0.3 ? -1 : 1);
+}
+
+if (bHasSpecularMap)
+{
+	shine = sMaterialShininess;
+	vSpecularColor = texSpecularMap.Sample(LinearSampler, input.t);
+}
+
+if (bHasEmissiveMap)
+{
+	vEmissiveColor = texEmissiveMap.Sample(LinearSampler, input.t);
+}
+
+
+// if(bHasMaskMap)
+// {
+
+// }
+
+// if(bHasNormalMap)
+// {
+
+// }
+
+// if(bHasColorTable)
+// {
+
+// }
+
+// light emissive and ambient intensity
+// this variable can be used for light accumulation
+//float4 I = vMaterialEmissive + vMaterialAmbient * vLightAmbient;
+float4 I = vEmissiveColor + vMaterialAmbient * vLightAmbient;
+
+// loop over lights
+for (int i = 0; i < LIGHTS; i++)
+{
+	// This framework calculates lighting in world space.
+	// For every light type, you should calculate the input values to the
+	// calcPhongLighting function, namely light direction and the reflection vector.
+	// For computuation of attenuation and the spot light factor, use the
+	// model from the DirectX documentation:
+	// http://msdn.microsoft.com/en-us/library/windows/desktop/bb172279(v=vs.85).aspx
+
+	if (iLightType[i] == 1) // directional
 	{
-		s = shadowStrength(input.sp);
+		float3 d = normalize((float3)vLightDir[i]);
+		float3 r = reflect(-d, input.n);
+		I += s * calcPhongLighting(vLightColor[i], vMaterialTexture, vSpecularColor, shine, input.n, d, eye, r);
 	}
-
-	float4 vMaterialTexture = 0.0f;
-	float4 vSpecularColor = 0.0f;
-	float4 shine = 1.0f;
-	float alpha = 1.0f;
-		
-	// add diffuse sampling
-	if (bHasDiffuseMap)
+	else if (iLightType[i] == 2)  // point
 	{
-		//SamplerState is defined in Common.fx.
-		vMaterialTexture = texDiffuseMap.Sample(LinearSampler, input.t);
+		float3 d = (float3)(vLightPos[i] - input.wp);	 // light dir	
+		float dl = length(d);
+		d = normalize(d);
+		float3 r = reflect(-d, input.n);
+		float att = 1.0f / (vLightAtt[i].x + vLightAtt[i].y * dl + vLightAtt[i].z * dl * dl);
+		I += att * calcPhongLighting(vLightColor[i], vMaterialTexture, input.n, d, eye, r);
 	}
-	
-	if (bHasAlphaMap)
+	else if (iLightType[i] == 3)  // spot
 	{
-		float4 color = texAlphaMap.Sample(LinearSampler, input.t);
-		alpha = color.r;
-		clip(alpha <= 0.3 ? -1 : 1);
+		float3 d = (float3)(vLightPos[i] - input.wp);	 // light dir
+		float dl = length(d);
+		d = normalize(d);
+		float3 r = reflect(-d, input.n);
+		float3 sd = normalize((float3)vLightDir[i]);	// missuse the vLightDir variable for spot-dir
+
+														/* --- this is the OpenGL 1.2 version (not so nice) --- */
+														//float spot = (dot(-d, sd));
+														//if(spot > cos(vLightSpot[i].x))
+														//	spot = pow( spot, vLightSpot[i].y );
+														//else
+														//	spot = 0.0f;	
+														/* --- */
+
+														/* --- this is the  DirectX9 version (better) --- */
+		float rho = dot(-d, sd);
+		float spot = pow(saturate((rho - vLightSpot[i].x) / (vLightSpot[i].y - vLightSpot[i].x)), vLightSpot[i].z);
+		float att = spot / (vLightAtt[i].x + vLightAtt[i].y * dl + vLightAtt[i].z * dl * dl);
+		I += att * calcPhongLighting(vLightColor[i], vMaterialTexture, input.n, d, eye, r);
 	}
-	
-	if (bHasSpecularMap)
+	else
 	{
-		shine = sMaterialShininess;
-		vSpecularColor = texSpecularMap.Sample(LinearSampler, input.t);
+		//I += 0;
 	}
-	
-	
-	// if(bHasMaskMap)
-	// {
-		
-	// }
-	
-	// if(bHasNormalMap)
-	// {
+}
 
-	// }
-	
-	// if(bHasColorTable)
-	// {
-		
-	// }
-			
-	// light emissive and ambient intensity
-	// this variable can be used for light accumulation
-	float4 I = vMaterialEmissive + vMaterialAmbient * vLightAmbient;
-			
-	// loop over lights
-	for (int i = 0; i < LIGHTS; i++)
-	{
-		// This framework calculates lighting in world space.
-		// For every light type, you should calculate the input values to the
-		// calcPhongLighting function, namely light direction and the reflection vector.
-		// For computuation of attenuation and the spot light factor, use the
-		// model from the DirectX documentation:
-		// http://msdn.microsoft.com/en-us/library/windows/desktop/bb172279(v=vs.85).aspx
+// set diffuse alpha
+I.a = vMaterialDiffuse.a;
 
-		if (iLightType[i] == 1) // directional
-		{
-			float3 d = normalize((float3) vLightDir[i]);
-			float3 r = reflect(-d, input.n);
-			I += s * calcPhongLighting(vLightColor[i], vMaterialTexture, vSpecularColor, shine, input.n, d, eye, r);
-		}
-		else if (iLightType[i] == 2)  // point
-		{
-			float3 d = (float3) (vLightPos[i] - input.wp); // light dir	
-			float dl = length(d);
-			d = normalize(d);
-			float3 r = reflect(-d, input.n);
-			float att = 1.0f / (vLightAtt[i].x + vLightAtt[i].y * dl + vLightAtt[i].z * dl * dl);
-			I += att * calcPhongLighting(vLightColor[i], vMaterialTexture, input.n, d, eye, r);
-		}
-		else if (iLightType[i] == 3)  // spot
-		{
-			float3 d = (float3) (vLightPos[i] - input.wp); // light dir
-			float dl = length(d);
-			d = normalize(d);
-			float3 r = reflect(-d, input.n);
-			float3 sd = normalize((float3) vLightDir[i]); // missuse the vLightDir variable for spot-dir
+// multiply by vertex colors
+//I = I * input.c;
 
-															/* --- this is the OpenGL 1.2 version (not so nice) --- */
-															//float spot = (dot(-d, sd));
-															//if(spot > cos(vLightSpot[i].x))
-															//	spot = pow( spot, vLightSpot[i].y );
-															//else
-															//	spot = 0.0f;	
-															/* --- */
-
-															/* --- this is the  DirectX9 version (better) --- */
-			float rho = dot(-d, sd);
-			float spot = pow(saturate((rho - vLightSpot[i].x) / (vLightSpot[i].y - vLightSpot[i].x)), vLightSpot[i].z);
-			float att = spot / (vLightAtt[i].x + vLightAtt[i].y * dl + vLightAtt[i].z * dl * dl);
-			I += att * calcPhongLighting(vLightColor[i], vMaterialTexture, input.n, d, eye, r);
-		}
-		else
-		{
-			//I += 0;
-		}
-	}
-
-	// set diffuse alpha
-	I.a = vMaterialDiffuse.a;
-	
-	// multiply by vertex colors
-	//I = I * input.c;
-
-	return I;
+return I;
 }
 
 
@@ -201,7 +208,7 @@ PSInputCustom VShaderCustom(VSInput input)
 		};
 		inputp = mul(mInstance, input.p);
 	}
-	
+
 	//set position into camera clip space	
 	output.p = mul(inputp, mWorld);
 	output.wp = output.p;
@@ -218,27 +225,27 @@ PSInputCustom VShaderCustom(VSInput input)
 			output.sp = mul(output.sp, mLightProj[0]);
 		}
 	}
-	
+
 	//set texture coords and color
 	output.t = input.t;
 	output.c = input.c;
-	
+
 	//set normal for interpolation	
-	output.n = normalize(mul(input.n, (float3x3) mWorld));
+	output.n = normalize(mul(input.n, (float3x3)mWorld));
 
 
 	if (bHasNormalMap)
 	{
 		// transform the tangents by the world matrix and normalize
-		output.t1 = normalize(mul(input.t1, (float3x3) mWorld));
-		output.t2 = normalize(mul(input.t2, (float3x3) mWorld));
+		output.t1 = normalize(mul(input.t1, (float3x3)mWorld));
+		output.t2 = normalize(mul(input.t2, (float3x3)mWorld));
 	}
 	else
 	{
 		output.t1 = 0.0f;
 		output.t2 = 0.0f;
 	}
-		
+
 	return output;
 }
 

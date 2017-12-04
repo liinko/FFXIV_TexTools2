@@ -631,7 +631,7 @@ namespace FFXIV_TexTools2.IO
 
                         dataOverwritten = true;
                     }
-                    else
+                    else if(!inModList)
                     {
                         int emptyLength = 0;
                         int emptyLine = 0;

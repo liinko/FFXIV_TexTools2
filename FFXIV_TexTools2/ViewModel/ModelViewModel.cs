@@ -46,7 +46,7 @@ namespace FFXIV_TexTools2.ViewModel
 
         int raceIndex, meshIndex, bodyIndex, partIndex;
         bool raceEnabled, meshEnabled, bodyEnabled, partEnabled, modelRendering, secondModelRendering, thirdModelRendering, is3DLoaded, disposing, modelTabEnabled;
-        bool import3dEnabled, activeEnabled;
+        bool import3dEnabled, activeEnabled, openEnabled;
         string selectedCategory, reflectionAmount, modelName, fullPath;
         string activeToggle = "Enable/Disable";
 
@@ -77,6 +77,7 @@ namespace FFXIV_TexTools2.ViewModel
         public bool ModelTabEnabled { get { return modelTabEnabled; } set { modelTabEnabled = value; NotifyPropertyChanged("ModelTabEnabled"); } }
         public bool Import3DEnabled { get { return import3dEnabled; } set { import3dEnabled = value; NotifyPropertyChanged("Import3DEnabled"); } }
         public bool ActiveEnabled { get { return activeEnabled; } set { activeEnabled = value; NotifyPropertyChanged("ActiveEnabled"); } }
+        public bool OpenEnabled { get { return openEnabled; } set { openEnabled = value; NotifyPropertyChanged("OpenEnabled"); } }
 
 
         public bool ModelRendering { get { return modelRendering; } set { modelRendering = value; NotifyPropertyChanged("ModelRendering"); } }
@@ -273,6 +274,25 @@ namespace FFXIV_TexTools2.ViewModel
         }
 
         /// <summary>
+        /// Command for Open Folder button
+        /// </summary>
+        public ICommand OpenFolderCommand
+        {
+            get { return new RelayCommand(OpenFolder); }
+        }
+
+        /// <summary>
+        /// Runs the OpenFolder method 
+        /// </summary>
+        /// <param name="obj"></param>
+        public void OpenFolder(object obj)
+        {
+            string savePath = Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selectedItem.ItemName + "/3D";
+
+            Process.Start(savePath);
+        }
+
+        /// <summary>
         /// Saves the model and created textures as an OBJ file
         /// </summary>
         /// <param name="obj"></param>
@@ -280,20 +300,21 @@ namespace FFXIV_TexTools2.ViewModel
         {
             SaveModel.Save(selectedCategory, modelName, SelectedMesh.ID, selectedItem.ItemName, meshData, meshList);
 
-            if (!selectedCategory.Equals(Strings.Pets) && !selectedCategory.Equals(Strings.Mounts) && !selectedCategory.Equals(Strings.Minions))
+            try
             {
-                try
+                var result = SaveModel.SaveCollada(selectedCategory, modelName, selectedItem.ItemName, meshData, meshList);
+                if (result)
                 {
-                    SaveModel.SaveCollada(selectedCategory, modelName, selectedItem.ItemName, meshData, meshList);
                     Import3DEnabled = true;
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("[Collada] Error saving .dae File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    Debug.WriteLine(ex.StackTrace);
-                }
-
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show("[Collada] Error saving .dae File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                Debug.WriteLine(ex.StackTrace);
+            }
+
+            OpenEnabled = true;
         }
 
         /// <summary>
@@ -820,9 +841,9 @@ namespace FFXIV_TexTools2.ViewModel
                     BitmapSource specularBMP = null;
                     BitmapSource diffuseBMP = null;
                     BitmapSource normalBMP = null;
-                    BitmapSource colorBMP = null;
                     BitmapSource alphaBMP = null;
                     BitmapSource maskBMP = null;
+                    BitmapSource emissiveBMP = null;
 
                     TEXData specularData = null;
                     TEXData diffuseData = null;
@@ -842,15 +863,14 @@ namespace FFXIV_TexTools2.ViewModel
                             {
                                 normalData = TEX.GetTex(mtrlData.NormalOffset, Strings.ItemsDat);
                                 maskData = TEX.GetTex(mtrlData.MaskOffset, Strings.ItemsDat);
-                                var colorBmp = TEX.TextureToBitmap(mtrlData.ColorData, 9312, 4, 16);
-                                colorBMP = Imaging.CreateBitmapSourceFromHBitmap(colorBmp.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
 
-                                var maps = TexHelper.MakeModelTextureMaps(normalData, null, maskData, null, colorBMP);
+                                var maps = TexHelper.MakeModelTextureMaps(normalData, null, maskData, null, mtrlData);
 
                                 diffuseBMP = maps[0];
                                 specularBMP = maps[1];
                                 normalBMP = maps[2];
                                 alphaBMP = maps[3];
+                                emissiveBMP = maps[4];
 
                                 normalData.Dispose();
                                 maskData.Dispose();
@@ -914,23 +934,35 @@ namespace FFXIV_TexTools2.ViewModel
                             }
                             else
                             {
-                                specularData = TEX.GetTex(mtrlData.SpecularOffset, Strings.ItemsDat);
-                                var maps = TexHelper.MakeCharacterMaps(normalData, diffuseData, null, specularData);
 
-                                diffuseBMP = maps[0];
-                                specularBMP = maps[1];
-                                normalBMP = maps[2];
-                                alphaBMP = maps[3];
+                                if (mtrlData.ColorData != null)
+                                {
+                                    specularData = TEX.GetTex(mtrlData.SpecularOffset, Strings.ItemsDat);
+                                    var maps = TexHelper.MakeModelTextureMaps(normalData, null, null, specularData, mtrlData);
+
+                                    diffuseBMP = maps[0];
+                                    specularBMP = maps[1];
+                                    normalBMP = maps[2];
+                                    alphaBMP = maps[3];
+                                    emissiveBMP = maps[4];
+                                }
+                                else
+                                {
+                                    specularData = TEX.GetTex(mtrlData.SpecularOffset, Strings.ItemsDat);
+                                    var maps = TexHelper.MakeCharacterMaps(normalData, diffuseData, null, specularData);
+
+                                    diffuseBMP = maps[0];
+                                    specularBMP = maps[1];
+                                    normalBMP = maps[2];
+                                    alphaBMP = maps[3];
+                                }
+
+
                             }
                         }
                     }
                     else
                     {
-                        if (mtrlData.ColorData != null)
-                        {
-                            var colorBmp = TEX.TextureToBitmap(mtrlData.ColorData, 9312, 4, 16);
-                            colorBMP = Imaging.CreateBitmapSourceFromHBitmap(colorBmp.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-                        }
 
                         if (mtrlData.NormalOffset != 0)
                         {
@@ -962,19 +994,21 @@ namespace FFXIV_TexTools2.ViewModel
 
                         if (!isBody && specularData == null)
                         {
-                            var maps = TexHelper.MakeModelTextureMaps(normalData, diffuseData, maskData, null, colorBMP);
+                            var maps = TexHelper.MakeModelTextureMaps(normalData, diffuseData, maskData, null, mtrlData);
                             diffuseBMP = maps[0];
                             specularBMP = maps[1];
                             normalBMP = maps[2];
                             alphaBMP = maps[3];
+                            emissiveBMP = maps[4];
                         }
                         else if (!isBody && specularData != null)
                         {
-                            var maps = TexHelper.MakeModelTextureMaps(normalData, diffuseData, null, specularData, colorBMP);
+                            var maps = TexHelper.MakeModelTextureMaps(normalData, diffuseData, null, specularData, mtrlData);
                             diffuseBMP = maps[0];
                             specularBMP = maps[1];
                             normalBMP = maps[2];
                             alphaBMP = maps[3];
+                            emissiveBMP = maps[4];
                         }
 
                         if (normalData != null)
@@ -1004,6 +1038,7 @@ namespace FFXIV_TexTools2.ViewModel
                         Diffuse = diffuseBMP,
                         Normal = normalBMP,
                         Alpha = alphaBMP,
+                        Emissive = emissiveBMP,
 
                         IsBody = isBody,
                         IsFace = isFace,
@@ -1028,6 +1063,15 @@ namespace FFXIV_TexTools2.ViewModel
                 else
                 {
                     Import3DEnabled = false;
+                }
+
+                if (Directory.Exists(Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selectedItem.ItemName + "/3D/"))
+                {
+                    OpenEnabled = true;
+                }
+                else
+                {
+                    openEnabled = false;
                 }
 
                 string line;
@@ -1091,177 +1135,92 @@ namespace FFXIV_TexTools2.ViewModel
         /// <returns>The MTRLData of the given mesh</returns>
         public MTRLData MTRL3D(int mesh)
         {
+            var mNum = meshList[mesh].MaterialNum;
+            var typeChar = materialStrings[mNum][4].ToString() + materialStrings[mNum][9].ToString();
+            var race = SelectedRace.ID;
+            var modelID = selectedItem.PrimaryModelID;
+            var body = "";
+            var mtrlFolder = "";
+            string slotAbr = null;
 
-            MTRLData mtrlData = null;
-            bool isDemiHuman = false;
-
-            if (selectedItem.PrimaryMTRLFolder != null)
+            if (typeChar.Contains("c"))
             {
-                isDemiHuman = selectedItem.PrimaryMTRLFolder.Contains("demihuman");
+                race = materialStrings[mNum].Substring(materialStrings[mNum].IndexOf("c") + 1, 4);
             }
-            
+
+            var part = materialStrings[mNum].Substring(materialStrings[mNum].LastIndexOf("_") + 1, 1);
             var itemVersion = IMC.GetVersion(selectedCategory, selectedItem, false).Item1;
             var itemType = Helper.GetCategoryType(selectedCategory);
 
-            try
+            switch (typeChar)
             {
-                if (selectedItem.ItemName.Equals(Strings.Face) || selectedItem.ItemName.Equals(Strings.Hair) || isDemiHuman)
-                {
-                    string slotAbr;
-
-                    if (isDemiHuman)
-                    {
-                        slotAbr = Info.slotAbr[SelectedPart.Name];
-                    }
-                    else if (selectedCategory.Equals(Strings.Character))
-                    {
-                        var race = materialStrings[mesh].Substring(materialStrings[mesh].IndexOf("c") + 1, 4);
-
-                        if (materialStrings[mesh].Contains("h0"))
-                        {
-                            var hairNum = materialStrings[mesh].Substring(materialStrings[mesh].IndexOf("h0") + 1, 4);
-                            var mtrlFolder = string.Format(Strings.HairMtrlFolder, race, hairNum);
-                            slotAbr = materialStrings[mesh].Substring(materialStrings[mesh].LastIndexOf("_") - 3, 3);
-                            slotAbr = Info.HairTypes.FirstOrDefault(x => x.Value == slotAbr).Key;
-                            var part = materialStrings[mesh].Substring(materialStrings[mesh].LastIndexOf("_") + 1, 1);
-
-                            var hairInfo = MTRL.GetMTRLDatafromType(selectedItem, SelectedRace, hairNum, slotAbr, itemVersion, selectedCategory, part);
-                            return hairInfo.Item1;
-                        }
-                        else if (materialStrings[mesh].Contains("f0"))
-                        {
-                            var faceNum = materialStrings[mesh].Substring(materialStrings[mesh].IndexOf("f0") + 1, 4);
-                            var mtrlFolder = string.Format(Strings.FaceMtrlFolder, race, faceNum);
-                            slotAbr = materialStrings[mesh].Substring(materialStrings[mesh].LastIndexOf("_") - 3, 3);
-                            slotAbr = Info.FaceTypes.FirstOrDefault(x => x.Value == slotAbr).Key;
-                            var part = materialStrings[mesh].Substring(materialStrings[mesh].LastIndexOf("_") + 1, 1);
-
-                            var faceInfo = MTRL.GetMTRLDatafromType(selectedItem, SelectedRace, faceNum, slotAbr, itemVersion, selectedCategory, part);
-                            return faceInfo.Item1;
-                        }
-                        else
-                        {
-                            slotAbr = selectedPart.Name;
-                        }
-                    }
-                    else
-                    {
-                        slotAbr = selectedPart.Name;
-                    }
-
-                    var info = MTRL.GetMTRLDatafromType(selectedItem, SelectedRace, selectedPart.Name, slotAbr, itemVersion, selectedCategory, "a");
-                    mtrlData = info.Item1;
-                }
-                else
-                {
-                    Tuple<MTRLData, ObservableCollection<ComboBoxInfo>> info;
-
-                    if (itemType.Equals("character") || itemType.Equals("equipment"))
-                    {
-                        try
-                        {
-                            if (materialStrings[mesh].Contains("b00") || materialStrings[mesh].Contains("t00") || materialStrings[mesh].Contains("h00"))
-                            {
-                                if (materialStrings[mesh].Contains("mt_c"))
-                                {
-                                    var mtrlFolder = "";
-                                    var race = materialStrings[mesh].Substring(materialStrings[mesh].IndexOf("c") + 1, 4);
-
-                                    if (materialStrings[mesh].Contains("b00"))
-                                    {
-                                        mtrlFolder = string.Format(Strings.BodyMtrlFolder, race, materialStrings[mesh].Substring(materialStrings[mesh].IndexOf("b00") + 1, 4));
-                                    }
-                                    else if (materialStrings[mesh].Contains("t00"))
-                                    {
-                                        mtrlFolder = string.Format(Strings.TailMtrlFolder, race, materialStrings[mesh].Substring(materialStrings[mesh].IndexOf("t00") + 1, 4));
-                                    }
-                                    else if (materialStrings[mesh].Contains("h00"))
-                                    {
-                                        mtrlFolder = string.Format(Strings.HairMtrlFolder, race, materialStrings[mesh].Substring(materialStrings[mesh].IndexOf("h00") + 1, 4));
-                                    }
-
-                                    var mtrlFile = materialStrings[mesh].Substring(1);
-
-                                    return MTRL.GetMTRLInfo(Helper.GetDataOffset(FFCRC.GetHash(mtrlFolder), FFCRC.GetHash(mtrlFile), Strings.ItemsDat), true);
-                                }
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            Debug.WriteLine(ex.Message);
-                            Debug.WriteLine(ex.StackTrace);
-                        }
-                    }
-                    else
-                    {
-                        info = MTRL.GetMTRLData(selectedItem, SelectedRace.ID, selectedCategory, SelectedPart.Name, itemVersion, "", "", "0000");
-                    }
-
-                    if (SelectedPart.Name.Equals("Secondary"))
-                    {
-                        info = MTRL.GetMTRLData(selectedItem, SelectedRace.ID, selectedCategory, SelectedPart.Name, itemVersion, "Secondary", "", "0000");
-                    }
-                    else
-                    {
-                        string part = "a";
-                        string itemID = selectedItem.PrimaryModelID;
-                        string body = "";
-
-                        if (materialStrings.Count > 1)
-                        {
-                            try
-                            {
-                                part = materialStrings[mesh].Substring(materialStrings[mesh].LastIndexOf("_") + 1, 1);
-                                itemID = materialStrings[mesh].Substring(materialStrings[mesh].IndexOf("_") + 2, 4);
-                                if (itemType.Equals("weapon"))
-                                {
-                                    body = materialStrings[mesh].Substring(materialStrings[mesh].IndexOf("b") + 1, 4);
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                Debug.WriteLine(ex.Message);
-                                Debug.WriteLine(ex.StackTrace);
-                            }
-                        }
-
-                        if (selectedCategory.Equals(Strings.Pets))
-                        {
-                            part = "1";
-                        }
-
-                        info = MTRL.GetMTRLData(selectedItem, SelectedRace.ID, selectedCategory, part, itemVersion, body, itemID, "0000");
-                    }
-
-                    if (info != null)
-                    {
-                        mtrlData = info.Item1;
-                    }
-                    else
-                    {
-                        var combo = new ComboBoxInfo() { Name = "Default", ID = materialStrings[mesh].Substring(materialStrings[mesh].IndexOf("c") + 1, 4), IsNum = false };
-
-                        if (SelectedPart.Name.Equals("-"))
-                        {
-                            info = MTRL.GetMTRLData(selectedItem, combo.ID, selectedCategory, "a", itemVersion, "", "", "0000");
-                        }
-                        else
-                        {
-                            info = MTRL.GetMTRLData(selectedItem, combo.ID, selectedCategory, SelectedPart.Name, itemVersion, "", "", "0000");
-                        }
-                       
-                        mtrlData = info.Item1;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.Message);
-                Debug.WriteLine(ex.StackTrace);
-                return null;
+                //equipment
+                case "ce":
+                    modelID = materialStrings[mNum].Substring(materialStrings[mNum].IndexOf("e") + 1, 4);
+                    break;
+                //accessory
+                case "ca":
+                    modelID = materialStrings[mNum].Substring(materialStrings[mNum].IndexOf("a") + 1, 4);
+                    break;
+                //weapon
+                case "wb":
+                    modelID = materialStrings[mNum].Substring(materialStrings[mNum].IndexOf("w") + 1, 4);
+                    body = materialStrings[mNum].Substring(materialStrings[mNum].IndexOf("b") + 1, 4);
+                    break;
+                //body
+                case "cb":
+                    modelID = materialStrings[mNum].Substring(materialStrings[mNum].IndexOf("b") + 1, 4);
+                    mtrlFolder = string.Format(Strings.BodyMtrlFolder, race, modelID);
+                    break;
+                //face
+                case "cf":
+                    modelID = materialStrings[mNum].Substring(materialStrings[mNum].IndexOf("f") + 1, 4);
+                    slotAbr = materialStrings[mNum].Substring(materialStrings[mNum].LastIndexOf("_") - 3, 3);
+                    slotAbr = Info.FaceTypes.FirstOrDefault(x => x.Value == slotAbr).Key;
+                    break;
+                //hair
+                case "ch":
+                    modelID = materialStrings[mNum].Substring(materialStrings[mNum].IndexOf("h") + 1, 4);
+                    slotAbr = materialStrings[mNum].Substring(materialStrings[mNum].LastIndexOf("_") - 3, 3);
+                    slotAbr = Info.HairTypes.FirstOrDefault(x => x.Value == slotAbr).Key;
+                    break;
+                //tail
+                case "ct":
+                    modelID = materialStrings[mNum].Substring(10, 4);
+                    mtrlFolder = string.Format(Strings.TailMtrlFolder, race, modelID);
+                    break;
+                //monster
+                case "mb":
+                    modelID = materialStrings[mNum].Substring(materialStrings[mNum].IndexOf("m") + 1, 4);
+                    body = materialStrings[mNum].Substring(materialStrings[mNum].IndexOf("b") + 1, 4);
+                    break;
+                //demihuman
+                case "de":
+                    race = materialStrings[mNum].Substring(materialStrings[mNum].IndexOf("d") + 1, 4);
+                    modelID = materialStrings[mNum].Substring(materialStrings[mNum].IndexOf("e") + 1, 4);
+                    slotAbr = Info.slotAbr[SelectedPart.Name];
+                    break;
             }
 
-            return mtrlData;
+            if(typeChar.Equals("ch") || typeChar.Equals("cf") || typeChar.Equals("de"))
+            {
+                var info = MTRL.GetMTRLDatafromType(selectedItem, race, modelID, slotAbr, itemVersion, selectedCategory, part);
+                return info.Item1;
+            }
+            else if (typeChar.Equals("cb") || typeChar.Equals("ct"))
+            {
+                var info = MTRL.GetMTRLInfo(Helper.GetDataOffset(FFCRC.GetHash(mtrlFolder), FFCRC.GetHash(materialStrings[mNum].Substring(1)), Strings.ItemsDat), true);
+                return info;
+            }
+            else
+            {
+                if (selectedCategory.Equals(Strings.Pets))
+                {
+                    part = "1";
+                }
+                var info = MTRL.GetMTRLData(selectedItem, race, selectedCategory, part, itemVersion, body, modelID, "0000");
+                return info.Item1;
+            }
         }
 
 
