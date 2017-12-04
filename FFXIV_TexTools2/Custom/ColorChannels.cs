@@ -16,7 +16,7 @@
 
 using System;
 using System.Drawing;
-using System.Windows;
+using System.Windows; using Syncfusion.Windows.Shared;
 using System.Windows.Media.Effects;
 using System.Windows.Media.Media3D;
 

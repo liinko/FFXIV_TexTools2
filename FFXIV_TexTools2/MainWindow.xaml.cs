@@ -20,10 +20,10 @@ using FFXIV_TexTools2.ViewModel;
 using FFXIV_TexTools2.Views;
 using Newtonsoft.Json;
 using System;
-using System.Globalization;
 using System.IO;
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Input;
 using System.Windows.Media.Imaging;
 
 namespace FFXIV_TexTools2
@@ -39,7 +39,7 @@ namespace FFXIV_TexTools2
         {
             InitializeComponent();
             mViewModel = new MainViewModel();
-            this.DataContext = mViewModel;
+            DataContext = mViewModel;
 
             DXVerStatus.Content = "DX Version: " + Properties.Settings.Default.DX_Ver.Substring(2);
 
@@ -272,6 +272,41 @@ namespace FFXIV_TexTools2
             App.Current.Shutdown();
         }
 
+        GridLength RCWidth;
+        double RCMinWidth;
+        private void ImageButton_Click(object sender, RoutedEventArgs e)
+        {
+
+            if (MainSplitter.IsEnabled == true)
+            {
+                IMGCollapse1.RenderTransformOrigin = new Point(0.5, 0.5);
+                IMGCollapse2.RenderTransformOrigin = new Point(0.5, 0.5);
+                ScaleTransform flipTrans = new ScaleTransform();
+                flipTrans.ScaleX = -1;
+                IMGCollapse1.RenderTransform = flipTrans;
+                IMGCollapse2.RenderTransform = flipTrans;
+                RCMinWidth = RightColumn.MinWidth;
+                RCWidth = RightColumn.Width;
+                RightColumn.MinWidth = 8;
+                RightColumn.MaxWidth = 8;
+                MainSplitter.IsEnabled = false;
+            }
+            else
+            {
+                IMGCollapse1.RenderTransformOrigin = new Point(0.5, 0.5);
+                IMGCollapse2.RenderTransformOrigin = new Point(0.5, 0.5);
+                ScaleTransform flipTrans = new ScaleTransform();
+                flipTrans.ScaleX = 1;
+                IMGCollapse1.RenderTransform = flipTrans;
+                IMGCollapse2.RenderTransform = flipTrans;
+                RightColumn.MaxWidth = 100000;
+                RightColumn.MinWidth = RCMinWidth;
+                RightColumn.Width = RCWidth;
+                MainSplitter.IsEnabled = true;
+            }
+        }
+
+ 
         private void textureTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             var item = e.NewValue as CategoryViewModel;
@@ -280,6 +315,20 @@ namespace FFXIV_TexTools2
             {
                 Save_All_DDS.IsEnabled = true;
                 var itemParent = item.Parent;
+
+                if (item.Children != null)
+                {
+                    if (item.IsExpanded != true)
+                    {
+                        item.IsExpanded = true;
+                        item.IsSelected = false;
+                    }
+                    else
+                    {
+                        item.IsExpanded = false;
+                        item.IsSelected = false;
+                    }
+                }
 
                 while (itemParent != null)
                 {
@@ -322,8 +371,42 @@ namespace FFXIV_TexTools2
                 Save_All_DDS.IsEnabled = false;
             }
         }
+        private void NewBar_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left) { 
+                    DragMove();
+            }
+        }
 
-        private void Save_All_DDS_Click(object sender, RoutedEventArgs e)
+        private void NewBar_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (WindowState == System.Windows.WindowState.Normal)
+            {
+                WindowState = System.Windows.WindowState.Maximized;
+            }
+            else
+            {
+                WindowState = System.Windows.WindowState.Normal;
+            }
+        }
+        private void MaximizeButton_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (WindowState == System.Windows.WindowState.Normal)
+            {
+                WindowState = System.Windows.WindowState.Maximized;
+            }
+            else
+            {
+                WindowState = System.Windows.WindowState.Normal;
+            }
+        }
+        private void MinimizeButton_MouseDown(object sender, MouseButtonEventArgs e)
+        { WindowState = System.Windows.WindowState.Minimized; }
+        private void CloseButton_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            App.Current.Shutdown();
+        }
+            private void Save_All_DDS_Click(object sender, RoutedEventArgs e)
         {
             mViewModel.TextureVM.SaveAllDDS();
         }
@@ -393,6 +476,11 @@ namespace FFXIV_TexTools2
             }
         }
 
+
+        private void SplitCollapse_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+ }
+
         private void TextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
             if (searchBox.Text == "")
@@ -413,6 +501,8 @@ namespace FFXIV_TexTools2
 
                 searchBox.Background = null;
             }
-        }
+       
     }
+
+   
 }

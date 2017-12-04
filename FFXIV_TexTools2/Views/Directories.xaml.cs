@@ -17,14 +17,14 @@
 using FolderSelect;
 using System.Diagnostics;
 using System.IO;
-using System.Windows;
+using System.Windows; using Syncfusion.Windows.Shared;
 
 namespace FFXIV_TexTools2.Views
 {
     /// <summary>
     /// Interaction logic for Window1.xaml
     /// </summary>
-    public partial class DirectoriesView : Window
+    public partial class DirectoriesView : ChromelessWindow
     {
         public DirectoriesView()
         {

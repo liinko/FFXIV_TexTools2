@@ -60,7 +60,8 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>Resources\ffxiv2.ico</ApplicationIcon>
+    <ApplicationIcon>
+    </ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Cyotek.Drawing.BitmapFont, Version=1.0.0.0, Culture=neutral, PublicKeyToken=58daa28b0b2de221, processorArchitecture=MSIL">
@@ -102,6 +103,9 @@
     <Reference Include="SharpDX.Mathematics, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
       <HintPath>..\packages\SharpDX.Mathematics.4.0.1\lib\net45\SharpDX.Mathematics.dll</HintPath>
     </Reference>
+    <Reference Include="Syncfusion.Shared.WPF, Version=15.4451.0.17, Culture=neutral, PublicKeyToken=3d67ed1f87d44c89, processorArchitecture=MSIL">
+      <HintPath>C:\Program Files (x86)\Syncfusion\Essential Studio\15.4.0.17\Assemblies\4.5.1\Syncfusion.Shared.WPF.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -115,6 +119,7 @@
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
+    <Reference Include="UIAutomationProvider" />
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -336,6 +341,7 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <None Include="app.manifest" />
+    <None Include="HelixToolkit.Wpf.SharpDX.1.0.0-unstable1826.nupkg" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
@@ -374,11 +380,33 @@
   <ItemGroup>
     <Resource Include="Resources\PaypalDonateButton.png" />
     <Resource Include="Resources\ffxivmeteorlogo.png" />
-    <Resource Include="Resources\ffxiv2.ico" />
+    <Resource Include="Bullets-04-WF.png" />
     <Content Include="Custom\Custom.fx" />
     <Content Include="Custom\Material.fx" />
     <Resource Include="Resources\3DModel.png" />
     <None Include="Resources\uldpaths.txt" />
+    <Resource Include="Resources\NewIcon.png" />
+    <Resource Include="Resources\Pixel.png" />
+    <Resource Include="Resources\Models.png" />
+    <Resource Include="Resources\Search.png" />
+    <Resource Include="Resources\Collapse.png" />
+    <Resource Include="Resources\Grip.png" />
+    <Resource Include="Resources\Textures_Deselected.png" />
+    <Resource Include="Resources\Textures_Hover.png" />
+    <Resource Include="Resources\Textures_Selected.png" />
+    <Resource Include="Resources\NewIcon.ico" />
+    <Resource Include="Resources\Settings_Deselected.png" />
+    <Resource Include="Resources\Settings_Hover.png" />
+    <Resource Include="Resources\Settings_Selected.png" />
+    <Resource Include="Resources\Models_Deselected.png" />
+    <Resource Include="Resources\Models_Hover.png" />
+    <Resource Include="Resources\Models_Selected.png" />
+    <Resource Include="Resources\Mods_Deselected.png" />
+    <Resource Include="Resources\Mods_Hover.png" />
+    <Resource Include="Resources\Mods_Selected.png" />
+    <Resource Include="Resources\Chat_Deselected.png" />
+    <Resource Include="Resources\Chat_Hover.png" />
+    <Resource Include="Resources\Chat_Selected.png" />
     <Resource Include="Resources\search.png" />
     <Resource Include="Resources\FolderOpen_16x.png" />
     <Content Include="sharpdx_direct3d11_1_effects_arm.dll" />

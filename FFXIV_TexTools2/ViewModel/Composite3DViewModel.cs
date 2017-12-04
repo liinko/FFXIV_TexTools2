@@ -96,7 +96,7 @@ namespace FFXIV_TexTools2.ViewModel
 
             Vector3 center = ((CustomGM3D)ModelCollection[0]).Geometry.BoundingSphere.Center;
 
-            Camera.Position = new Media3D.Point3D(center.X, center.Y, center.Z + 2);
+            Camera.Position = new Media3D.Point3D(center.X, center.Y, center.Z + 3);
             Camera.LookDirection =  new Media3D.Vector3D(0, 0, center.Z - 2);
         }
 

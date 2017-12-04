@@ -82,5 +82,53 @@ namespace FFXIV_TexTools2.Properties {
                 this["FFXIV_Ver"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Normal")]
+        public global::System.Windows.Forms.FormWindowState TT_Win_State {
+            get {
+                return ((global::System.Windows.Forms.FormWindowState)(this["TT_Win_State"]));
+            }
+            set {
+                this["TT_Win_State"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0, 0")]
+        public global::System.Drawing.Size TT_Resolution {
+            get {
+                return ((global::System.Drawing.Size)(this["TT_Resolution"]));
+            }
+            set {
+                this["TT_Resolution"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string TT_SplitWidth {
+            get {
+                return ((string)(this["TT_SplitWidth"]));
+            }
+            set {
+                this["TT_SplitWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0, 0")]
+        public global::System.Drawing.Point TT_Location {
+            get {
+                return ((global::System.Drawing.Point)(this["TT_Location"]));
+            }
+            set {
+                this["TT_Location"] = value;
+            }
+        }
     }
 }

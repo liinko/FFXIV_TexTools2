@@ -25,7 +25,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Windows;
+using System.Windows; using Syncfusion.Windows.Shared;
 
 namespace HelixToolkit.Wpf.SharpDX
 {

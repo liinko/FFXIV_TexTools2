@@ -27,7 +27,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
-using System.Windows;
+using System.Windows; using Syncfusion.Windows.Shared;
 using System.Windows.Input;
 using System.Xml;
 

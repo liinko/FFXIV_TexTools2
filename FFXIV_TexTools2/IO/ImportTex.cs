@@ -23,7 +23,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
-using System.Windows;
+using System.Windows; using Syncfusion.Windows.Shared;
 
 namespace FFXIV_TexTools2.IO
 {

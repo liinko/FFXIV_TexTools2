@@ -34,8 +34,8 @@
             </Style.Triggers>
         </Style>
     </UserControl.Resources>
-    <Grid Background="White">
-        <GroupBox x:Name="groupBox" Header="Viewer" Margin="10,47,10,63">
+    <Grid>
+        <GroupBox x:Name="groupBox" Header="" Margin="10,47,10,63" BorderBrush="{x:Null}">
             <Border>
                 <Border.Background>
                     <DrawingBrush Viewport="0,0,20,20" ViewportUnits="Absolute" Stretch="None" TileMode="Tile">
@@ -89,10 +89,10 @@
                 <ColumnDefinition/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <ComboBox x:Name="raceComboBox" Margin="5,5,5.5,5" IsReadOnly="True" ItemsSource="{Binding RaceComboBox}" DisplayMemberPath="Name" SelectedValuePath="Name" SelectedItem="{Binding SelectedRace}" SelectedIndex="{Binding RaceIndex}" IsEnabled="{Binding RaceEnabled, FallbackValue=false}"/>
-            <ComboBox x:Name="mapComboBox" Grid.Column="1" Margin="5" IsReadOnly="True" IsTextSearchEnabled="False" IsSynchronizedWithCurrentItem="False" ItemsSource="{Binding MapComboBox}" DisplayMemberPath="Name" SelectedValuePath="Name" SelectedItem="{Binding SelectedMap}" SelectedIndex="{Binding MapIndex}" IsEnabled="{Binding MapEnabled, FallbackValue=false}"/>
-            <ComboBox x:Name="partComboBox" Grid.Column="2" Margin="5" IsSynchronizedWithCurrentItem="False" IsReadOnly="True" ItemsSource="{Binding PartComboBox}" DisplayMemberPath="Name" SelectedValuePath="Name" SelectedItem="{Binding SelectedPart}" SelectedIndex="{Binding PartIndex}" IsEnabled="{Binding PartEnabled, FallbackValue=false}"/>
-            <ComboBox x:Name="typeComboBox" Grid.Column="3" Margin="5,5,6,5" IsSynchronizedWithCurrentItem="False" IsReadOnly="True" ItemsSource="{Binding TypeComboBox}" DisplayMemberPath="Name" SelectedValuePath="Name" SelectedItem="{Binding SelectedType}" SelectedIndex="{Binding TypeIndex}" IsEnabled="{Binding TypeEnabled, FallbackValue=false}"/>
+            <ComboBox x:Name="raceComboBox" Margin="5,5,5.5,5" IsReadOnly="True" ItemsSource="{Binding RaceComboBox}" DisplayMemberPath="Name" SelectedValuePath="Name" SelectedItem="{Binding SelectedRace}" SelectedIndex="{Binding RaceIndex}" IsEnabled="{Binding RaceEnabled, FallbackValue=false}" Background="#00000000" BorderBrush="{x:Null}"/>
+            <ComboBox x:Name="mapComboBox" Grid.Column="1" Margin="5" IsReadOnly="True" IsTextSearchEnabled="False" IsSynchronizedWithCurrentItem="False" ItemsSource="{Binding MapComboBox}" DisplayMemberPath="Name" SelectedValuePath="Name" SelectedItem="{Binding SelectedMap}" SelectedIndex="{Binding MapIndex}" IsEnabled="{Binding MapEnabled, FallbackValue=false}" BorderBrush="{x:Null}" Background="#00000000"/>
+            <ComboBox x:Name="partComboBox" Grid.Column="2" Margin="5" IsSynchronizedWithCurrentItem="False" IsReadOnly="True" ItemsSource="{Binding PartComboBox}" DisplayMemberPath="Name" SelectedValuePath="Name" SelectedItem="{Binding SelectedPart}" SelectedIndex="{Binding PartIndex}" IsEnabled="{Binding PartEnabled, FallbackValue=false}" Background="#00000000" BorderBrush="{x:Null}"/>
+            <ComboBox x:Name="typeComboBox" Grid.Column="3" Margin="5,5,6,5" IsSynchronizedWithCurrentItem="False" IsReadOnly="True" ItemsSource="{Binding TypeComboBox}" DisplayMemberPath="Name" SelectedValuePath="Name" SelectedItem="{Binding SelectedType}" SelectedIndex="{Binding TypeIndex}" IsEnabled="{Binding TypeEnabled, FallbackValue=false}" BorderBrush="{x:Null}" Background="#00000000"/>
         </Grid>
         <Grid>
             <Grid.ColumnDefinitions>
@@ -113,9 +113,9 @@
                 <ColumnDefinition/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <Button Content="Export as Image" Margin="5" Command="{Binding SavePNGCommand}" IsEnabled="{Binding SaveEnabled, FallbackValue=false}"/>
-            <Button Content="Export as DDS" Grid.Column="1" Margin="5" Command="{Binding SaveDDSCommand}" IsEnabled="{Binding SaveEnabled, FallbackValue=false}"/>
-            <Button Content="Import" Grid.Column="2" Margin="5" Command="{Binding ImportCommand}" IsEnabled="{Binding ImportEnabled, FallbackValue=false}"/>
+            <Button Content="Export as Image" Margin="5" Command="{Binding SavePNGCommand}" IsEnabled="{Binding SaveEnabled, FallbackValue=false}" Background="#00000000"/>
+            <Button Content="Export as DDS" Grid.Column="1" Margin="5" Command="{Binding SaveDDSCommand}" IsEnabled="{Binding SaveEnabled, FallbackValue=false}" Background="#00000000"/>
+            <Button Content="Import" Grid.Column="2" Margin="5" Command="{Binding ImportCommand}" IsEnabled="{Binding ImportEnabled, FallbackValue=false}" Background="#00000000"/>
             <Button Content="{Binding ActiveToggle, FallbackValue='Enable/Disable' }" Grid.Column="3" Margin="5" Command="{Binding ActiveCommand}" IsEnabled="{Binding ActiveEnabled, FallbackValue=false}"/>
         </Grid>
     </Grid>

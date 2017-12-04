@@ -14,14 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using System.Windows;
+using System.Windows; using Syncfusion.Windows.Shared;
 
 namespace FFXIV_TexTools2.Views
 {
     /// <summary>
     /// Interaction logic for About.xaml
     /// </summary>
-    public partial class About : Window
+    public partial class About : ChromelessWindow
     {
         public About()
         {

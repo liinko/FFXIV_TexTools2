@@ -6,11 +6,11 @@
              xmlns:hx="http://helix-toolkit.org/wpf/SharpDX"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
-    <Grid Background="White">
+    <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <GroupBox x:Name="groupBox1" Header="Viewer" Margin="10,50,10,70">
+        <GroupBox x:Name="groupBox1" Header="" Margin="10,50,10,70" BorderBrush="{x:Null}">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
@@ -26,7 +26,7 @@
                     BackgroundColor="{Binding BackgroundColor}"
                     RenderTechnique="{Binding RenderTechnique}"
                     EffectsManager="{Binding EffectsManager}"
-                    DataContext="{Binding CompositeVM}">
+                    DataContext="{Binding CompositeVM}" InfoBackground="{x:Null}">
                     <hx:Viewport3DX.InputBindings>
                         <KeyBinding Key="B" Command="hx:ViewportCommands.BackView" />
                         <KeyBinding Key="F" Command="hx:ViewportCommands.FrontView" />

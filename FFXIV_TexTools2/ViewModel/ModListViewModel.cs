@@ -20,7 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Windows;
+using System.Windows; using Syncfusion.Windows.Shared;
 
 namespace FFXIV_TexTools2.ViewModel
 {
