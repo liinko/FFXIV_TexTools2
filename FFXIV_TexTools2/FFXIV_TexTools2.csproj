@@ -60,7 +60,8 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>Resources\ffxiv2.ico</ApplicationIcon>
+    <ApplicationIcon>
+    </ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Cyotek.Drawing.BitmapFont, Version=1.0.0.0, Culture=neutral, PublicKeyToken=58daa28b0b2de221, processorArchitecture=MSIL">
@@ -379,17 +380,33 @@
   <ItemGroup>
     <Resource Include="Resources\PaypalDonateButton.png" />
     <Resource Include="Resources\ffxivmeteorlogo.png" />
-    <Resource Include="Resources\ffxiv2.ico" />
     <Resource Include="Bullets-04-WF.png" />
     <Content Include="Custom\Custom.fx" />
     <Content Include="Custom\Material.fx" />
     <Resource Include="Resources\3DModel.png" />
     <None Include="Resources\uldpaths.txt" />
-    <Resource Include="NewIcon.png" />
     <Resource Include="Resources\NewIcon.png" />
     <Resource Include="Resources\Pixel.png" />
-    <Resource Include="Resources\Textures.png" />
     <Resource Include="Resources\Models.png" />
+    <Resource Include="Resources\Search.png" />
+    <Resource Include="Resources\Collapse.png" />
+    <Resource Include="Resources\Grip.png" />
+    <Resource Include="Resources\Textures_Deselected.png" />
+    <Resource Include="Resources\Textures_Hover.png" />
+    <Resource Include="Resources\Textures_Selected.png" />
+    <Resource Include="Resources\NewIcon.ico" />
+    <Resource Include="Resources\Settings_Deselected.png" />
+    <Resource Include="Resources\Settings_Hover.png" />
+    <Resource Include="Resources\Settings_Selected.png" />
+    <Resource Include="Resources\Models_Deselected.png" />
+    <Resource Include="Resources\Models_Hover.png" />
+    <Resource Include="Resources\Models_Selected.png" />
+    <Resource Include="Resources\Mods_Deselected.png" />
+    <Resource Include="Resources\Mods_Hover.png" />
+    <Resource Include="Resources\Mods_Selected.png" />
+    <Resource Include="Resources\Chat_Deselected.png" />
+    <Resource Include="Resources\Chat_Hover.png" />
+    <Resource Include="Resources\Chat_Selected.png" />
     <Content Include="sharpdx_direct3d11_1_effects_arm.dll" />
     <Content Include="sharpdx_direct3d11_1_effects_x64.dll" />
     <Content Include="sharpdx_direct3d11_1_effects_x86.dll" />

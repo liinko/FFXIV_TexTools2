@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows; using Syncfusion.Windows.Shared;
-using System.Windows.Input;
+using System.Windows;
 
 namespace FFXIV_TexTools2
 {

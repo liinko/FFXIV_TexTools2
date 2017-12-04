@@ -6,6 +6,134 @@
              StartupUri="MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
+            <Style TargetType="{x:Type Button}" x:Key="ImageButtonStyle">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type Button}">
+                            <ContentPresenter/>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <!--Scrollbar Thumbs-->
+            <Style x:Key="ScrollThumbs" TargetType="{x:Type Thumb}">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type Thumb}">
+                            <Grid x:Name="Grid">
+                                <Rectangle HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width="Auto" Height="Auto" Fill="Transparent" />
+                                <Border x:Name="Rectangle1" CornerRadius="10" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width="Auto" Height="Auto"  Background="{TemplateBinding Background}" />
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="Tag" Value="Horizontal">
+                                    <Setter TargetName="Rectangle1" Property="Width" Value="Auto" />
+                                    <Setter TargetName="Rectangle1" Property="Height" Value="Auto" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <Style x:Key="blah" TargetType="{x:Type ResizeGrip}">
+                <Setter Property="OverridesDefaultStyle" Value="True" />
+                <Setter Property="Foreground" Value="Blue"/>
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type ResizeGrip}">
+                            <Border Background="{TemplateBinding Background}"
+                    SnapsToDevicePixels="True"
+                    Width="10"
+                    Height="10">
+                                <Path Data="M7.677,7.5300003 L9.677,7.5300003 9.677,9.5300002 7.677,9.5300002 z M3.786,7.5300003 L5.7859998,7.5300003 5.7859998,9.5300002 3.786,9.5300002 z M0,7.5300003 L2,7.5300003 2,9.5300002 0,9.5300002 z M3.786,3.8280003 L5.7859998,3.8280003 5.7859998,5.8280003 3.786,5.8280003 z M7.677,3.7660003 L9.677,3.7660003 9.677,5.7659999 7.677,5.7659999 z M7.677,0 L9.677,0 9.677,2 7.677,2 z" Fill="{TemplateBinding Foreground}" Height="9.53" Stretch="Fill" VerticalAlignment="Top" Width="9.677"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <!--ScrollBars-->
+            <Style x:Key="{x:Type ScrollBar}" TargetType="{x:Type ScrollBar}">
+                <Setter Property="Stylus.IsFlicksEnabled" Value="false" />
+                <Setter Property="Foreground" Value="#FF313131" />
+                <Setter Property="Background" Value="#00000000" />
+                <Setter Property="Width" Value="10" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type ScrollBar}">
+                            <Grid x:Name="GridRoot" Width="4" Background="{TemplateBinding Background}">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition  />
+                                </Grid.RowDefinitions>
+
+                                <Track x:Name="PART_Track" Grid.Row="0" IsDirectionReversed="true" Focusable="false">
+                                    <Track.Thumb>
+                                        <Thumb x:Name="Thumb" Background="{TemplateBinding Foreground}" Style="{DynamicResource ScrollThumbs}" />
+                                    </Track.Thumb>
+                                    <Track.IncreaseRepeatButton>
+                                        <RepeatButton x:Name="PageUp" Command="ScrollBar.PageDownCommand" Opacity="0" Focusable="false" />
+                                    </Track.IncreaseRepeatButton>
+                                    <Track.DecreaseRepeatButton>
+                                        <RepeatButton x:Name="PageDown" Command="ScrollBar.PageUpCommand" Opacity="0" Focusable="false" />
+                                    </Track.DecreaseRepeatButton>
+                                </Track>
+                            </Grid>
+
+                            <ControlTemplate.Triggers>
+                                <Trigger SourceName="Thumb" Property="IsMouseOver" Value="true">
+                                    <Setter Value="{DynamicResource ButtonSelectBrush}" TargetName="Thumb" Property="Background" />
+                                </Trigger>
+                                <Trigger SourceName="Thumb" Property="IsDragging" Value="true">
+                                    <Setter Value="{DynamicResource DarkBrush}" TargetName="Thumb" Property="Background" />
+                                </Trigger>
+
+                                <Trigger Property="IsEnabled" Value="false">
+                                    <Setter TargetName="Thumb" Property="Visibility" Value="Collapsed" />
+                                </Trigger>
+                                <Trigger Property="Orientation" Value="Horizontal">
+                                    <Setter TargetName="GridRoot" Property="LayoutTransform">
+                                        <Setter.Value>
+                                            <RotateTransform Angle="-90" />
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Setter TargetName="PART_Track" Property="LayoutTransform">
+                                        <Setter.Value>
+                                            <RotateTransform Angle="-90" />
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Setter Property="Width" Value="Auto" />
+                                    <Setter Property="Height" Value="12" />
+                                    <Setter TargetName="Thumb" Property="Tag" Value="Horizontal" />
+                                    <Setter TargetName="PageDown" Property="Command" Value="ScrollBar.PageLeftCommand" />
+                                    <Setter TargetName="PageUp" Property="Command" Value="ScrollBar.PageRightCommand" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style TargetType="{x:Type ScrollViewer}">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type ScrollViewer}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <ScrollContentPresenter Grid.Column="0" />
+                                <ScrollBar x:Name="PART_VerticalScrollBar" Grid.Row="0" Grid.Column="1" Value="{TemplateBinding VerticalOffset}" Maximum="{TemplateBinding ScrollableHeight}" ViewportSize="{TemplateBinding ViewportHeight}" Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"/>
+                                <ScrollBar x:Name="PART_HorizontalScrollBar" Orientation="Horizontal" Grid.Row="1" Grid.Column="0" Value="{TemplateBinding HorizontalOffset}" Maximum="{TemplateBinding ScrollableWidth}" ViewportSize="{TemplateBinding ViewportWidth}" Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}"/>
+                                <!--<Rectangle Grid.Row="1" Grid.Column="1" Fill="Red"/>-->
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
             <Style TargetType="{x:Type TabItem}">
                 <Setter Property="Template">
                     <Setter.Value>
@@ -40,329 +168,7 @@
                     </Setter.Value>
                 </Setter>
             </Style>
-            <DrawingBrush x:Key="MixedGreen">
-                <DrawingBrush.Drawing>
-                    <DrawingGroup>
-                        <DrawingGroup.Children>
-                            <GeometryDrawing Geometry="F1 M 470.695,443.187L 70.6947,443.187L 70.6947,43.1867L 470.695,43.1867L 470.695,443.187 Z ">
-                                <GeometryDrawing.Brush>
-                                    <RadialGradientBrush RadiusX="0.906377" RadiusY="0.906377" Center="0.15494,0.0920561" GradientOrigin="0.15494,0.0920561">
-                                        <RadialGradientBrush.GradientStops>
-                                            <GradientStop Color="#FF0CB14A" Offset="0"/>
-                                            <GradientStop Color="#FF051D31" Offset="1"/>
-                                        </RadialGradientBrush.GradientStops>
-                                        <RadialGradientBrush.RelativeTransform>
-                                            <TransformGroup/>
-                                        </RadialGradientBrush.RelativeTransform>
-                                    </RadialGradientBrush>
-                                </GeometryDrawing.Brush>
-                            </GeometryDrawing>
-                            <GeometryDrawing Brush="#0DFFFFFF" Geometry="F1 M 73.1439,43.306C 73.1439,43.306 290.508,322.327 470.347,162.681L 470.347,197.199C 470.347,197.199 292.497,339.582 73.1439,43.306 Z "/>
-                            <GeometryDrawing Brush="#0DD6DE23" Geometry="F1 M 425.698,59.1419C 401.547,266.89 143.033,345.051 71.4019,364.451L 71.4019,389.003C 407.873,309.582 425.698,59.1419 425.698,59.1419 Z "/>
-                            <GeometryDrawing Geometry="F1 M 470.571,396.376C 244.464,370.247 159.396,121.001 138.28,43.4907L 111.557,43.4907C 198,407.575 470.571,396.376 470.571,396.376 Z ">
-                                <GeometryDrawing.Brush>
-                                    <RadialGradientBrush RadiusX="0.082767" RadiusY="0.081363" Center="0.368626,0.660002" GradientOrigin="0.368626,0.660002">
-                                        <RadialGradientBrush.GradientStops>
-                                            <GradientStop Color="#0D036454" Offset="0"/>
-                                            <GradientStop Color="#0D051D31" Offset="1"/>
-                                        </RadialGradientBrush.GradientStops>
-                                        <RadialGradientBrush.RelativeTransform>
-                                            <TransformGroup>
-                                                <RotateTransform CenterX="0.368626" CenterY="0.660002" Angle="90"/>
-                                            </TransformGroup>
-                                        </RadialGradientBrush.RelativeTransform>
-                                    </RadialGradientBrush>
-                                </GeometryDrawing.Brush>
-                            </GeometryDrawing>
-                            <GeometryDrawing Brush="#0800ADEE" Geometry="F1 M 71.5971,323.314L 71.1557,328.835L 71.1557,357.363C 324.133,492.111 470.346,325.693 470.346,325.693C 300.224,461.693 71.5971,323.314 71.5971,323.314 Z "/>
-                            <GeometryDrawing Brush="#088BC53F" Geometry="F1 M 469.992,47.4472L 469.249,46.3219C 378.979,268.793 71.3321,239.609 71.3321,239.609C 322.057,271.905 433.604,145.363 469.992,91.4925L 469.992,47.4472 Z "/>
-                            <GeometryDrawing Brush="#08FFFFFF" Geometry="F1 M 395.25,43.306L 396.409,43.9967C 178.481,144.741 221.049,442.925 221.049,442.925C 176.869,194.018 299.174,84.3087 351.255,45.3993L 395.25,43.306 Z "/>
-                        </DrawingGroup.Children>
-                    </DrawingGroup>
-                </DrawingBrush.Drawing>
-            </DrawingBrush>
-
-            <ControlTemplate x:Key="MinimizeIcon" TargetType="{x:Type Button}" >
-                <Border Name="minborder4"   BorderThickness="1" CornerRadius="1" Background="Transparent"  MinHeight="20" Width="22"  Margin="1,0,1,5">
-                    <Canvas Width="9" Height="9">
-                        <Line X1="0" X2="8"  Y1="6" Y2="6" Stroke="White" StrokeThickness="1"/>
-                        <Line X1="0" X2="8"  Y1="7" Y2="7" Stroke="White" StrokeThickness="1"/>
-                        <Line X1="0" X2="8"  Y1="8" Y2="8" Stroke="White" StrokeThickness="1"/>
-                    </Canvas>
-                </Border>
-                <ControlTemplate.Triggers>
-                    <Trigger Property="IsMouseOver" Value="true">
-                        <Setter TargetName="minborder4" Property="Background" >
-                            <Setter.Value>
-                                <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
-                                    <GradientStop Color="#66FFFFFF" Offset="0"/>
-                                    <GradientStop Color="#00FFFFFF" Offset="1"/>
-                                </LinearGradientBrush>
-                            </Setter.Value>
-                        </Setter>
-                        <Setter TargetName="minborder4" Property="BorderBrush" >
-                            <Setter.Value>
-                                <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
-                                    <GradientStop Color="#00FFFFFF" Offset="0"/>
-                                    <GradientStop Color="#7FFFFFFF" Offset="0.1"/>
-                                </LinearGradientBrush>
-                            </Setter.Value>
-                        </Setter>
-                    </Trigger>
-                    <Trigger Property="IsPressed" Value="true">
-                        <Setter TargetName="minborder4" Property="Background">
-                            <Setter.Value>
-                                <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
-                                    <GradientStop Color="#99FFFFFF" Offset="0"/>
-                                    <GradientStop Color="#00FFFFFF" Offset="1"/>
-                                </LinearGradientBrush>
-                            </Setter.Value>
-                        </Setter>
-                    </Trigger>
-
-                </ControlTemplate.Triggers>
-            </ControlTemplate>
-
-            <ControlTemplate x:Key="RestoreIcon" TargetType="{x:Type Button}">
-                <Border Name="resborder4"   BorderThickness="1" CornerRadius="1" Background="Transparent"  Height="20" Width="20"  Margin="1,0,1,5">
-                    <Canvas Width="9" Height="8">
-                        <Line X1="2" X2="9"  Y1="1.5" Y2="1.5" Stroke="White" StrokeThickness="1"/>
-                        <Rectangle Canvas.Left="6" Canvas.Top="2"  Stroke="White" Width="3" Height="5" StrokeThickness="1"/>
-                        <Line X1="3" X2="8"  Y1="3" Y2="3" Stroke="White" StrokeThickness="1"/>
-                        <Line X1="2" X2="8"  Y1="7" Y2="7" Stroke="White" StrokeThickness="1"/>
-                        <Line X1="0" X2="7"  Y1="2.5" Y2="2.5" Stroke="White" StrokeThickness="1"/>
-                        <Rectangle Canvas.Left="0" Canvas.Top="3" Stroke="White" Width="7" Height="5" StrokeThickness="1"/>
-                        <Line X1="1" X2="6"  Y1="4" Y2="4" Stroke="White" StrokeThickness="1"/>
-                        <Line X1="0" X2="6"  Y1="8" Y2="8" Stroke="White" StrokeThickness="1"/>
-                    </Canvas>
-                </Border>
-                <ControlTemplate.Triggers>
-                    <Trigger Property="IsMouseOver" Value="true">
-                        <Setter TargetName="resborder4" Property="Background" >
-                            <Setter.Value>
-                                <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
-                                    <GradientStop Color="#66FFFFFF" Offset="0"/>
-                                    <GradientStop Color="#00FFFFFF" Offset="1"/>
-                                </LinearGradientBrush>
-                            </Setter.Value>
-                        </Setter>
-                        <Setter TargetName="resborder4" Property="BorderBrush" >
-                            <Setter.Value>
-                                <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
-                                    <GradientStop Color="#00FFFFFF" Offset="0"/>
-                                    <GradientStop Color="#7FFFFFFF" Offset="0.1"/>
-                                </LinearGradientBrush>
-                            </Setter.Value>
-                        </Setter>
-                    </Trigger>
-                    <Trigger Property="IsPressed" Value="true">
-                        <Setter TargetName="resborder4" Property="Background">
-                            <Setter.Value>
-                                <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
-                                    <GradientStop Color="#99FFFFFF" Offset="0"/>
-                                    <GradientStop Color="#00FFFFFF" Offset="1"/>
-                                </LinearGradientBrush>
-                            </Setter.Value>
-                        </Setter>
-                    </Trigger>
-
-                </ControlTemplate.Triggers>
-            </ControlTemplate>
-            
-            
-
-            <ControlTemplate x:Key="MaximizeIcon" TargetType="{x:Type Button}">
-                <Border Name="maxborder4" BorderThickness="1" CornerRadius="1" Background="Transparent" Height="20" Width="22" HorizontalAlignment="Right" Margin="1,2,1,5">
-                    <Canvas Width="9" Height="9">
-                        <Rectangle Fill="Transparent" Stroke="White" Width="9" Height="7"/>
-                        <Rectangle Canvas.Top="1" Canvas.Left="1" Fill="{TemplateBinding Background}" Stroke="{TemplateBinding Background}" Width="7" Height="3" Margin="0,2,0,0"/>
-                        <Line X1="0" X2="8"  Y1="8" Y2="8" Stroke="Transparent" StrokeThickness="1"/>
-                    </Canvas>
-                </Border>
-                <ControlTemplate.Triggers>
-                    <Trigger Property="IsMouseOver" Value="true">
-                        <Setter TargetName="maxborder4" Property="Background" >
-                            <Setter.Value>
-                                <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
-                                    <GradientStop Color="#66FFFFFF" Offset="0"/>
-                                    <GradientStop Color="#00FFFFFF" Offset="1"/>
-                                </LinearGradientBrush>
-                            </Setter.Value>
-                        </Setter>
-                        <Setter TargetName="maxborder4" Property="BorderBrush" >
-                            <Setter.Value>
-                                <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
-                                    <GradientStop Color="#00FFFFFF" Offset="0"/>
-                                    <GradientStop Color="#7FFFFFFF" Offset="0.1"/>
-                                </LinearGradientBrush>
-                            </Setter.Value>
-                        </Setter>
-                    </Trigger>
-                    <Trigger Property="IsPressed" Value="true">
-                        <Setter TargetName="maxborder4" Property="Background">
-                            <Setter.Value>
-                                <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
-                                    <GradientStop Color="#99FFFFFF" Offset="0"/>
-                                    <GradientStop Color="#00FFFFFF" Offset="1"/>
-                                </LinearGradientBrush>
-                            </Setter.Value>
-                        </Setter>
-                    </Trigger>
-                </ControlTemplate.Triggers>
-            </ControlTemplate>
-
-            <ControlTemplate x:Key="CloseIcon" TargetType="{x:Type Button}">
-                <Border Name="closeborder4" BorderThickness="1" CornerRadius="1" Background="Transparent" Height="20" Width="22" HorizontalAlignment="Right" Margin="1,0,1,5">
-                    <Canvas Width="12" Height="9">
-                        <Path Fill="#FFFFFFFF" Stretch="Fill" Stroke="#FF000000" Width="11" Height="10" Canvas.Left="0.875" Data="M284.20002,237.66667 L287.59967,237.66667 288.733,239.46634 290.06676,237.53303 293.0665,237.53303 293.0665,238.99951 290.59978,241.26536 290.59978,242.26457 293.19982,244.59636 293.19982,245.66247 290.13311,245.72877 288.74141,243.79678 287.39973,245.59584 284.26634,245.59584 284.26634,244.663 286.66638,242.39751 286.66638,241.26476 284.19968,238.79938 z"/>
-                    </Canvas>
-                </Border>
-                <ControlTemplate.Triggers>
-                    <Trigger Property="IsMouseOver" Value="true">
-                        <Setter TargetName="closeborder4" Property="Background" >
-                            <Setter.Value>
-                                <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
-                                    <GradientStop Color="#66FFFFFF" Offset="0"/>
-                                    <GradientStop Color="#00FFFFFF" Offset="1"/>
-                                </LinearGradientBrush>
-                            </Setter.Value>
-                        </Setter>
-                        <Setter TargetName="closeborder4" Property="BorderBrush" >
-                            <Setter.Value>
-                                <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
-                                    <GradientStop Color="#00FFFFFF" Offset="0"/>
-                                    <GradientStop Color="#7FFFFFFF" Offset="0.1"/>
-                                </LinearGradientBrush>
-                            </Setter.Value>
-                        </Setter>
-                    </Trigger>
-                    <Trigger Property="IsPressed" Value="true">
-                        <Setter TargetName="closeborder4" Property="Background">
-                            <Setter.Value>
-                                <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
-                                    <GradientStop Color="#99FFFFFF" Offset="0"/>
-                                    <GradientStop Color="#00FFFFFF" Offset="1"/>
-                                </LinearGradientBrush>
-                            </Setter.Value>
-                        </Setter>
-                    </Trigger>
-                </ControlTemplate.Triggers>
-            </ControlTemplate>
-
-
-            <ControlTemplate x:Key="Titlebartemplate" TargetType="{x:Type shared:TitleBar}">
-                <Border Name="border" Background="#FF282828" MinHeight="32" Height="32" CornerRadius="0" BorderThickness="0"  >
-                    <ContentPresenter  Margin="3,5,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  />
-                </Border>
-            </ControlTemplate>
-            <ControlTemplate x:Key="ChromelessWindowTemplate" TargetType="{x:Type shared:ChromelessWindow}">
-                <Border Name="OuterBorder" Background="#FF484848" BorderBrush="Black" BorderThickness="0" CornerRadius="0"  >
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-                        <shared:TitleBar Name="PART_TitleBar" Grid.Row="0" Template="{StaticResource Titlebartemplate}" Margin="0,-2,0,0" >
-                            <Grid VerticalAlignment="Top" Height="32">
-                                <StackPanel Orientation="Horizontal">
-                                    <Image x:Name="PART_Icon" Source="{Binding RelativeSource={RelativeSource FindAncestor,  AncestorType={x:Type shared:ChromelessWindow}}, Path=Icon}" VerticalAlignment="Center"  HorizontalAlignment="Left" Margin="4,2,2,4" Width="225" Height="25"  MaxWidth="225" MaxHeight="25" MinWidth="225" MinHeight="25" />
-                                    <ContentControl Foreground="{TemplateBinding Foreground}"  Content="{TemplateBinding Title}" VerticalAlignment="Center" HorizontalAlignment="Left" x:Name="TitlePresenter" Margin="5,5,5,5" />
-                                </StackPanel>
-                                <StackPanel   Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                    <shared:TitleButton x:Name="MinimizeButton" Command="shared:ChromelessWindow.ToggleMinimizedState" Template="{StaticResource MinimizeIcon}" shared:WindowChrome.IsHitTestVisibleInChrome="True" ToolTip="Minimize"/>
-                                    <shared:TitleButton x:Name="PART_MaximizeButton" Visibility="Collapsed"  Command="shared:ChromelessWindow.ToggleMaximizedState"   Template="{StaticResource MaximizeIcon}" shared:WindowChrome.IsHitTestVisibleInChrome="True" ToolTip="Maximize"/>
-                                    <shared:TitleButton x:Name="PART_RestoreButton" Visibility="Collapsed" Command="shared:ChromelessWindow.ToggleMaximizedState"  Template="{StaticResource RestoreIcon}" shared:WindowChrome.IsHitTestVisibleInChrome="True"  ToolTip="Restore Down"/>
-                                    <shared:TitleButton x:Name="CloseButton"  Command="shared:ChromelessWindow.CloseWindow"  Template="{StaticResource CloseIcon}" shared:WindowChrome.IsHitTestVisibleInChrome="True" ToolTip="Close"/>
-                                </StackPanel>
-                            </Grid>
-                        </shared:TitleBar>
-
-                        <Border Grid.Row="1"  Name="ContentAreaBorder" CornerRadius="{Binding ElementName=CornerRadiusSlider,Path=Value}" >
-                            <Grid x:Name="ChildGrid" Margin="0,-100">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="*"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
-                                <shared:ResizeGripStyle x:Name="PART_Resizegrip" Style="{TemplateBinding ResizeGripStyle}" HorizontalAlignment="right" VerticalAlignment="Bottom" Visibility="Collapsed" IsTabStop="False" Cursor="SizeNWSE" Margin="0,0,3,3" />
-                                <ContentPresenter Name="contentpresenter"  />
-                            </Grid>
-                        </Border>
-                    </Grid>
-                </Border>
-                <ControlTemplate.Triggers>
-                    <Trigger Property="ResizeMode" Value="NoResize">
-                        <Setter Property="Visibility" Value="Collapsed" TargetName="MinimizeButton"/>
-                        <Setter Property="Visibility" Value="Collapsed" TargetName="PART_MaximizeButton"/>
-                        <Setter Property="Visibility" Value="Collapsed" TargetName="PART_RestoreButton"/>
-                        <Setter Property="ResizeBorderThickness" Value="1"/>
-                    </Trigger>
-                    <MultiTrigger>
-                        <MultiTrigger.Conditions>
-                            <Condition Property="ResizeMode" Value="CanMinimize"/>
-                            <Condition Property="WindowState" Value="Normal"/>
-                        </MultiTrigger.Conditions>
-                        <Setter Property="Visibility" Value="Visible" TargetName="PART_MaximizeButton"/>
-                        <Setter Property="Visibility" Value="Collapsed" TargetName="PART_RestoreButton"/>
-                        <Setter Property="IsEnabled" Value="False" TargetName="PART_MaximizeButton"/>
-                        <Setter Property="IsEnabled" Value="False" TargetName="PART_RestoreButton"/>
-                    </MultiTrigger>
-                    <MultiTrigger>
-                        <MultiTrigger.Conditions>
-                            <Condition Property="ResizeMode" Value="CanMinimize"/>
-                            <Condition Property="WindowState" Value="Maximized"/>
-                        </MultiTrigger.Conditions>
-                        <Setter Property="Visibility" Value="Visible" TargetName="PART_RestoreButton"/>
-                        <Setter Property="Visibility" Value="Collapsed" TargetName="PART_MaximizeButton"/>
-                        <Setter Property="IsEnabled" Value="False" TargetName="PART_MaximizeButton"/>
-                        <Setter Property="IsEnabled" Value="False" TargetName="PART_RestoreButton"/>
-                    </MultiTrigger>
-                    <MultiTrigger>
-                        <MultiTrigger.Conditions>
-                            <Condition Property="ResizeMode" Value="CanResize"/>
-                            <Condition Property="WindowState" Value="Normal"/>
-                        </MultiTrigger.Conditions>
-                        <Setter Property="Visibility" Value="Visible" TargetName="MinimizeButton"/>
-                        <Setter Property="Visibility" Value="Visible" TargetName="PART_MaximizeButton"/>
-                        <Setter Property="Visibility" Value="Collapsed" TargetName="PART_RestoreButton"/>
-                    </MultiTrigger>
-                    <MultiTrigger>
-                        <MultiTrigger.Conditions>
-                            <Condition Property="ResizeMode" Value="CanResize"/>
-                            <Condition Property="WindowState" Value="Maximized"/>
-                        </MultiTrigger.Conditions>
-                        <Setter Property="Visibility" Value="Visible" TargetName="MinimizeButton"/>
-                        <Setter Property="Visibility" Value="Collapsed" TargetName="PART_MaximizeButton"/>
-                        <Setter Property="Visibility" Value="Visible" TargetName="PART_RestoreButton"/>
-                    </MultiTrigger>
-                    <MultiTrigger>
-                        <MultiTrigger.Conditions>
-                            <Condition Property="ResizeMode" Value="CanResizeWithGrip"/>
-                            <Condition Property="WindowState" Value="Normal"/>
-                        </MultiTrigger.Conditions>
-                        <Setter Property="Visibility" Value="Visible" TargetName="PART_Resizegrip"/>
-                        <Setter Property="Visibility" Value="Visible" TargetName="PART_MaximizeButton"/>
-                        <Setter Property="Visibility" Value="Collapsed" TargetName="PART_RestoreButton"/>
-                    </MultiTrigger>
-                    <MultiTrigger>
-                        <MultiTrigger.Conditions>
-                            <Condition Property="ResizeMode" Value="CanResizeWithGrip"/>
-                            <Condition Property="WindowState" Value="Maximized"/>
-                        </MultiTrigger.Conditions>
-                        <Setter Property="Visibility" Value="Collapsed" TargetName="PART_Resizegrip"/>
-                        <Setter Property="Visibility" Value="Collapsed" TargetName="PART_MaximizeButton"/>
-                        <Setter Property="Visibility" Value="Visible" TargetName="PART_RestoreButton"/>
-                    </MultiTrigger>
-                    <MultiTrigger>
-                        <MultiTrigger.Conditions>
-                            <Condition Property="ResizeMode" Value="NoResize"/>
-                            <Condition Property="WindowState" Value="Maximized"/>
-                        </MultiTrigger.Conditions>
-                        <Setter Property="Visibility" Value="Collapsed" TargetName="MinimizeButton"/>
-                        <Setter Property="Visibility" Value="Collapsed" TargetName="PART_MaximizeButton"/>
-                        <Setter Property="Visibility" Value="Collapsed" TargetName="PART_RestoreButton"/>
-                    </MultiTrigger>
-                </ControlTemplate.Triggers>
-            </ControlTemplate>
+ 
         </ResourceDictionary>
     </Application.Resources>
 </Application>

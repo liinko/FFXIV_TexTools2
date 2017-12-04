@@ -20,19 +20,17 @@ using FFXIV_TexTools2.ViewModel;
 using FFXIV_TexTools2.Views;
 using Newtonsoft.Json;
 using System;
-using System.Globalization;
 using System.IO;
 using System.Windows;
-using System.Windows.Data;
-using System.ComponentModel;
-using Syncfusion.Windows.Shared;
+using System.Windows.Media;
+using System.Windows.Input;
 
 namespace FFXIV_TexTools2
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : ChromelessWindow
+    public partial class MainWindow : Window
     {
         MainViewModel mViewModel;
 
@@ -40,7 +38,7 @@ namespace FFXIV_TexTools2
         {
             InitializeComponent();
             mViewModel = new MainViewModel();
-            this.DataContext = mViewModel;
+            DataContext = mViewModel;
 
             DXVerStatus.Content = "DX Version: " + Properties.Settings.Default.DX_Ver.Substring(2);
 
@@ -273,6 +271,39 @@ namespace FFXIV_TexTools2
             App.Current.Shutdown();
         }
 
+        GridLength RCWidth;
+        double RCMinWidth;
+        private void ImageButton_Click(object sender, RoutedEventArgs e)
+        {
+
+            if (MainSplitter.IsEnabled == true)
+            {
+                IMGCollapse1.RenderTransformOrigin = new Point(0.5, 0.5);
+                IMGCollapse2.RenderTransformOrigin = new Point(0.5, 0.5);
+                ScaleTransform flipTrans = new ScaleTransform();
+                flipTrans.ScaleX = -1;
+                IMGCollapse1.RenderTransform = flipTrans;
+                IMGCollapse2.RenderTransform = flipTrans;
+                RCMinWidth = RightColumn.MinWidth;
+                RCWidth = RightColumn.Width;
+                RightColumn.MinWidth = 8;
+                RightColumn.MaxWidth = 8;
+                MainSplitter.IsEnabled = false;
+            }
+            else
+            {
+                IMGCollapse1.RenderTransformOrigin = new Point(0.5, 0.5);
+                IMGCollapse2.RenderTransformOrigin = new Point(0.5, 0.5);
+                ScaleTransform flipTrans = new ScaleTransform();
+                flipTrans.ScaleX = 1;
+                IMGCollapse1.RenderTransform = flipTrans;
+                IMGCollapse2.RenderTransform = flipTrans;
+                RightColumn.MaxWidth = 100000;
+                RightColumn.MinWidth = RCMinWidth;
+                RightColumn.Width = RCWidth;
+                MainSplitter.IsEnabled = true;
+            }
+        }
 
  
         private void textureTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
@@ -339,10 +370,42 @@ namespace FFXIV_TexTools2
                 Save_All_DDS.IsEnabled = false;
             }
         }
+        private void NewBar_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left) { 
+                    DragMove();
+            }
+        }
 
-  
-
-        private void Save_All_DDS_Click(object sender, RoutedEventArgs e)
+        private void NewBar_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (WindowState == System.Windows.WindowState.Normal)
+            {
+                WindowState = System.Windows.WindowState.Maximized;
+            }
+            else
+            {
+                WindowState = System.Windows.WindowState.Normal;
+            }
+        }
+        private void MaximizeButton_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (WindowState == System.Windows.WindowState.Normal)
+            {
+                WindowState = System.Windows.WindowState.Maximized;
+            }
+            else
+            {
+                WindowState = System.Windows.WindowState.Normal;
+            }
+        }
+        private void MinimizeButton_MouseDown(object sender, MouseButtonEventArgs e)
+        { WindowState = System.Windows.WindowState.Minimized; }
+        private void CloseButton_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            App.Current.Shutdown();
+        }
+            private void Save_All_DDS_Click(object sender, RoutedEventArgs e)
         {
             mViewModel.TextureVM.SaveAllDDS();
         }
@@ -411,40 +474,12 @@ namespace FFXIV_TexTools2
                 CreateDat.CreateModList();
             }
         }
-    }
 
-    #region Converter
-
-    /// <summary>
-    /// FormatConvertor class
-    /// </summary>
-    public class FormatConverter : IValueConverter
-    {
-        //Converter to display the values modified in slider to the textblock
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        private void SplitCollapse_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (parameter != null)
-            {
-                string strFormatString = parameter.ToString();
-                if (!string.IsNullOrEmpty(strFormatString))
-                    return string.Format(culture, strFormatString, value);
-            }
-            return value;
-        }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            TypeConverter objTypeConverter = TypeDescriptor.GetConverter(targetType);
-            object objReturnValue = null;
-
-            if (objTypeConverter.CanConvertFrom(value.GetType()))
-            {
-                objReturnValue = objTypeConverter.ConvertFrom(value);
-            }
-
-            return objReturnValue;
         }
     }
 
-    #endregion
+   
 }
