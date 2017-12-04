@@ -117,7 +117,11 @@
                         </TreeView.Resources>
                     </TreeView>
                     <Grid Grid.Row="1" Margin="0,0,2,0">
-                        <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" TextWrapping="NoWrap"  VerticalAlignment="Bottom"/>
+                        <TextBox x:Name="searchBox" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" TextWrapping="NoWrap"  VerticalAlignment="Bottom" TextChanged="TextBox_TextChanged">
+                            <TextBox.Background>
+                                <ImageBrush ImageSource="/FFXIV TexTools 2;component/Resources/search.png" AlignmentX="Left" Stretch="Uniform" />
+                            </TextBox.Background>
+                        </TextBox>
                     </Grid>
                 </Grid>
             </GroupBox>

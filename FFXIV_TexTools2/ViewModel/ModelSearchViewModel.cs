@@ -193,14 +193,8 @@ namespace FFXIV_TexTools2.ViewModel
             if (SelectedType.Name.Equals(Strings.Equipment) || SelectedType.Name.Equals(Strings.Accessory))
             {
                 MTRLFolder = string.Format(folder, searchText.PadLeft(4, '0')) + SelectedItem.Variant.PadLeft(4, '0');
-                if (SelectedType.Name.Equals(Strings.Accessory))
-                {
-                    MTRLFile = string.Format(file, searchText.PadLeft(4, '0'), SelectedItem.SlotAbr, SelectedItem.Part);
-                }
-                else
-                {
-                    MTRLFile = string.Format(file, SelectedItem.RaceID, searchText.PadLeft(4, '0'), SelectedItem.SlotAbr, SelectedItem.Part);
-                }
+
+                MTRLFile = string.Format(file, SelectedItem.RaceID, searchText.PadLeft(4, '0'), SelectedItem.SlotAbr, SelectedItem.Part);
             }
             else
             {

@@ -468,31 +468,12 @@ namespace FFXIV_TexTools2.IO
 						TexCoord.Add(new SharpDX.Vector2(cd.texCoord[i], cd.texCoord[i + 1]));
 					}
 
-					//for (int i = 0; i < cd.index.Count; i += 4)
-					//{
-					//	Indices.Add(cd.index[i]);
-					//}
-
-					//if (Vertex.Count < Normals.Count)
-					//{
-					//    MessageBox.Show("[Import] The number of Vertices, Normals, and Texture Coordinates should be equal. \n", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-					//    return;
-					//}
-
 					if (Vertex.Count != TexCoord.Count)
 					{
 						MessageBox.Show("You are importing a mesh which has more Texture Coordinates than there are Vertices. \n\n" +
 							"This is known to cause issues with texture mapping, as there are more texture seams than mesh borders.", "Mesh Import Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
 					}
 
-					//if (cd.biNormal.Count > 0)
-					//{
-					//	if (Vertex.Count != BiNormals.Count)
-					//	{
-					//		MessageBox.Show("[Import] The number of Vertices, Normals, and Texture Coordinates should be equal. \n", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-					//		return;
-					//	}
-					//}
 
 					Dictionary<int, int> errorDict = new Dictionary<int, int>();
 
@@ -563,6 +544,8 @@ namespace FFXIV_TexTools2.IO
 					Dictionary<int, int> indexDict = new Dictionary<int, int>();
 					var inCount = 0;
 
+					List<int> handedness = new List<int>();
+
 					for (int i = 0; i < cd.index.Count; i++)
 					{
 						if (!indexDict.ContainsKey(cd.index[i]))
@@ -605,7 +588,7 @@ namespace FFXIV_TexTools2.IO
 
 					//if (cd.biNormal.Count > 0)
 					//{
-					//    mg.BiTangents = BiNormals;
+					//    mg.BiTangents = nBiNormals;
 					//}
 
 					//if (cd.tangent.Count > 0)
@@ -613,37 +596,62 @@ namespace FFXIV_TexTools2.IO
 					//    mg.Tangents = Tangents;
 					//}
 
+					SharpDX.Vector3[] tan1 = new SharpDX.Vector3[Vertex.Count];
+					SharpDX.Vector3[] tan2 = new SharpDX.Vector3[Vertex.Count];
+					for (int a = 0; a < Indices.Count; a += 3)
+					{
+						int i1 = Indices[a];
+						int i2 = Indices[a + 1];
+						int i3 = Indices[a + 2];
+						SharpDX.Vector3 v1 = nVertex[i1];
+						SharpDX.Vector3 v2 = nVertex[i2];
+						SharpDX.Vector3 v3 = nVertex[i3];
+						SharpDX.Vector2 w1 = nTexCoord[i1];
+						SharpDX.Vector2 w2 = nTexCoord[i2];
+						SharpDX.Vector2 w3 = nTexCoord[i3];
+						float x1 = v2.X - v1.X;
+						float x2 = v3.X - v1.X;
+						float y1 = v2.Y - v1.Y;
+						float y2 = v3.Y - v1.Y;
+						float z1 = v2.Z - v1.Z;
+						float z2 = v3.Z - v1.Z;
+						float s1 = w2.X - w1.X;
+						float s2 = w3.X - w1.X;
+						float t1 = w2.Y - w1.Y;
+						float t2 = w3.Y - w1.Y;
+						float r = 1.0f / (s1 * t2 - s2 * t1);
+						SharpDX.Vector3 sdir = new SharpDX.Vector3((t2 * x1 - t1 * x2) * r, (t2 * y1 - t1 * y2) * r, (t2 * z1 - t1 * z2) * r);
+						SharpDX.Vector3 tdir = new SharpDX.Vector3((s1 * x2 - s2 * x1) * r, (s1 * y2 - s2 * y1) * r, (s1 * z2 - s2 * z1) * r);
+						tan1[i1] += sdir;
+						tan1[i2] += sdir;
+						tan1[i3] += sdir;
+						tan2[i1] += tdir;
+						tan2[i2] += tdir;
+						tan2[i3] += tdir;
+					}
+
+					float d;
+					SharpDX.Vector3 tmpt;
+					for (int a = 0; a < nVertex.Count; ++a)
+					{
+						SharpDX.Vector3 n = SharpDX.Vector3.Normalize(nNormals[a]);
+						SharpDX.Vector3 t = SharpDX.Vector3.Normalize(tan1[a]);
+						d = (SharpDX.Vector3.Dot(SharpDX.Vector3.Cross(n, t), tan2[a]) < 0.0f) ? -1.0f : 1.0f;
+						tmpt = new SharpDX.Vector3(t.X, t.Y, t.Z);
+						mg.BiTangents.Add(tmpt);
+						cmd.handedness.Add((int)d);
+					}
 					cmd.meshGeometry = mg;
 					cmd.blendIndices = nBlendIndices;
 					cmd.blendWeights = nBlendWeights;
 					cmd.partsDict = cd.partsDict;
 
 					cmdList.Add(cmd);
+				
 				}
 
 				Create(cmdList, internalPath, selectedMesh, category, itemName);
 			}
-		}
-
-		public static double RoundUp(double input, int places)
-		{
-			bool isNeg = false;
-
-			if(input < 0)
-			{
-				input = input * -1;
-				isNeg = true;
-			}
-
-			double multiplier = Math.Pow(10, Convert.ToDouble(places));
-			var result = Math.Ceiling(input * multiplier) / multiplier;
-
-			if (isNeg)
-			{
-				result = result * -1;
-			}
-
-			return result;
 		}
 
 		public static void Create(List<ColladaMeshData> cmdList, string internalPath, string selectedMesh, string category, string itemName)
@@ -730,10 +738,6 @@ namespace FFXIV_TexTools2.IO
 					bc++;
 				}
 
-				int amount = 0;
-				int lastdigit = 0;
-				string numString, decimals;
-
 				for (int i = 0; i < mg.Normals.Count; i++)
 				{
 					//Normal X (Half)
@@ -754,21 +758,35 @@ namespace FFXIV_TexTools2.IO
 					////Normal W (Half)
 					//id.dataSet2.AddRange(new byte[2]);
 
+					var btn = mg.BiTangents[i];
+					var h = cmd.handedness[i];
+					if (h > 0) { btn = SharpDX.Vector3.Normalize(-btn); }
+					int c = id.dataSet2.Count;
 
 					//tangent X
-					byte tx = (byte)(((255 * (mg.BiTangents[i].X * -1)) + 255) / 2);
-					id.dataSet2.Add(tx);
+					if (btn.X < 0) { id.dataSet2.Add((byte)((Math.Abs(btn.X) * 255 + 255) / 2)); }
+					else { id.dataSet2.Add((byte)((-Math.Abs(btn.X) - .014) * 255 / 2 - 255 / 2)); }
 
 					//tangent Y
-					byte ty = (byte)(((255 * (mg.BiTangents[i].Y * -1)) + 255) / 2);
-					id.dataSet2.Add(ty);
+					if (btn.Y < 0) { id.dataSet2.Add((byte)((Math.Abs(btn.Y) * 255 + 255) / 2)); }
+					else { id.dataSet2.Add((byte)((-Math.Abs(btn.Y) - .014) * 255 / 2 - 255 / 2)); }
 
 					//tangent Z
-					byte tz = (byte)(((255 * (mg.BiTangents[i].Z * -1)) + 255) / 2);
-					id.dataSet2.Add(tz);
+					if (btn.Z < 0) { id.dataSet2.Add((byte)((Math.Abs(btn.Z) * 255 + 255) / 2)); }
+					else { id.dataSet2.Add((byte)((-Math.Abs(btn.Z) - .014) * 255 / 2 - 255 / 2)); }
 
 					//tangent W
-					id.dataSet2.Add((byte)0);
+					byte tw = 0;
+					if(h == 1)
+					{
+						tw = 255;
+					}
+					else if (h == -1)
+					{
+						tw = 0;
+					}
+
+					id.dataSet2.Add(tw);
 
 					//Color
 					id.dataSet2.AddRange(BitConverter.GetBytes(4294967295));
@@ -776,61 +794,11 @@ namespace FFXIV_TexTools2.IO
 					//TexCoord X
 					float x = mg.TextureCoordinates[i].X;
 
-					amount = 0;
-					if(x != 0F && x != 1F && x != -1F)
-					{
-						numString = x.ToString("F20").TrimEnd("0".ToCharArray());
-						decimals = numString.Substring(numString.LastIndexOf(".") + 1);
-						lastdigit = int.Parse(decimals) % 10;
-						amount = decimals.Length - 1;
-
-						if (decimals.Length > 4 && lastdigit == 5)
-						{
-							lastdigit = 0;
-						}
-					}
-
-					float nx = 0;
-					if (amount > 1 && lastdigit != 5)
-					{
-						nx = (float)RoundUp(x, amount);
-					}
-					else
-					{
-						nx = x;
-					}
-					var tcx = new SharpDX.Half(nx);
-
 					id.dataSet2.AddRange(BitConverter.GetBytes(x));
 
 					//TexCoord Y
 					float y = mg.TextureCoordinates[i].Y * -1;
 
-					amount = 0;
-					if(y != 0F && y != 1F && y != -1F)
-					{
-						numString = y.ToString("F20").TrimEnd("0".ToCharArray());
-						decimals = numString.Substring(numString.LastIndexOf(".") + 1);
-						lastdigit = int.Parse(decimals) % 10;
-						amount = decimals.Length - 1;
-
-						if (decimals.Length > 4 && lastdigit == 5)
-						{
-							lastdigit = 0;
-						}
-					}
-
-					float ny = 0;
-					if (amount > 1 && lastdigit != 5)
-					{
-						ny = (float)RoundUp(y, amount);
-					}
-					else
-					{
-						ny = y;
-					}
-
-					var tcy = new SharpDX.Half(ny);
 					id.dataSet2.AddRange(BitConverter.GetBytes(y));
 
 					//id.dataSet2.AddRange(BitConverter.GetBytes((short)0));
@@ -854,10 +822,20 @@ namespace FFXIV_TexTools2.IO
 			/*
 			 * Open oringial MDL file
 			 */
-			var MDLFile = Path.GetFileName(internalPath);
-			var MDLFolder = internalPath.Substring(0, internalPath.LastIndexOf("/"));
+			int offset;
 
-			int offset = Helper.GetDataOffset(FFCRC.GetHash(MDLFolder), FFCRC.GetHash(MDLFile), Strings.ItemsDat);
+			if (inModList)
+			{
+				offset = modEntry.originalOffset;
+			}
+			else
+			{
+				var MDLFile = Path.GetFileName(internalPath);
+				var MDLFolder = internalPath.Substring(0, internalPath.LastIndexOf("/"));
+
+				offset = Helper.GetDataOffset(FFCRC.GetHash(MDLFolder), FFCRC.GetHash(MDLFile), Strings.ItemsDat);
+			}
+
 
 			int datNum = ((offset / 8) & 0x000f) / 2;
 
@@ -876,7 +854,6 @@ namespace FFXIV_TexTools2.IO
 				 * Vertex Info Block Start
 				 * -------------------------------
 				 */
-
 				List<byte> vertexInfoBlock = new List<byte>();
 				int compVertexInfoSize;
 
@@ -902,7 +879,6 @@ namespace FFXIV_TexTools2.IO
 				 * Model Data Block Start
 				 * -------------------------------
 				 */
-
 				List<byte> modelDataBlock = new List<byte>();
 				int compModelDataSize;
 
@@ -1307,7 +1283,7 @@ namespace FFXIV_TexTools2.IO
 
 				int meshPadd = 0;
 
-				for(int l = 0; l < lodList.Count; l++)
+				for (int l = 0; l < lodList.Count; l++)
 				{
 					for (int i = 0; i < meshInfoDict[l].Count; i++)
 					{
@@ -1497,7 +1473,6 @@ namespace FFXIV_TexTools2.IO
 				 * Vertex Data Start
 				 * ---------------------
 				*/
-
 				List<int> compMeshSizes = new List<int>();
 
 				List<DataBlocks> dbList = new List<DataBlocks>();
@@ -1661,7 +1636,6 @@ namespace FFXIV_TexTools2.IO
 				 * Create Header Start
 				 * -----------------------------------
 				 */
-
 				int headerLength = 256;
 
 				if(compMeshSizes.Count > 24)
@@ -1929,6 +1903,7 @@ namespace FFXIV_TexTools2.IO
 
 			public List<byte[]> blendIndices = new List<byte[]>();
 			public List<byte[]> blendWeights = new List<byte[]>();
+			public List<int> handedness = new List<int>();
 
 			public Dictionary<int, int> partsDict = new Dictionary<int, int>();
 		}
@@ -1977,7 +1952,7 @@ namespace FFXIV_TexTools2.IO
 
 						dataOverwritten = true;
 					}
-					else
+					else if(!inModList)
 					{
 						int emptyLength = 0;
 						int emptyLine = 0;
