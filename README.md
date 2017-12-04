@@ -2,28 +2,29 @@
 # FFXIV TexTools 2 by Liinko
 This is a more feature rich WPF implementation of FFXIV TexTools and replaced FFXIV TexTools.
 
-# Current Version: 1.2
+# Current Version: 1.4
 ChangeLog:
 
 Application:
- - Added DemiHuman category to Model Search.
- - Folder select dialog now reappears if incorrect folder is selected.
+ - Added more translations.
+ - Removed ability to turn off modlist.
  
 Textures:
- - Added _stigma.tex to Equipment Decals
+ - Added Loading Image, Map Symbol, Online Status, and Weather to UI.
 
 3D:
- - Meshes exported in .dae file are now separated into parts to reflect MDL structure.
- - Improved importing, it should work with most equipment.
- - Alpha texture for 3D files now exports separately.
- 
+ - Models now export at 10x their original size for easier modding.
+ - Changed the datatype of Normals and Texture coordinates from Half Floats to Singles.
+ - Changed up axis to Y_UP.
+ - other smaller tweaks to importing and exporting
+
 Bug Fixes:
- - Fixed an issue where certain model IDs would not appear in search results list.
- - Fixed an issue where other windows would stay open when main window was closed.
- - Fixed an issue where certain items with VFX files would crash due to being read incorrectly.
- - Fixed an issue where certain models for MCH weapons would not be displayed.
- - Fixed an issue where application would not check if a newer version was available.
- - Other minor bug fixes.
+ - Fixed an issue where certain items were using system locale instead of application language.
+ - Fixed an issue where some languages would not function correctly.
+ - Fixed an issue where UI texture would not be imported correctly.
+ - Fixed an issue where certain head models could not be exported.
+ - Fixed an issue where a check for .modlist was being called before it was created
+ - Other minor bug fixes
 
 Know Issues:
  - Not all models are exportable as .dae.
