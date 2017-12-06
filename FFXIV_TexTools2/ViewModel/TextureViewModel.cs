@@ -51,7 +51,7 @@ namespace FFXIV_TexTools2.ViewModel
         int raceIndex, mapIndex, typeIndex, partIndex, currMap;
 
         bool redChecked = true, greenChecked = true, blueChecked = true;
-        bool alphaChecked, raceEnabled, mapEnabled, typeEnabled, partEnabled, importEnabled, activeEnabled, saveEnabled, channelsEnabled;
+        bool alphaChecked, raceEnabled, mapEnabled, typeEnabled, partEnabled, importEnabled, activeEnabled, saveEnabled, channelsEnabled, openEnabled;
 
 
         private ObservableCollection<ComboBoxInfo> raceComboInfo = new ObservableCollection<ComboBoxInfo>();
@@ -85,6 +85,7 @@ namespace FFXIV_TexTools2.ViewModel
         public bool MapEnabled { get { return mapEnabled; } set { mapEnabled = value; NotifyPropertyChanged("MapEnabled"); } }
         public bool TypeEnabled { get { return typeEnabled; } set { typeEnabled = value; NotifyPropertyChanged("TypeEnabled"); } }
         public bool PartEnabled { get { return partEnabled; } set { partEnabled = value; NotifyPropertyChanged("PartEnabled"); } }
+        public bool OpenEnabled { get { return openEnabled; } set { openEnabled = value; NotifyPropertyChanged("OpenEnabled"); } }
 
         public string ActiveToggle { get { return activeToggle; } set { activeToggle = value; NotifyPropertyChanged("ActiveToggle"); } }
         public bool ImportEnabled { get { return importEnabled; } set { importEnabled = value; NotifyPropertyChanged("ImportEnabled"); } }
@@ -197,6 +198,14 @@ namespace FFXIV_TexTools2.ViewModel
         }
 
         /// <summary>
+        /// Command for Open Folder button
+        /// </summary>
+        public ICommand OpenFolderCommand
+        {
+            get { return new RelayCommand(OpenFolder); }
+        }
+
+        /// <summary>
         /// Runs the SaveDDS method from SaveTex 
         /// </summary>
         /// <param name="obj"></param>
@@ -204,6 +213,7 @@ namespace FFXIV_TexTools2.ViewModel
         {
             SaveTex.SaveDDS(selectedCategory, selectedItem.ItemName, fullPath, SelectedMap.Name, mtrlData, texData, selectedItem.ItemCategory);
             ImportEnabled = true;
+            OpenEnabled = true;
         }
 
         /// <summary>
@@ -213,6 +223,18 @@ namespace FFXIV_TexTools2.ViewModel
         public void SavePNG(object obj)
         {
             SaveTex.SaveImage(selectedCategory, selectedItem.ItemName, fullPath, ImageSource, saveClone, SelectedMap.Name, selectedItem.ItemCategory);
+            OpenEnabled = true;
+        }
+
+        /// <summary>
+        /// Runs the OpenFolder method 
+        /// </summary>
+        /// <param name="obj"></param>
+        public void OpenFolder(object obj)
+        {
+            string savePath = Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selectedItem.ItemName;
+
+            Process.Start(savePath);
         }
 
         public void SaveAllDDS()
@@ -586,7 +608,45 @@ namespace FFXIV_TexTools2.ViewModel
         {
             if (selectedCategory != "UI")
             {
-                var info = MTRL.GetMTRLData(selectedItem, selectedRace.ID, selectedCategory, selectedPart.Name, imcVersion, "", "", VFXVersion);
+                var body = "";
+                var modelID = selectedItem.PrimaryModelID;
+                var imc = imcVersion;
+                var vfx = VFXVersion;
+                var part = selectedPart.Name;
+
+                if(selectedItem.PrimaryMTRLFolder != null)
+                {
+                    if (selectedItem.PrimaryMTRLFolder.Contains("weapon"))
+                    {
+                        var imcData = IMC.GetVersion(selectedCategory, selectedItem, false);
+
+                        imc = imcData.Item1;
+                        vfx = imcData.Item2;
+
+                        modelID = selectedItem.PrimaryModelID;
+                        body = selectedItem.PrimaryModelBody;
+                        part = selectedPart.Name;
+                    }
+                }
+
+
+                if (SelectedPart.Name.Equals("s"))
+                {
+                    var imcData = IMC.GetVersion(selectedCategory, selectedItem, true);
+
+                    imc = imcData.Item1;
+                    vfx = imcData.Item2;
+
+                    modelID = selectedItem.SecondaryModelID;
+                    body = selectedItem.SecondaryModelBody;
+                    part = "a";
+
+                    if(body == null)
+                    {
+                        body = "0001";
+                    }
+                }
+                var info = MTRL.GetMTRLData(selectedItem, selectedRace.ID, selectedCategory, part, imc, body, modelID, vfx);
                 mtrlData = info.Item1;
 
                 if (selectedItem.ItemName.Equals(Strings.Face) || selectedItem.ItemName.Equals(Strings.Hair))
@@ -614,6 +674,7 @@ namespace FFXIV_TexTools2.ViewModel
                         {
                             MapIndex = currMap;
                         }
+                        TypeComboBox.Clear();
                     }
                 }
                 else
@@ -627,6 +688,7 @@ namespace FFXIV_TexTools2.ViewModel
                     {
                         MapIndex = currMap;
                     }
+                    TypeComboBox.Clear();
                 }
             }
             else
@@ -642,6 +704,7 @@ namespace FFXIV_TexTools2.ViewModel
                 {
                     MapIndex = currMap;
                 }
+                TypeComboBox.Clear();
             }
 
 
@@ -716,7 +779,7 @@ namespace FFXIV_TexTools2.ViewModel
                 type = selectedType.Name;
             }
 
-            var info = MTRL.GetMTRLDatafromType(selectedItem, selectedRace, selectedPart.Name, type, imcVersion, selectedCategory, "a");
+            var info = MTRL.GetMTRLDatafromType(selectedItem, selectedRace.ID, selectedPart.Name, type, imcVersion, selectedCategory, "a");
             mtrlData = info.Item1;
 
             MapComboBox = info.Item2;
@@ -1062,6 +1125,18 @@ namespace FFXIV_TexTools2.ViewModel
             else
             {
                 ImportEnabled= false;
+            }
+
+            string folderPath = Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selectedItem.ItemName;
+
+
+            if (Directory.Exists(folderPath))
+            {
+                OpenEnabled = true;
+            }
+            else
+            {
+                OpenEnabled = false;
             }
         }
 
