@@ -3,9 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:FFXIV_TexTools2.Views"
              xmlns:hx="http://helix-toolkit.org/wpf/SharpDX"
-             xmlns:custom="clr-namespace:HelixToolkit.Wpf.SharpDX"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid Background="White">
@@ -78,10 +76,16 @@
                 <ColumnDefinition Width="1*"/>
                 <ColumnDefinition Width="1*"/>
                 <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width=".1*"/>
             </Grid.ColumnDefinitions>
             <Button x:Name="exportObjButton" Content="Export Model + Materials" Margin="5" Command="{Binding ExportOBJCommand}"/>
             <Button x:Name="import3DButton" Content="Import (Beta)" Grid.Column="1" Margin="5" Command="{Binding ImportOBJCommand}" IsEnabled="{Binding Import3DEnabled, FallbackValue=false}"/>
             <Button x:Name="revert3DButton" Content="{Binding ActiveToggle, FallbackValue='Enable/Disable'}" Grid.Column="2" Margin="5,5,4.5,5" Command="{Binding RevertOBJCommand}" IsEnabled="{Binding ActiveEnabled, FallbackValue=false}"/>
+            <Button Grid.Column="3" Margin="0" Command="{Binding OpenFolderCommand}" IsEnabled="{Binding OpenEnabled, FallbackValue=false}" MaxWidth="20" MaxHeight="20">
+                <Button.Background>
+                    <ImageBrush ImageSource="/FFXIV TexTools 2;component/Resources/FolderOpen_16x.png" Stretch="Uniform"/>
+                </Button.Background>
+            </Button>
         </Grid>
         <Grid Margin="10,10,10,0" Height="37" VerticalAlignment="Top">
             <Grid.ColumnDefinitions>

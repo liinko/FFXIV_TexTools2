@@ -199,7 +199,7 @@
     <value>Food</value>
   </data>
   <data name="Garuda_Egi" xml:space="preserve">
-    <value>Garuda Egi</value>
+    <value>Garuda-Egi</value>
   </data>
   <data name="Hair" xml:space="preserve">
     <value>Hair</value>
@@ -220,7 +220,7 @@
     <value>Hyur Midlander</value>
   </data>
   <data name="Ifrit_Egi" xml:space="preserve">
-    <value>Ifrit Egi</value>
+    <value>Ifrit-Egi</value>
   </data>
   <data name="Iris" xml:space="preserve">
     <value>Iris</value>
@@ -304,7 +304,7 @@
     <value>Tail</value>
   </data>
   <data name="Titan_Egi" xml:space="preserve">
-    <value>Titan Egi</value>
+    <value>Titan-Egi</value>
   </data>
   <data name="Two_Handed" xml:space="preserve">
     <value>Two Handed</value>
@@ -319,7 +319,7 @@
     <value>Wrists</value>
   </data>
   <data name="AccMtrlFile" xml:space="preserve">
-    <value>mt_c0101a{0}_{1}_{2}.mtrl</value>
+    <value>mt_c{0}a{1}_{2}_{3}.mtrl</value>
   </data>
   <data name="BodyMtrlFile" xml:space="preserve">
     <value>mt_c{0}b{1}_a.mtrl</value>
@@ -641,5 +641,29 @@
   </data>
   <data name="WeatherEXD" xml:space="preserve">
     <value>weather_0_{0}.exd</value>
+  </data>
+  <data name="WeapSkelFile" xml:space="preserve">
+    <value>skl_w{0}b{1}.sklb</value>
+  </data>
+  <data name="WeapSkelFolder" xml:space="preserve">
+    <value>chara/weapon/w{0}/skeleton/base/b{1}</value>
+  </data>
+  <data name="DemiSkelFile" xml:space="preserve">
+    <value>skl_d{0}b{1}.sklb</value>
+  </data>
+  <data name="DemiSkelFolder" xml:space="preserve">
+    <value>chara/demihuman/d{0}/skeleton/base/b{1}</value>
+  </data>
+  <data name="MetSkelFIle" xml:space="preserve">
+    <value>skl_c{0}m{1}.sklb</value>
+  </data>
+  <data name="MetSkelFolder" xml:space="preserve">
+    <value>chara/human/c{0}/skeleton/met/m{1}</value>
+  </data>
+  <data name="MonsterSkelFile" xml:space="preserve">
+    <value>skl_m{0}b{1}.sklb</value>
+  </data>
+  <data name="MonsterSkelFolder" xml:space="preserve">
+    <value>chara/monster/m{0}/skeleton/base/b{1}</value>
   </data>
 </root>

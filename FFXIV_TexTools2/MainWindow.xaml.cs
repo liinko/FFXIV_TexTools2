@@ -23,6 +23,8 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Windows;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace FFXIV_TexTools2
 {
@@ -388,6 +390,28 @@ namespace FFXIV_TexTools2
             if (!File.Exists(Info.modListDir))
             {
                 CreateDat.CreateModList();
+            }
+        }
+
+        private void TextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            if (searchBox.Text == "")
+            {
+                // Create an ImageBrush.
+                ImageBrush textImageBrush = new ImageBrush();
+                textImageBrush.ImageSource =
+                    new BitmapImage(
+                        new Uri("pack://application:,,,/Resources/search.png")
+                    );
+                textImageBrush.AlignmentX = AlignmentX.Left;
+                // Use the brush to paint the button's background.
+                searchBox.Background = textImageBrush;
+
+            }
+            else
+            {
+
+                searchBox.Background = null;
             }
         }
     }

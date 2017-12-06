@@ -193,7 +193,7 @@
     <value>Food</value>
   </data>
   <data name="Garuda_Egi" xml:space="preserve">
-    <value>Garuda Egi</value>
+    <value>Garuda-Egi</value>
   </data>
   <data name="Hair" xml:space="preserve">
     <value>Hair</value>
@@ -214,7 +214,7 @@
     <value>Hyur Midlander</value>
   </data>
   <data name="Ifrit_Egi" xml:space="preserve">
-    <value>Ifrit Egi</value>
+    <value>Ifrit-Egi</value>
   </data>
   <data name="Iris" xml:space="preserve">
     <value>Iris</value>
@@ -291,14 +291,11 @@
   <data name="Specular" xml:space="preserve">
     <value>Specular</value>
   </data>
-  <data name="String1" xml:space="preserve">
-    <value />
-  </data>
   <data name="Tail" xml:space="preserve">
     <value>Tail</value>
   </data>
   <data name="Titan_Egi" xml:space="preserve">
-    <value>Titan Egi</value>
+    <value>Titan-Egi</value>
   </data>
   <data name="Two_Handed" xml:space="preserve">
     <value>Two Handed</value>

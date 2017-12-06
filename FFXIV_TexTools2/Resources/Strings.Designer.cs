@@ -106,7 +106,7 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to mt_c0101a{0}_{1}_{2}.mtrl.
+        ///   Looks up a localized string similar to mt_c{0}a{1}_{2}_{3}.mtrl.
         /// </summary>
         internal static string AccMtrlFile {
             get {
@@ -390,6 +390,24 @@ namespace FFXIV_TexTools2.Resources {
         internal static string DemiMtrlFolder {
             get {
                 return ResourceManager.GetString("DemiMtrlFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to skl_d{0}b{1}.sklb.
+        /// </summary>
+        internal static string DemiSkelFile {
+            get {
+                return ResourceManager.GetString("DemiSkelFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to chara/demihuman/d{0}/skeleton/base/b{1}.
+        /// </summary>
+        internal static string DemiSkelFolder {
+            get {
+                return ResourceManager.GetString("DemiSkelFolder", resourceCulture);
             }
         }
         
@@ -727,7 +745,7 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Garuda Egi.
+        ///   Looks up a localized string similar to Garuda-Egi.
         /// </summary>
         internal static string Garuda_Egi {
             get {
@@ -880,7 +898,7 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Ifrit Egi.
+        ///   Looks up a localized string similar to Ifrit-Egi.
         /// </summary>
         internal static string Ifrit_Egi {
             get {
@@ -1123,6 +1141,24 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to skl_c{0}m{1}.sklb.
+        /// </summary>
+        internal static string MetSkelFIle {
+            get {
+                return ResourceManager.GetString("MetSkelFIle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to chara/human/c{0}/skeleton/met/m{1}.
+        /// </summary>
+        internal static string MetSkelFolder {
+            get {
+                return ResourceManager.GetString("MetSkelFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 24.
         /// </summary>
         internal static string Minion_Category {
@@ -1227,6 +1263,24 @@ namespace FFXIV_TexTools2.Resources {
         internal static string MonsterMtrlFolder {
             get {
                 return ResourceManager.GetString("MonsterMtrlFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to skl_m{0}b{1}.sklb.
+        /// </summary>
+        internal static string MonsterSkelFile {
+            get {
+                return ResourceManager.GetString("MonsterSkelFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to chara/monster/m{0}/skeleton/base/b{1}.
+        /// </summary>
+        internal static string MonsterSkelFolder {
+            get {
+                return ResourceManager.GetString("MonsterSkelFolder", resourceCulture);
             }
         }
         
@@ -1483,7 +1537,7 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Titan Egi.
+        ///   Looks up a localized string similar to Titan-Egi.
         /// </summary>
         internal static string Titan_Egi {
             get {
@@ -1587,6 +1641,24 @@ namespace FFXIV_TexTools2.Resources {
         internal static string Weapon {
             get {
                 return ResourceManager.GetString("Weapon", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to skl_w{0}b{1}.sklb.
+        /// </summary>
+        internal static string WeapSkelFile {
+            get {
+                return ResourceManager.GetString("WeapSkelFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to chara/weapon/w{0}/skeleton/base/b{1}.
+        /// </summary>
+        internal static string WeapSkelFolder {
+            get {
+                return ResourceManager.GetString("WeapSkelFolder", resourceCulture);
             }
         }
         

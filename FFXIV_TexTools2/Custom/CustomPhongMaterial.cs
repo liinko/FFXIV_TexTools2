@@ -119,6 +119,12 @@ namespace HelixToolkit.Wpf.SharpDX
         public static readonly DependencyProperty SpecularMapProperty =
             DependencyProperty.Register("SpecularMap", typeof(Stream), typeof(CustomPhongMaterial), new AffectsRenderPropertyMetadata(null));
 
+        /// <summary>
+        /// 
+        /// </summary>
+        public static readonly DependencyProperty EmissiveMapProperty =
+            DependencyProperty.Register("EmissiveMap", typeof(Stream), typeof(CustomPhongMaterial), new AffectsRenderPropertyMetadata(null));
+
 
         /// <summary>
         /// Constructs a Shading Material which correspnds with 
@@ -219,6 +225,12 @@ namespace HelixToolkit.Wpf.SharpDX
             set { this.SetValue(DiffuseAlphaMapProperty, value); }
         }
 
+        public Stream EmissiveMap
+        {
+            get { return (Stream)this.GetValue(EmissiveMapProperty); }
+            set { this.SetValue(EmissiveMapProperty, value); }
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -251,7 +263,8 @@ namespace HelixToolkit.Wpf.SharpDX
                 SpecularShininess = this.SpecularShininess,
                 DiffuseMap = this.DiffuseMap,
                 DiffuseAlphaMap = this.DiffuseAlphaMap,
-                SpecularMap = this.SpecularMap
+                SpecularMap = this.SpecularMap,
+                EmissiveMap = this.EmissiveMap
             };
         }
 
@@ -285,6 +298,11 @@ namespace HelixToolkit.Wpf.SharpDX
                 if(SpecularMap != null)
                 {
                     SpecularMap.Dispose();
+                }
+
+                if (EmissiveMap != null)
+                {
+                    EmissiveMap.Dispose();
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.

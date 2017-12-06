@@ -57,6 +57,11 @@ namespace FFXIV_TexTools2.Model
         public BitmapSource ColorTable { get; set; }
 
         /// <summary>
+        /// The emissive map as an image
+        /// </summary>
+        public BitmapSource Emissive { get; set; }
+
+        /// <summary>
         /// Is the mesh part of the models body
         /// </summary>
         public bool IsBody { get; set; }

@@ -4,8 +4,7 @@ This is a more feature rich WPF implementation of FFXIV TexTools and replaced FF
 
 # Current Version: 1.4
 ChangeLog:
-Updated HelixToolkit and SharpDX versions.
-        
+
 Application:
  - Added more translations.
  - Removed ability to turn off modlist.

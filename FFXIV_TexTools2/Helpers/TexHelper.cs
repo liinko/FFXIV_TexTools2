@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using FFXIV_TexTools2.Material;
 using FFXIV_TexTools2.Model;
 using System;
 using System.Collections.Generic;
@@ -21,6 +22,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
@@ -45,7 +47,7 @@ namespace FFXIV_TexTools2.Helpers
         /// <param name="specularTexData">The texture data of the specular map</param>
         /// <param name="colorMap">The bitmap of the color map</param>
         /// <returns>An array of bitmaps to be used on the model</returns>
-        public static BitmapSource[] MakeModelTextureMaps(TEXData normalTexData, TEXData diffuseTexData, TEXData maskTexData, TEXData specularTexData, BitmapSource colorMap)
+        public static BitmapSource[] MakeModelTextureMaps(TEXData normalTexData, TEXData diffuseTexData, TEXData maskTexData, TEXData specularTexData, MTRLData mtrlData)
         {
             int height = normalTexData.Height;
             int width = normalTexData.Width;
@@ -80,15 +82,21 @@ namespace FFXIV_TexTools2.Helpers
 
             List<System.Drawing.Color> colorList = new List<System.Drawing.Color>();
             List<System.Drawing.Color> specularList = new List<System.Drawing.Color>();
+            List<System.Drawing.Color> emissiveList = new List<System.Drawing.Color>();
 
-            BitmapSource[] texBitmaps = new BitmapSource[4];
+            BitmapSource[] texBitmaps = new BitmapSource[5];
 
-            if (colorMap != null)
+            if (mtrlData.ColorData != null)
             {
-                int colorSetStride = colorMap.PixelWidth * (colorMap.Format.BitsPerPixel / 8);
-                byte[] colorPixels = new byte[colorMap.PixelHeight * colorSetStride];
+                var colorBitmap = TEX.TextureToBitmap(mtrlData.ColorData, 9312, 4, 16);
+                var cbmp = SetAlpha(colorBitmap, 255);
+                var colorMap1 = Imaging.CreateBitmapSourceFromHBitmap(cbmp.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
 
-                colorMap.CopyPixels(colorPixels, colorSetStride, 0);
+                int colorSetStride = colorMap1.PixelWidth * (colorMap1.Format.BitsPerPixel / 8);
+                byte[] colorPixels = new byte[colorMap1.PixelHeight * colorSetStride];
+                byte[] colorPixels2 = new byte[colorMap1.PixelHeight * colorSetStride];
+
+                colorMap1.CopyPixels(colorPixels, colorSetStride, 0);
 
                 for (int i = 0; i < colorPixels.Length; i += 16)
                 {
@@ -105,16 +113,22 @@ namespace FFXIV_TexTools2.Helpers
                     alpha = colorPixels[i + 7];
 
                     specularList.Add(System.Drawing.Color.FromArgb(255, red, green, blue));
+
+                    var r1 = colorPixels[i + 10];
+                    var g1 = colorPixels[i + 9];
+                    var b1 = colorPixels[i + 8];
+                    var a1 = colorPixels[i + 11];
+
+                    emissiveList.Add(System.Drawing.Color.FromArgb(255, r1, g1, b1));
                 }
             }
-            else if (colorMap == null)
+            else if (mtrlData.ColorData == null)
             {
                 for (int i = 0; i < 1024; i += 16)
                 {
                     colorList.Add(System.Drawing.Color.FromArgb(255, 255, 255, 255));
                 }
             }
-
 
             if (maskTexData != null)
             {
@@ -204,6 +218,7 @@ namespace FFXIV_TexTools2.Helpers
 
             List<byte> diffuseMap = new List<byte>();
             List<byte> specularMap = new List<byte>();
+            List<byte> emissiveMap = new List<byte>();
             List<byte> alphaMap = new List<byte>();
 
             float R = 1;
@@ -243,24 +258,70 @@ namespace FFXIV_TexTools2.Helpers
                         R = 255;
                     }
 
-                    B1 = specularPixels[i - 2];
-                    G1 = specularPixels[i - 2];
-                    R1 = specularPixels[i - 2];
-                }
+                    if(specularPixels != null)
+                    {
+                        B1 = specularPixels[i - 2];
+                        G1 = specularPixels[i - 2];
+                        R1 = specularPixels[i - 2];
+                    }
+                    else
+                    {
+                        B1 = 255;
+                        G1 = 255;
+                        R1 = 255;
+                    }
 
-                float pixel = (normalPixels[i] / 255f) * 15f;
-                int colorLoc = (int)Math.Floor(pixel + 0.5f);
+                }
 
                 System.Drawing.Color diffuseColor;
                 System.Drawing.Color specularColor;
+                System.Drawing.Color emissiveColor;
                 System.Drawing.Color alphaColor;
 
-                diffuseColor = System.Drawing.Color.FromArgb(alpha, (int)((colorList[colorLoc].R / 255f) * R), (int)((colorList[colorLoc].G / 255f) * G), (int)((colorList[colorLoc].B / 255f) * B));
-                specularColor = System.Drawing.Color.FromArgb(255, (int)((specularList[colorLoc].R / 255f) * R1), (int)((specularList[colorLoc].G / 255f) * G1), (int)((specularList[colorLoc].B / 255f) * B1));
+
+                float pixel = (normalPixels[i] / 255f) * 15f;
+                //int colorLoc = (int)Math.Floor(pixel + 0.5f);
+                float percent = (float)(pixel - Math.Truncate(pixel));
+
+                if(percent != 0)
+                {
+                    var color2Loc = (int)(Math.Truncate(pixel));
+                    var color1Loc = color2Loc + 1;
+
+                    var color1 = System.Drawing.Color.FromArgb(alpha, colorList[color1Loc].R, colorList[color1Loc].G, colorList[color1Loc].B);
+                    var color2 = System.Drawing.Color.FromArgb(alpha, colorList[color2Loc].R, colorList[color2Loc].G, colorList[color2Loc].B);
+
+                    var diffuseBlend = Blend(color1, color2, percent);
+
+                    color1 = System.Drawing.Color.FromArgb(255, specularList[color1Loc].R, specularList[color1Loc].G, specularList[color1Loc].B);
+                    color2 = System.Drawing.Color.FromArgb(255, specularList[color2Loc].R, specularList[color2Loc].G, specularList[color2Loc].B);
+
+                    var specBlend = Blend(color1, color2, percent);
+
+                    color1 = System.Drawing.Color.FromArgb(255, emissiveList[color1Loc].R, emissiveList[color1Loc].G, emissiveList[color1Loc].B);
+                    color2 = System.Drawing.Color.FromArgb(255, emissiveList[color2Loc].R, emissiveList[color2Loc].G, emissiveList[color2Loc].B);
+
+                    var emisBlend = Blend(color1, color2, percent);
+
+                    diffuseColor = System.Drawing.Color.FromArgb(alpha, (int)((diffuseBlend.R / 255f) * R), (int)((diffuseBlend.G / 255f) * G), (int)((diffuseBlend.B / 255f) * B));
+                    specularColor = System.Drawing.Color.FromArgb(255, (int)((specBlend.R / 255f) * R1), (int)((specBlend.G / 255f) * G1), (int)((specBlend.B / 255f) * B1));
+                    emissiveColor = System.Drawing.Color.FromArgb(255, emisBlend.R, emisBlend.G, emisBlend.B);
+                }
+                else
+                {
+                    var colorLoc = (int)Math.Floor(pixel + 0.5f);
+
+                    diffuseColor = System.Drawing.Color.FromArgb(alpha, (int)((colorList[colorLoc].R / 255f) * R), (int)((colorList[colorLoc].G / 255f) * G), (int)((colorList[colorLoc].B / 255f) * B));
+                    specularColor = System.Drawing.Color.FromArgb(255, (int)((specularList[colorLoc].R / 255f) * R1), (int)((specularList[colorLoc].G / 255f) * G1), (int)((specularList[colorLoc].B / 255f) * B1));
+                    emissiveColor = System.Drawing.Color.FromArgb(255, emissiveList[colorLoc].R, emissiveList[colorLoc].G, emissiveList[colorLoc].B);
+                }
+
+
                 alphaColor = System.Drawing.Color.FromArgb(255, alpha, alpha, alpha);
 
                 diffuseMap.AddRange(BitConverter.GetBytes(diffuseColor.ToArgb()));
                 specularMap.AddRange(BitConverter.GetBytes(specularColor.ToArgb()));
+                emissiveMap.AddRange(BitConverter.GetBytes(emissiveColor.ToArgb()));
                 alphaMap.AddRange(BitConverter.GetBytes(alphaColor.ToArgb()));
             }
 
@@ -277,6 +338,9 @@ namespace FFXIV_TexTools2.Helpers
 
             bitmapSource = BitmapSource.Create(width, height, normalBitmap.HorizontalResolution, normalBitmap.VerticalResolution, PixelFormats.Bgra32, null, alphaMap.ToArray(), stride);
             texBitmaps[3] = bitmapSource;
+
+            bitmapSource = BitmapSource.Create(width, height, normalBitmap.HorizontalResolution, normalBitmap.VerticalResolution, PixelFormats.Bgra32, null, emissiveMap.ToArray(), stride);
+            texBitmaps[4] = bitmapSource;
 
 
             if (normalTexData != null)
@@ -622,6 +686,39 @@ namespace FFXIV_TexTools2.Helpers
             bmp.UnlockBits(data);
 
             return bmp;
+        }
+
+        public static Bitmap GetBitmap(BitmapSource source)
+        {
+            Bitmap bmp = new Bitmap(
+              source.PixelWidth,
+              source.PixelHeight,
+              System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+            BitmapData data = bmp.LockBits(
+              new Rectangle(System.Drawing.Point.Empty, bmp.Size),
+              ImageLockMode.WriteOnly,
+              System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+            source.CopyPixels(
+              Int32Rect.Empty,
+              data.Scan0,
+              data.Height * data.Stride,
+              data.Stride);
+            bmp.UnlockBits(data);
+            return bmp;
+        }
+
+        /// <summary>Blends the specified colors together.</summary>
+        /// <param name="color">Color to blend onto the background color.</param>
+        /// <param name="backColor">Color to blend the other color onto.</param>
+        /// <param name="amount">How much of <paramref name="color"/> to keep,
+        /// “on top of” <paramref name="backColor"/>.</param>
+        /// <returns>The blended colors.</returns>
+        public static System.Drawing.Color Blend(this System.Drawing.Color color, System.Drawing.Color backColor, double amount)
+        {
+            byte r = (byte)((color.R * amount) + backColor.R * (1 - amount));
+            byte g = (byte)((color.G * amount) + backColor.G * (1 - amount));
+            byte b = (byte)((color.B * amount) + backColor.B * (1 - amount));
+            return System.Drawing.Color.FromArgb(r, g, b);
         }
     }
 }
