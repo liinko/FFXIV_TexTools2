@@ -18,7 +18,6 @@ using FFXIV_TexTools2.Model;
 using FFXIV_TexTools2.Resources;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
@@ -882,61 +881,6 @@ namespace FFXIV_TexTools2.Helpers
         }
 
         /// <summary>
-        /// Checks the index for the number of dats the game will attempt to read
-        /// </summary>
-        /// <returns></returns>
-        public static bool CheckIndex()
-        {
-            bool problemFound = false;
-
-            foreach(var indexFile in Info.ModIndexDict)
-            {
-                var indexPath = string.Format(Info.indexDir, indexFile.Key);
-                var index2Path = string.Format(Info.index2Dir, indexFile.Key);
-
-                try
-                {
-                    using (BinaryReader br = new BinaryReader(File.OpenRead(indexPath)))
-                    {
-                        br.BaseStream.Seek(1104, SeekOrigin.Begin);
-
-                        var numDats = br.ReadInt16();
-
-                        if (numDats != indexFile.Value)
-                        {
-                            problemFound = true;
-                        }
-                    }
-                }
-                catch (Exception e)
-                {
-                    MessageBox.Show("[Helper] Error Accessing Index File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-
-                try
-                {
-                    using (BinaryReader br = new BinaryReader(File.OpenRead(index2Path)))
-                    {
-                        br.BaseStream.Seek(1104, SeekOrigin.Begin);
-
-                        var numDats = br.ReadInt16();
-
-                        if (numDats != indexFile.Value)
-                        {
-                            problemFound = true;
-                        }
-                    }
-                }
-                catch (Exception e)
-                {
-                    MessageBox.Show("[Helper] Error Accessing Index 2 File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            }
-
-            return problemFound;
-        }
-
-        /// <summary>
         /// Changes the number of dats the game will attempt to read to 5
         /// </summary>
         public static void FixIndex()
@@ -1012,6 +956,41 @@ namespace FFXIV_TexTools2.Helpers
             }
 
             return itemType;
+        }
+
+        public static bool IsIndexLocked(bool showMessage)
+        {
+            foreach (var indexFile in Info.ModIndexDict)
+            {
+                var indexPath = string.Format(Info.indexDir, indexFile.Key);
+                var index2Path = string.Format(Info.index2Dir, indexFile.Key);
+
+                FileStream stream = null;
+
+                try
+                {
+                    stream = File.Open(index2Path, FileMode.Open);
+                }
+                catch(Exception e)
+                {
+                    if (showMessage)
+                    {
+                        MessageBox.Show("Error Accessing Index File\n\n" +
+                        "Please exit the game before proceeding.\n" +
+                        "-----------------------------------------------------\n\n" +
+                        "Error Message:\n" +
+                        e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+
+                    return true;
+                }
+                finally
+                {
+                    if (stream != null)
+                        stream.Close();
+                }
+            }
+            return false;
         }
 
         /// <summary>

@@ -22,7 +22,6 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -80,7 +79,7 @@ namespace FFXIV_TexTools2.ViewModel
             {
                 race = entry.fullPath.Substring(entry.fullPath.LastIndexOf('/'));
 
-                if ((entry.fullPath.Contains("_fac_") || entry.fullPath.Contains("_etc_") || entry.fullPath.Contains("_acc_")) && Properties.Settings.Default.DX_Ver.Equals("DX11"))
+                if ((entry.fullPath.Contains("_fac_") || entry.fullPath.Contains("_etc_") || entry.fullPath.Contains("_acc_")) && Properties.Settings.Default.DX_Ver.Equals(Strings.DX11))
                 {
                     race = race.Substring(race.LastIndexOf("--c") + 3, 4);
                 }

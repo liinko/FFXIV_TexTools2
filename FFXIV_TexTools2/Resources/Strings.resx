@@ -654,16 +654,22 @@
   <data name="DemiSkelFolder" xml:space="preserve">
     <value>chara/demihuman/d{0}/skeleton/base/b{1}</value>
   </data>
-  <data name="MetSkelFIle" xml:space="preserve">
-    <value>skl_c{0}m{1}.sklb</value>
+  <data name="EquipSkelFile" xml:space="preserve">
+    <value>skl_c{0}{1}{2}.sklb</value>
   </data>
-  <data name="MetSkelFolder" xml:space="preserve">
-    <value>chara/human/c{0}/skeleton/met/m{1}</value>
+  <data name="EquipSkelFolder" xml:space="preserve">
+    <value>chara/human/c{0}/skeleton/{1}/{2}{3}</value>
   </data>
   <data name="MonsterSkelFile" xml:space="preserve">
     <value>skl_m{0}b{1}.sklb</value>
   </data>
   <data name="MonsterSkelFolder" xml:space="preserve">
     <value>chara/monster/m{0}/skeleton/base/b{1}</value>
+  </data>
+  <data name="DX11" xml:space="preserve">
+    <value>DX11</value>
+  </data>
+  <data name="DX9" xml:space="preserve">
+    <value>DX9</value>
   </data>
 </root>

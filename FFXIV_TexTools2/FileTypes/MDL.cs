@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using FFXIV_TexTools2.FileTypes.ModelContainers;
 using FFXIV_TexTools2.Helpers;
 using FFXIV_TexTools2.Material.ModelMaterial;
 using FFXIV_TexTools2.Model;
@@ -22,8 +23,8 @@ using HelixToolkit.Wpf.SharpDX.Core;
 using SharpDX;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace FFXIV_TexTools2.Material
@@ -40,7 +41,8 @@ namespace FFXIV_TexTools2.Material
         List<string> materialStrings = new List<string>();
         List<string> boneStrings = new List<string>();
         List<float> boneTransforms = new List<float>();
-
+        ExtraIndexData extraIndexData = new ExtraIndexData();
+        ModelData modelData = new ModelData();
 
         /// <summary>
         /// Parses the MDL file to obtain model information
@@ -153,7 +155,7 @@ namespace FFXIV_TexTools2.Material
             fullPath = MDLFolder + "/" + MDLFile;
             int offset = Helper.GetDataOffset(FFCRC.GetHash(MDLFolder), FFCRC.GetHash(MDLFile), Strings.ItemsDat);
 
-            if(offset == 0)
+            if (offset == 0)
             {
                 if (itemType.Equals("weapon"))
                 {
@@ -173,8 +175,6 @@ namespace FFXIV_TexTools2.Material
 
             using (BinaryReader br = new BinaryReader(new MemoryStream(MDLDatData.Item1)))
             {
-                ModelData modelData = new ModelData();
-
                 // The size of the header + (size of the mesh information block (136 bytes) * the number of meshes) + padding
                 br.BaseStream.Seek(64 + 136 * MDLDatData.Item2 + 4, SeekOrigin.Begin);
 
@@ -372,9 +372,150 @@ namespace FFXIV_TexTools2.Material
                     modelData.BoneSet.Add(bones);
                 }
 
-                br.ReadBytes(unknown1 * 16);
-                br.ReadBytes(unknown2 * 12);
-                br.ReadBytes(unknown3 * 4);
+                //br.ReadBytes(unknown1 * 16);
+
+                Dictionary<int, int> indexMin = new Dictionary<int, int>();
+                Dictionary<int, List<int>> extraIndices = new Dictionary<int, List<int>>();
+                List<ExtraIndex> indexCounts = new List<ExtraIndex>();
+
+                var pCount = 0;
+                var pCount1 = 0;
+                var pCount2 = 0;
+
+                if (unknown1 > 0)
+                {
+                    for (int i = 0; i < unknown1; i++)
+                    {
+                        //not sure
+                        br.ReadBytes(4);
+
+                        //LoD[0] Extra Data Index
+                        var p1 = br.ReadUInt16();
+
+                        //LoD[1] Extra Data Index
+                        var p2 = br.ReadUInt16();
+
+                        //LoD[2] Extra Data Index
+                        var p3 = br.ReadUInt16();
+
+
+                        //LoD[0] Extra Data Part Count
+                        var p1n = br.ReadUInt16();
+                        pCount += p1n;
+
+                        //LoD[1] Extra Data Part Count
+                        var p2n = br.ReadUInt16();
+                        pCount1 += p2n;
+
+                        //LoD[2] Extra Data Part Count
+                        var p3n = br.ReadUInt16();
+                        pCount2 += p3n;
+
+                    }
+                }
+
+                Dictionary<int, int> indexLoc = new Dictionary<int, int>();
+
+                if(unknown1 > 0)
+                {
+                    for (int i = 0; i < modelData.LoD[0].MeshCount; i++)
+                    {
+                        var ido = modelData.LoD[0].MeshList[i].MeshInfo.IndexDataOffset;
+                        indexLoc.Add(ido, i);
+                    }
+                }
+
+
+                List<int> maskCounts = new List<int>();
+                Dictionary<int, int> totalExtraCounts = new Dictionary<int, int>();
+                if (unknown2 > 0)
+                {
+                    for (int i = 0; i < pCount; i++)
+                    {
+                        //Index Offset Start
+                        var m1 = br.ReadInt32();
+                        var iLoc = indexLoc[m1];
+
+                        //index count
+                        var mCount = br.ReadInt32();
+
+                        //index offset in unk3
+                        var mOffset = br.ReadInt32();
+
+                        indexCounts.Add(new ExtraIndex() { IndexLocation = iLoc, IndexCount = mCount });
+                        maskCounts.Add(mCount);
+                    }
+
+                    br.ReadBytes((pCount1 + pCount2) * 12);
+                }
+
+                int totalLoD0MaskCount = 0;
+
+                if(unknown2 > 0)
+                {
+                    for (int i = 0; i < pCount; i++)
+                    {
+                        totalLoD0MaskCount += maskCounts[i];
+                    }
+                }
+
+                if (unknown3 > 0)
+                {
+                    var unk3Remainder = (unknown3 * 4) - (totalLoD0MaskCount * 4);
+
+                    foreach (var ic in indexCounts)
+                    {
+                        HashSet<int> mIndexList = new HashSet<int>();
+
+                        for (int i = 0; i < ic.IndexCount; i++)
+                        {
+                            //index its replacing? attatched to?
+                            br.ReadBytes(2);
+                            //extra index following last equipment index
+                            var mIndex = br.ReadInt16();
+                            mIndexList.Add(mIndex);
+
+                            if (extraIndices.ContainsKey(ic.IndexLocation))
+                            {
+                                extraIndices[ic.IndexLocation].Add(mIndex);
+                            }
+                            else
+                            {
+                                extraIndices.Add(ic.IndexLocation, new List<int>() { mIndex });
+                            }
+                        }
+
+                        if (totalExtraCounts.ContainsKey(ic.IndexLocation))
+                        {
+                            totalExtraCounts[ic.IndexLocation] += mIndexList.Count;
+                        }
+                        else
+                        {
+                            totalExtraCounts.Add(ic.IndexLocation, mIndexList.Count);
+                        }
+                    }
+                    //the rest of unk3
+                    br.ReadBytes(unk3Remainder);
+                }
+
+
+
+                if(unknown3 > 0)
+                {
+                    foreach (var ei in extraIndices)
+                    {
+                        indexMin.Add(ei.Key, ei.Value.Min());
+                    }
+
+                    extraIndexData.indexCounts = indexCounts;
+                    extraIndexData.indexMin = indexMin;
+                    extraIndexData.totalExtraCounts = totalExtraCounts;
+                    extraIndexData.extraIndices = extraIndices;
+
+                    modelData.ExtraData = extraIndexData;
+                }
+
+                //br.ReadBytes(unknown3 * 4);
 
                 var boneIndexSize = br.ReadInt32();
 
@@ -442,6 +583,7 @@ namespace FFXIV_TexTools2.Material
 
                     var vertexList = new Vector3Collection();
                     var texCoordList = new Vector2Collection();
+                    var texCoordList2 = new Vector2Collection();
                     var normalList = new Vector3Collection();
                     var tangentList = new Vector3Collection();
                     var colorsList = new Color4Collection();
@@ -677,10 +819,17 @@ namespace FFXIV_TexTools2.Material
                                 z = h3;
                                 w = h4;
                             }
+                            else if (meshDataInfoList[coordinates].DataType == 1)
+                            {
+                                x = br1.ReadSingle();
+                                y = br1.ReadSingle();   
+                            }
                             else
                             {
                                 x = br1.ReadSingle();
                                 y = br1.ReadSingle();
+                                z = br1.ReadSingle();
+                                w = br1.ReadSingle();
                             }
 
 
@@ -689,6 +838,7 @@ namespace FFXIV_TexTools2.Material
 
                             objBytes.Add("vt " + ox.ToString("N5") + " " + (1 - y).ToString("N5") + " ");
                             texCoordList.Add(new Vector2(x, y));
+                            texCoordList2.Add(new Vector2(z, w));
                         }
                     }
 
@@ -806,6 +956,7 @@ namespace FFXIV_TexTools2.Material
                             indexList.Add(i1);
                             indexList.Add(i2);
                             indexList.Add(i3);
+
                         }
                     }
 
@@ -814,6 +965,7 @@ namespace FFXIV_TexTools2.Material
                         Vertices = vertexList,
                         Normals = normalList,
                         TextureCoordinates = texCoordList,
+                        TextureCoordinates2 = texCoordList2,
                         BiTangents = tangentList,
                         Indices = indexList,
                         VertexColors = colorsList,
@@ -827,7 +979,9 @@ namespace FFXIV_TexTools2.Material
                         MeshPartList = mesh.MeshPartList,
                         BlendIndicesArrayList = blendIndicesList2,
                         BlendWeightsArrayList = blendWeightList2,
-                        MaterialNum = mesh.MeshInfo.MaterialNum
+                        MaterialNum = mesh.MeshInfo.MaterialNum,
+                        MeshPartCount = mesh.MeshInfo.MeshPartCount,
+                        MeshPartOffset = mesh.MeshInfo.MeshPartOffset
                     };
 
                     meshList.Add(modelMeshData);
@@ -878,6 +1032,11 @@ namespace FFXIV_TexTools2.Material
         public string GetInternalPath()
         {
             return fullPath;
+        }
+
+        public ModelData GetModelData()
+        {
+            return modelData;
         }
     }
 }

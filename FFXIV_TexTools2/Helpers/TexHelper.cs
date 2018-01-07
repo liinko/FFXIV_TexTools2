@@ -22,7 +22,6 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
-using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
@@ -94,7 +93,6 @@ namespace FFXIV_TexTools2.Helpers
 
                 int colorSetStride = colorMap1.PixelWidth * (colorMap1.Format.BitsPerPixel / 8);
                 byte[] colorPixels = new byte[colorMap1.PixelHeight * colorSetStride];
-                byte[] colorPixels2 = new byte[colorMap1.PixelHeight * colorSetStride];
 
                 colorMap1.CopyPixels(colorPixels, colorSetStride, 0);
 
@@ -127,6 +125,8 @@ namespace FFXIV_TexTools2.Helpers
                 for (int i = 0; i < 1024; i += 16)
                 {
                     colorList.Add(System.Drawing.Color.FromArgb(255, 255, 255, 255));
+                    specularList.Add(System.Drawing.Color.FromArgb(255, 0, 0, 0));
+                    emissiveList.Add(System.Drawing.Color.FromArgb(255, 0, 0, 0));
                 }
             }
 
@@ -195,7 +195,7 @@ namespace FFXIV_TexTools2.Helpers
 
             if (normalTexData != null)
             {
-                if (tSize > (normalTexData.Height * normalTexData.Height))
+                if (tSize > (normalTexData.Height * normalTexData.Width))
                 {
                     var normBitmap = ResizeImage(Image.FromHbitmap(normalTexData.BMP.GetHbitmap()), width, height);
                     var normalData = normBitmap.LockBits(new System.Drawing.Rectangle(0, 0, normBitmap.Width, normBitmap.Height), ImageLockMode.ReadOnly, normBitmap.PixelFormat);
@@ -283,7 +283,7 @@ namespace FFXIV_TexTools2.Helpers
                 //int colorLoc = (int)Math.Floor(pixel + 0.5f);
                 float percent = (float)(pixel - Math.Truncate(pixel));
 
-                if(percent != 0)
+                if (percent != 0)
                 {
                     var color2Loc = (int)(Math.Truncate(pixel));
                     var color1Loc = color2Loc + 1;

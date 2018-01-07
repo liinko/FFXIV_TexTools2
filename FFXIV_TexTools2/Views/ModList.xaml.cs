@@ -58,7 +58,7 @@ namespace FFXIV_TexTools2.Views
                 selected.Active = Brushes.Gray;
                 selected.ActiveOpacity = 0.5f;
                 selected.ActiveBorder = Brushes.Red;
-
+                modToggleButton.Content = "Enable";
             }
             else if (modToggleButton.Content.Equals("Enable"))
             {
@@ -66,7 +66,7 @@ namespace FFXIV_TexTools2.Views
                 selected.Active = Brushes.Transparent;
                 selected.ActiveOpacity = 1;
                 selected.ActiveBorder = Brushes.Green;
-
+                modToggleButton.Content = "Disable";
             }
 
             Helper.UpdateIndex(offset, selected.Entry.fullPath, selected.Entry.datFile);

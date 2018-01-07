@@ -20,7 +20,7 @@ using FFXIV_TexTools2.ViewModel;
 using FFXIV_TexTools2.Views;
 using Newtonsoft.Json;
 using System;
-using System.Globalization;
+using System.Collections.Generic;
 using System.IO;
 using System.Windows;
 using System.Windows.Media;
@@ -41,6 +41,14 @@ namespace FFXIV_TexTools2
             mViewModel = new MainViewModel();
             this.DataContext = mViewModel;
 
+            var dxver = Properties.Settings.Default.DX_Ver;
+
+            if(dxver != Strings.DX11 || dxver != Strings.DX9)
+            {
+                Properties.Settings.Default.DX_Ver = Strings.DX11;
+                Properties.Settings.Default.Save();
+            }
+
             DXVerStatus.Content = "DX Version: " + Properties.Settings.Default.DX_Ver.Substring(2);
 
             //HavokInterop.InitializeSTA();
@@ -50,7 +58,7 @@ namespace FFXIV_TexTools2
         {
             try
             {
-                Properties.Settings.Default.DX_Ver = "DX9";
+                Properties.Settings.Default.DX_Ver = Strings.DX9;
                 Properties.Settings.Default.Save();
 
                 Menu_DX9.IsEnabled = false;
@@ -76,7 +84,7 @@ namespace FFXIV_TexTools2
         {
             try
             {
-                Properties.Settings.Default.DX_Ver = "DX11";
+                Properties.Settings.Default.DX_Ver = Strings.DX11;
                 Properties.Settings.Default.Save();
 
                 Menu_DX11.IsEnabled = false;
@@ -101,22 +109,26 @@ namespace FFXIV_TexTools2
 
         private void Menu_ProblemCheck_Click(object sender, RoutedEventArgs e)
         {
-            if (Helper.CheckIndex())
-            {
-                if (MessageBox.Show("The index file does not have access to the modded dat file. \nFix now?", "Found an Issue", MessageBoxButton.YesNo, MessageBoxImage.Error) == MessageBoxResult.Yes)
-                {
-                    Helper.FixIndex();
-                }
-            }
-            else
-            {
-                MessageBox.Show("No issues were found \nIf you are still experiencing issues, please submit a bug report.", "No Issues Found", MessageBoxButton.OK, MessageBoxImage.None);
-            }
+            ProblemCheckView pcv = new ProblemCheckView();
+            pcv.Show();
+
+
+            //if (Helper.CheckIndex())
+            //{
+            //    if (MessageBox.Show("The index file does not have access to the modded dat file. \nFix now?", "Found an Issue", MessageBoxButton.YesNo, MessageBoxImage.Error) == MessageBoxResult.Yes)
+            //    {
+            //        Helper.FixIndex();
+            //    }
+            //}
+            //else
+            //{
+            //    MessageBox.Show("No issues were found \nIf you are still experiencing issues, please submit a bug report.", "No Issues Found", MessageBoxButton.OK, MessageBoxImage.None);
+            //}
         }
 
         private void Menu_BugReport_Click(object sender, RoutedEventArgs e)
         {
-            System.Diagnostics.Process.Start("http://ffxivtextools.dualwield.net/bug_report.html");
+            System.Diagnostics.Process.Start("https://bitbucket.org/liinko/ffxiv-textools/issues");
         }
 
         private void Menu_About_Click(object sender, RoutedEventArgs e)
@@ -330,44 +342,50 @@ namespace FFXIV_TexTools2
 
         private void Menu_StartOver_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show("Starting over will:\n\n" +
-                "Restore index files to their original state.\n" +
-                "Delete all mods and create new .dat files.\n" +
-                "Delete all .modlist file entries.\n\n" +
-                "Do you want to start over?", "Start Over", MessageBoxButton.YesNo, MessageBoxImage.Information) == MessageBoxResult.Yes)
+            if (!Helper.IsIndexLocked(true))
             {
-
-                RevertAll();
-
-                string[] indexFiles = new string[]
+                if (MessageBox.Show("Starting over will:\n\n" +
+                    "Restore index files to their original state.\n" +
+                    "Delete all mods and create new .dat files.\n" +
+                    "Delete all .modlist file entries.\n\n" +
+                    "Do you want to start over?", "Start Over", MessageBoxButton.YesNo, MessageBoxImage.Information) == MessageBoxResult.Yes)
                 {
-                    Directory.GetCurrentDirectory() + "/Index_Backups/040000.win32.index",
-                    Directory.GetCurrentDirectory() + "/Index_Backups/040000.win32.index2",
-                    Directory.GetCurrentDirectory() + "/Index_Backups/060000.win32.index",
-                    Directory.GetCurrentDirectory() + "/Index_Backups/060000.win32.index2"
-                };
 
-                foreach(var i in indexFiles)
-                {
-                    if (File.Exists(i))
+                    RevertAll();
+
+                    var indexFiles = new List<string>();
+
+                    foreach (var indexFile in Info.ModIndexDict)
                     {
-                        File.Copy(i, Properties.Settings.Default.FFXIV_Directory + "/" + Path.GetFileName(i), true);
+                        var indexPath = string.Format(Info.indexBackupFile, indexFile.Key);
+                        var index2Path = string.Format(Info.index2BackupFile, indexFile.Key);
+
+                        indexFiles.Add(indexPath);
+                        indexFiles.Add(index2Path);
                     }
-                }
 
-                foreach (var datName in Info.ModDatDict)
-                {
-                    var datPath = string.Format(Info.datDir, datName.Key, datName.Value);
-
-                    if (File.Exists(datPath))
+                    foreach (var i in indexFiles)
                     {
-                        File.Delete(datPath);
+                        if (File.Exists(i))
+                        {
+                            File.Copy(i, Properties.Settings.Default.FFXIV_Directory + "/" + Path.GetFileName(i), true);
+                        }
                     }
+
+                    foreach (var datName in Info.ModDatDict)
+                    {
+                        var datPath = string.Format(Info.datDir, datName.Key, datName.Value);
+
+                        if (File.Exists(datPath))
+                        {
+                            File.Delete(datPath);
+                        }
+                    }
+
+                    File.Delete(Info.modListDir);
+
+                    MakeModContainers();
                 }
-
-                File.Delete(Info.modListDir);
-
-                MakeModContainers();
             }
         }
 

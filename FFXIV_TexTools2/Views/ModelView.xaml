@@ -13,7 +13,7 @@
         <GroupBox x:Name="groupBox1" Header="Viewer" Margin="10,50,10,70">
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
+                    <RowDefinition Height="10*" />
                 </Grid.RowDefinitions>
                 <hx:Viewport3DX
                     x:Name="viewport3DX"
@@ -23,10 +23,12 @@
                     ShowCoordinateSystem="False"
                     TextBrush="Black"
                     UseDefaultGestures="False"
+                    Title="{Binding ModelTitle}"
+                    SubTitle="{Binding ModelSubTitle}"
                     BackgroundColor="{Binding BackgroundColor}"
                     RenderTechnique="{Binding RenderTechnique}"
                     EffectsManager="{Binding EffectsManager}"
-                    DataContext="{Binding CompositeVM}">
+                    DataContext="{Binding CompositeVM}" Panel.ZIndex="1">
                     <hx:Viewport3DX.InputBindings>
                         <KeyBinding Key="B" Command="hx:ViewportCommands.BackView" />
                         <KeyBinding Key="F" Command="hx:ViewportCommands.FrontView" />

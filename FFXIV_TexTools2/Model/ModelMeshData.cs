@@ -16,7 +16,6 @@
 
 using FFXIV_TexTools2.Material.ModelMaterial;
 using HelixToolkit.Wpf.SharpDX.Core;
-using SharpDX;
 using System.Collections.Generic;
 
 namespace FFXIV_TexTools2.Material
@@ -34,6 +33,11 @@ namespace FFXIV_TexTools2.Material
         public Vector2Collection TextureCoordinates = new Vector2Collection();
 
         /// <summary>
+        /// The collection of secondary texture coordinates for the mesh
+        /// </summary>
+        public Vector2Collection TextureCoordinates2 = new Vector2Collection();
+
+        /// <summary>
         /// The collection of normals for the mesh
         /// </summary>
         public Vector3Collection Normals = new Vector3Collection();
@@ -43,12 +47,10 @@ namespace FFXIV_TexTools2.Material
         /// </summary>
         public Vector3Collection BiTangents = new Vector3Collection();
 
-
         /// <summary>
         /// The collection of tangents for the mesh
         /// </summary>
         public Vector3Collection Tangents = new Vector3Collection();
-
 
         /// <summary>
         /// The collection of indices for the mesh
@@ -114,5 +116,15 @@ namespace FFXIV_TexTools2.Material
         /// The mesh parts list
         /// </summary>
         public List<MeshPart> MeshPartList { get; set; }
+
+        /// <summary>
+        /// The mesh part count
+        /// </summary>
+        public int MeshPartCount{ get; set; }
+
+        /// <summary>
+        /// The mesh part count
+        /// </summary>
+        public int MeshPartOffset { get; set; }
     }
 }

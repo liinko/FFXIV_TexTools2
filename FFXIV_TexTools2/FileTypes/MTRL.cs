@@ -20,7 +20,6 @@ using FFXIV_TexTools2.Resources;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -792,7 +791,7 @@ namespace FFXIV_TexTools2.Material
             int offset = 0;
             string[] partList = new string[] { "a", "b", "c", "d" };
 
-            if (item.ItemName.Equals(Strings.Face))
+            if (item.ItemName.Equals(Strings.Face) || item.ItemName.Equals(Strings.Body))
             {
                 MTRLFolder = String.Format(Strings.FaceMtrlFolder, race, partNum.PadLeft(4, '0'));
                 MTRLFile = String.Format(Strings.FaceMtrlFile, race, partNum.PadLeft(4, '0'), Info.FaceTypes[type], part);
@@ -934,7 +933,7 @@ namespace FFXIV_TexTools2.Material
 
                     string fileName = fullPath.Substring(fullPath.LastIndexOf("/") + 1);
 
-                    if (Properties.Settings.Default.DX_Ver.Equals("DX11") && isUncompressed)
+                    if (Properties.Settings.Default.DX_Ver.Equals(Strings.DX11) && isUncompressed)
                     {
                         if(textureNameSize > 50)
                         {
