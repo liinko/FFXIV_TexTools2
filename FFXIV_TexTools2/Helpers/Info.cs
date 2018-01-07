@@ -14,11 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using FFXIV_TexTools2.IO;
 using FFXIV_TexTools2.Resources;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
 
 namespace FFXIV_TexTools2.Helpers
 {
@@ -31,8 +30,12 @@ namespace FFXIV_TexTools2.Helpers
         public static string datDir = Properties.Settings.Default.FFXIV_Directory + "/{0}.win32.dat{1}";
         public static int modelMultiplier = 10;
 
-        public static string modListDir = Directory.GetCurrentDirectory() + "/TexTools.modlist";
+        public static string modListDir = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/TexTools/TexTools.modlist";
         public static string modDatDir = Properties.Settings.Default.FFXIV_Directory + "/{0}.win32.dat{1}";
+
+        public static string indexBackupDir = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/TexTools/Index_Backups";
+        public static string indexBackupFile = indexBackupDir + "/{0}.win32.index";
+        public static string index2BackupFile = indexBackupDir + "/{0}.win32.index2";
 
         public static Dictionary<string, string> ModDatDict = new Dictionary<string, string>
         {

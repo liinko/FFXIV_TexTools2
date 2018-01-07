@@ -430,6 +430,24 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to DX11.
+        /// </summary>
+        internal static string DX11 {
+            get {
+                return ResourceManager.GetString("DX11", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to DX9.
+        /// </summary>
+        internal static string DX9 {
+            get {
+                return ResourceManager.GetString("DX9", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Ears.
         /// </summary>
         internal static string Ears {
@@ -561,6 +579,24 @@ namespace FFXIV_TexTools2.Resources {
         internal static string EquipMtrlFolder {
             get {
                 return ResourceManager.GetString("EquipMtrlFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to skl_c{0}{1}{2}.sklb.
+        /// </summary>
+        internal static string EquipSkelFile {
+            get {
+                return ResourceManager.GetString("EquipSkelFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to chara/human/c{0}/skeleton/{1}/{2}{3}.
+        /// </summary>
+        internal static string EquipSkelFolder {
+            get {
+                return ResourceManager.GetString("EquipSkelFolder", resourceCulture);
             }
         }
         
@@ -1137,24 +1173,6 @@ namespace FFXIV_TexTools2.Resources {
         internal static string Mask {
             get {
                 return ResourceManager.GetString("Mask", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to skl_c{0}m{1}.sklb.
-        /// </summary>
-        internal static string MetSkelFIle {
-            get {
-                return ResourceManager.GetString("MetSkelFIle", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to chara/human/c{0}/skeleton/met/m{1}.
-        /// </summary>
-        internal static string MetSkelFolder {
-            get {
-                return ResourceManager.GetString("MetSkelFolder", resourceCulture);
             }
         }
         

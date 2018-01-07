@@ -19,7 +19,6 @@ using FFXIV_TexTools2.Helpers;
 using FFXIV_TexTools2.Material;
 using FFXIV_TexTools2.Model;
 using FFXIV_TexTools2.Resources;
-using HelixToolkit.Wpf.SharpDX.Core;
 using Newtonsoft.Json;
 using SharpDX;
 using System;
@@ -187,7 +186,7 @@ namespace FFXIV_TexTools2.IO
         }
 
 
-        public static bool SaveCollada(string selectedCategory, string modelName, string selectedItemName, List<MDLTEXData> meshData, List<ModelMeshData> meshList)
+        public static bool SaveCollada(string selectedCategory, string modelName, string selectedItemName, List<MDLTEXData> meshData, List<ModelMeshData> meshList, ModelData modelData)
         {
             string skelName = modelName.Substring(0, 5);
 
@@ -320,13 +319,13 @@ namespace FFXIV_TexTools2.IO
 
 
                 //Geometries
-                XMLgeometries(xmlWriter, modelName, meshList);
+                XMLgeometries(xmlWriter, modelName, meshList, modelData);
 
                 //Controllers
-                XMLcontrollers(xmlWriter, modelName, meshList, skelDict);
+                XMLcontrollers(xmlWriter, modelName, meshList, skelDict, modelData);
 
                 //Scenes
-                XMLscenes(xmlWriter, modelName, meshList, skelDict);
+                XMLscenes(xmlWriter, modelName, meshList, skelDict, modelData);
 
                 xmlWriter.WriteEndElement();
                 //</COLLADA>
@@ -360,10 +359,12 @@ namespace FFXIV_TexTools2.IO
                 skelFolder = string.Format(Strings.DemiSkelFolder, modelName.Substring(1, 4), "0001");
                 skelFile = string.Format(Strings.DemiSkelFile, modelName.Substring(1, 4), "0001");
             }
-            else if (category.Equals(Strings.Head))
+            else
             {
-                skelFolder = string.Format(Strings.MetSkelFolder, modelName.Substring(1, 4), modelName.Substring(6, 4));
-                skelFile = string.Format(Strings.MetSkelFIle, modelName.Substring(1, 4), modelName.Substring(6, 4));
+                var abr = Info.slotAbr[category];
+
+                skelFolder = string.Format(Strings.EquipSkelFolder, modelName.Substring(1, 4), abr, abr[0], modelName.Substring(6, 4));
+                skelFile = string.Format(Strings.EquipSkelFile, modelName.Substring(1, 4), abr[0], modelName.Substring(6, 4));
             }
 
             if(Helper.FileExists(FFCRC.GetHash(skelFile), FFCRC.GetHash(skelFolder), Strings.ItemsDat))
@@ -386,7 +387,6 @@ namespace FFXIV_TexTools2.IO
 
                     if (magic != 0x736B6C62)
                     {
-                        Debug.WriteLine("\nNot an SKLB file\n");
                         throw new FormatException();
                     }
 
@@ -395,7 +395,7 @@ namespace FFXIV_TexTools2.IO
                     {
                         dataOffset = br.ReadInt16();
                     }
-                    else if (format == 0x31333030)
+                    else if (format == 0x31333030 || format == 0x31333031)
                     {
                         br.ReadBytes(2);
                         dataOffset = br.ReadInt16();
@@ -584,21 +584,70 @@ namespace FFXIV_TexTools2.IO
 
             File.WriteAllLines(Path.ChangeExtension(skelLoc, ".skel"), jsonBones.ToArray());
 
-
-            fullSkel.Clear();
-            fullSkelnum.Clear();
-
             Dictionary<string, JsonSkeleton> skelDict = new Dictionary<string, JsonSkeleton>();
 
-            var skeleton1 = File.ReadAllLines(Directory.GetCurrentDirectory() + "/Skeletons/" + Path.GetFileNameWithoutExtension(skelLoc) + ".skel");
+            var skelFileName = Path.GetFileNameWithoutExtension(skelLoc);
 
-            foreach (var b in skeleton1)
+            var skeleton1 = File.ReadAllLines(Directory.GetCurrentDirectory() + "/Skeletons/" + skelFileName  + ".skel");
+
+            var nbn = 0;
+
+            var lastBone = fullSkelnum.Last().Value;
+
+            if (skelFileName[0].Equals('m'))
             {
-                var j = JsonConvert.DeserializeObject<JsonSkeleton>(b);
+                fullSkel.Clear();
+                fullSkelnum.Clear();
 
-                fullSkel.Add(j.BoneName, j);
-                fullSkelnum.Add(j.BoneNumber, j);
+                foreach (var b in skeleton1)
+                {
+                    var j = JsonConvert.DeserializeObject<JsonSkeleton>(b);
+
+                    fullSkel.Add(j.BoneName, j);
+                    fullSkelnum.Add(j.BoneNumber, j);
+                }
             }
+            else
+            {
+                for (int i = 0; i < skeleton1.Length; i++)
+                {
+                    var j = JsonConvert.DeserializeObject<JsonSkeleton>(skeleton1[i]);
+
+                    var bn = j.BoneNumber;
+                    var bp = j.BoneParent;
+                    if (fullSkel.Keys.Contains(j.BoneName))
+                    {
+                        nbn = fullSkel[j.BoneName].BoneNumber;
+                    }
+                    else
+                    {
+                        var add = 0;
+                        if (i == 0)
+                        {
+                            add = i + 1;
+                        }
+                        else
+                        {
+                            add = i;
+                        }
+
+                        j.BoneNumber = lastBone.BoneNumber + add;
+
+                        if (bp == 0)
+                        {
+                            j.BoneParent = nbn;
+                        }
+                        else
+                        {
+                            j.BoneParent = bp + lastBone.BoneNumber;
+                        }
+
+                        fullSkel.Add(j.BoneName, j);
+                        fullSkelnum.Add(j.BoneNumber, j);
+                    }
+                }
+            }
+
 
             foreach (var s in meshList[0].BoneStrings)
             {
@@ -1088,14 +1137,14 @@ namespace FFXIV_TexTools2.IO
             //</library_materials>
         }
 
-        private static void XMLgeometries(XmlWriter xmlWriter, string modelName, List<ModelMeshData> meshList)
+        private static void XMLgeometries(XmlWriter xmlWriter, string modelName, List<ModelMeshData> meshList, ModelData modelData)
         {
             //<library_geometries>
             xmlWriter.WriteStartElement("library_geometries");
 
             for(int i = 0; i < meshList.Count; i++)
             {
-                if(meshList[i].Vertices.Count > 0)
+                if (meshList[i].Vertices.Count > 0)
                 {
                     var prevIndexCount = 0;
                     var totalVertices = 0;
@@ -1119,15 +1168,6 @@ namespace FFXIV_TexTools2.IO
                             }
 
                             int totalCount = indexHashSet.Count + 1;
-
-                            int indexMin = 0;
-                            int indexMax = 0;
-
-                            if (indexList.Count != 0)
-                            {
-                                indexMin = indexList.Min();
-                                indexMax = indexList.Max() + 1;
-                            }
 
                             var partString = "." + j;
 
@@ -1318,6 +1358,61 @@ namespace FFXIV_TexTools2.IO
                             //</source>
 
 
+
+                            /*
+                             * --------------------
+                             * Seconadry Texture Coordinates
+                             * --------------------
+                             */
+
+                            //<source>
+                            xmlWriter.WriteStartElement("source");
+                            xmlWriter.WriteAttributeString("id", "geom-" + modelName + "_" + i + partString + "-map1");
+                            //<float_array>
+                            xmlWriter.WriteStartElement("float_array");
+                            xmlWriter.WriteAttributeString("id", "geom-" + modelName + "_" + i + partString + "-map1-array");
+                            xmlWriter.WriteAttributeString("count", (totalCount * 2).ToString());
+
+                            //var texCoords = meshList[i].TextureCoordinates.GetRange(totalVertices, totalCount);
+                            var texCoords2 = meshList[i].TextureCoordinates2.GetRange(totalVertices, totalCount);
+
+                            foreach (var tc in texCoords2)
+                            {
+                                xmlWriter.WriteString(tc.X.ToString() + " " + (tc.Y * -1).ToString() + " ");
+                            }
+
+                            xmlWriter.WriteEndElement();
+                            //</float_array>
+
+                            //<technique_common>
+                            xmlWriter.WriteStartElement("technique_common");
+                            //<accessor>
+                            xmlWriter.WriteStartElement("accessor");
+                            xmlWriter.WriteAttributeString("source", "#geom-" + modelName + "_" + i + partString + "-map1-array");
+                            xmlWriter.WriteAttributeString("count", totalCount.ToString());
+                            xmlWriter.WriteAttributeString("stride", "2");
+
+                            //<param>
+                            xmlWriter.WriteStartElement("param");
+                            xmlWriter.WriteAttributeString("name", "S");
+                            xmlWriter.WriteAttributeString("type", "float");
+                            xmlWriter.WriteEndElement();
+                            //</param>
+
+                            //<param>
+                            xmlWriter.WriteStartElement("param");
+                            xmlWriter.WriteAttributeString("name", "T");
+                            xmlWriter.WriteAttributeString("type", "float");
+                            xmlWriter.WriteEndElement();
+                            //</param>
+
+                            xmlWriter.WriteEndElement();
+                            //</accessor>
+                            xmlWriter.WriteEndElement();
+                            //</technique_common>
+                            xmlWriter.WriteEndElement();
+                            //</source>
+
                             /*
                              * --------------------
                              * Tangents
@@ -1484,6 +1579,14 @@ namespace FFXIV_TexTools2.IO
                             xmlWriter.WriteEndElement();
                             //</input>
 
+                            //<input>
+                            xmlWriter.WriteStartElement("input");
+                            xmlWriter.WriteAttributeString("semantic", "TEXCOORD");
+                            xmlWriter.WriteAttributeString("source", "#geom-" + modelName + "_" + i + partString + "-map1");
+                            xmlWriter.WriteAttributeString("offset", "2");
+                            xmlWriter.WriteAttributeString("set", "1");
+                            xmlWriter.WriteEndElement();
+                            //</input>
 
                             //<input>
                             xmlWriter.WriteStartElement("input");
@@ -1529,13 +1632,473 @@ namespace FFXIV_TexTools2.IO
                         }
                     }
                 }
+
+                //if (modelData.ExtraData.totalExtraCounts.ContainsKey(i))
+                //{
+                //    var extraVerts = modelData.ExtraData.totalExtraCounts[i];
+                //    var extraStart = meshList[i].Indices.Max() + 1;
+
+                //    //<geometry>
+                //    xmlWriter.WriteStartElement("geometry");
+                //    xmlWriter.WriteAttributeString("id", "geom-extra_" + modelName + "_" + i);
+                //    xmlWriter.WriteAttributeString("name", "extra_" + modelName + "_" + i);
+                //    //<mesh>
+                //    xmlWriter.WriteStartElement("mesh");
+
+                //    /*
+                //     * --------------------
+                //     * Verticies
+                //     * --------------------
+                //     */
+
+                //    //<source>
+                //    xmlWriter.WriteStartElement("source");
+                //    xmlWriter.WriteAttributeString("id", "geom-extra_" + modelName + "_" + i + "-positions");
+                //    //<float_array>
+                //    xmlWriter.WriteStartElement("float_array");
+                //    xmlWriter.WriteAttributeString("id", "geom-extra_" + modelName + "_" + i + "-positions-array");
+                //    xmlWriter.WriteAttributeString("count", (extraVerts * 3).ToString());
+
+                //    var ExPositions = meshList[i].Vertices.GetRange(extraStart, extraVerts);
+
+                //    foreach (var v in ExPositions)
+                //    {
+                //        xmlWriter.WriteString((v.X * Info.modelMultiplier).ToString() + " " + (v.Y * Info.modelMultiplier).ToString() + " " + (v.Z * Info.modelMultiplier).ToString() + " ");
+                //    }
+
+                //    xmlWriter.WriteEndElement();
+                //    //</float_array>
+
+                //    //<technique_common>
+                //    xmlWriter.WriteStartElement("technique_common");
+                //    //<accessor>
+                //    xmlWriter.WriteStartElement("accessor");
+                //    xmlWriter.WriteAttributeString("source", "#geom-extra_" + modelName + "_" + i + "-positions-array");
+                //    xmlWriter.WriteAttributeString("count", extraVerts.ToString());
+                //    xmlWriter.WriteAttributeString("stride", "3");
+
+                //    //<param>
+                //    xmlWriter.WriteStartElement("param");
+                //    xmlWriter.WriteAttributeString("name", "X");
+                //    xmlWriter.WriteAttributeString("type", "float");
+                //    xmlWriter.WriteEndElement();
+                //    //</param>
+
+                //    //<param>
+                //    xmlWriter.WriteStartElement("param");
+                //    xmlWriter.WriteAttributeString("name", "Y");
+                //    xmlWriter.WriteAttributeString("type", "float");
+                //    xmlWriter.WriteEndElement();
+                //    //</param>
+
+                //    //<param>
+                //    xmlWriter.WriteStartElement("param");
+                //    xmlWriter.WriteAttributeString("name", "Z");
+                //    xmlWriter.WriteAttributeString("type", "float");
+                //    xmlWriter.WriteEndElement();
+                //    //</param>
+
+                //    xmlWriter.WriteEndElement();
+                //    //</accessor>
+                //    xmlWriter.WriteEndElement();
+                //    //</technique_common>
+                //    xmlWriter.WriteEndElement();
+                //    //</source>
+
+
+                //    /*
+                //     * --------------------
+                //     * Normals
+                //     * --------------------
+                //     */
+
+                //    //<source>
+                //    xmlWriter.WriteStartElement("source");
+                //    xmlWriter.WriteAttributeString("id", "geom-extra_" + modelName + "_" + i + "-normals");
+                //    //<float_array>
+                //    xmlWriter.WriteStartElement("float_array");
+                //    xmlWriter.WriteAttributeString("id", "geom-extra_" + modelName + "_" + i + "-normals-array");
+                //    xmlWriter.WriteAttributeString("count", (extraVerts * 3).ToString());
+
+                //    var ExNormals = meshList[i].Normals.GetRange(extraStart, extraVerts);
+
+                //    foreach (var n in ExNormals)
+                //    {
+                //        xmlWriter.WriteString(n.X.ToString() + " " + n.Y.ToString() + " " + n.Z.ToString() + " ");
+                //    }
+
+                //    xmlWriter.WriteEndElement();
+                //    //</float_array>
+
+                //    //<technique_common>
+                //    xmlWriter.WriteStartElement("technique_common");
+                //    //<accessor>
+                //    xmlWriter.WriteStartElement("accessor");
+                //    xmlWriter.WriteAttributeString("source", "#geom-extra_" + modelName + "_" + i + "-normals-array");
+                //    xmlWriter.WriteAttributeString("count", extraVerts.ToString());
+                //    xmlWriter.WriteAttributeString("stride", "3");
+
+                //    //<param>
+                //    xmlWriter.WriteStartElement("param");
+                //    xmlWriter.WriteAttributeString("name", "X");
+                //    xmlWriter.WriteAttributeString("type", "float");
+                //    xmlWriter.WriteEndElement();
+                //    //</param>
+
+                //    //<param>
+                //    xmlWriter.WriteStartElement("param");
+                //    xmlWriter.WriteAttributeString("name", "Y");
+                //    xmlWriter.WriteAttributeString("type", "float");
+                //    xmlWriter.WriteEndElement();
+                //    //</param>
+
+                //    //<param>
+                //    xmlWriter.WriteStartElement("param");
+                //    xmlWriter.WriteAttributeString("name", "Z");
+                //    xmlWriter.WriteAttributeString("type", "float");
+                //    xmlWriter.WriteEndElement();
+                //    //</param>
+
+                //    xmlWriter.WriteEndElement();
+                //    //</accessor>
+                //    xmlWriter.WriteEndElement();
+                //    //</technique_common>
+                //    xmlWriter.WriteEndElement();
+                //    //</source>
+
+                //    /*
+                //     * --------------------
+                //     * Texture Coordinates
+                //     * --------------------
+                //     */
+
+                //    //<source>
+                //    xmlWriter.WriteStartElement("source");
+                //    xmlWriter.WriteAttributeString("id", "geom-extra_" + modelName + "_" + i + "-map0");
+                //    //<float_array>
+                //    xmlWriter.WriteStartElement("float_array");
+                //    xmlWriter.WriteAttributeString("id", "geom-extra_" + modelName + "_" + i + "-map0-array");
+                //    xmlWriter.WriteAttributeString("count", (extraVerts * 2).ToString());
+
+                //    //var texCoords = meshList[i].TextureCoordinates.GetRange(totalVertices, totalCount);
+                //    var ExTexCoords = meshList[i].TextureCoordinates.GetRange(extraStart, extraVerts);
+
+                //    foreach (var tc in ExTexCoords)
+                //    {
+                //        xmlWriter.WriteString(tc.X.ToString() + " " + (tc.Y * -1).ToString() + " ");
+                //    }
+
+                //    xmlWriter.WriteEndElement();
+                //    //</float_array>
+
+                //    //<technique_common>
+                //    xmlWriter.WriteStartElement("technique_common");
+                //    //<accessor>
+                //    xmlWriter.WriteStartElement("accessor");
+                //    xmlWriter.WriteAttributeString("source", "#geom-extra_" + modelName + "_" + i + "-map0-array");
+                //    xmlWriter.WriteAttributeString("count", extraVerts.ToString());
+                //    xmlWriter.WriteAttributeString("stride", "2");
+
+                //    //<param>
+                //    xmlWriter.WriteStartElement("param");
+                //    xmlWriter.WriteAttributeString("name", "S");
+                //    xmlWriter.WriteAttributeString("type", "float");
+                //    xmlWriter.WriteEndElement();
+                //    //</param>
+
+                //    //<param>
+                //    xmlWriter.WriteStartElement("param");
+                //    xmlWriter.WriteAttributeString("name", "T");
+                //    xmlWriter.WriteAttributeString("type", "float");
+                //    xmlWriter.WriteEndElement();
+                //    //</param>
+
+                //    xmlWriter.WriteEndElement();
+                //    //</accessor>
+                //    xmlWriter.WriteEndElement();
+                //    //</technique_common>
+                //    xmlWriter.WriteEndElement();
+                //    //</source>
+
+                //    /*
+                //     * --------------------
+                //     * Seconadry Texture Coordinates
+                //     * --------------------
+                //     */
+
+                //    //<source>
+                //    xmlWriter.WriteStartElement("source");
+                //    xmlWriter.WriteAttributeString("id", "geom-extra_" + modelName + "_" + i + "-map1");
+                //    //<float_array>
+                //    xmlWriter.WriteStartElement("float_array");
+                //    xmlWriter.WriteAttributeString("id", "geom-extra_" + modelName + "_" + i + "-map1-array");
+                //    xmlWriter.WriteAttributeString("count", (extraVerts * 2).ToString());
+
+                //    //var texCoords = meshList[i].TextureCoordinates.GetRange(totalVertices, totalCount);
+                //    var ExTexCoords2 = meshList[i].TextureCoordinates2.GetRange(extraStart, extraVerts);
+
+                //    foreach (var tc in ExTexCoords2)
+                //    {
+                //        xmlWriter.WriteString(tc.X.ToString() + " " + (tc.Y * -1).ToString() + " ");
+                //    }
+
+                //    xmlWriter.WriteEndElement();
+                //    //</float_array>
+
+                //    //<technique_common>
+                //    xmlWriter.WriteStartElement("technique_common");
+                //    //<accessor>
+                //    xmlWriter.WriteStartElement("accessor");
+                //    xmlWriter.WriteAttributeString("source", "#geom-extra_" + modelName + "_" + i + "-map1-array");
+                //    xmlWriter.WriteAttributeString("count", extraVerts.ToString());
+                //    xmlWriter.WriteAttributeString("stride", "2");
+
+                //    //<param>
+                //    xmlWriter.WriteStartElement("param");
+                //    xmlWriter.WriteAttributeString("name", "S");
+                //    xmlWriter.WriteAttributeString("type", "float");
+                //    xmlWriter.WriteEndElement();
+                //    //</param>
+
+                //    //<param>
+                //    xmlWriter.WriteStartElement("param");
+                //    xmlWriter.WriteAttributeString("name", "T");
+                //    xmlWriter.WriteAttributeString("type", "float");
+                //    xmlWriter.WriteEndElement();
+                //    //</param>
+
+                //    xmlWriter.WriteEndElement();
+                //    //</accessor>
+                //    xmlWriter.WriteEndElement();
+                //    //</technique_common>
+                //    xmlWriter.WriteEndElement();
+                //    //</source>
+
+                //    /*
+                //     * --------------------
+                //     * Tangents
+                //     * --------------------
+                //     */
+
+                //    //<source>
+                //    xmlWriter.WriteStartElement("source");
+                //    xmlWriter.WriteAttributeString("id", "geom-extra_" + modelName + "_" + i + "-map0-textangents");
+                //    //<float_array>
+                //    xmlWriter.WriteStartElement("float_array");
+                //    xmlWriter.WriteAttributeString("id", "geom-extra_" + modelName + "_" + i + "-map0-textangents-array");
+                //    xmlWriter.WriteAttributeString("count", (extraVerts * 3).ToString());
+
+                //    var ExTangents = meshList[i].Tangents.GetRange(extraStart, extraVerts);
+
+                //    foreach (var tan in ExTangents)
+                //    {
+                //        xmlWriter.WriteString(tan.X.ToString() + " " + tan.Y.ToString() + " " + tan.Z.ToString() + " ");
+                //    }
+
+                //    xmlWriter.WriteEndElement();
+                //    //</float_array>
+
+                //    //<technique_common>
+                //    xmlWriter.WriteStartElement("technique_common");
+                //    //<accessor>
+                //    xmlWriter.WriteStartElement("accessor");
+                //    xmlWriter.WriteAttributeString("source", "#geom-extra_" + modelName + "_" + i + "-map0-textangents-array");
+                //    xmlWriter.WriteAttributeString("count", extraVerts.ToString());
+                //    xmlWriter.WriteAttributeString("stride", "3");
+
+                //    //<param>
+                //    xmlWriter.WriteStartElement("param");
+                //    xmlWriter.WriteAttributeString("name", "X");
+                //    xmlWriter.WriteAttributeString("type", "float");
+                //    xmlWriter.WriteEndElement();
+                //    //</param>
+
+                //    //<param>
+                //    xmlWriter.WriteStartElement("param");
+                //    xmlWriter.WriteAttributeString("name", "Y");
+                //    xmlWriter.WriteAttributeString("type", "float");
+                //    xmlWriter.WriteEndElement();
+                //    //</param>
+
+                //    //<param>
+                //    xmlWriter.WriteStartElement("param");
+                //    xmlWriter.WriteAttributeString("name", "Z");
+                //    xmlWriter.WriteAttributeString("type", "float");
+                //    xmlWriter.WriteEndElement();
+                //    //</param>
+
+                //    xmlWriter.WriteEndElement();
+                //    //</accessor>
+                //    xmlWriter.WriteEndElement();
+                //    //</technique_common>
+                //    xmlWriter.WriteEndElement();
+                //    //</source>
+
+
+                //    /*
+                //     * --------------------
+                //     * Binormals
+                //     * --------------------
+                //     */
+
+                //    //<source>
+                //    xmlWriter.WriteStartElement("source");
+                //    xmlWriter.WriteAttributeString("id", "geom-extra_" + modelName + "_" + i + "-map0-texbinormals");
+                //    //<float_array>
+                //    xmlWriter.WriteStartElement("float_array");
+                //    xmlWriter.WriteAttributeString("id", "geom-extra_" + modelName + "_" + i + "-map0-texbinormals-array");
+                //    xmlWriter.WriteAttributeString("count", (extraVerts * 3).ToString());
+
+                //    var ExBiNormals = meshList[i].BiTangents.GetRange(extraStart, extraVerts);
+
+                //    foreach (var bn in ExBiNormals)
+                //    {
+                //        xmlWriter.WriteString(bn.X.ToString() + " " + bn.Y.ToString() + " " + bn.Z.ToString() + " ");
+                //    }
+
+                //    xmlWriter.WriteEndElement();
+                //    //</float_array>
+
+                //    //<technique_common>
+                //    xmlWriter.WriteStartElement("technique_common");
+                //    //<accessor>
+                //    xmlWriter.WriteStartElement("accessor");
+                //    xmlWriter.WriteAttributeString("source", "#geom-extra_" + modelName + "_" + i + "-map0-texbinormals-array");
+                //    xmlWriter.WriteAttributeString("count", extraVerts.ToString());
+                //    xmlWriter.WriteAttributeString("stride", "3");
+
+                //    //<param>
+                //    xmlWriter.WriteStartElement("param");
+                //    xmlWriter.WriteAttributeString("name", "X");
+                //    xmlWriter.WriteAttributeString("type", "float");
+                //    xmlWriter.WriteEndElement();
+                //    //</param>
+
+                //    //<param>
+                //    xmlWriter.WriteStartElement("param");
+                //    xmlWriter.WriteAttributeString("name", "Y");
+                //    xmlWriter.WriteAttributeString("type", "float");
+                //    xmlWriter.WriteEndElement();
+                //    //</param>
+
+                //    //<param>
+                //    xmlWriter.WriteStartElement("param");
+                //    xmlWriter.WriteAttributeString("name", "Z");
+                //    xmlWriter.WriteAttributeString("type", "float");
+                //    xmlWriter.WriteEndElement();
+                //    //</param>
+
+                //    xmlWriter.WriteEndElement();
+                //    //</accessor>
+                //    xmlWriter.WriteEndElement();
+                //    //</technique_common>
+                //    xmlWriter.WriteEndElement();
+                //    //</source>
+
+
+                //    //<vertices>
+                //    xmlWriter.WriteStartElement("vertices");
+                //    xmlWriter.WriteAttributeString("id", "geom-extra_" + modelName + "_" + i + "-vertices");
+                //    //<input>
+                //    xmlWriter.WriteStartElement("input");
+                //    xmlWriter.WriteAttributeString("semantic", "POSITION");
+                //    xmlWriter.WriteAttributeString("source", "#geom-extra_" + modelName + "_" + i + "-positions");
+                //    xmlWriter.WriteEndElement();
+                //    //</input>
+                //    xmlWriter.WriteEndElement();
+                //    //</vertices>
+
+                //    var extraIndexCount = 0;
+                //    foreach (var ic in modelData.ExtraData.indexCounts)
+                //    {
+                //        extraIndexCount += ic.IndexCount;
+                //    }
+
+                //    //<triangles>
+                //    xmlWriter.WriteStartElement("triangles");
+                //    xmlWriter.WriteAttributeString("material", modelName + "_" + i);
+                //    xmlWriter.WriteAttributeString("count", (modelData.ExtraData.extraIndices[i].Count / 3).ToString());
+                //    //<input>
+                //    xmlWriter.WriteStartElement("input");
+                //    xmlWriter.WriteAttributeString("semantic", "VERTEX");
+                //    xmlWriter.WriteAttributeString("source", "#geom-extra_" + modelName + "_" + i + "-vertices");
+                //    xmlWriter.WriteAttributeString("offset", "0");
+                //    xmlWriter.WriteEndElement();
+                //    //</input>
+
+                //    //<input>
+                //    xmlWriter.WriteStartElement("input");
+                //    xmlWriter.WriteAttributeString("semantic", "NORMAL");
+                //    xmlWriter.WriteAttributeString("source", "#geom-extra_" + modelName + "_" + i + "-normals");
+                //    xmlWriter.WriteAttributeString("offset", "1");
+                //    xmlWriter.WriteEndElement();
+                //    //</input>
+
+                //    //<input>
+                //    xmlWriter.WriteStartElement("input");
+                //    xmlWriter.WriteAttributeString("semantic", "TEXCOORD");
+                //    xmlWriter.WriteAttributeString("source", "#geom-extra_" + modelName + "_" + i + "-map0");
+                //    xmlWriter.WriteAttributeString("offset", "2");
+                //    xmlWriter.WriteAttributeString("set", "0");
+                //    xmlWriter.WriteEndElement();
+                //    //</input>
+
+                //    //<input>
+                //    xmlWriter.WriteStartElement("input");
+                //    xmlWriter.WriteAttributeString("semantic", "TEXCOORD");
+                //    xmlWriter.WriteAttributeString("source", "#geom-extra_" + modelName + "_" + i + "-map1");
+                //    xmlWriter.WriteAttributeString("offset", "2");
+                //    xmlWriter.WriteAttributeString("set", "1");
+                //    xmlWriter.WriteEndElement();
+                //    //</input>
+
+                //    //<input>
+                //    xmlWriter.WriteStartElement("input");
+                //    xmlWriter.WriteAttributeString("semantic", "TEXTANGENT");
+                //    xmlWriter.WriteAttributeString("source", "#geom-extra_" + modelName + "_" + i + "-map0-textangents");
+                //    xmlWriter.WriteAttributeString("offset", "3");
+                //    xmlWriter.WriteAttributeString("set", "1");
+                //    xmlWriter.WriteEndElement();
+                //    //</input>
+
+                //    //<input>
+                //    xmlWriter.WriteStartElement("input");
+                //    xmlWriter.WriteAttributeString("semantic", "TEXBINORMAL");
+                //    xmlWriter.WriteAttributeString("source", "#geom-extra_" + modelName + "_" + i + "-map0-texbinormals");
+                //    xmlWriter.WriteAttributeString("offset", "3");
+                //    xmlWriter.WriteAttributeString("set", "1");
+                //    xmlWriter.WriteEndElement();
+                //    //</input>
+
+                //    //<p>
+                //    xmlWriter.WriteStartElement("p");
+                //    var minIndex = modelData.ExtraData.extraIndices[i].Min();
+                //    foreach (var ind in modelData.ExtraData.extraIndices[i])
+                //    {
+                //        int p = ind - minIndex;
+
+                //        if (p >= 0)
+                //        {
+                //            xmlWriter.WriteString(p + " " + p + " " + p + " " + p + " ");
+                //        }
+                //    }
+                //    xmlWriter.WriteEndElement();
+                //    //</p>
+
+                //    xmlWriter.WriteEndElement();
+                //    //</triangles>
+                //    xmlWriter.WriteEndElement();
+                //    //</mesh>
+                //    xmlWriter.WriteEndElement();
+                //    //</geometry>
+                //}
             }
 
             xmlWriter.WriteEndElement();
             //</library_geometries>
         }
 
-        private static void XMLcontrollers(XmlWriter xmlWriter, string modelName, List<ModelMeshData> meshDataList, Dictionary<string, JsonSkeleton> skelDict)
+        private static void XMLcontrollers(XmlWriter xmlWriter, string modelName, List<ModelMeshData> meshDataList, Dictionary<string, JsonSkeleton> skelDict, ModelData modelData)
         {
 
             //<library_controllers>
@@ -1611,6 +2174,7 @@ namespace FFXIV_TexTools2.IO
                             xmlWriter.WriteStartElement("Name_array");
                             xmlWriter.WriteAttributeString("id", "geom-" + modelName + "_" + i + partString + "-skin1-joints-array");
                             xmlWriter.WriteAttributeString("count", meshDataList[i].BoneStrings.Count.ToString());
+
                             foreach (var b in meshDataList[i].BoneStrings)
                             {
                                 xmlWriter.WriteString(b + " ");
@@ -1774,6 +2338,10 @@ namespace FFXIV_TexTools2.IO
 
                             xmlWriter.WriteEndElement();
                             //</vcount>
+
+                            var bs = modelData.LoD[0].MeshList[i].MeshInfo.BoneListIndex;
+                            var boneset = modelData.BoneSet[bs].BoneData;
+
                             //<v>
                             xmlWriter.WriteStartElement("v");
                             int blin = 0;
@@ -1782,7 +2350,7 @@ namespace FFXIV_TexTools2.IO
 
                             foreach (var bi in blendind)
                             {
-                                xmlWriter.WriteString(bi + " " + blin + " ");
+                                xmlWriter.WriteString(boneset[bi] + " " + blin + " ");
                                 blin++;
                             }
 
@@ -1802,13 +2370,231 @@ namespace FFXIV_TexTools2.IO
                         }
                     }
                 }
+
+                //if (modelData.ExtraData.totalExtraCounts.ContainsKey(i))
+                //{
+                //    //< controller >
+                //    xmlWriter.WriteStartElement("controller");
+                //    xmlWriter.WriteAttributeString("id", "geom-extra_" + modelName + "_" + i + "-skin1");
+                //    //<skin>
+                //    xmlWriter.WriteStartElement("skin");
+                //    xmlWriter.WriteAttributeString("source", "#geom-extra_" + modelName + "_" + i);
+                //    //<bind_shape_matrix>
+                //    xmlWriter.WriteStartElement("bind_shape_matrix");
+                //    xmlWriter.WriteString("1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1");
+                //    xmlWriter.WriteEndElement();
+                //    //</bind_shape_matrix>
+
+
+                //    //<source>
+                //    xmlWriter.WriteStartElement("source");
+                //    xmlWriter.WriteAttributeString("id", "geom-extra_" + modelName + "_" + i + "-skin1-joints");
+                //    //<Name_array>
+                //    xmlWriter.WriteStartElement("Name_array");
+                //    xmlWriter.WriteAttributeString("id", "geom-extra_" + modelName + "_" + i + "-skin1-joints-array");
+                //    xmlWriter.WriteAttributeString("count", meshDataList[i].BoneStrings.Count.ToString());
+                //    foreach (var b in meshDataList[i].BoneStrings)
+                //    {
+                //        xmlWriter.WriteString(b + " ");
+                //    }
+                //    xmlWriter.WriteEndElement();
+                //    //</Name_array>
+
+                //    //<technique_common>
+                //    xmlWriter.WriteStartElement("technique_common");
+                //    //<accessor>
+                //    xmlWriter.WriteStartElement("accessor");
+                //    xmlWriter.WriteAttributeString("source", "#geom-extra_" + modelName + "_" + i + "-skin1-joints-array");
+                //    xmlWriter.WriteAttributeString("count", meshDataList[i].BoneStrings.Count.ToString());
+                //    xmlWriter.WriteAttributeString("stride", "1");
+                //    //<param>
+                //    xmlWriter.WriteStartElement("param");
+                //    xmlWriter.WriteAttributeString("name", "JOINT");
+                //    xmlWriter.WriteAttributeString("type", "name");
+                //    xmlWriter.WriteEndElement();
+                //    //</param>
+                //    xmlWriter.WriteEndElement();
+                //    //</accessor>
+                //    xmlWriter.WriteEndElement();
+                //    //</technique_common>
+                //    xmlWriter.WriteEndElement();
+                //    //</source>
+
+
+                //    //<source>
+                //    xmlWriter.WriteStartElement("source");
+                //    xmlWriter.WriteAttributeString("id", "geom-extra_" + modelName + "_" + i + "-skin1-bind_poses");
+                //    //<Name_array>
+                //    xmlWriter.WriteStartElement("float_array");
+                //    xmlWriter.WriteAttributeString("id", "geom-extra_" + modelName + "_" + i + "-skin1-bind_poses-array");
+                //    xmlWriter.WriteAttributeString("count", (16 * meshDataList[i].BoneStrings.Count).ToString());
+
+                //    for (int m = 0; m < meshDataList[i].BoneStrings.Count; m++)
+                //    {
+                //        try
+                //        {
+                //            Matrix matrix = new Matrix(skelDict[meshDataList[i].BoneStrings[m]].InversePoseMatrix);
+
+                //            xmlWriter.WriteString(matrix.Column1.X + " " + matrix.Column1.Y + " " + matrix.Column1.Z + " " + (matrix.Column1.W * Info.modelMultiplier) + " ");
+                //            xmlWriter.WriteString(matrix.Column2.X + " " + matrix.Column2.Y + " " + matrix.Column2.Z + " " + (matrix.Column2.W * Info.modelMultiplier) + " ");
+                //            xmlWriter.WriteString(matrix.Column3.X + " " + matrix.Column3.Y + " " + matrix.Column3.Z + " " + (matrix.Column3.W * Info.modelMultiplier) + " ");
+                //            xmlWriter.WriteString(matrix.Column4.X + " " + matrix.Column4.Y + " " + matrix.Column4.Z + " " + (matrix.Column4.W * Info.modelMultiplier) + " ");
+                //        }
+                //        catch
+                //        {
+                //            Debug.WriteLine("Error at " + meshDataList[i].BoneStrings[m]);
+                //        }
+
+                //    }
+                //    xmlWriter.WriteEndElement();
+                //    //</Name_array>
+
+                //    //<technique_common>
+                //    xmlWriter.WriteStartElement("technique_common");
+                //    //<accessor>
+                //    xmlWriter.WriteStartElement("accessor");
+                //    xmlWriter.WriteAttributeString("source", "#geom-extra_" + modelName + "_" + i + "-skin1-bind_poses-array");
+                //    xmlWriter.WriteAttributeString("count", meshDataList[i].BoneStrings.Count.ToString());
+                //    xmlWriter.WriteAttributeString("stride", "16");
+                //    //<param>
+                //    xmlWriter.WriteStartElement("param");
+                //    xmlWriter.WriteAttributeString("name", "TRANSFORM");
+                //    xmlWriter.WriteAttributeString("type", "float4x4");
+                //    xmlWriter.WriteEndElement();
+                //    //</param>
+                //    xmlWriter.WriteEndElement();
+                //    //</accessor>
+                //    xmlWriter.WriteEndElement();
+                //    //</technique_common>
+                //    xmlWriter.WriteEndElement();
+                //    //</source>
+
+                //    var extraVerts = modelData.ExtraData.totalExtraCounts[i];
+                //    //var extraStart = meshDataList[i].Indices.Max() + 1;
+                //    var extraStart = modelData.ExtraData.indexMin[i];
+                //    var ExWeightCounts = meshDataList[i].WeightCounts.GetRange(extraStart, extraVerts);
+                //    var totalExWeights = 0;
+
+                //    foreach (var bwc in ExWeightCounts)
+                //    {
+                //        totalExWeights += bwc;
+                //    }
+
+                //    //<source>
+                //    xmlWriter.WriteStartElement("source");
+                //    xmlWriter.WriteAttributeString("id", "geom-extra_" + modelName + "_" + i + "-skin1-weights");
+                //    //<Name_array>
+                //    xmlWriter.WriteStartElement("float_array");
+                //    xmlWriter.WriteAttributeString("id", "geom-extra_" + modelName + "_" + i + "-skin1-weights-array");
+                //    xmlWriter.WriteAttributeString("count", totalExWeights.ToString());
+
+                //    var ExWeightlist = meshDataList[i].BlendWeights.GetRange(extraStart, totalExWeights);
+
+                //    foreach (var bw in ExWeightlist)
+                //    {
+                //        xmlWriter.WriteString(bw + " ");
+                //    }
+
+                //    xmlWriter.WriteEndElement();
+                //    //</Name_array>
+
+                //    //<technique_common>
+                //    xmlWriter.WriteStartElement("technique_common");
+                //    //<accessor>
+                //    xmlWriter.WriteStartElement("accessor");
+                //    xmlWriter.WriteAttributeString("source", "#geom-extra_" + modelName + "_" + i + "-skin1-weights-array");
+                //    xmlWriter.WriteAttributeString("count", totalExWeights.ToString());
+                //    xmlWriter.WriteAttributeString("stride", "1");
+                //    //<param>
+                //    xmlWriter.WriteStartElement("param");
+                //    xmlWriter.WriteAttributeString("name", "WEIGHT");
+                //    xmlWriter.WriteAttributeString("type", "float");
+                //    xmlWriter.WriteEndElement();
+                //    //</param>
+                //    xmlWriter.WriteEndElement();
+                //    //</accessor>
+                //    xmlWriter.WriteEndElement();
+                //    //</technique_common>
+                //    xmlWriter.WriteEndElement();
+                //    //</source>
+
+                //    //<joints>
+                //    xmlWriter.WriteStartElement("joints");
+                //    //<input>
+                //    xmlWriter.WriteStartElement("input");
+                //    xmlWriter.WriteAttributeString("semantic", "JOINT");
+                //    xmlWriter.WriteAttributeString("source", "#geom-extra_" + modelName + "_" + i + "-skin1-joints");
+                //    xmlWriter.WriteEndElement();
+                //    //</input>
+
+                //    //<input>
+                //    xmlWriter.WriteStartElement("input");
+                //    xmlWriter.WriteAttributeString("semantic", "INV_BIND_MATRIX");
+                //    xmlWriter.WriteAttributeString("source", "#geom-extra_" + modelName + "_" + i + "-skin1-bind_poses");
+                //    xmlWriter.WriteEndElement();
+                //    //</input>
+                //    xmlWriter.WriteEndElement();
+                //    //</joints>
+
+                //    //<vertex_weights>
+                //    xmlWriter.WriteStartElement("vertex_weights");
+                //    xmlWriter.WriteAttributeString("count", ExWeightlist.Count.ToString());
+                //    //<input>
+                //    xmlWriter.WriteStartElement("input");
+                //    xmlWriter.WriteAttributeString("semantic", "JOINT");
+                //    xmlWriter.WriteAttributeString("source", "#geom-extra_" + modelName + "_" + i + "-skin1-joints");
+                //    xmlWriter.WriteAttributeString("offset", "0");
+                //    xmlWriter.WriteEndElement();
+                //    //</input>
+                //    //<input>
+                //    xmlWriter.WriteStartElement("input");
+                //    xmlWriter.WriteAttributeString("semantic", "WEIGHT");
+                //    xmlWriter.WriteAttributeString("source", "#geom-extra_" + modelName + "_" + i + "-skin1-weights");
+                //    xmlWriter.WriteAttributeString("offset", "1");
+                //    xmlWriter.WriteEndElement();
+                //    //</input>
+
+                //    //<vcount>
+                //    xmlWriter.WriteStartElement("vcount");
+
+                //    //var ExWeightlist = meshDataList[i].WeightCounts.GetRange(extraStart, totalExWeights);
+
+                //    foreach (var bwc in ExWeightCounts)
+                //    {
+                //        xmlWriter.WriteString(bwc + " ");
+                //    }
+
+                //    xmlWriter.WriteEndElement();
+                //    //</vcount>
+                //    //<v>
+                //    xmlWriter.WriteStartElement("v");
+                //    int blin2 = 0;
+
+                //    var ExBlendind = meshDataList[i].BlendIndices.GetRange(extraStart, totalExWeights);
+
+                //    foreach (var bi in ExBlendind)
+                //    {
+                //        xmlWriter.WriteString(bi + " " + blin2 + " ");
+                //        blin2++;
+                //    }
+
+                //    xmlWriter.WriteEndElement();
+                //    //</v>
+                //    xmlWriter.WriteEndElement();
+                //    //</vertex_weights>
+
+                //    xmlWriter.WriteEndElement();
+                //    //</skin>
+                //    xmlWriter.WriteEndElement();
+                //    //</controller>
+                //}
             }
 
             xmlWriter.WriteEndElement();
             //</library_controllers>
         }
 
-        private static void XMLscenes(XmlWriter xmlWriter, string modelName, List<ModelMeshData> meshDataList, Dictionary<string, JsonSkeleton> skelDict)
+        private static void XMLscenes(XmlWriter xmlWriter, string modelName, List<ModelMeshData> meshDataList, Dictionary<string, JsonSkeleton> skelDict, ModelData modelData)
         {
             //<library_visual_scenes>
             xmlWriter.WriteStartElement("library_visual_scenes");
@@ -1895,6 +2681,54 @@ namespace FFXIV_TexTools2.IO
                     xmlWriter.WriteEndElement();
                     //</node>
                 }
+
+                //if (modelData.ExtraData.totalExtraCounts.ContainsKey(i))
+                //{
+                //    //<node>
+                //    xmlWriter.WriteStartElement("node");
+                //    xmlWriter.WriteAttributeString("id", "node-extra_" + modelName + "_" + i);
+                //    xmlWriter.WriteAttributeString("name", "extra_" + modelName + "_" + i);
+
+                //    //<instance_controller>
+                //    xmlWriter.WriteStartElement("instance_controller");
+                //    xmlWriter.WriteAttributeString("url", "#geom-extra_" + modelName + "_" + i + "-skin1");
+
+                //    foreach (var b in boneParents)
+                //    {
+                //        //<skeleton> 
+                //        xmlWriter.WriteStartElement("skeleton");
+                //        xmlWriter.WriteString("#node-" + b);
+                //        xmlWriter.WriteEndElement();
+                //        //</skeleton> 
+                //    }
+
+                //    //<bind_material>
+                //    xmlWriter.WriteStartElement("bind_material");
+                //    //<technique_common>
+                //    xmlWriter.WriteStartElement("technique_common");
+                //    //<instance_material>
+                //    xmlWriter.WriteStartElement("instance_material");
+                //    xmlWriter.WriteAttributeString("symbol", modelName + "_" + i);
+                //    xmlWriter.WriteAttributeString("target", "#" + modelName + "_" + i + "-material");
+                //    //<bind_vertex_input>
+                //    xmlWriter.WriteStartElement("bind_vertex_input");
+                //    xmlWriter.WriteAttributeString("semantic", "geom-" + modelName + "_" + i + "-map1");
+                //    xmlWriter.WriteAttributeString("input_semantic", "TEXCOORD");
+                //    xmlWriter.WriteAttributeString("input_set", "0");
+                //    xmlWriter.WriteEndElement();
+                //    //</bind_vertex_input>   
+                //    xmlWriter.WriteEndElement();
+                //    //</instance_material>       
+                //    xmlWriter.WriteEndElement();
+                //    //</technique_common>            
+                //    xmlWriter.WriteEndElement();
+                //    //</bind_material>   
+                //    xmlWriter.WriteEndElement();
+                //    //</instance_controller>
+                //    xmlWriter.WriteEndElement();
+                //    //</node>
+                //}
+
                 xmlWriter.WriteEndElement();
                 //</node>
             }

@@ -22,7 +22,6 @@ using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Windows.Media.Imaging;
 using Media3D = System.Windows.Media.Media3D;
@@ -34,6 +33,7 @@ namespace FFXIV_TexTools2.ViewModel
         Vector3 light1Direction, light2Direction;
         ObservableElement3DCollection modelCollection = new ObservableElement3DCollection();
         int currentSS;
+        string modelTitle, modelSubTitle;
 
         public string Name { get; set; }
         public Composite3DViewModel ViewModel { get { return this; } }
@@ -47,6 +47,9 @@ namespace FFXIV_TexTools2.ViewModel
 
         public bool RenderLight1 { get; set; }
         public bool RenderLight2 { get; set; }
+
+        public string ModelTitle { get { return modelTitle; } set { modelTitle = value; NotifyPropertyChanged("ModelTitle"); } }
+        public string ModelSubTitle { get { return modelSubTitle; } set { modelSubTitle = value; NotifyPropertyChanged("ModelSubTitle"); } }
 
         public ObservableElement3DCollection ModelCollection { get { return modelCollection; } set { modelCollection = value; NotifyPropertyChanged("ModelCollection"); } }
 
@@ -82,12 +85,23 @@ namespace FFXIV_TexTools2.ViewModel
             this.RenderLight2 = true;
         }
 
-        public void UpdateModel(List<MDLTEXData> meshData)
+        public void UpdateModel(List<MDLTEXData> meshData, ItemData item)
         {
             disposed = false;
             disposing = false;
 
             mData = meshData;
+
+            if (item.ItemName.Equals(Strings.Body))
+            {
+                ModelTitle = "Note: This is not the default model when unequipped.";
+                ModelSubTitle = "For the unequipped model, search for SmallClothes under the Gear category.";
+            }
+            else
+            {
+                ModelTitle = "";
+                ModelSubTitle = "";
+            }
 
             for (int i = 0; i < meshData.Count; i++)
             {

@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using FFXIV_TexTools2.FileTypes.ModelContainers;
 using FFXIV_TexTools2.Material.ModelMaterial;
 using System.Collections.Generic;
 
@@ -40,5 +41,10 @@ namespace FFXIV_TexTools2.Model
         /// The models bone indices
         /// </summary>
         public List<int> BoneIndicies = new List<int>();
+
+        /// <summary>
+        /// The models extra index data
+        /// </summary>
+        public ExtraIndexData ExtraData = new ExtraIndexData();
     }
 }

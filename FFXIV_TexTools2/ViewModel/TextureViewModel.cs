@@ -378,61 +378,64 @@ namespace FFXIV_TexTools2.ViewModel
         /// <param name="obj"></param>
         public void Import(object obj)
         {
-            if (SelectedMap.Name.Equals(Strings.ColorSet))
+            if (!Helper.IsIndexLocked(true))
             {
-                var newData = ImportTex.ImportColor(mtrlData, selectedCategory, selectedItem.ItemName);
-                if(newData.Item1 != 0)
+                if (SelectedMap.Name.Equals(Strings.ColorSet))
                 {
-                    UpdateImage(newData.Item1, true);
-                    ActiveToggle = "Disable";
-                    ActiveEnabled = true;
-                    mtrlData.ColorData = newData.Item2;
+                    var newData = ImportTex.ImportColor(mtrlData, selectedCategory, selectedItem.ItemName);
+                    if (newData.Item1 != 0)
+                    {
+                        UpdateImage(newData.Item1, true);
+                        ActiveToggle = "Disable";
+                        ActiveEnabled = true;
+                        mtrlData.ColorData = newData.Item2;
+                    }
                 }
-            }
-            else if (SelectedMap.ID.Contains("vfx"))
-            {
-                int newOffset = ImportTex.ImportVFX(texData, selectedCategory, selectedItem.ItemName, SelectedMap.ID);
-                if (newOffset != 0)
+                else if (SelectedMap.ID.Contains("vfx"))
                 {
-                    UpdateImage(newOffset, false);
-                    ActiveToggle = "Disable";
-                    ActiveEnabled = true;
+                    int newOffset = ImportTex.ImportVFX(texData, selectedCategory, selectedItem.ItemName, SelectedMap.ID);
+                    if (newOffset != 0)
+                    {
+                        UpdateImage(newOffset, false);
+                        ActiveToggle = "Disable";
+                        ActiveEnabled = true;
+                    }
                 }
-            }
-            else
-            {
-                int newOffset = ImportTex.ImportTexture(texData, selectedCategory, selectedItem.ItemCategory, selectedItem.ItemName, fullPath);
-                if (newOffset != 0)
+                else
                 {
-                    UpdateImage(newOffset, false);
-                    ActiveToggle = "Disable";
-                    ActiveEnabled = true;
+                    int newOffset = ImportTex.ImportTexture(texData, selectedCategory, selectedItem.ItemCategory, selectedItem.ItemName, fullPath);
+                    if (newOffset != 0)
+                    {
+                        UpdateImage(newOffset, false);
+                        ActiveToggle = "Disable";
+                        ActiveEnabled = true;
 
-                    if (selectedMap.Name.Equals(Strings.Normal))
-                    {
-                        mtrlData.NormalOffset = newOffset;
-                    }
-                    else if (selectedMap.Name.Equals(Strings.Diffuse))
-                    {
-                        mtrlData.DiffuseOffset = newOffset;
-                    }
-                    else if (selectedMap.Name.Equals(Strings.Specular))
-                    {
-                        mtrlData.SpecularOffset = newOffset;
-                    }
-                    else if (selectedMap.Name.Equals(Strings.Mask))
-                    {
-                        mtrlData.MaskOffset = newOffset;
-                    }
-                    else if (selectedCategory.Equals("UI"))
-                    {
-                        if (SelectedMap.Name.Contains("HQ"))
+                        if (selectedMap.Name.Equals(Strings.Normal))
                         {
-                            mtrlData.UIHQOffset = newOffset;
+                            mtrlData.NormalOffset = newOffset;
                         }
-                        else
+                        else if (selectedMap.Name.Equals(Strings.Diffuse))
                         {
-                            mtrlData.UIOffset = newOffset;
+                            mtrlData.DiffuseOffset = newOffset;
+                        }
+                        else if (selectedMap.Name.Equals(Strings.Specular))
+                        {
+                            mtrlData.SpecularOffset = newOffset;
+                        }
+                        else if (selectedMap.Name.Equals(Strings.Mask))
+                        {
+                            mtrlData.MaskOffset = newOffset;
+                        }
+                        else if (selectedCategory.Equals("UI"))
+                        {
+                            if (SelectedMap.Name.Contains("HQ"))
+                            {
+                                mtrlData.UIHQOffset = newOffset;
+                            }
+                            else
+                            {
+                                mtrlData.UIOffset = newOffset;
+                            }
                         }
                     }
                 }
@@ -445,71 +448,78 @@ namespace FFXIV_TexTools2.ViewModel
         /// <param name="obj"></param>
         private void Revert(object obj)
         {
-            JsonEntry modEntry = null;
-            string line;
-
-            try
+            if (!Helper.IsIndexLocked(true))
             {
-                using (StreamReader sr = new StreamReader(Info.modListDir))
+                JsonEntry modEntry = null;
+                string line;
+
+                try
                 {
-                    while ((line = sr.ReadLine()) != null)
+                    using (StreamReader sr = new StreamReader(Info.modListDir))
                     {
-                        modEntry = JsonConvert.DeserializeObject<JsonEntry>(line);
-                        if (modEntry.fullPath.Equals(fullPath))
+                        while ((line = sr.ReadLine()) != null)
                         {
-                            break;
+                            modEntry = JsonConvert.DeserializeObject<JsonEntry>(line);
+                            if (modEntry.fullPath.Equals(fullPath))
+                            {
+                                break;
+                            }
                         }
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("[TVM] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-
-            if (modEntry != null)
-            {
-                int offset = 0;
-
-                if (ActiveToggle.Equals("Enable"))
+                catch (Exception ex)
                 {
-                    offset = modEntry.modOffset;
-                    Helper.UpdateIndex(offset, fullPath, modEntry.datFile);
-                    Helper.UpdateIndex2(offset, fullPath, modEntry.datFile);
-                    ActiveToggle = "Disable";
-                }
-                else if (ActiveToggle.Equals("Disable"))
-                {
-                    offset = modEntry.originalOffset;
-                    Helper.UpdateIndex(offset, fullPath, modEntry.datFile);
-                    Helper.UpdateIndex2(offset, fullPath, modEntry.datFile);
-                    ActiveToggle = "Enable";
+                    MessageBox.Show("[TVM] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
 
-                if (selectedMap.Name.Equals(Strings.Normal))
+                if (modEntry != null)
                 {
-                    mtrlData.NormalOffset = offset;
-                }
-                else if (selectedMap.Name.Equals(Strings.Diffuse))
-                {
-                    mtrlData.DiffuseOffset = offset;
-                }
-                else if (selectedMap.Name.Equals(Strings.Specular))
-                {
-                    mtrlData.SpecularOffset = offset;
-                }
-                else if (selectedMap.Name.Equals(Strings.Mask))
-                {
-                    mtrlData.MaskOffset = offset;
-                }
+                    int offset = 0;
+                    string toggle = "";
 
-                if (SelectedMap.Name.Equals(Strings.ColorSet))
-                {
-                    UpdateImage(offset, true);
-                }
-                else
-                {
-                    UpdateImage(offset, false);
+                    if (ActiveToggle.Equals("Enable"))
+                    {
+                        offset = modEntry.modOffset;
+                        toggle = "Disable";
+                    }
+                    else if (ActiveToggle.Equals("Disable"))
+                    {
+                        offset = modEntry.originalOffset;
+                        toggle = "Enable";
+                    }
+
+                    if(offset != 0)
+                    {
+                        ActiveToggle = toggle;
+                        Helper.UpdateIndex(offset, fullPath, modEntry.datFile);
+                        Helper.UpdateIndex2(offset, fullPath, modEntry.datFile);
+
+                        if (selectedMap.Name.Equals(Strings.Normal))
+                        {
+                            mtrlData.NormalOffset = offset;
+                        }
+                        else if (selectedMap.Name.Equals(Strings.Diffuse))
+                        {
+                            mtrlData.DiffuseOffset = offset;
+                        }
+                        else if (selectedMap.Name.Equals(Strings.Specular))
+                        {
+                            mtrlData.SpecularOffset = offset;
+                        }
+                        else if (selectedMap.Name.Equals(Strings.Mask))
+                        {
+                            mtrlData.MaskOffset = offset;
+                        }
+
+                        if (SelectedMap.Name.Equals(Strings.ColorSet))
+                        {
+                            UpdateImage(offset, true);
+                        }
+                        else
+                        {
+                            UpdateImage(offset, false);
+                        }
+                    }
                 }
             }
         }
@@ -1182,65 +1192,73 @@ namespace FFXIV_TexTools2.ViewModel
         /// <param name="isColor">Is the image being udpated a color set.</param>
         public void UpdateImage(int offset, bool isColor)
         {
-            if (isColor)
+            try
             {
-                var colorBMP = MTRL.GetColorBitmap(offset);
-
-                TextureType = "A16B16G16R16F";
-                TextureDimensions = "(4 x 16)";
-
-                alphaBitmap = Imaging.CreateBitmapSourceFromHBitmap(colorBMP.Item1.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-                alphaBitmap.Freeze();
-
-                var removeAlphaBitmap = SetAlpha(colorBMP.Item1, 255);
-
-                noAlphaBitmap = Imaging.CreateBitmapSourceFromHBitmap(removeAlphaBitmap.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-                noAlphaBitmap.Freeze();
-
-                mtrlData.ColorData = colorBMP.Item2;
-
-                colorBMP.Item1.Dispose();
-                removeAlphaBitmap.Dispose();
-            }
-            else
-            {
-                if (SelectedMap.ID.Contains("vfx"))
+                if (isColor)
                 {
-                    texData = TEX.GetVFX(offset, Strings.ItemsDat);
+                    var colorBMP = MTRL.GetColorBitmap(offset);
+
+                    TextureType = "A16B16G16R16F";
+                    TextureDimensions = "(4 x 16)";
+
+                    alphaBitmap = Imaging.CreateBitmapSourceFromHBitmap(colorBMP.Item1.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                    alphaBitmap.Freeze();
+
+                    var removeAlphaBitmap = SetAlpha(colorBMP.Item1, 255);
+
+                    noAlphaBitmap = Imaging.CreateBitmapSourceFromHBitmap(removeAlphaBitmap.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                    noAlphaBitmap.Freeze();
+
+                    mtrlData.ColorData = colorBMP.Item2;
+
+                    colorBMP.Item1.Dispose();
+                    removeAlphaBitmap.Dispose();
                 }
                 else
                 {
-                    if (selectedCategory.Equals("UI"))
+                    if (SelectedMap.ID.Contains("vfx"))
                     {
-                        texData = TEX.GetTex(offset, Strings.UIDat);
+                        texData = TEX.GetVFX(offset, Strings.ItemsDat);
                     }
                     else
                     {
-                        texData = TEX.GetTex(offset, Strings.ItemsDat);
-                    }              
+                        if (selectedCategory.Equals("UI"))
+                        {
+                            texData = TEX.GetTex(offset, Strings.UIDat);
+                        }
+                        else
+                        {
+                            texData = TEX.GetTex(offset, Strings.ItemsDat);
+                        }
+                    }
+
+                    TextureType = texData.TypeString;
+                    TextureDimensions = "(" + texData.Width + " x " + texData.Height + ")";
+
+                    alphaBitmap = Imaging.CreateBitmapSourceFromHBitmap(texData.BMP.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+
+                    var removeAlphaBitmap = SetAlpha(texData.BMP, 255);
+
+                    noAlphaBitmap = Imaging.CreateBitmapSourceFromHBitmap(removeAlphaBitmap.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+
+                    texData.Dispose();
+                    removeAlphaBitmap.Dispose();
                 }
 
-                TextureType = texData.TypeString;
-                TextureDimensions = "(" + texData.Width + " x " + texData.Height + ")";
-
-                alphaBitmap = Imaging.CreateBitmapSourceFromHBitmap(texData.BMP.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-
-                var removeAlphaBitmap = SetAlpha(texData.BMP, 255);
-
-                noAlphaBitmap = Imaging.CreateBitmapSourceFromHBitmap(removeAlphaBitmap.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-
-                texData.Dispose();
-                removeAlphaBitmap.Dispose();
+                if (AlphaChecked)
+                {
+                    ImageSource = alphaBitmap;
+                }
+                else
+                {
+                    ImageSource = noAlphaBitmap;
+                }
             }
-
-            if (AlphaChecked)
+            catch(Exception e)
             {
-                ImageSource = alphaBitmap;
+                    MessageBox.Show("[TVM] There was an error updating the image.\n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            else
-            {
-                ImageSource = noAlphaBitmap;
-            }
+
         }
 
 
