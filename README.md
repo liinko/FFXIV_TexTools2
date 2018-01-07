@@ -2,37 +2,41 @@
 # FFXIV TexTools 2 by Liinko
 This is a more feature rich WPF implementation of FFXIV TexTools and replaced FFXIV TexTools.
 
-# Current Version: 1.5
+# Current Version: 1.6.1
 ChangeLog:
 
 Application:
- - Added watermark to search box for better visibility.
- - Added open folder icon to Texture and Model tabs for easier access to the items folder.
+ - Updated to latest version of Helix Toolkit.
+ - Added new steam directory name "FINAL FANTASY XIV Online" to common install directories.
+ - Help > Check For Problems now does a more thorough check.
+ - Changed .modlist and saved directory to MyDocument/TexTools so that it is shared by all newer version of TexTools.
+ - User settings from this version onward should now persist as new versions are released.
+ - Help > Report Bug now opens a new link to a public issue tracker.
+ - Added a whole bunch of additional safeguards and checks for importing.
+ - Added a crash dialog with information that can be copied to clipboard for bug reports.
  
 3D:
- - Added emissive texture (Glow) to shader and export.
- - Models importing is now more accurate and free of issues. (Big Thanks to NeoX42)
- - Exporting .dae files with all models is now supported.
-     - Requires AssetCc2.exe from Havok Content Tools (Not Provided)
+ - Meshes in the .dae file no longer have to be in order when importing.
+ - Secondary Texture coorindates now export and import (used for decals/face paints).
+ - Extra data used to hide mesh parts when overlaid by another mesh now imports and updates (this should fix a lot of issues).
+ - Faces now import correctly.
+ - Slight increase in emissive intensity in 3D viewer.
+ - Added a notice for the model in Character > Body stating that it is not the default model when unequipped.
+ - Added initial support for importing from blender (must use "Better Collada exporter" from here https://github.com/godotengine/collada-exporter)
 
 Bug Fixes:
- - Fixed an issue where certain models with vfx textures would not load.
- - Fixed an issue where the models for Selene and Bishop AutoTurret were incorrect.
- - Fixed an issue where certain models were using incorrect textures.
- - Fixed issue where monk weapons that used equipment for secondary model would not display.
- - Fixed an issue where data was not being saved correctly in the modlist in certain scenarios, causing double entries, crashes, and incorrect reverts.
- - Fixed an issue where blank entries appeared in modlist window.
- - Fixed an issue where Egi's were crashing due to missing hyphen.
- - Fixed an issue where the Type dropdown would not empty after changing items.
- - Fixed an Issue where importing a model twice would cause incorrect data to be read.
+ - Fixed an issue where textures would not appear correctly on 3D model when the texture width was greater than its height.
+ - Fixed an issue where the model for Hyur Midlander Female in Charater > Body would not display.
+ - Fixed an issue where imported model indices could be read incorrectly under certain circumstances.
+ - Fixed an issue where offset was being set to 0 when importing an item with a larger data size than that already in the modlist.
+ - Fixed an issue where some exported models had incorrect skinning (eg. Yotsuyu body[9130]), also fixes incorrect skinning on import.
+ - Fixed an issue where certain models would not display in 3D (eg. Raubahn[9095]).
+ - Fixed an issue where under certain circumstances information would be saved incorrectly to the modlist causing file pointer issues.
  - Other minor bug fixes
 
-Know Issues:
- - Importing faces appear correctly in TexTools, but crash the game.
- - Some astrologian weapons textures are not mapped correctly in 3D view.
+Version 1.6.1 Bug Fixes:
+ - Fixed an issue where dae files with TexTools authoring tool were not able to be imported.
+ - Fixed an issue where certain models with no extra data in mesh 0, but extra data in mesh 1 would not import and cause the application to crash. (eg. Makai Moon Guide's Quartertights)
 
 Not Yet Implemented:
 * Mod Importer
-
-Using HelixToolkit:
-https://ci.appveyor.com/project/objorke/helix-toolkit/build/1.0.0-unstable.1826.build.906/artifacts
