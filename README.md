@@ -5,6 +5,8 @@ This is a more feature rich WPF implementation of FFXIV TexTools and replaced FF
 # Current Version: 1.6.1
 ChangeLog:
 
+For previous ChangeLogs visit http://ffxivtextools.dualwield.net/change_log.html
+
 Application:
  - Updated to latest version of Helix Toolkit.
  - Added new steam directory name "FINAL FANTASY XIV Online" to common install directories.
