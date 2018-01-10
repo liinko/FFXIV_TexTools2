@@ -166,6 +166,9 @@ namespace FFXIV_TexTools2.IO
 				Dictionary<string, int> boneDict = new Dictionary<string, int>();
 				Dictionary<string, string> meshNameDict = new Dictionary<string, string>();
 
+                //Some collada files use STP coordinates, some just use ST
+                var texStride = 2;
+
 				for (int i = 0; i < boneStrings.Count; i++)
 				{
 					boneDict.Add(boneStrings[i], i);
@@ -274,8 +277,15 @@ namespace FFXIV_TexTools2.IO
 										{
 											cData.index.AddRange((int[])reader.ReadElementContentAs(typeof(int[]), null));
 											break;
-										}
-									}
+                                        }
+                                        else if (reader.Name.Equals("param"))
+                                        {
+                                            if (reader.GetAttribute("name") == "P")
+                                            {
+                                                texStride = 3;
+                                            }
+                                        }
+                                    }
 								}
 
 								if (atr.Contains("."))
@@ -370,8 +380,9 @@ namespace FFXIV_TexTools2.IO
 												cData.bIndex.Add(tempbIndex[a + 1]);
 											}
 											break;
-										}
-									}
+                                        }
+
+                                    }
 								}
 							}
 						}
@@ -387,12 +398,12 @@ namespace FFXIV_TexTools2.IO
 					MessageBox.Show("[Import] Error reading .dae file.\n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
 					return;
 				}
-
+                
 				if (!hasTexc2 && indStride == 6)
 				{
 					indStride = 4;
 				}
-
+                
 				for(int i = 0; i < pDict.Count; i++)
 				{
 					var mDict = pDict[i];
@@ -410,17 +421,77 @@ namespace FFXIV_TexTools2.IO
 								c++;
 							}
 
-							cdDict[i].vertex.AddRange(mDict[c].vertex);
+                            // lastIndex is whatever we left our buffers at last time.
+                            lastIndex = cdDict[i].vertex.Count() / 3;
+
+
+
+                            cdDict[i].vertex.AddRange(mDict[c].vertex);
 							cdDict[i].normal.AddRange(mDict[c].normal);
 							cdDict[i].texCoord.AddRange(mDict[c].texCoord);
 							cdDict[i].texCoord2.AddRange(mDict[c].texCoord2);
 							cdDict[i].tangent.AddRange(mDict[c].tangent);
 							cdDict[i].biNormal.AddRange(mDict[c].biNormal);
 
-							if (j > 0)
+                            //Fill out buffers with dummy data to make sure they're all the same length.
+                            List<int> counts = new List<int>();
+                            counts.Add(cdDict[i].vertex.Count());
+                            counts.Add(cdDict[i].normal.Count());
+                            counts.Add(cdDict[i].texCoord.Count());
+                            counts.Add(cdDict[i].texCoord2.Count());
+                            counts.Add(cdDict[i].tangent.Count());
+                            counts.Add(cdDict[i].biNormal.Count());
+                            int maxCount = counts.Max();
+                            
+                            if(cdDict[i].vertex.Count() < maxCount)
+                            {
+                                var countDiff = maxCount - cdDict[i].vertex.Count();
+                                cdDict[i].vertex.AddRange(Enumerable.Repeat((float) 0, countDiff));
+                            }
+
+                            if (cdDict[i].normal.Count() < maxCount)
+                            {
+                                var countDiff = maxCount - cdDict[i].normal.Count();
+                                cdDict[i].normal.AddRange(Enumerable.Repeat((float)0, countDiff));
+                            }
+
+                            if (cdDict[i].tangent.Count() < maxCount)
+                            {
+                                var countDiff = maxCount - cdDict[i].tangent.Count();
+                                cdDict[i].tangent.AddRange(Enumerable.Repeat((float)0, countDiff));
+                            }
+
+                            if (cdDict[i].biNormal.Count() < maxCount)
+                            {
+                                var countDiff = maxCount - cdDict[i].biNormal.Count();
+                                cdDict[i].biNormal.AddRange(Enumerable.Repeat((float)0, countDiff));
+                            }
+
+                            //Texture buffer may be shorter if the file uses just ST coordinates.
+                            int texMaxCount = (maxCount / 3) * texStride;
+
+                            if (cdDict[i].texCoord.Count() < texMaxCount)
+                            {
+                                var countDiff = texMaxCount - cdDict[i].texCoord.Count();
+                                cdDict[i].texCoord.AddRange(Enumerable.Repeat((float)0, countDiff));
+                            }
+
+                            if (cdDict[i].texCoord2.Count() < texMaxCount)
+                            {
+                                // Don't buffer us if it's omitted.
+                                if (cdDict[i].texCoord2.Count() != 0)
+                                {
+                                    var countDiff = texMaxCount - cdDict[i].texCoord2.Count();
+                                    cdDict[i].texCoord2.AddRange(Enumerable.Repeat((float)0, countDiff));
+                                }
+                            }
+
+
+
+                            
+                            if (j > 0)
 							{
-								lastIndex = cdDict[i].index.Max() + 1;
-								foreach (var ind in mDict[c].index)
+                                foreach (var ind in mDict[c].index)
 								{
 									cdDict[i].index.Add(ind + lastIndex);
 								}
@@ -432,12 +503,20 @@ namespace FFXIV_TexTools2.IO
 
 							cdDict[i].partsDict.Add(c, mDict[c].index.Count / indStride);
 
+                            // Copy weights over.
 							cdDict[i].weights.AddRange(mDict[c].weights);
 							cdDict[i].vCount.AddRange(mDict[c].vCount);
 
-							if (j > 0)
+                            // Buffer out the vCount for weights as well so it doesn't get off-kilter or blow up down the line.
+                            if (cdDict[i].vCount.Count() < (maxCount / 3))
+                            {
+                                var countDiff = (maxCount / 3) - cdDict[i].vCount.Count();
+                                cdDict[i].vCount.AddRange(Enumerable.Repeat((int)0, countDiff));
+                            }
+                            
+                            if (j > 0)
 							{
-								lastIndex = cdDict[i].bIndex.Max() + 1;
+                                lastIndex = cdDict[i].bIndex.Max() + 1;
 
 								for (int a = 0; a < mDict[c].bIndex.Count; a += 2)
 								{
@@ -461,7 +540,7 @@ namespace FFXIV_TexTools2.IO
 				}
 
 				List<ColladaMeshData> cmdList = new List<ColladaMeshData>();
-
+                
 				int m = 0;
 				foreach (var cd in cdDict.Values)
 				{
@@ -487,7 +566,7 @@ namespace FFXIV_TexTools2.IO
 					Vector3Collection nBiNormals = new Vector3Collection();
 					List<byte[]> nBlendIndices = new List<byte[]>();
 					List<byte[]> nBlendWeights = new List<byte[]>();
-
+                    
 					for (int i = 0; i < cd.vertex.Count; i += 3)
 					{
 						Vertex.Add(new SharpDX.Vector3((cd.vertex[i] / Info.modelMultiplier), (cd.vertex[i + 1] / Info.modelMultiplier), (cd.vertex[i + 2] / Info.modelMultiplier)));
@@ -599,7 +678,7 @@ namespace FFXIV_TexTools2.IO
 					}
 					catch(Exception e)
 					{
-						MessageBox.Show("[Import] Error reading skinning data.\nPlease make sure the skinning data was saved to the .dae file.\n\n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+					    MessageBox.Show("[Import] Error reading skinning data.\nPlease make sure the skinning data was saved to the .dae file.\n\n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                         return;
 					}
 
