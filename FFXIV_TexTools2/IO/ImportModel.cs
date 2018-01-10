@@ -277,8 +277,15 @@ namespace FFXIV_TexTools2.IO
 										{
 											cData.index.AddRange((int[])reader.ReadElementContentAs(typeof(int[]), null));
 											break;
-										}
-									}
+                                        }
+                                        else if (reader.Name.Equals("param"))
+                                        {
+                                            if (reader.GetAttribute("name") == "P")
+                                            {
+                                                texStride = 3;
+                                            }
+                                        }
+                                    }
 								}
 
 								if (atr.Contains("."))
@@ -373,13 +380,6 @@ namespace FFXIV_TexTools2.IO
 												cData.bIndex.Add(tempbIndex[a + 1]);
 											}
 											break;
-                                        }
-                                        else if (reader.Name.Equals("param"))
-                                        {
-                                            if(reader.GetAttribute("name")  == "P" && reader.GetAttribute("type") == "float")
-                                            {
-                                                texStride = 3;
-                                            }
                                         }
 
                                     }
@@ -478,8 +478,12 @@ namespace FFXIV_TexTools2.IO
 
                             if (cdDict[i].texCoord2.Count() < texMaxCount)
                             {
-                                var countDiff = texMaxCount - cdDict[i].texCoord2.Count();
-                                cdDict[i].texCoord2.AddRange(Enumerable.Repeat((float)0, countDiff));
+                                // Don't buffer us if it's omitted.
+                                if (cdDict[i].texCoord2.Count() != 0)
+                                {
+                                    var countDiff = texMaxCount - cdDict[i].texCoord2.Count();
+                                    cdDict[i].texCoord2.AddRange(Enumerable.Repeat((float)0, countDiff));
+                                }
                             }
 
 
