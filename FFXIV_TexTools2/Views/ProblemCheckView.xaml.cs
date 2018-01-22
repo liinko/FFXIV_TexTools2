@@ -155,13 +155,15 @@ namespace FFXIV_TexTools2.Views
         private bool CheckBackups()
         {
             bool problem = false;
+            string indexBackupFile = Properties.Settings.Default.IndexBackups_Directory + "/{0}.win32.index";
+            string index2BackupFile = Properties.Settings.Default.IndexBackups_Directory + "/{0}.win32.index2";
 
-            if (Directory.Exists(Info.indexBackupDir))
+            if (Directory.Exists(Properties.Settings.Default.IndexBackups_Directory))
             {
                 foreach (var indexFile in Info.ModIndexDict)
                 {
-                    var indexPath = string.Format(Info.indexBackupFile, indexFile.Key);
-                    var index2Path = string.Format(Info.index2BackupFile, indexFile.Key);
+                    var indexPath = string.Format(indexBackupFile, indexFile.Key);
+                    var index2Path = string.Format(index2BackupFile, indexFile.Key);
                     bool check = false;
 
                     AddText("\t" + indexFile.Key + ".win32.index", "Black");
@@ -291,11 +293,11 @@ namespace FFXIV_TexTools2.Views
             JsonEntry modEntry = null;
             bool check = false;
 
-            if(File.ReadLines(Info.modListDir).Count() > 0)
+            if(File.ReadLines(Properties.Settings.Default.Modlist_Directory).Count() > 0)
             {
                 try
                 {
-                    using (StreamReader sr = new StreamReader(Info.modListDir))
+                    using (StreamReader sr = new StreamReader(Properties.Settings.Default.Modlist_Directory))
                     {
                         while ((line = sr.ReadLine()) != null)
                         {

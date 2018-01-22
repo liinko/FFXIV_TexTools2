@@ -48,7 +48,7 @@
                 <Label x:Name="DXVerStatus" Content="DX Ver: " Padding="0"/>
             </Viewbox>
         </StatusBar>
-        <Menu x:Name="menu" Height="22" VerticalAlignment="Top" Margin="0,0,1,0">
+        <Menu x:Name="menu" Height="22" VerticalAlignment="Top">
             <MenuItem Header="Mods">
                 <MenuItem x:Name="Menu_ModList" Header="Mod List" BorderThickness="1" Click="Menu_ModList_Click" IsEnabled="{Binding ModlistOffEnabled}"/>
                 <MenuItem x:Name="Menu_Importer" Header="Importer" HorizontalAlignment="Left" Width="140" Click="Menu_Importer_Click" IsEnabled="False"/>
@@ -68,8 +68,9 @@
             </MenuItem>
             <MenuItem Header="Help">
                 <MenuItem x:Name="Menu_ProblemCheck" Header="Check For Problems" Click="Menu_ProblemCheck_Click"/>
-                <MenuItem x:Name="Menu_StartOver" Header="Start Over" Click="Menu_StartOver_Click" /> 
+                <MenuItem x:Name="Menu_StartOver" Header="Start Over" Click="Menu_StartOver_Click" />
                 <MenuItem x:Name="Menu_BugReport" Header="Report Bug" HorizontalAlignment="Left" Width="188" Click="Menu_BugReport_Click"/>
+                <MenuItem x:Name="Menu_Tutorials" Header="Tutorials" HorizontalAlignment="Left" Width="188" Click="Menu_Tutorials_Click"/>
             </MenuItem>
             <MenuItem Header="About">
                 <MenuItem x:Name="Menu_About" Header="FFXIV TexTools" Click="Menu_About_Click"/>
@@ -81,6 +82,8 @@
                 <MenuItem x:Name="Menu_German" Header="German" HorizontalAlignment="Left" Width="140" IsCheckable="True" Click="Menu_German_Click" IsEnabled="{Binding GermanEnabled}" IsChecked="{Binding IsGerman, Mode=OneWay}"/>
             </MenuItem>
         </Menu>
+        <Button Content="Join us on Discord!" VerticalAlignment="Top" HorizontalAlignment="Right" BorderBrush="{x:Null}" Background="{x:Null}" Click="Menu_Discord_Click">
+        </Button>
         <Grid Margin="0,22,0,21">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="113*"/>

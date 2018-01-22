@@ -48,7 +48,7 @@ namespace FFXIV_TexTools2.ViewModel
 
             try
             {
-                foreach (string line in File.ReadAllLines(Info.modListDir))
+                foreach (string line in File.ReadAllLines(Properties.Settings.Default.Modlist_Directory))
                 {
                     JsonEntry entry = JsonConvert.DeserializeObject<JsonEntry>(line);
 

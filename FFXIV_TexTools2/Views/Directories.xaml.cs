@@ -36,6 +36,12 @@ namespace FFXIV_TexTools2.Views
 
             var ffxivPath = Path.GetFullPath(Properties.Settings.Default.FFXIV_Directory);
             FFXIVDir.Text = ffxivPath;
+
+            var modListPath = Path.GetFullPath(Properties.Settings.Default.Modlist_Directory);
+            modListDir.Text = modListPath;
+
+            var indexBackupsPath = Path.GetFullPath(Properties.Settings.Default.IndexBackups_Directory);
+            indexBackupsDir.Text = indexBackupsPath;
         }
 
         private void FFXIVDirButton_Click(object sender, RoutedEventArgs e)
@@ -56,18 +62,149 @@ namespace FFXIV_TexTools2.Views
 
         private void SaveDirButton_Click(object sender, RoutedEventArgs e)
         {
+            var oldSaveLocation = saveDir.Text;
             FolderSelectDialog folderSelect = new FolderSelectDialog()
             {
-                Title = "Select save folder"
+                Title = "Select new location of save folder"
             };
+            folderSelect.InitialDirectory = oldSaveLocation;
+
             var result = folderSelect.ShowDialog();
             if (result)
             {
-                Properties.Settings.Default.Save_Directory = folderSelect.FileName;
+                if (MessageBox.Show("Would you like to move the existing data to the new location?", "Move Data?", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                {
+                    try
+                    {
+                        Directory.Move(oldSaveLocation, folderSelect.FileName);
+                    }
+                    catch
+                    {
+                        var newLoc = folderSelect.FileName + "\\Saved";
+                        Directory.CreateDirectory(newLoc);
+
+                        foreach (string dirPath in Directory.GetDirectories(oldSaveLocation, "*", SearchOption.AllDirectories))
+                        {
+                            Directory.CreateDirectory(dirPath.Replace(oldSaveLocation, newLoc));
+                        }
+
+                        foreach (string newPath in Directory.GetFiles(oldSaveLocation, "*.*", SearchOption.AllDirectories))
+                        {
+                            File.Copy(newPath, newPath.Replace(oldSaveLocation, newLoc), true);
+                        }
+
+                        DeleteDirectory(oldSaveLocation);
+                    }
+                }
+                else
+                {
+                    Directory.CreateDirectory(folderSelect.FileName + "/Saved");
+                }
+
+                Properties.Settings.Default.Save_Directory = folderSelect.FileName + "/Saved";
                 Properties.Settings.Default.Save();
 
-                saveDir.Text = folderSelect.FileName;
+                MessageBox.Show("Location of Saved folder changed.\n\n" +
+                    "New Location: " + folderSelect.FileName + "\\Saved", "New Directory", MessageBoxButton.OK, MessageBoxImage.Information);
+                saveDir.Text = folderSelect.FileName + "\\Saved";
             }
+        }
+
+        private void indexbackupDirButton_Click(object sender, RoutedEventArgs e)
+        {
+            var oldIndexBackupLocation = indexBackupsDir.Text;
+            FolderSelectDialog folderSelect = new FolderSelectDialog()
+            {
+                Title = "Select new location of Index Backup folder"
+            };
+            folderSelect.InitialDirectory = oldIndexBackupLocation;
+            var result = folderSelect.ShowDialog();
+            if (result)
+            {
+                Properties.Settings.Default.IndexBackups_Directory = folderSelect.FileName + "\\Index_Backups";
+                Properties.Settings.Default.Save();
+
+                if (MessageBox.Show("Would you like to move the existing data to the new location?", "Move Data?", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                {
+                    try
+                    {
+                        Directory.Move(oldIndexBackupLocation, folderSelect.FileName);
+
+                    }
+                    catch
+                    {
+                        var newLoc = folderSelect.FileName + "\\Index_Backups";
+                        Directory.CreateDirectory(newLoc);
+
+                        foreach (string dirPath in Directory.GetDirectories(oldIndexBackupLocation, "*", SearchOption.AllDirectories))
+                        {
+                            Directory.CreateDirectory(dirPath.Replace(oldIndexBackupLocation, newLoc));
+                        }
+
+                        foreach (string newPath in Directory.GetFiles(oldIndexBackupLocation, "*.*", SearchOption.AllDirectories))
+                        {
+                            File.Copy(newPath, newPath.Replace(oldIndexBackupLocation, newLoc), true);
+                        }
+
+                        DeleteDirectory(oldIndexBackupLocation);
+                    }
+                }
+
+                MessageBox.Show("Location of Index Backup folder changed.\n\n" +
+                    "New Location: " + folderSelect.FileName + "\\Index_Backups", "New Directory", MessageBoxButton.OK, MessageBoxImage.Information);
+                indexBackupsDir.Text = folderSelect.FileName + "\\Index_Backups";
+            }
+        }
+
+        private void modlistDirButton_Click(object sender, RoutedEventArgs e)
+        {
+            var oldModListLocation = modListDir.Text;
+            FolderSelectDialog folderSelect = new FolderSelectDialog()
+            {
+                Title = "Select new location of Mod List file"
+            };
+            folderSelect.InitialDirectory = oldModListLocation;
+            var result = folderSelect.ShowDialog();
+            if (result)
+            {
+                var fullLoc = folderSelect.FileName + "\\TexTools.modlist";
+
+                Properties.Settings.Default.Modlist_Directory = fullLoc;
+                Properties.Settings.Default.Save();
+
+                try
+                {
+                    File.Move(oldModListLocation, fullLoc);
+                }
+                catch
+                {
+                    File.Copy(oldModListLocation, fullLoc, true);
+                    File.Delete(oldModListLocation);
+                }
+
+                MessageBox.Show("Location of ModList file changed.\n\n" +
+                    "New Location: " + fullLoc, "New Directory", MessageBoxButton.OK, MessageBoxImage.Information);
+                modListDir.Text = fullLoc;
+            }
+        }
+
+
+        private static void DeleteDirectory(string target_dir)
+        {
+            string[] files = Directory.GetFiles(target_dir);
+            string[] dirs = Directory.GetDirectories(target_dir);
+
+            foreach (string file in files)
+            {
+                File.Delete(file);
+            }
+
+            foreach (string dir in dirs)
+            {
+                DeleteDirectory(dir);
+            }
+
+            Directory.Delete(target_dir, false);
         }
     }
 }

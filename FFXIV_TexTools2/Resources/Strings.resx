@@ -672,4 +672,13 @@
   <data name="DX9" xml:space="preserve">
     <value>DX9</value>
   </data>
+  <data name="Bahamut_Egi" xml:space="preserve">
+    <value>Bahamut-Egi</value>
+  </data>
+  <data name="Placeholder_Egi" xml:space="preserve">
+    <value>Placeholder-Egi</value>
+  </data>
+  <data name="Sephirot_Egi" xml:space="preserve">
+    <value>Sephirot-Egi</value>
+  </data>
 </root>

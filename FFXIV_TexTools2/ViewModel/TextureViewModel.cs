@@ -234,6 +234,11 @@ namespace FFXIV_TexTools2.ViewModel
         {
             string savePath = Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selectedItem.ItemName;
 
+            if (selectedCategory.Equals("UI"))
+            {
+                savePath = Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selectedItem.ItemCategory;
+            }
+
             Process.Start(savePath);
         }
 
@@ -455,7 +460,7 @@ namespace FFXIV_TexTools2.ViewModel
 
                 try
                 {
-                    using (StreamReader sr = new StreamReader(Info.modListDir))
+                    using (StreamReader sr = new StreamReader(Properties.Settings.Default.Modlist_Directory))
                     {
                         while ((line = sr.ReadLine()) != null)
                         {
@@ -655,6 +660,11 @@ namespace FFXIV_TexTools2.ViewModel
                     {
                         body = "0001";
                     }
+                }
+
+                if (selectedCategory.Equals(Strings.Pets))
+                {
+                    body = "a";
                 }
                 var info = MTRL.GetMTRLData(selectedItem, selectedRace.ID, selectedCategory, part, imc, body, modelID, vfx);
                 mtrlData = info.Item1;
@@ -983,7 +993,7 @@ namespace FFXIV_TexTools2.ViewModel
             bool inModList = false;
             try
             {
-                using (StreamReader sr = new StreamReader(Info.modListDir))
+                using (StreamReader sr = new StreamReader(Properties.Settings.Default.Modlist_Directory))
                 {
                     while ((line = sr.ReadLine()) != null)
                     {
@@ -1028,12 +1038,9 @@ namespace FFXIV_TexTools2.ViewModel
 
             if (offset == 0)
             {
-                TextureType = "A16B16G16R16F";
-                textureType = "A16B16G16R16F";
+                TextureType = "Type: 16.16.16.16f ABGR\nMipMaps: None";
 
                 TextureDimensions = "(4 x 16)";
-                textureDimensions = "(4 x 16)";
-
 
                 alphaBitmap = Imaging.CreateBitmapSourceFromHBitmap(colorBmp.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
                 alphaBitmap.Freeze();
@@ -1064,8 +1071,13 @@ namespace FFXIV_TexTools2.ViewModel
                     texData = TEX.GetVFX(offset, Strings.ItemsDat);
                 }
 
-                TextureType = texData.TypeString;
-
+                string mipMaps = "Yes (" + texData.MipCount + ")";
+                if(texData.MipCount < 1)
+                {
+                    mipMaps = "None";
+                }
+                TextureType = "Type: " + texData.TypeString + "\nMipMaps: " + mipMaps;
+                
                 TextureDimensions = "(" + texData.Width + " x " + texData.Height + ")";
 
                 var clonerect = new Rectangle(0, 0, texData.Width, texData.Height);
@@ -1085,20 +1097,21 @@ namespace FFXIV_TexTools2.ViewModel
                 }
             }
 
+
+            try
+            {
+                ImageEffect = new ColorChannels()
+                {
+                    Channel = new System.Windows.Media.Media3D.Point4D(1.0f, 1.0f, 1.0f, 0.0f)
+                };
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.StackTrace);
+            }
+
             if (!isUI)
             {
-                try
-                {
-                    ImageEffect = new ColorChannels()
-                    {
-                        Channel = new System.Windows.Media.Media3D.Point4D(1.0f, 1.0f, 1.0f, 0.0f)
-                    };
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine(ex.StackTrace);
-                }
-
                 ImageSource = noAlphaBitmap;
 
                 SetColorChannelFilter(imageEffect);
@@ -1107,13 +1120,11 @@ namespace FFXIV_TexTools2.ViewModel
             }
             else
             {
-                if(ImageEffect != null)
-                {
-                    ImageEffect = null;
-                }
                 ImageSource = alphaBitmap;
 
-                ChannelsEnabled = false;
+                SetColorChannelFilter(imageEffect);
+
+                ChannelsEnabled = true;
             }
 
             SaveEnabled = true;
@@ -1125,7 +1136,7 @@ namespace FFXIV_TexTools2.ViewModel
             string savePath = Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selectedItem.ItemName + "/" + dxPath + ".dds";
             if (selectedCategory.Equals("UI"))
             {
-                savePath = Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selectedItem.ItemCategory + "/" + selectedItem.ItemName + "/" + dxPath + ".dds";
+                savePath = Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selectedItem.ItemCategory + "/" + dxPath + ".dds";
             }
 
             if (File.Exists(savePath))
@@ -1138,7 +1149,10 @@ namespace FFXIV_TexTools2.ViewModel
             }
 
             string folderPath = Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selectedItem.ItemName;
-
+            if (selectedCategory.Equals("UI"))
+            {
+                folderPath = Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selectedItem.ItemCategory;
+            }
 
             if (Directory.Exists(folderPath))
             {
@@ -1198,7 +1212,7 @@ namespace FFXIV_TexTools2.ViewModel
                 {
                     var colorBMP = MTRL.GetColorBitmap(offset);
 
-                    TextureType = "A16B16G16R16F";
+                    TextureType = "Type: 16.16.16.16f ABGR\nMipMaps: 0";
                     TextureDimensions = "(4 x 16)";
 
                     alphaBitmap = Imaging.CreateBitmapSourceFromHBitmap(colorBMP.Item1.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
@@ -1232,7 +1246,12 @@ namespace FFXIV_TexTools2.ViewModel
                         }
                     }
 
-                    TextureType = texData.TypeString;
+                    string mipMaps = "Yes (" + texData.MipCount + ")";
+                    if (texData.MipCount < 1)
+                    {
+                        mipMaps = "None";
+                    }
+                    TextureType = "Type: " + texData.TypeString + "\nMipMaps: " + mipMaps;
                     TextureDimensions = "(" + texData.Width + " x " + texData.Height + ")";
 
                     alphaBitmap = Imaging.CreateBitmapSourceFromHBitmap(texData.BMP.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());

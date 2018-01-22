@@ -30,12 +30,7 @@ namespace FFXIV_TexTools2.Helpers
         public static string datDir = Properties.Settings.Default.FFXIV_Directory + "/{0}.win32.dat{1}";
         public static int modelMultiplier = 10;
 
-        public static string modListDir = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/TexTools/TexTools.modlist";
         public static string modDatDir = Properties.Settings.Default.FFXIV_Directory + "/{0}.win32.dat{1}";
-
-        public static string indexBackupDir = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/TexTools/Index_Backups";
-        public static string indexBackupFile = indexBackupDir + "/{0}.win32.index";
-        public static string index2BackupFile = indexBackupDir + "/{0}.win32.index2";
 
         public static Dictionary<string, string> ModDatDict = new Dictionary<string, string>
         {
@@ -194,6 +189,9 @@ namespace FFXIV_TexTools2.Helpers
             {Strings.Ramuh_Egi, "7006"},
             {Strings.Rook_Autoturret, "7101"},
             {Strings.Bishop_Autoturret, "7101"},
+            {Strings.Sephirot_Egi, "7007" },
+            {Strings.Bahamut_Egi, "7102" },
+            {Strings.Placeholder_Egi, "7103" }
         };
 
         public static Dictionary<string, string> FaceTypes = new Dictionary<string, string>
@@ -299,21 +297,21 @@ namespace FFXIV_TexTools2.Helpers
 
         public static Dictionary<int, string> TextureTypes = new Dictionary<int, string>
         {
-            {4400, "L8" },
-            {4401, "A8" },
+            {4400, "8   L" },
+            {4401, "8   A" },
             {4440, "Unknown" },
-            {5184, "A4R4G4B4" },
-            {5185, "A1R5G5B5" },
-            {5200, "A8R8G8B8" },
-            {5201, "X8R8G8B8" },
-            {8528, "R32F" },
-            {8784, "G16R16F" },
+            {5184, "4.4.4.4 RGB" },
+            {5185, "1.5.5.5 ARGB" },
+            {5200, "8.8.8.8 ARGB" },
+            {5201, "X.8.8.8 XRGB" },
+            {8528, "32f R" },
+            {8784, "16.16f  GR" },
             {8800, "G32R32F" },
-            {9312, "A16B16G16R16F" },
-            {9328, "A32B32G32R32F" },
-            {13344, "DXT1" },
-            {13360, "DXT3" },
-            {13361, "DXT5" },
+            {9312, "16.16.16.16f ABGR" },
+            {9328, "32.32.32.32f ABGR" },
+            {13344, "DXT1   RGB" },
+            {13360, "DXT3   ARGB" },
+            {13361, "DXT5   ARGB" },
             {16704, "D16" }
         };
     }

@@ -5,28 +5,39 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FFXIV_TexTools2.Views"
         mc:Ignorable="d"
-        Title="Directories" WindowStartupLocation="CenterOwner" WindowStyle="ToolWindow" Height="150" Width="400" SizeToContent="WidthAndHeight" ResizeMode="NoResize">
+        Title="Directories" WindowStartupLocation="CenterOwner" WindowStyle="ToolWindow" Height="210" Width="400" SizeToContent="WidthAndHeight" ResizeMode="NoResize">
     <Grid Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="10*" />
             <ColumnDefinition Width="1*"/>
         </Grid.ColumnDefinitions>
-        <Grid Grid.Column="0" Height="23" VerticalAlignment="Top" Margin="10,26,10,0">
+        <Grid Grid.Column="0" Grid.Row="0" Height="23" Margin="10,15,10,5" VerticalAlignment="Top">
             <TextBox x:Name="FFXIVDir" TextWrapping="Wrap" IsReadOnly="True" Margin="0"/>
         </Grid>
-        <Grid Grid.Column="0" Height="23" Margin="10,75,10,0" VerticalAlignment="Top">
+        <Grid Grid.Column="0" Grid.Row="1" Height="23" Margin="10,15,10,5" VerticalAlignment="Top">
             <TextBox x:Name="saveDir" TextWrapping="Wrap" IsReadOnly="True" Margin="0"/>
         </Grid>
-        <Grid Grid.Column="1">
-            <Grid.RowDefinitions>
-                <RowDefinition/>
-                <RowDefinition/>
-            </Grid.RowDefinitions>
-            <Button x:Name="FFXIVDirButton" Content="..." Grid.Row="0" Margin="5,15,5,5" Click="FFXIVDirButton_Click" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="25" MinHeight="25" HorizontalContentAlignment="Center" VerticalContentAlignment="Top"/>
-            <Button x:Name="saveDirButton" Content="..." Grid.Row="1" Margin="5,5,5,15" Click="SaveDirButton_Click" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="25" MinHeight="25" VerticalContentAlignment="Top" HorizontalContentAlignment="Center"/>
+        <Grid Grid.Column="0" Grid.Row="2" Height="23" Margin="10,15,10,5" VerticalAlignment="Top">
+            <TextBox x:Name="modListDir" TextWrapping="Wrap" IsReadOnly="True" Margin="0"/>
         </Grid>
-        <Label x:Name="label" Content="FFXIV Directory" VerticalAlignment="Top" Margin="10,0" Height="26"/>
-        <Label x:Name="label1" Content="Save Directory" Margin="10,49,10,0" VerticalAlignment="Top" Height="26"/>
-        <Label x:Name="label2" Content="" Margin="0,98,0,0" VerticalAlignment="Top" Height="24"/>
+        <Grid Grid.Column="0" Grid.Row="3" Height="23" Margin="10,15,10,5" VerticalAlignment="Top">
+            <TextBox x:Name="indexBackupsDir" TextWrapping="Wrap" IsReadOnly="True" Margin="0"/>
+        </Grid>
+
+        <Button x:Name="FFXIVDirButton" Content="..." Grid.Row="0" Grid.Column="1" Margin="5" Click="FFXIVDirButton_Click" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="25" MinHeight="25" HorizontalContentAlignment="Center" VerticalContentAlignment="Top"/>
+        <Button x:Name="saveDirButton" Content="..." Grid.Row="1" Grid.Column="1" Margin="5" Click="SaveDirButton_Click" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="25" MinHeight="25" VerticalContentAlignment="Top" HorizontalContentAlignment="Center"/>
+        <Button x:Name="modlistDirButton" Content="..." Grid.Row="2" Grid.Column="1" Margin="5" Click="modlistDirButton_Click" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="25" MinHeight="25" VerticalContentAlignment="Top" HorizontalContentAlignment="Center"/>
+        <Button x:Name="indexbackupDirButton" Content="..." Grid.Row="3" Grid.Column="1" Margin="5" Click="indexbackupDirButton_Click" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="25" MinHeight="25" VerticalContentAlignment="Top" HorizontalContentAlignment="Center"/>
+        
+        <Label x:Name="label" Grid.Row="0" Content="FFXIV Directory" VerticalAlignment="Top"  Height="15" Padding="0" Margin="5,0,0,0"/>
+        <Label x:Name="label1" Grid.Row="1"  Content="Save Directory" VerticalAlignment="Top" Height="15" Padding="0" Margin="5,0,0,0"/>
+        <Label x:Name="label2" Grid.Row="2"  Content="Modlist Directory" VerticalAlignment="Top" Height="15" Padding="0" Margin="5,0,0,0"/>
+        <Label x:Name="label3" Grid.Row="3"  Content="Index Backups Directory" VerticalAlignment="Top" Height="15" Padding="0" Margin="5,0,0,0"/>
     </Grid>
 </Window>
