@@ -275,11 +275,19 @@ namespace FFXIV_TexTools2.IO
                     proc.WaitForExit();
                 }
                 skelDict.Clear();
-                skelDict = ParseSkeleton(skelLoc + sklbName + ".xml", meshList);
+                try
+                {
+                    skelDict = ParseSkeleton(skelLoc + sklbName + ".xml", meshList);
+                }
+                catch
+                {
+                    MessageBox.Show("There was an issue reading the skeleton file.\n\nYour AssetCc2.exe may be outdated, version 2012+ is required.", "Save Model Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return false;
+                }
             }
             else if(runAsset && !hasAssetcc)
             {
-                MessageBox.Show("[SaveModel] No skeleton found for item. No .dae file will be saved. \n\nPlace AssetCc2(Not provided) in root folder to create skeleton.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("No skeleton found for item. No .dae file will be saved. \n\nPlace AssetCc2(Not provided) in root folder to create skeleton.", "Save Model Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
 
@@ -402,7 +410,8 @@ namespace FFXIV_TexTools2.IO
                     }
                     else
                     {
-                        Debug.WriteLine("\nUnknown Format" + format + "\n");
+                        MessageBox.Show("[SaveModel] Unknown Data format (" + format + ") please submit a bug report.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+
                         throw new FormatException();
                     }
 
@@ -420,11 +429,6 @@ namespace FFXIV_TexTools2.IO
                     File.WriteAllBytes(Directory.GetCurrentDirectory() + "/Skeletons/" + mName  + ".sklb", havokData);
                 }
             }
-            else
-            {
-                Debug.WriteLine("Could not find skeleton file: " + skelFolder + "/" + skelFile);
-            }
-
         }
 
         private static Dictionary<string, JsonSkeleton> ParseSkeleton(string skelLoc, List<ModelMeshData> meshList)
@@ -1633,6 +1637,7 @@ namespace FFXIV_TexTools2.IO
                     }
                 }
 
+                #region testing
                 //if (modelData.ExtraData.totalExtraCounts.ContainsKey(i))
                 //{
                 //    var extraVerts = modelData.ExtraData.totalExtraCounts[i];
@@ -2092,6 +2097,7 @@ namespace FFXIV_TexTools2.IO
                 //    xmlWriter.WriteEndElement();
                 //    //</geometry>
                 //}
+                #endregion testing
             }
 
             xmlWriter.WriteEndElement();
@@ -2371,6 +2377,7 @@ namespace FFXIV_TexTools2.IO
                     }
                 }
 
+                #region testing
                 //if (modelData.ExtraData.totalExtraCounts.ContainsKey(i))
                 //{
                 //    //< controller >
@@ -2588,6 +2595,7 @@ namespace FFXIV_TexTools2.IO
                 //    xmlWriter.WriteEndElement();
                 //    //</controller>
                 //}
+                #endregion testing
             }
 
             xmlWriter.WriteEndElement();
@@ -2682,6 +2690,7 @@ namespace FFXIV_TexTools2.IO
                     //</node>
                 }
 
+                #region testing
                 //if (modelData.ExtraData.totalExtraCounts.ContainsKey(i))
                 //{
                 //    //<node>
@@ -2728,6 +2737,7 @@ namespace FFXIV_TexTools2.IO
                 //    xmlWriter.WriteEndElement();
                 //    //</node>
                 //}
+                #endregion testing
 
                 xmlWriter.WriteEndElement();
                 //</node>

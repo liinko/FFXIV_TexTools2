@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Windows.Input;
 
 namespace FFXIV_TexTools2.ViewModel
@@ -149,7 +150,7 @@ namespace FFXIV_TexTools2.ViewModel
                 PrimaryModelID = searchText.PadLeft(4, '0'),
                 PrimaryModelBody = SelectedItem.Body.PadLeft(4, '0'),
                 PrimaryModelVariant = SelectedItem.Variant.PadLeft(4, '0'),
-                PrimaryMTRLFolder = MTRLPath.Substring(0, MTRLPath.LastIndexOf("v") + 1)
+                PrimaryMTRLFolder = MTRLPath.Substring(0, MTRLPath.LastIndexOf("/") - 4)
             };
 
             string category = SelectedItem.Slot;
@@ -412,8 +413,6 @@ namespace FFXIV_TexTools2.ViewModel
                     {
                         slotName = Strings.Mounts;
                     }
-
-
 
                     for (int i = 0; i <= 50; i++)
                     {

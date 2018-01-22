@@ -23,6 +23,7 @@ using HelixToolkit.Wpf.SharpDX.Core;
 using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -434,7 +435,11 @@ namespace FFXIV_TexTools2.Material
                     {
                         //Index Offset Start
                         var m1 = br.ReadInt32();
-                        var iLoc = indexLoc[m1];
+                        var iLoc = 0;
+                        if (indexLoc.ContainsKey(m1))
+                        {
+                            iLoc = indexLoc[m1];
+                        }
 
                         //index count
                         var mCount = br.ReadInt32();

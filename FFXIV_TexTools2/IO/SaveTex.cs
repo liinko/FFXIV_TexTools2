@@ -23,6 +23,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
 using System.Windows.Media.Imaging;
 
 namespace FFXIV_TexTools2.IO
@@ -45,7 +46,7 @@ namespace FFXIV_TexTools2.IO
             string savePath = "";
             if (selectedCategory.Equals("UI"))
             {
-                savePath = Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + subCategory + "/" + selectedItem;
+                savePath = Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + subCategory;
             }
             else
             {
@@ -85,12 +86,13 @@ namespace FFXIV_TexTools2.IO
             string savePath = "";
             if (selectedCategory.Equals("UI"))
             {
-                savePath = Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + subCategory + "/" + selectedItem;
+                savePath = Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + subCategory;
             }
             else
             {
                 savePath = Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selectedItem;
             }
+
             Directory.CreateDirectory(savePath);
 
             var fullSavePath = Path.Combine(savePath, (Path.GetFileNameWithoutExtension(internalFilePath) + ".dds"));

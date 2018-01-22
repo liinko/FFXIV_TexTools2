@@ -25,8 +25,10 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Text;
 using System.Windows;
 using System.Windows.Input;
 using System.Xml;
@@ -83,10 +85,55 @@ namespace FFXIV_TexTools2.ViewModel
             CheckVersion();
             MakeModContainers();
 
-            var gameDir = Properties.Settings.Default.FFXIV_Directory.Substring(0, Properties.Settings.Default.FFXIV_Directory.LastIndexOf("sqpack"));
-            var versionFile = File.ReadAllLines(gameDir + "/ffxivgame.ver");
-            var ffxivVersion = new Version(versionFile[0].Substring(0, versionFile[0].LastIndexOf(".")));
+            var gameDir = "";
+            string[] versionFile = new string[] { "" };
+            Version ffxivVersion = null;
+            try
+            {
+                gameDir = Properties.Settings.Default.FFXIV_Directory.Substring(0, Properties.Settings.Default.FFXIV_Directory.LastIndexOf("sqpack"));
+
+            }
+            catch(Exception e)
+            {
+                MessageBox.Show("Could not find sqpack folder in game directory.\nDirectory: " + Properties.Settings.Default.FFXIV_Directory + "\n\nError: " + e.Message, "Version Check Error", MessageBoxButton.OK, MessageBoxImage.None);
+            }
+
+            try
+            {
+                versionFile = File.ReadAllLines(gameDir + "/ffxivgame.ver");
+                ffxivVersion = new Version(versionFile[0].Substring(0, versionFile[0].LastIndexOf(".")));
+            }
+            catch(Exception e)
+            {
+                MessageBox.Show("Could not determine FFXIV Version.\nData read: " + versionFile[0] + "\n\nError: " + e.Message, "Version Check Error", MessageBoxButton.OK, MessageBoxImage.None);
+
+            }
+
             var indexBackupDir = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/TexTools/Index_Backups";
+            try
+            {
+                indexBackupDir = Properties.Settings.Default.IndexBackups_Directory;
+            }
+            catch
+            {
+                MessageBox.Show("TexTools was unable to read Index Backups Directory setting\n\n" +
+                    "The following default will be used:\n" + indexBackupDir, "Settings Read Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+            if (indexBackupDir.Equals(""))
+            {
+                indexBackupDir = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/TexTools/Index_Backups";
+                Properties.Settings.Default.IndexBackups_Directory = indexBackupDir;
+                Properties.Settings.Default.Save();
+            }
+
+            if (Properties.Settings.Default.Save_Directory.Equals(""))
+            {
+                var md = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/TexTools/Saved";
+                Directory.CreateDirectory(md);
+                Properties.Settings.Default.Save_Directory = md;
+                Properties.Settings.Default.Save();
+            }
 
             if (!Directory.Exists(indexBackupDir))
             {
@@ -201,7 +248,7 @@ namespace FFXIV_TexTools2.ViewModel
 
                             lineList.Add(JsonConvert.SerializeObject(modEntry));
                         }
-                        File.WriteAllLines(Info.modListDir, lineList);
+                        File.WriteAllLines(Properties.Settings.Default.Modlist_Directory, lineList);
                     }
 
                     File.Delete(oldModListDir);
@@ -215,7 +262,6 @@ namespace FFXIV_TexTools2.ViewModel
                 MessageBox.Show("There was an error converting the old modlist.  \n\n" +
                  "A new modlist will be created, you may remove the old modlist from the ffxiv folder. \n\n" + e.Message, "ModList Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-
         }
 
 
@@ -293,13 +339,14 @@ namespace FFXIV_TexTools2.ViewModel
                         Environment.Exit(0);
                     }
                 }
+            }
 
-                MessageBox.Show("==== Important ====\n\n" +
-                    "* The modlist file, saved folder, and index backups folder are now located in Documents\\TexTools directory.\n\n" +
-                    "* This will be the same location for all versions going forward.\n\n" +
-                    "* You may copy the content of your old saved and index backups folders to the new directories.\n\n" +
-                    "* You may also copy the TexTools.modlist file, but it is recommended to start over instead.", "Location Change", MessageBoxButton.OK, MessageBoxImage.Information);
-
+            if (Properties.Settings.Default.Save_Directory.Equals(""))
+            {
+                var md = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/TexTools/Saved";
+                Directory.CreateDirectory(md);
+                Properties.Settings.Default.Save_Directory = md;
+                Properties.Settings.Default.Save();
             }
         }
 
@@ -350,7 +397,8 @@ namespace FFXIV_TexTools2.ViewModel
                     }
                 }
 
-                Version curVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+                var ver = FileVersionInfo.GetVersionInfo(System.Reflection.Assembly.GetExecutingAssembly().Location).FileVersion;
+                var curVersion = new Version(ver);
 
                 if (curVersion.CompareTo(v) < 0)
                 {
@@ -372,7 +420,7 @@ namespace FFXIV_TexTools2.ViewModel
         /// </summary>
         private void MakeModContainers()
         {
-            foreach(var datName in Info.ModDatDict)
+            foreach (var datName in Info.ModDatDict)
             {
                 var datPath = string.Format(Info.datDir, datName.Key, datName.Value);
 
@@ -383,7 +431,14 @@ namespace FFXIV_TexTools2.ViewModel
                 }
             }
 
-            if (!File.Exists(Info.modListDir))
+            if (Properties.Settings.Default.Modlist_Directory.Equals(""))
+            {
+                string md = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/TexTools/TexTools.modlist";
+                Properties.Settings.Default.Modlist_Directory = md;
+                Properties.Settings.Default.Save();
+            }
+
+            if (!File.Exists(Properties.Settings.Default.Modlist_Directory))
             {
                 CreateDat.CreateModList();
             }
@@ -577,7 +632,7 @@ namespace FFXIV_TexTools2.ViewModel
 
                 try
                 {
-                    using (StreamReader sr = new StreamReader(Info.modListDir))
+                    using (StreamReader sr = new StreamReader(Properties.Settings.Default.Modlist_Directory))
                     {
                         while ((line = sr.ReadLine()) != null)
                         {

@@ -82,5 +82,29 @@ namespace FFXIV_TexTools2.Properties {
                 this["FFXIV_Ver"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string Modlist_Directory {
+            get {
+                return ((string)(this["Modlist_Directory"]));
+            }
+            set {
+                this["Modlist_Directory"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string IndexBackups_Directory {
+            get {
+                return ((string)(this["IndexBackups_Directory"]));
+            }
+            set {
+                this["IndexBackups_Directory"] = value;
+            }
+        }
     }
 }

@@ -163,16 +163,19 @@ namespace FFXIV_TexTools2
             string md = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/TexTools";
             Directory.CreateDirectory(md);
 
-            File.Create(md + "/TexTools.modlist");
-            //try
-            //{
-            //    File.Create(Info.modListDir);
-            //}
-            //catch (Exception e)
-            //{
-            //    MessageBox.Show("[Create] Error Creating .modlist File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            //}
+            if(!File.Exists(md + "/TexTools.modlist"))
+            {
+                try
+                {
+                    File.Create(md + "/TexTools.modlist");
 
+                }
+                catch(Exception e)
+                {
+                    MessageBox.Show("[Create] Error Creating .modlist File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                }
+            }
         }
     }
 }

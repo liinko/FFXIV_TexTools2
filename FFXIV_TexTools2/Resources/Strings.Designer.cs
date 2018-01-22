@@ -169,6 +169,15 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Bahamut-Egi.
+        /// </summary>
+        internal static string Bahamut_Egi {
+            get {
+                return ResourceManager.GetString("Bahamut_Egi", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Beneficial.
         /// </summary>
         internal static string Beneficial {
@@ -1402,6 +1411,15 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Placeholder-Egi.
+        /// </summary>
+        internal static string Placeholder_Egi {
+            get {
+                return ResourceManager.GetString("Placeholder_Egi", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to placename_0_{0}.exd.
         /// </summary>
         internal static string PlaceName {
@@ -1461,6 +1479,15 @@ namespace FFXIV_TexTools2.Resources {
         internal static string Selene {
             get {
                 return ResourceManager.GetString("Selene", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sephirot-Egi.
+        /// </summary>
+        internal static string Sephirot_Egi {
+            get {
+                return ResourceManager.GetString("Sephirot_Egi", resourceCulture);
             }
         }
         

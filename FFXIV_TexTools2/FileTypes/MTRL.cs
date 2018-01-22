@@ -525,7 +525,7 @@ namespace FFXIV_TexTools2.Material
                 }
 
                 MTRLFolder = String.Format(Strings.MonsterMtrlFolder, Info.petID[item.ItemName], p.ToString().PadLeft(4, '0')) + part.PadLeft(4, '0');
-                MTRLFile = String.Format(Strings.MonsterMtrlFile, Info.petID[item.ItemName], p.ToString().PadLeft(4, '0'), "a");
+                MTRLFile = String.Format(Strings.MonsterMtrlFile, Info.petID[item.ItemName], p.ToString().PadLeft(4, '0'), body);
 
                 if (Helper.FileExists(FFCRC.GetHash(MTRLFile), FFCRC.GetHash(MTRLFolder), Strings.ItemsDat))
                 {

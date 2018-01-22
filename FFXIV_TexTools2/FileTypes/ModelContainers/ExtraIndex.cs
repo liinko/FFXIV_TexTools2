@@ -15,6 +15,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+using System.Collections.Generic;
+
 namespace FFXIV_TexTools2.FileTypes.ModelContainers
 {
     public class ExtraIndex
@@ -22,5 +24,7 @@ namespace FFXIV_TexTools2.FileTypes.ModelContainers
         public int IndexLocation { get; set; }
 
         public int IndexCount { get; set; }
+
+        public List<short[]> IndexList = new List<short[]>();
     }
 }

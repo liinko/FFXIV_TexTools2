@@ -23,6 +23,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Windows;
 
 namespace FFXIV_TexTools2.IO
 {
@@ -81,7 +82,7 @@ namespace FFXIV_TexTools2.IO
             List<string> petNames = new List<string>();
 
             var petFile = String.Format(Strings.PetEXD, Strings.Language);
-            var petBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(petFile)));
+            var petBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(petFile)), petFile);
 
             using (BinaryReader br = new BinaryReader(new MemoryStream(petBytes)))
             {
@@ -139,6 +140,36 @@ namespace FFXIV_TexTools2.IO
 
                 petNode._subNode.Add(extraItemNode);
 
+                extraItem = new ItemData()
+                {
+                    ItemName = Strings.Sephirot_Egi,
+                    ItemCategory = "22"
+                };
+
+                extraItemNode = new TreeNode() { Name = extraItem.ItemName, ItemData = extraItem };
+
+                petNode._subNode.Add(extraItemNode);
+
+                extraItem = new ItemData()
+                {
+                    ItemName = Strings.Bahamut_Egi,
+                    ItemCategory = "22"
+                };
+
+                extraItemNode = new TreeNode() { Name = extraItem.ItemName, ItemData = extraItem };
+
+                petNode._subNode.Add(extraItemNode);
+
+                extraItem = new ItemData()
+                {
+                    ItemName = Strings.Placeholder_Egi,
+                    ItemCategory = "22"
+                };
+
+                extraItemNode = new TreeNode() { Name = extraItem.ItemName, ItemData = extraItem };
+
+                petNode._subNode.Add(extraItemNode);
+
                 return petNode;
             }
         }
@@ -152,8 +183,8 @@ namespace FFXIV_TexTools2.IO
         {
             string minionFile = String.Format(Strings.MinionFile, Strings.Language);
 
-            byte[] minionsBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(minionFile)));
-            byte[] modelChara = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(Strings.ModelCharaFile)));
+            byte[] minionsBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(minionFile)), minionFile);
+            byte[] modelChara = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(Strings.ModelCharaFile)), Strings.ModelCharaFile);
 
             TreeNode minionNode = new TreeNode() { Name = Strings.Minions};
 
@@ -234,8 +265,8 @@ namespace FFXIV_TexTools2.IO
         {
             string placeNameFile = String.Format(Strings.PlaceName, Strings.Language);
 
-            byte[] placeNameBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(placeNameFile)));
-            byte[] mapBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(Strings.MapExd)));
+            byte[] placeNameBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(placeNameFile)), placeNameFile);
+            byte[] mapBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(Strings.MapExd)), Strings.MapExd);
 
             //SortedSet<ItemData> mapList = new SortedSet<ItemData>();
             TreeNode mapNode = new TreeNode() { Name = Strings.Maps };
@@ -476,10 +507,10 @@ namespace FFXIV_TexTools2.IO
             TreeNode mapSymbolNode = new TreeNode() { Name = Strings.MapSymbol };
 
             string mapSymbolFile = "mapsymbol_0.exd";
-            byte[] mapSymbolBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(mapSymbolFile)));
+            byte[] mapSymbolBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(mapSymbolFile)), mapSymbolFile);
 
             string placeNameFile = String.Format(Strings.PlaceName, Strings.Language);
-            byte[] placeNameBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(placeNameFile)));
+            byte[] placeNameBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(placeNameFile)), placeNameFile);
 
             using (BinaryReader br = new BinaryReader(new MemoryStream(mapSymbolBytes)))
             {
@@ -559,7 +590,7 @@ namespace FFXIV_TexTools2.IO
             TreeNode OnlineStatusNode = new TreeNode() { Name = Strings.OnlineStatus };
 
             string onlineStatusFile = String.Format(Strings.OnlineStatusEXD, Strings.Language);
-            byte[] onlineStatusBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(onlineStatusFile)));
+            byte[] onlineStatusBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(onlineStatusFile)), onlineStatusFile);
 
             using (BinaryReader br = new BinaryReader(new MemoryStream(onlineStatusBytes)))
             {
@@ -611,7 +642,7 @@ namespace FFXIV_TexTools2.IO
             TreeNode weatherNode = new TreeNode() { Name = Strings.Weather };
 
             string weatherFile = String.Format(Strings.WeatherEXD, Strings.Language);
-            byte[] weatherBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(weatherFile)));
+            byte[] weatherBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(weatherFile)), weatherFile);
 
             List<int> weatherIcons = new List<int>();
 
@@ -668,7 +699,7 @@ namespace FFXIV_TexTools2.IO
 
             string actionFile = String.Format(Strings.Action, Strings.Language);
 
-            byte[] actionBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(actionFile)));
+            byte[] actionBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(actionFile)), actionFile);
 
             TreeNode actionNode = new TreeNode();
 
@@ -736,7 +767,7 @@ namespace FFXIV_TexTools2.IO
             }
 
             actionFile = String.Format(Strings.GeneralAction, Strings.Language);
-            actionBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(actionFile)));
+            actionBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(actionFile)), actionFile);
 
             TreeNode generalNode = new TreeNode() { Name = Strings.General };
 
@@ -792,7 +823,7 @@ namespace FFXIV_TexTools2.IO
 
 
             actionFile = String.Format(Strings.BuddyAction, Strings.Language);
-            actionBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(actionFile)));
+            actionBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(actionFile)), actionFile);
 
             TreeNode buddyNode = new TreeNode() { Name = Strings.Buddy };
             using (BinaryReader br = new BinaryReader(new MemoryStream(actionBytes)))
@@ -845,7 +876,7 @@ namespace FFXIV_TexTools2.IO
             actionsNode._subNode.Add(buddyNode);
 
             actionFile = String.Format(Strings.CompanyAction, Strings.Language);
-            actionBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(actionFile)));
+            actionBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(actionFile)), actionFile);
 
             TreeNode companyNode = new TreeNode() { Name = Strings.Company };
 
@@ -899,7 +930,7 @@ namespace FFXIV_TexTools2.IO
             actionsNode._subNode.Add(companyNode);
 
             actionFile = String.Format(Strings.CraftAction, Strings.Language);
-            actionBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(actionFile)));
+            actionBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(actionFile)), actionFile);
             TreeNode craftNode = new TreeNode() { Name = Strings.Craft };
 
             using (BinaryReader br = new BinaryReader(new MemoryStream(actionBytes)))
@@ -953,7 +984,7 @@ namespace FFXIV_TexTools2.IO
 
 
             actionFile = String.Format(Strings.EventAction, Strings.Language);
-            actionBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(actionFile)));
+            actionBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(actionFile)), actionFile);
 
             TreeNode eventNode = new TreeNode() { Name = Strings.Event };
 
@@ -1003,7 +1034,7 @@ namespace FFXIV_TexTools2.IO
             actionsNode._subNode.Add(eventNode);
 
             actionFile = String.Format(Strings.EmoteEXD, Strings.Language);
-            actionBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(actionFile)));
+            actionBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(actionFile)), actionFile);
 
             TreeNode emoteNode = new TreeNode() { Name = Strings.Emote };
 
@@ -1053,7 +1084,7 @@ namespace FFXIV_TexTools2.IO
             actionsNode._subNode.Add(emoteNode);
 
             actionFile = String.Format(Strings.MarkerEXD, Strings.Language);
-            actionBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(actionFile)));
+            actionBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(actionFile)), actionFile);
 
             TreeNode markerNode = new TreeNode() { Name = Strings.Marker };
 
@@ -1107,7 +1138,7 @@ namespace FFXIV_TexTools2.IO
         public static TreeNode MakeStatusList()
         {
             var statusFile = String.Format(Strings.StatusExd, Strings.Language);
-            var statusBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(statusFile)));
+            var statusBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(statusFile)), statusFile);
             Dictionary<string, TreeNode> statusDict = new Dictionary<string, TreeNode>();
 
             TreeNode statusNode = new TreeNode() { Name = Strings.Status };
@@ -1199,8 +1230,8 @@ namespace FFXIV_TexTools2.IO
         {
             string mountFile = String.Format(Strings.MountFile, Strings.Language);
 
-            byte[] mountBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(mountFile)));
-            byte[] modelchara = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(Strings.ModelCharaFile)));
+            byte[] mountBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(mountFile)), mountFile);
+            byte[] modelchara = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(Strings.ModelCharaFile)), Strings.ModelCharaFile);
 
             TreeNode mountNode = new TreeNode() { Name = Strings.Mounts };
 
@@ -1284,7 +1315,7 @@ namespace FFXIV_TexTools2.IO
         {
             string itemUICatFile = String.Format(Strings.ItemUICategory, Strings.Language);
 
-            byte[] itemUICatBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(itemUICatFile)));
+            byte[] itemUICatBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(itemUICatFile)), itemUICatFile);
 
             Dictionary<int, string> UICategories = new Dictionary<int, string>();
 
@@ -1321,7 +1352,7 @@ namespace FFXIV_TexTools2.IO
         {
             string actionCatFile = String.Format(Strings.ActionCategory, Strings.Language);
 
-            byte[] actionCatBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(actionCatFile)));
+            byte[] actionCatBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(actionCatFile)), actionCatFile);
 
             Dictionary<int, string> actionCategories = new Dictionary<int, string>();
 
@@ -1361,13 +1392,15 @@ namespace FFXIV_TexTools2.IO
         public static List<TreeNode> MakeItemsList()
         {
             SortedSet<ItemData> itemIconList = new SortedSet<ItemData>();
-            List<int> itemOffsetList = new List<int>();
+            Dictionary<int, string> itemOffsetDict = new Dictionary<int, string>();
             Dictionary<string, TreeNode> itemDict = new Dictionary<string, TreeNode>();
             Dictionary<string, TreeNode> itemIconDict = new Dictionary<string, TreeNode>();
 
             var UICategoryDict = ItemUICategory();
 
             var smallClothesMTRL = "chara/equipment/e0000/material/v";
+
+            int errorCount = 0;
 
             //smallclothes are not in the item list, so they are added manualy
             ItemData item = new ItemData()
@@ -1379,7 +1412,15 @@ namespace FFXIV_TexTools2.IO
                 PrimaryMTRLFolder = smallClothesMTRL
             };
 
-            var catName = Info.IDSlotName[item.ItemCategory];
+            var catName = "";
+            try
+            {
+                catName = Info.IDSlotName[item.ItemCategory];
+            }
+            catch(Exception e)
+            {
+                MessageBox.Show("Error at .\nItem: " + item.ItemName + "\nCategory: " + item.ItemCategory  + "\n\n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
             var scNode = new TreeNode() { Name = item.ItemName, ItemData = item };
             itemDict.Add(catName, new TreeNode() { Name = catName, _subNode = new List<TreeNode>() { scNode } });
 
@@ -1391,7 +1432,16 @@ namespace FFXIV_TexTools2.IO
                 PrimaryModelVariant = "1",
                 PrimaryMTRLFolder = smallClothesMTRL
             };
-            catName = Info.IDSlotName[item.ItemCategory];
+
+
+            try
+            {
+                catName = Info.IDSlotName[item.ItemCategory];
+            }
+            catch
+            {
+                errorCount++;
+            }
             scNode = new TreeNode() { Name = item.ItemName, ItemData = item };
             itemDict.Add(catName, new TreeNode() { Name = catName, _subNode = new List<TreeNode>() { scNode } });
 
@@ -1403,7 +1453,16 @@ namespace FFXIV_TexTools2.IO
                 PrimaryModelVariant = "1",
                 PrimaryMTRLFolder = smallClothesMTRL
             };
-            catName = Info.IDSlotName[item.ItemCategory];
+
+            try
+            {
+                catName = Info.IDSlotName[item.ItemCategory];
+            }
+            catch
+            {
+                errorCount++;
+            }
+
             scNode = new TreeNode() { Name = item.ItemName, ItemData = item };
             itemDict.Add(catName, new TreeNode() { Name = catName, _subNode = new List<TreeNode>() { scNode } });
 
@@ -1417,7 +1476,7 @@ namespace FFXIV_TexTools2.IO
 
                 if(offset != 0)
                 {
-                    itemOffsetList.Add(offset);
+                    itemOffsetDict.Add(offset, itemExd);
                 }
                 else
                 {
@@ -1425,9 +1484,9 @@ namespace FFXIV_TexTools2.IO
                 }
             }
 
-            foreach(int offset in itemOffsetList)
+            foreach(int offset in itemOffsetDict.Keys)
             {
-                using (BinaryReader br = new BinaryReader(new MemoryStream(Helper.GetDecompressedEXDData(offset))))
+                using (BinaryReader br = new BinaryReader(new MemoryStream(Helper.GetDecompressedEXDData(offset, itemOffsetDict[offset]))))
                 {
                     br.ReadBytes(8);
                     int offsetTableSize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
@@ -1513,8 +1572,8 @@ namespace FFXIV_TexTools2.IO
                                 br.ReadBytes(2);
                                 br.ReadBytes(lastText);
 
-                                item.ItemName = Encoding.UTF8.GetString(br.ReadBytes(entrySize - (lastText + 152))).Replace("\0", "");
-
+                                var name = Encoding.UTF8.GetString(br.ReadBytes(entrySize - (lastText + 152))).Replace("\0", "");
+                                item.ItemName = new string(name.Where(c => !char.IsControl(c)).ToArray());
 
                                 if (item.ItemCategory.Equals("0") || item.ItemCategory.Equals("1") || item.ItemCategory.Equals("2") || item.ItemCategory.Equals("13") || item.ItemCategory.Equals("14"))
                                 {
@@ -1536,7 +1595,16 @@ namespace FFXIV_TexTools2.IO
                                 try
                                 {
                                     var itemNode = new TreeNode { Name = item.ItemName, ItemData = item };
-                                    var itemCatName = Info.IDSlotName[item.ItemCategory];
+                                    var itemCatName = "";
+
+                                    try
+                                    {
+                                        itemCatName = Info.IDSlotName[item.ItemCategory];
+                                    }
+                                    catch
+                                    {
+                                        errorCount++;
+                                    }
 
                                     if (!item.ItemCategory.Equals("6"))
                                     {
@@ -1565,13 +1633,21 @@ namespace FFXIV_TexTools2.IO
 
                                 var someByte = br.ReadByte();
 
-                                item.ItemSubCategory = UICategoryDict[someByte];
+                                try
+                                {
+                                    item.ItemSubCategory = UICategoryDict[someByte];
+                                }
+                                catch
+                                {
+                                    errorCount++;
+                                }
 
                                 br.ReadBytes(7);
 
                                 br.ReadBytes(lastText);
 
-                                item.ItemName = Encoding.UTF8.GetString(br.ReadBytes(entrySize - (lastText + 152))).Replace("\0", "");
+                                var name = Encoding.UTF8.GetString(br.ReadBytes(entrySize - (lastText + 152))).Replace("\0", "");
+                                item.ItemName = new string(name.Where(c => !char.IsControl(c)).ToArray());
 
                                 item.ItemCategory = Strings.Items;
 
@@ -1602,7 +1678,13 @@ namespace FFXIV_TexTools2.IO
 
                 }
             }
-            foreach(var i in itemDict.Values)
+
+            if(errorCount > 0)
+            {
+                MessageBox.Show("TexTools ran into errors reading the items list.\n\nError Count: " + errorCount, "EXD Read Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+            foreach (var i in itemDict.Values)
             {
                 i._subNode.Sort();
             }

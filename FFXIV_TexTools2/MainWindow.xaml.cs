@@ -43,13 +43,13 @@ namespace FFXIV_TexTools2
 
             var dxver = Properties.Settings.Default.DX_Ver;
 
-            if(dxver != Strings.DX11 || dxver != Strings.DX9)
+            if(dxver != Strings.DX11 && dxver != Strings.DX9)
             {
                 Properties.Settings.Default.DX_Ver = Strings.DX11;
                 Properties.Settings.Default.Save();
             }
 
-            DXVerStatus.Content = "DX Version: " + Properties.Settings.Default.DX_Ver.Substring(2);
+            DXVerStatus.Content = "DX Version: " + dxver.Substring(2);
 
             //HavokInterop.InitializeSTA();
         }
@@ -111,19 +111,6 @@ namespace FFXIV_TexTools2
         {
             ProblemCheckView pcv = new ProblemCheckView();
             pcv.Show();
-
-
-            //if (Helper.CheckIndex())
-            //{
-            //    if (MessageBox.Show("The index file does not have access to the modded dat file. \nFix now?", "Found an Issue", MessageBoxButton.YesNo, MessageBoxImage.Error) == MessageBoxResult.Yes)
-            //    {
-            //        Helper.FixIndex();
-            //    }
-            //}
-            //else
-            //{
-            //    MessageBox.Show("No issues were found \nIf you are still experiencing issues, please submit a bug report.", "No Issues Found", MessageBoxButton.OK, MessageBoxImage.None);
-            //}
         }
 
         private void Menu_BugReport_Click(object sender, RoutedEventArgs e)
@@ -239,7 +226,7 @@ namespace FFXIV_TexTools2
             JsonEntry modEntry = null;
             string line;
 
-            using (StreamReader sr = new StreamReader(Info.modListDir))
+            using (StreamReader sr = new StreamReader(Properties.Settings.Default.Modlist_Directory))
             {
                 while ((line = sr.ReadLine()) != null)
                 {
@@ -259,7 +246,7 @@ namespace FFXIV_TexTools2
             string line;
             try
             {
-                using (StreamReader sr = new StreamReader(Info.modListDir))
+                using (StreamReader sr = new StreamReader(Properties.Settings.Default.Modlist_Directory))
                 {
                     while ((line = sr.ReadLine()) != null)
                     {
@@ -342,6 +329,10 @@ namespace FFXIV_TexTools2
 
         private void Menu_StartOver_Click(object sender, RoutedEventArgs e)
         {
+
+            string indexBackupFile = Properties.Settings.Default.IndexBackups_Directory + "/{0}.win32.index";
+            string index2BackupFile = Properties.Settings.Default.IndexBackups_Directory + "/{0}.win32.index2";
+
             if (!Helper.IsIndexLocked(true))
             {
                 if (MessageBox.Show("Starting over will:\n\n" +
@@ -357,8 +348,8 @@ namespace FFXIV_TexTools2
 
                     foreach (var indexFile in Info.ModIndexDict)
                     {
-                        var indexPath = string.Format(Info.indexBackupFile, indexFile.Key);
-                        var index2Path = string.Format(Info.index2BackupFile, indexFile.Key);
+                        var indexPath = string.Format(indexBackupFile, indexFile.Key);
+                        var index2Path = string.Format(index2BackupFile, indexFile.Key);
 
                         indexFiles.Add(indexPath);
                         indexFiles.Add(index2Path);
@@ -382,7 +373,7 @@ namespace FFXIV_TexTools2
                         }
                     }
 
-                    File.Delete(Info.modListDir);
+                    File.Delete(Properties.Settings.Default.Modlist_Directory);
 
                     MakeModContainers();
                 }
@@ -405,7 +396,7 @@ namespace FFXIV_TexTools2
                 }
             }
 
-            if (!File.Exists(Info.modListDir))
+            if (!File.Exists(Properties.Settings.Default.Modlist_Directory))
             {
                 CreateDat.CreateModList();
             }
@@ -431,6 +422,16 @@ namespace FFXIV_TexTools2
 
                 searchBox.Background = null;
             }
+        }
+
+        private void Menu_Discord_Click(object sender, RoutedEventArgs e)
+        {
+            System.Diagnostics.Process.Start("http://discord.gg/dVSMA8y");
+        }
+
+        private void Menu_Tutorials_Click(object sender, RoutedEventArgs e)
+        {
+            System.Diagnostics.Process.Start("http://ffxivtextools.dualwield.net/app_tutorial.html");
         }
     }
 }

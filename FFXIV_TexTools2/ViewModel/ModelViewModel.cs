@@ -359,7 +359,7 @@ namespace FFXIV_TexTools2.ViewModel
 
                 try
                 {
-                    using (StreamReader sr = new StreamReader(Info.modListDir))
+                    using (StreamReader sr = new StreamReader(Properties.Settings.Default.Modlist_Directory))
                     {
                         while ((line = sr.ReadLine()) != null)
                         {
@@ -687,7 +687,14 @@ namespace FFXIV_TexTools2.ViewModel
             }
             else if(type.Equals("monster"))
             {
-                cbi.Add(new ComboBoxInfo() { Name = "1", ID = "1", IsNum = false });
+                if (selectedCategory.Equals(Strings.Pets))
+                {
+                    cbi.AddRange(MTRL.GetMTRLParts(selectedItem, SelectedRace.ID, "", selectedCategory));
+                }
+                else
+                {
+                    cbi.Add(new ComboBoxInfo() { Name = "1", ID = "1", IsNum = false });
+                }
             }
             else if (selectedItem.PrimaryModelID.Equals("9900"))
             {
@@ -776,8 +783,6 @@ namespace FFXIV_TexTools2.ViewModel
                 materialStrings = mdl.GetMaterialStrings();
                 fullPath = mdl.GetInternalPath();
                 modelData = mdl.GetModelData();
-                //extraMins = mdl.GetExtraIndexMins();
-                //extraCounts = mdl.GetExtraIndexCounts();
 
                 cbi.Add(new ComboBoxInfo() { Name = Strings.All, ID = Strings.All, IsNum = false });
 
@@ -1088,7 +1093,7 @@ namespace FFXIV_TexTools2.ViewModel
                 bool inModList = false;
                 try
                 {
-                    using (StreamReader sr = new StreamReader(Info.modListDir))
+                    using (StreamReader sr = new StreamReader(Properties.Settings.Default.Modlist_Directory))
                     {
                         while ((line = sr.ReadLine()) != null)
                         {
@@ -1225,7 +1230,8 @@ namespace FFXIV_TexTools2.ViewModel
             {
                 if (selectedCategory.Equals(Strings.Pets))
                 {
-                    part = "1";
+                    body = part;
+                    part = SelectedPart.ID;
                 }
                 var info = MTRL.GetMTRLData(selectedItem, race, selectedCategory, part, itemVersion, body, modelID, "0000");
                 return info.Item1;
