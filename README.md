@@ -2,43 +2,37 @@
 # FFXIV TexTools 2 by Liinko
 This is a more feature rich WPF implementation of FFXIV TexTools and replaced FFXIV TexTools.
 
-# Current Version: 1.6.1
+# Current Version: 1.7
 ChangeLog:
 
 For previous ChangeLogs visit http://ffxivtextools.dualwield.net/change_log.html
 
 Application:
- - Updated to latest version of Helix Toolkit.
- - Added new steam directory name "FINAL FANTASY XIV Online" to common install directories.
- - Help > Check For Problems now does a more thorough check.
- - Changed .modlist and saved directory to MyDocument/TexTools so that it is shared by all newer version of TexTools.
- - User settings from this version onward should now persist as new versions are released.
- - Help > Report Bug now opens a new link to a public issue tracker.
- - Added a whole bunch of additional safeguards and checks for importing.
- - Added a crash dialog with information that can be copied to clipboard for bug reports.
- 
+ - Added the ability to change directory for Index Backup folder and Modlist file.
+ - Added error checking when reading the games items list.
+ - Added missing Egi (Sephirot & Bahamut).
+ - Added discord link.
+ - Added tutorials link to Help menu.
+ - Added additional checks to prevent writing an offset of 0 to the modlist.
+ - Added additional checks to make sure settings are set correctly
+
 3D:
- - Meshes in the .dae file no longer have to be in order when importing.
- - Secondary Texture coorindates now export and import (used for decals/face paints).
- - Extra data used to hide mesh parts when overlaid by another mesh now imports and updates (this should fix a lot of issues).
- - Faces now import correctly.
- - Slight increase in emissive intensity in 3D viewer.
- - Added a notice for the model in Character > Body stating that it is not the default model when unequipped.
- - Added initial support for importing from blender (must use "Better Collada exporter" from here https://github.com/godotengine/collada-exporter)
+ - Removed warning for having extra texture coordinates as that is now taken care of internally.
+ - Added an error message when the AssetCc2.exe may be an unsupported version.
 
 Bug Fixes:
- - Fixed an issue where textures would not appear correctly on 3D model when the texture width was greater than its height.
- - Fixed an issue where the model for Hyur Midlander Female in Charater > Body would not display.
- - Fixed an issue where imported model indices could be read incorrectly under certain circumstances.
- - Fixed an issue where offset was being set to 0 when importing an item with a larger data size than that already in the modlist.
- - Fixed an issue where some exported models had incorrect skinning (eg. Yotsuyu body[9130]), also fixes incorrect skinning on import.
- - Fixed an issue where certain models would not display in 3D (eg. Raubahn[9095]).
- - Fixed an issue where under certain circumstances information would be saved incorrectly to the modlist causing file pointer issues.
- - Other minor bug fixes
+ - Fixed an issue where models were not able to be imported if there was a gap in part numbers.
+ - Fixed an issue where data was being read incorrectly on importing a model for a second time.
+ - Fixed an issue where DX version setting would not save, and would be DX11 after restarting the application every time.
+ - Fixed an issue where RGBA toggles were not selectable on UI items.
+ - Fixed an issue where texture variations of Pets were not displaying in 3D view.
+ - Fixed an issue where extra vertex data was not being read correctly on import causing parts of gear to go flying off into space somewhere. 
+ - Fixed an issue where importing a model with a mesh that is referencing a bone that is included in the model but not referenced by the original would cause TexTools to crash.
+ - Other minor bug fixes.
 
-Version 1.6.1 Bug Fixes:
- - Fixed an issue where dae files with TexTools authoring tool were not able to be imported.
- - Fixed an issue where certain models with no extra data in mesh 0, but extra data in mesh 1 would not import and cause the application to crash. (eg. Makai Moon Guide's Quartertights)
+Known Issues:
+ - Some or All model imports crash the game when using the DX9 client.
+ - UI textures do not show up unless A in RGBA is checked.
 
 Not Yet Implemented:
 * Mod Importer
