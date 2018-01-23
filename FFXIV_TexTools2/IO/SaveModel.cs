@@ -28,6 +28,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
+using System.Windows.Forms;
 using System.Windows.Media.Imaging;
 using System.Xml;
 
@@ -281,13 +282,13 @@ namespace FFXIV_TexTools2.IO
                 }
                 catch
                 {
-                    MessageBox.Show("There was an issue reading the skeleton file.\n\nYour AssetCc2.exe may be outdated, version 2012+ is required.", "Save Model Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    FlexibleMessageBox.Show("There was an issue reading the skeleton file.\n\nYour AssetCc2.exe may be outdated, version 2012+ is required.", "Save Model Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return false;
                 }
             }
             else if(runAsset && !hasAssetcc)
             {
-                MessageBox.Show("No skeleton found for item. No .dae file will be saved. \n\nPlace AssetCc2(Not provided) in root folder to create skeleton.", "Save Model Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                FlexibleMessageBox.Show("No skeleton found for item. No .dae file will be saved. \n\nPlace AssetCc2(Not provided) in root folder to create skeleton.", "Save Model Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
 
@@ -410,7 +411,7 @@ namespace FFXIV_TexTools2.IO
                     }
                     else
                     {
-                        MessageBox.Show("[SaveModel] Unknown Data format (" + format + ") please submit a bug report.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        FlexibleMessageBox.Show("[SaveModel] Unknown Data format (" + format + ") please submit a bug report.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
                         throw new FormatException();
                     }

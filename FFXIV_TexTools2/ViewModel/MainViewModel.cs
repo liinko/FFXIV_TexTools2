@@ -30,8 +30,11 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Windows;
+using System.Windows.Forms;
 using System.Windows.Input;
 using System.Xml;
+using MessageBox = System.Windows.Forms.MessageBox;
+using TreeNode = FFXIV_TexTools2.Model.TreeNode;
 
 namespace FFXIV_TexTools2.ViewModel
 {
@@ -95,7 +98,7 @@ namespace FFXIV_TexTools2.ViewModel
             }
             catch(Exception e)
             {
-                MessageBox.Show("Could not find sqpack folder in game directory.\nDirectory: " + Properties.Settings.Default.FFXIV_Directory + "\n\nError: " + e.Message, "Version Check Error", MessageBoxButton.OK, MessageBoxImage.None);
+               FlexibleMessageBox.Show("Could not find sqpack folder in game directory.\nDirectory: " + Properties.Settings.Default.FFXIV_Directory + "\n\nError: " + e.Message, "Version Check Error",MessageBoxButtons.OK,MessageBoxIcon.None);
             }
 
             try
@@ -105,7 +108,7 @@ namespace FFXIV_TexTools2.ViewModel
             }
             catch(Exception e)
             {
-                MessageBox.Show("Could not determine FFXIV Version.\nData read: " + versionFile[0] + "\n\nError: " + e.Message, "Version Check Error", MessageBoxButton.OK, MessageBoxImage.None);
+               FlexibleMessageBox.Show("Could not determine FFXIV Version.\nData read: " + versionFile[0] + "\n\nError: " + e.Message, "Version Check Error",MessageBoxButtons.OK,MessageBoxIcon.None);
 
             }
 
@@ -116,8 +119,8 @@ namespace FFXIV_TexTools2.ViewModel
             }
             catch
             {
-                MessageBox.Show("TexTools was unable to read Index Backups Directory setting\n\n" +
-                    "The following default will be used:\n" + indexBackupDir, "Settings Read Error", MessageBoxButton.OK, MessageBoxImage.Error);
+               FlexibleMessageBox.Show("TexTools was unable to read Index Backups Directory setting\n\n" +
+                    "The following default will be used:\n" + indexBackupDir, "Settings Read Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
             if (indexBackupDir.Equals(""))
@@ -142,7 +145,7 @@ namespace FFXIV_TexTools2.ViewModel
 
                 var backupMessage = "No index file backups were detected. \nWould you like to create a backup now? \n\nWarning:\nIn order to create a clean backup, all active modifications will be set to disabled, they will have to be re-enabled manually.";
 
-                if (MessageBox.Show(backupMessage, "Create Backup", MessageBoxButton.YesNo, MessageBoxImage.Error) == MessageBoxResult.Yes)
+                if (MessageBox.Show(backupMessage, "Create Backup",MessageBoxButtons.YesNo,MessageBoxIcon.Error) == DialogResult.Yes)
                 {
                     Directory.CreateDirectory(indexBackupDir);
 
@@ -159,13 +162,13 @@ namespace FFXIV_TexTools2.ViewModel
                             }
                             catch (Exception e)
                             {
-                                MessageBox.Show("There was an issue creating backup files. \n" + e.Message, "Backup Error", MessageBoxButton.OK, MessageBoxImage.None);
+                               FlexibleMessageBox.Show("There was an issue creating backup files. \n" + e.Message, "Backup Error",MessageBoxButtons.OK,MessageBoxIcon.None);
                             }
                         }
                         else
                         {
-                            MessageBox.Show("There are still modified offsets in the index files, disable all mods and reopen TexTools to try again.\n\n" +
-                                "If this issue persits, obtain new index backups to place in the index_backups folder. (TexTools Discord is a good place to ask)", "Backup Error", MessageBoxButton.OK, MessageBoxImage.None);
+                           FlexibleMessageBox.Show("There are still modified offsets in the index files, disable all mods and reopen TexTools to try again.\n\n" +
+                                "If this issue persits, obtain new index backups to place in the index_backups folder. (TexTools Discord is a good place to ask)", "Backup Error",MessageBoxButtons.OK,MessageBoxIcon.None);
                         }
                     }
                 }
@@ -184,7 +187,7 @@ namespace FFXIV_TexTools2.ViewModel
                 {
                     Helper.FixIndex();
                     var backupMessage = "A newer version of FFXIV was detected. \nWould you like to create a new backup of your index files now? (Recommended) \n\nWarning:\nIn order to create a clean backup, all active modifications will be set to disabled, they will have to be re-enabled manually.";
-                    if (MessageBox.Show(backupMessage, "Create Backup", MessageBoxButton.YesNo, MessageBoxImage.Error) == MessageBoxResult.Yes)
+                    if (MessageBox.Show(backupMessage, "Create Backup",MessageBoxButtons.YesNo,MessageBoxIcon.Error) == DialogResult.Yes)
                     {
                         if (!Helper.IsIndexLocked(true))
                         {
@@ -204,13 +207,13 @@ namespace FFXIV_TexTools2.ViewModel
                                 }
                                 catch (Exception e)
                                 {
-                                    MessageBox.Show("There was an issue creating backup files. \n" + e.Message, "Backup Error", MessageBoxButton.OK, MessageBoxImage.None);
+                                   FlexibleMessageBox.Show("There was an issue creating backup files. \n" + e.Message, "Backup Error",MessageBoxButtons.OK,MessageBoxIcon.None);
                                 }
                             }
                             else
                             {
-                                MessageBox.Show("There are still modified offsets in the index files, disable all mods and reopen TexTools to try again.\n\n" +
-                                    "If this issue persits, obtain new index backups to place in the index_backups folder. (TexTools Discord is a good place to ask)", "Backup Error", MessageBoxButton.OK, MessageBoxImage.None);
+                               FlexibleMessageBox.Show("There are still modified offsets in the index files, disable all mods and reopen TexTools to try again.\n\n" +
+                                    "If this issue persits, obtain new index backups to place in the index_backups folder. (TexTools Discord is a good place to ask)", "Backup Error",MessageBoxButtons.OK,MessageBoxIcon.None);
                             }
                         }
                     }
@@ -253,14 +256,14 @@ namespace FFXIV_TexTools2.ViewModel
 
                     File.Delete(oldModListDir);
 
-                    MessageBox.Show("TexTools discovered an old modlist in the ffxiv directory. \n\n" +
-                        "A new modlist (TexTools.modlist) with the same data has been created and is located in the TexTools folder. ", "ModList Change.", MessageBoxButton.OK, MessageBoxImage.Information);
+                   FlexibleMessageBox.Show("TexTools discovered an old modlist in the ffxiv directory. \n\n" +
+                        "A new modlist (TexTools.modlist) with the same data has been created and is located in the TexTools folder. ", "ModList Change.",MessageBoxButtons.OK,MessageBoxIcon.Information);
                 }
             }
             catch(Exception e)
             {
-                MessageBox.Show("There was an error converting the old modlist.  \n\n" +
-                 "A new modlist will be created, you may remove the old modlist from the ffxiv folder. \n\n" + e.Message, "ModList Error", MessageBoxButton.OK, MessageBoxImage.Error);
+               FlexibleMessageBox.Show("There was an error converting the old modlist.  \n\n" +
+                 "A new modlist will be created, you may remove the old modlist from the ffxiv folder. \n\n" + e.Message, "ModList Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -299,7 +302,7 @@ namespace FFXIV_TexTools2.ViewModel
                 {
                     if (Directory.Exists(i))
                     {
-                        if (MessageBox.Show("FFXIV install directory found at \n\n" + i + "\n\nUse this directory? ", "Install Directory Found", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                        if (FlexibleMessageBox.Show("FFXIV install directory found at \n\n" + i + "\n\nUse this directory? ", "Install Directory Found",MessageBoxButtons.YesNo,MessageBoxIcon.Question) == DialogResult.Yes)
                         {
                             installDirectory = i;
                             Properties.Settings.Default.FFXIV_Directory = installDirectory;
@@ -312,7 +315,7 @@ namespace FFXIV_TexTools2.ViewModel
 
                 if (installDirectory.Equals(""))
                 {
-                    if (MessageBox.Show("Please locate the following directory. \n\n .../FINAL FANTASY XIV - A Realm Reborn/game/sqpack/ffxiv", "Install Directory Not Found", MessageBoxButton.OK, MessageBoxImage.Question) == MessageBoxResult.OK)
+                    if (FlexibleMessageBox.Show("Please locate the following directory. \n\n .../FINAL FANTASY XIV - A Realm Reborn/game/sqpack/ffxiv", "Install Directory Not Found",MessageBoxButtons.OK,MessageBoxIcon.Question) == System.Windows.Forms.DialogResult.OK)
                     {
                         while (!installDirectory.Contains("ffxiv"))
                         {
@@ -411,7 +414,7 @@ namespace FFXIV_TexTools2.ViewModel
             }
             catch (Exception ex)
             {
-                MessageBox.Show("There was an issue checking for updates. \n" + ex.Message, "Updater Error", MessageBoxButton.OK, MessageBoxImage.None);
+               FlexibleMessageBox.Show("There was an issue checking for updates. \n" + ex.Message, "Updater Error",MessageBoxButtons.OK,MessageBoxIcon.None);
             }
         }
 
@@ -644,7 +647,7 @@ namespace FFXIV_TexTools2.ViewModel
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("[Main] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    FlexibleMessageBox.Show("[Main] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -701,7 +704,7 @@ namespace FFXIV_TexTools2.ViewModel
                 }
                 catch (Exception e)
                 {
-                    MessageBox.Show("[Main] Error checking index values for backup. \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    FlexibleMessageBox.Show("[Main] Error checking index values for backup. \n" + e.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
 
                 try
@@ -744,7 +747,7 @@ namespace FFXIV_TexTools2.ViewModel
                 }
                 catch (Exception e)
                 {
-                    MessageBox.Show("[Main] Error checking index2 values for backup. \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    FlexibleMessageBox.Show("[Main] Error checking index2 values for backup. \n" + e.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
                 }
             }

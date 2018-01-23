@@ -22,6 +22,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
+using System.Windows.Forms;
 
 namespace FFXIV_TexTools2.ViewModel
 {
@@ -61,7 +62,7 @@ namespace FFXIV_TexTools2.ViewModel
             }
             catch (Exception e)
             {
-                MessageBox.Show("[VM] Error Accessing .modlist File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                FlexibleMessageBox.Show("[VM] Error Accessing .modlist File \n" + e.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
 

@@ -28,6 +28,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows;
+using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media.Imaging;
@@ -197,7 +198,7 @@ namespace FFXIV_TexTools2.ViewModel
             }
             catch (Exception ex)
             {
-                MessageBox.Show("[Main] Model Error \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                FlexibleMessageBox.Show("[Main] Model Error \n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Debug.WriteLine(ex.StackTrace);
             }
         }
@@ -309,7 +310,7 @@ namespace FFXIV_TexTools2.ViewModel
             }
             catch (Exception ex)
             {
-                MessageBox.Show("[Collada] Error saving .dae File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                FlexibleMessageBox.Show("[Collada] Error saving .dae File \n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Debug.WriteLine(ex.StackTrace);
             }
 
@@ -373,7 +374,7 @@ namespace FFXIV_TexTools2.ViewModel
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("[MVM] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    FlexibleMessageBox.Show("[MVM] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
 
                 if (modEntry != null)
@@ -808,7 +809,7 @@ namespace FFXIV_TexTools2.ViewModel
             }
             catch (Exception ex)
             {
-                MessageBox.Show("[Main] part 3D Error \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                FlexibleMessageBox.Show("[Main] part 3D Error \n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Debug.WriteLine(ex.StackTrace);
             }
         }
@@ -1108,7 +1109,7 @@ namespace FFXIV_TexTools2.ViewModel
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("[MVM] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    FlexibleMessageBox.Show("[MVM] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
 
                 if (inModList)

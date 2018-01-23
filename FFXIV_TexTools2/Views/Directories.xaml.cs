@@ -14,10 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using FFXIV_TexTools2.Helpers;
 using FolderSelect;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
+using System.Windows.Forms;
+using MessageBox = System.Windows.MessageBox;
 
 namespace FFXIV_TexTools2.Views
 {
@@ -72,7 +75,7 @@ namespace FFXIV_TexTools2.Views
             var result = folderSelect.ShowDialog();
             if (result)
             {
-                if (MessageBox.Show("Would you like to move the existing data to the new location?", "Move Data?", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                if (FlexibleMessageBox.Show("Would you like to move the existing data to the new location?", "Move Data?",MessageBoxButtons.YesNo,MessageBoxIcon.Question) == System.Windows.Forms.DialogResult.Yes)
                 {
                     try
                     {
@@ -104,8 +107,8 @@ namespace FFXIV_TexTools2.Views
                 Properties.Settings.Default.Save_Directory = folderSelect.FileName + "/Saved";
                 Properties.Settings.Default.Save();
 
-                MessageBox.Show("Location of Saved folder changed.\n\n" +
-                    "New Location: " + folderSelect.FileName + "\\Saved", "New Directory", MessageBoxButton.OK, MessageBoxImage.Information);
+               FlexibleMessageBox.Show("Location of Saved folder changed.\n\n" +
+                    "New Location: " + folderSelect.FileName + "\\Saved", "New Directory",MessageBoxButtons.OK,MessageBoxIcon.Information);
                 saveDir.Text = folderSelect.FileName + "\\Saved";
             }
         }
@@ -124,7 +127,7 @@ namespace FFXIV_TexTools2.Views
                 Properties.Settings.Default.IndexBackups_Directory = folderSelect.FileName + "\\Index_Backups";
                 Properties.Settings.Default.Save();
 
-                if (MessageBox.Show("Would you like to move the existing data to the new location?", "Move Data?", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                if (FlexibleMessageBox.Show("Would you like to move the existing data to the new location?", "Move Data?",MessageBoxButtons.YesNo,MessageBoxIcon.Question) == System.Windows.Forms.DialogResult.Yes)
                 {
                     try
                     {
@@ -150,8 +153,8 @@ namespace FFXIV_TexTools2.Views
                     }
                 }
 
-                MessageBox.Show("Location of Index Backup folder changed.\n\n" +
-                    "New Location: " + folderSelect.FileName + "\\Index_Backups", "New Directory", MessageBoxButton.OK, MessageBoxImage.Information);
+               FlexibleMessageBox.Show("Location of Index Backup folder changed.\n\n" +
+                    "New Location: " + folderSelect.FileName + "\\Index_Backups", "New Directory",MessageBoxButtons.OK,MessageBoxIcon.Information);
                 indexBackupsDir.Text = folderSelect.FileName + "\\Index_Backups";
             }
         }
@@ -182,8 +185,8 @@ namespace FFXIV_TexTools2.Views
                     File.Delete(oldModListLocation);
                 }
 
-                MessageBox.Show("Location of ModList file changed.\n\n" +
-                    "New Location: " + fullLoc, "New Directory", MessageBoxButton.OK, MessageBoxImage.Information);
+               FlexibleMessageBox.Show("Location of ModList file changed.\n\n" +
+                    "New Location: " + fullLoc, "New Directory",MessageBoxButtons.OK,MessageBoxIcon.Information);
                 modListDir.Text = fullLoc;
             }
         }

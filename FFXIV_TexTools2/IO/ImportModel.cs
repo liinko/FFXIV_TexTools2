@@ -31,6 +31,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
+using System.Windows.Forms;
 using System.Xml;
 
 namespace FFXIV_TexTools2.IO
@@ -161,7 +162,7 @@ namespace FFXIV_TexTools2.IO
 
 				if(boneJointDict.Count < 1)
 				{
-					MessageBox.Show("[Import] No bones were found in the .dae file.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+					FlexibleMessageBox.Show("[Import] No bones were found in the .dae file.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 					return;
 				}
 
@@ -213,12 +214,12 @@ namespace FFXIV_TexTools2.IO
                                     }
                                     else if (!tool.Contains("TexTools"))
                                     {
-                                        MessageBox.Show("Unsupported Authoring Tool\n\n" +
+                                        FlexibleMessageBox.Show("Unsupported Authoring Tool\n\n" +
                                             tool +
                                             "\n\nCurrently supported tools are:\n" +
                                             "* 3DS Max with default(FBX) or OpenCOLLADA plugin\n" +
                                             "* Blender with \"Better\" Collada exporter plugin\n\n" +
-                                            "If you'd like to get another tool supported, submit a request.", "Unsupported File", MessageBoxButton.OK, MessageBoxImage.Error);
+                                            "If you'd like to get another tool supported, submit a request.", "Unsupported File", MessageBoxButtons.OK, MessageBoxIcon.Error);
                                         return;
                                     }
                                 }
@@ -436,13 +437,13 @@ namespace FFXIV_TexTools2.IO
                             bones += "* " + b + "\n";
                         }
 
-                        MessageBox.Show("TexTools detected bones that are not part of the original model.\n" +
-                            "Importing extra bones is not supported, delete the extra bones and try importing again.\n\nExtra Bone(s):\n" + bones, "Import Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                       FlexibleMessageBox.Show("TexTools detected bones that are not part of the original model.\n" +
+                            "Importing extra bones is not supported, delete the extra bones and try importing again.\n\nExtra Bone(s):\n" + bones, "Import Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
                     }
                     else
                     {
-                        MessageBox.Show("Error reading .dae file.\n" + e.Message, "Import Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        FlexibleMessageBox.Show("Error reading .dae file.\n" + e.Message, "Import Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
 					return;
 				}
@@ -462,15 +463,15 @@ namespace FFXIV_TexTools2.IO
                         {
                             if(mDict[j].texCoord.Count < 1)
                             {
-                                MessageBox.Show("TexTools detected missing Texture Coordinates for:\nMesh: " + i + " Part: " + j 
-                                    + "\n\nPlease check your model before importing again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                                FlexibleMessageBox.Show("TexTools detected missing Texture Coordinates for:\nMesh: " + i + " Part: " + j 
+                                    + "\n\nPlease check your model before importing again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                                 return;
                             }
 
                             if (mDict[j].weights.Count < 1)
                             {
-                                MessageBox.Show("TexTools detected missing Bone Data for:\nMesh: " + i + " Part: " + j
-                                    + "\n\nPlease check your model before importing again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                                FlexibleMessageBox.Show("TexTools detected missing Bone Data for:\nMesh: " + i + " Part: " + j
+                                    + "\n\nPlease check your model before importing again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                                 return;
                             }
                         }
@@ -711,9 +712,9 @@ namespace FFXIV_TexTools2.IO
                     }
                     catch
                     {
-                        MessageBox.Show("TexTools detected that mesh " + m + " refrences bones that were not originally part of that mesh.\n\n" +
+                       FlexibleMessageBox.Show("TexTools detected that mesh " + m + " refrences bones that were not originally part of that mesh.\n\n" +
                             "This may cause things to not look correct in-game, but will most likely be fine.\n\n" +
-                            "TexTools will now continue importing.", "Mesh Import Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            "TexTools will now continue importing.", "Mesh Import Warning",MessageBoxButtons.OK,MessageBoxIcon.Warning);
 
                         vTrack = 0;
                         blDict.Clear();
@@ -788,8 +789,8 @@ namespace FFXIV_TexTools2.IO
 					}
 					catch(Exception e)
 					{
-						MessageBox.Show("[Import] Error reading skinning data.\nPlease make sure the skinning data was saved to the .dae file.\n\n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-						Debug.WriteLine(e.StackTrace);
+						FlexibleMessageBox.Show("[Import] Error reading skinning data.\nPlease make sure the skinning data was saved to the .dae file.\n\n" + e.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        Debug.WriteLine(e.StackTrace);
 						return;
 					}
 
@@ -803,8 +804,8 @@ namespace FFXIV_TexTools2.IO
 						}
 
 
-						MessageBox.Show("TexTools detected an affected bone count greater than 4.\n\n" +
-							"TexTools removed the smallest weight counts from the following: \n\n" + errorString, "Over Weight Count", MessageBoxButton.OK, MessageBoxImage.Information);
+						FlexibleMessageBox.Show("TexTools detected an affected bone count greater than 4.\n\n" +
+							"TexTools removed the smallest weight counts from the following: \n\n" + errorString, "Over Weight Count",MessageBoxButtons.OK,MessageBoxIcon.Information);
 					}
 
 					Dictionary<int, int> indexDict = new Dictionary<int, int>();
@@ -899,7 +900,7 @@ namespace FFXIV_TexTools2.IO
 					}
 					catch (Exception e)
 					{
-						MessageBox.Show("[Import] Error computing tangents.\n\n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+						FlexibleMessageBox.Show("[Import] Error computing tangents.\n\n" + e.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 						return;
 					}
 
@@ -1003,7 +1004,7 @@ namespace FFXIV_TexTools2.IO
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show("[Import] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+				FlexibleMessageBox.Show("[Import] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
 			/*
 			* Imported Vertex Data Start
@@ -2650,14 +2651,14 @@ namespace FFXIV_TexTools2.IO
             {
                 if (modEntry.modOffset == 0)
                 {
-                    MessageBox.Show("TexTools detected a Mod List entry with a Mod Offset of 0.\n\n" +
-                        "Please submit a bug report along with your modlist file.", "Import Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    FlexibleMessageBox.Show("TexTools detected a Mod List entry with a Mod Offset of 0.\n\n" +
+                        "Please submit a bug report along with your modlist file.", "Import Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return 0;
                 }
                 else if (modEntry.originalOffset == 0)
                 {
-                    MessageBox.Show("TexTools detected a Mod List entry with an Original Offset of 0.\n\n" +
-                        "Please submit a bug report along with your modlist file.", "Import Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                   FlexibleMessageBox.Show("TexTools detected a Mod List entry with an Original Offset of 0.\n\n" +
+                        "Please submit a bug report along with your modlist file.", "Import Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return 0;
                 }
             }
@@ -2774,7 +2775,7 @@ namespace FFXIV_TexTools2.IO
 						}
 						catch (Exception ex)
 						{
-							MessageBox.Show("[Import] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+							FlexibleMessageBox.Show("[Import] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 						}
 
 
@@ -2803,8 +2804,8 @@ namespace FFXIV_TexTools2.IO
 							}
 							else
 							{
-								MessageBox.Show("[Import] There was an issue obtaining the .dat4 offset to write data to, try importing again. " +
-												"\n\n If the problem persists, please submit a bug report.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+								FlexibleMessageBox.Show("[Import] There was an issue obtaining the .dat4 offset to write data to, try importing again. " +
+												"\n\n If the problem persists, please submit a bug report.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 								return 0;
 							}
 						}
@@ -2813,7 +2814,7 @@ namespace FFXIV_TexTools2.IO
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show("[Import] Error Accessing .dat4 File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+				FlexibleMessageBox.Show("[Import] Error Accessing .dat4 File \n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 				return 0;
 			}
 
@@ -2870,7 +2871,7 @@ namespace FFXIV_TexTools2.IO
 					}
 					catch (Exception ex)
 					{
-						MessageBox.Show("[Import] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+						FlexibleMessageBox.Show("[Import] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 					}
 				}
 			}

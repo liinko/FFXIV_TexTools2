@@ -24,6 +24,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows;
+using System.Windows.Forms;
+
+using TreeNode = FFXIV_TexTools2.Model.TreeNode;
 
 namespace FFXIV_TexTools2.IO
 {
@@ -1419,7 +1422,7 @@ namespace FFXIV_TexTools2.IO
             }
             catch(Exception e)
             {
-                MessageBox.Show("Error at .\nItem: " + item.ItemName + "\nCategory: " + item.ItemCategory  + "\n\n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                FlexibleMessageBox.Show("Error at .\nItem: " + item.ItemName + "\nCategory: " + item.ItemCategory  + "\n\n" + e.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             var scNode = new TreeNode() { Name = item.ItemName, ItemData = item };
             itemDict.Add(catName, new TreeNode() { Name = catName, _subNode = new List<TreeNode>() { scNode } });
@@ -1681,7 +1684,7 @@ namespace FFXIV_TexTools2.IO
 
             if(errorCount > 0)
             {
-                MessageBox.Show("TexTools ran into errors reading the items list.\n\nError Count: " + errorCount, "EXD Read Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                FlexibleMessageBox.Show("TexTools ran into errors reading the items list.\n\nError Count: " + errorCount, "EXD Read Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
             foreach (var i in itemDict.Values)
