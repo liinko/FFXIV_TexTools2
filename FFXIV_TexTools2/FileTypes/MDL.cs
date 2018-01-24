@@ -44,6 +44,7 @@ namespace FFXIV_TexTools2.Material
         List<float> boneTransforms = new List<float>();
         ExtraIndexData extraIndexData = new ExtraIndexData();
         ModelData modelData = new ModelData();
+        byte[] rawMDL;
 
         /// <summary>
         /// Parses the MDL file to obtain model information
@@ -174,7 +175,9 @@ namespace FFXIV_TexTools2.Material
      
             var MDLDatData = Helper.GetType3DecompressedData(offset, datNum, Strings.ItemsDat);
 
-            using (BinaryReader br = new BinaryReader(new MemoryStream(MDLDatData.Item1)))
+            rawMDL = MDLDatData.Item1;
+
+            using (BinaryReader br = new BinaryReader(new MemoryStream(rawMDL)))
             {
                 // The size of the header + (size of the mesh information block (136 bytes) * the number of meshes) + padding
                 br.BaseStream.Seek(64 + 136 * MDLDatData.Item2 + 4, SeekOrigin.Begin);
@@ -1042,6 +1045,15 @@ namespace FFXIV_TexTools2.Material
         public ModelData GetModelData()
         {
             return modelData;
+        }
+
+        /// <summary>
+        /// Gets the mesh list
+        /// </summary>
+        /// <returns></returns>
+        public byte[] GetRawMDL()
+        {
+            return rawMDL;
         }
     }
 }

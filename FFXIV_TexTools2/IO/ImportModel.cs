@@ -497,7 +497,7 @@ namespace FFXIV_TexTools2.IO
 					{
 						for (int j = 0; j < mDict.Count; j++)
 						{
-                            if (!mDict.ContainsKey(c))
+                            while (!mDict.ContainsKey(c) && c < 20)
                             {
 								cdDict[i].partsDict.Add(c, 0);
 								c++;
@@ -839,17 +839,17 @@ namespace FFXIV_TexTools2.IO
 								nBlendWeights.Add(blendWeights[iList[i][0]]);
 								nNormals.Add(Normals[iList[i][1]]);
 								nTexCoord.Add(TexCoord[iList[i][2]]);
-								if (hasTexc2)
+								if (TexCoord2.Count > 0)
 								{
 									nTexCoord2.Add(TexCoord2[iList[i][3]]);
 								}
 
-								if (nTangents.Count > 0 && hasTexc2)
+								if (nTangents.Count > 0 && TexCoord2.Count > 0)
 								{
 									nTangents.Add(Tangents[iList[i][4]]);
 									nBiNormals.Add(BiNormals[iList[i][4]]);
 								}
-                                else if(nTangents.Count > 0 && !hasTexc2)
+                                else if(nTangents.Count > 0 && TexCoord2.Count < 1)
                                 {
                                     nTangents.Add(Tangents[iList[i][3]]);
                                     nBiNormals.Add(BiNormals[iList[i][3]]);

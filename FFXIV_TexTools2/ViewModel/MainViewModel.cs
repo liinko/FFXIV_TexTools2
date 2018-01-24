@@ -82,7 +82,7 @@ namespace FFXIV_TexTools2.ViewModel
             }
 
             CheckForModList();
-            CheckVersion();
+            //CheckVersion();
             MakeModContainers();
 
             var gameDir = "";
@@ -129,7 +129,15 @@ namespace FFXIV_TexTools2.ViewModel
 
             if (Properties.Settings.Default.Save_Directory.Equals(""))
             {
-                var md = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/TexTools/Saved";
+                var md = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/TexTools/Raw";
+                Directory.CreateDirectory(md);
+                Properties.Settings.Default.Save_Directory = md;
+                Properties.Settings.Default.Save();
+            }
+
+            if (Properties.Settings.Default.Save_Directory.Contains("Saved"))
+            {
+                var md = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/TexTools/Raw";
                 Directory.CreateDirectory(md);
                 Properties.Settings.Default.Save_Directory = md;
                 Properties.Settings.Default.Save();
@@ -289,7 +297,7 @@ namespace FFXIV_TexTools2.ViewModel
 
             if (Properties.Settings.Default.FFXIV_Directory.Equals(""))
             {
-                var md = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/TexTools/Saved";
+                var md = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/TexTools/Raw";
                 Directory.CreateDirectory(md);
                 Properties.Settings.Default.Save_Directory = md;
                 Properties.Settings.Default.Save();
@@ -343,7 +351,7 @@ namespace FFXIV_TexTools2.ViewModel
 
             if (Properties.Settings.Default.Save_Directory.Equals(""))
             {
-                var md = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/TexTools/Saved";
+                var md = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/TexTools/Raw";
                 Directory.CreateDirectory(md);
                 Properties.Settings.Default.Save_Directory = md;
                 Properties.Settings.Default.Save();

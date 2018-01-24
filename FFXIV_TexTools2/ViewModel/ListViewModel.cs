@@ -93,11 +93,25 @@ namespace FFXIV_TexTools2.ViewModel
                     race = race.Substring(race.IndexOf("_c") + 2, 4);
 
                 }
+                else if (entry.fullPath.Contains(".imc") || entry.fullPath.Contains(".avfx"))
+                {
+                    race = "-";
+
+                }
                 else
                 {
                     race = race.Substring(race.LastIndexOf('c') + 1, 4);
                 }
-                race = Info.IDRace[race];
+
+                try
+                {
+                    race = Info.IDRace[race];
+
+                }
+                catch
+                {
+                    race = "All";
+                }
             }
 
             mlm.Race = race;
@@ -115,10 +129,6 @@ namespace FFXIV_TexTools2.ViewModel
             {
                 map = Strings.Specular;
             }
-            else if (entry.fullPath.Contains("material"))
-            {
-                map = Strings.ColorSet;
-            }
             else if (entry.fullPath.Contains("model"))
             {
                 map = "3D";
@@ -126,6 +136,18 @@ namespace FFXIV_TexTools2.ViewModel
             else if (entry.fullPath.Contains("ui/"))
             {
                 map = "UI";
+            }
+            else if (entry.fullPath.Contains(".imc"))
+            {
+                map = "IMC";
+            }
+            else if (entry.fullPath.Contains(".mtrl"))
+            {
+                map = "MTRL";
+            }
+            else if (entry.fullPath.Contains(".avfx"))
+            {
+                map = "AVFX";
             }
             else
             {
@@ -153,7 +175,7 @@ namespace FFXIV_TexTools2.ViewModel
             }
             else
             {
-                part = "a";
+                part = "-";
             }
 
             mlm.Part = part;
@@ -203,11 +225,15 @@ namespace FFXIV_TexTools2.ViewModel
             {
                 mlm.BMP = new BitmapImage(new Uri("pack://application:,,,/FFXIV TexTools 2;component/Resources/3DModel.png"));
             }
+            else if (entry.fullPath.Contains(".imc") || entry.fullPath.Contains(".avfx"))
+            {
+                mlm.BMP = new BitmapImage(new Uri("pack://application:,,,/FFXIV TexTools 2;component/Resources/BinaryFile.png"));
+            }
             else
             {
                 TEXData texData;
 
-                if (entry.fullPath.Contains("vfx"))
+                if (entry.fullPath.Contains("atex"))
                 {
                     texData = TEX.GetVFX(entry.modOffset, entry.datFile);
                 }

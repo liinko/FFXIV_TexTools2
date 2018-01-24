@@ -1,0 +1,292 @@
+﻿<Window x:Class="FFXIV_TexTools2.Views.MTRLInfo"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:FFXIV_TexTools2.Views"
+        mc:Ignorable="d"
+        Title="MTRLInfo" Height="450" Width="500">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Border>
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Border BorderBrush="Black" BorderThickness="1">
+                    <Grid Grid.Column="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Grid Grid.Column="0" Grid.Row="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="3*"/>
+                                <ColumnDefinition Width="2*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label x:Name="FileSizeOffset" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0"/>
+                            <Label Grid.Column="1" Content="File Size" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0"/>
+                            <Label x:Name="FileSizeData" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0"/>
+                        </Grid>
+                        <Grid Grid.Column="0" Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="3*"/>
+                                <ColumnDefinition Width="2*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label x:Name="ColorSetOffset" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0"/>
+                            <Label Grid.Column="1" Content="ColorSet Size" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0"/>
+                            <Label x:Name="ColorSetData" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0"/>
+                        </Grid>
+                        <Grid Grid.Column="0" Grid.Row="2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="3*"/>
+                                <ColumnDefinition Width="2*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label x:Name="MaterialSizeOffset" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0"/>
+                            <Label Grid.Column="1" Content="Materials Size" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0"/>
+                            <Label x:Name="MaterialSizeData" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0"/>
+                        </Grid>
+                        <Grid Grid.Column="0" Grid.Row="3">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="3*"/>
+                                <ColumnDefinition Width="2*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label x:Name="PathSizeOffset" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0"/>
+                            <Label Grid.Column="1" Content="Paths Size" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0"/>
+                            <Label x:Name="PathSizeData" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0"/>
+                        </Grid>
+                    </Grid>
+                </Border>
+                <Border Grid.Column="1" BorderBrush="Black" BorderThickness="1">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Grid Grid.Column="0" Grid.Row="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="3*"/>
+                                <ColumnDefinition Width="2*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label x:Name="TextureCountOffset" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0"/>
+                            <Label Grid.Column="1" Content="Texture Count" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0"/>
+                            <Label x:Name="TextureCountData" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0"/>
+                        </Grid>
+                        <Grid Grid.Column="0" Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="3*"/>
+                                <ColumnDefinition Width="2*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label x:Name="MapCountOffset" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0"/>
+                            <Label Grid.Column="1" Content="Map Count" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0"/>
+                            <Label x:Name="MapCountData" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0"/>
+                        </Grid>
+                        <Grid Grid.Column="0" Grid.Row="2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="3*"/>
+                                <ColumnDefinition Width="2*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label x:Name="ColorSetCountOffset" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0"/>
+                            <Label Grid.Column="1" Content="ColorSet Count" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0"/>
+                            <Label x:Name="ColorSetCountData" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0"/>
+                        </Grid>
+                        <Grid Grid.Column="0" Grid.Row="3">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="3*"/>
+                                <ColumnDefinition Width="2*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label x:Name="UnknownOffset" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0"/>
+                            <Label Grid.Column="1" Content="Unknown Count" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0"/>
+                            <Label x:Name="UnknownData" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0"/>
+                        </Grid>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Border>
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="50*"/>
+                    <ColumnDefinition Width="15*"/>
+                </Grid.ColumnDefinitions>
+                <Label Content="MTRL Strings" Grid.ColumnSpan="2" HorizontalAlignment="Center" VerticalAlignment="Top" Height="26"/>
+                <CheckBox x:Name="HexCheck" Content="Hex" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Left" Unchecked="CheckBox_Unchecked" Checked="CheckBox_Checked"/>
+            </Grid>
+            <Border Name="border" Grid.Row="1" BorderBrush="Black" Margin="5" BorderThickness="1" ScrollViewer.HorizontalScrollBarVisibility="Auto" >
+                <TextBox x:Name="StringsTextBlock" VerticalScrollBarVisibility="Auto"/>
+            </Border>
+        </Grid>
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Border BorderBrush="Black" BorderThickness="1">
+                <Grid Grid.Column="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Column="0" Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Label x:Name="DataSizeOffset" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0"/>
+                        <Label Grid.Column="1" Content="Data Size" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0" Margin="20,0,0,0"/>
+                        <Label x:Name="DataSizeData" Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" Padding="0" Margin="0,0,20,0"/>
+                    </Grid>
+                    <Grid Grid.Column="0" Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Label x:Name="Struct1Offset" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0"/>
+                        <Label Grid.Column="1" Content="Unknown Struct 1 Size" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0" Margin="20,0,0,0"/>
+                        <Label x:Name="Struct1Data" Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" Padding="0" Margin="0,0,20,0"/>
+                    </Grid>
+                    <Grid Grid.Column="0" Grid.Row="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Label x:Name="Struct2Offset" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0"/>
+                        <Label Grid.Column="1" Content="Unknown Struct 2 Size" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0" Margin="20,0,0,0"/>
+                        <Label x:Name="Struct2Data" Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" Padding="0" Margin="0,0,20,0"/>
+                    </Grid>
+                    <Grid Grid.Column="0" Grid.Row="3">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Label x:Name="ParamOffset" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0"/>
+                        <Label Grid.Column="1" Content="Parameter Mapping Count" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0" Margin="20,0,0,0"/>
+                        <Label x:Name="ParamData" Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" Padding="0" Margin="0,0,20,0"/>
+                    </Grid>
+                    <Grid Grid.Column="0" Grid.Row="4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Label x:Name="Unk1Offset" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0"/>
+                        <Label Grid.Column="1" Content="Unknown 1" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0" Margin="20,0,0,0"/>
+                        <Label x:Name="Unk1Data" Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" Padding="0" Margin="0,0,20,0"/>
+                    </Grid>
+                    <Grid Grid.Column="0" Grid.Row="5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Label x:Name="Unk2Offset" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0"/>
+                        <Label Grid.Column="1"  Content="Unknown 2" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0" Margin="20,0,0,0"/>
+                        <Label x:Name="Unk2Data" Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" Padding="0" Margin="0,0,20,0"/>
+                    </Grid>
+                </Grid>
+            </Border>
+            <Border Grid.Column="1" BorderBrush="Black" BorderThickness="1">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Border BorderBrush="Black" BorderThickness="0,0,0,1">
+                        <ComboBox x:Name="DataComboBox" Grid.Row="0" Width="120" VerticalAlignment="Top" HorizontalAlignment="Center" SelectionChanged="DataComboBox_SelectionChanged"/>
+                    </Border>
+                    <Grid Grid.Row="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Grid Grid.Column="0" Grid.Row="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="3*"/>
+                                <ColumnDefinition Width="2*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label x:Name="Data1Offset" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0"/>
+                            <Label x:Name="Data1Name" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0"/>
+                            <Label x:Name="Data1Data" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0"/>
+                        </Grid>
+                        <Grid Grid.Column="0" Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="3*"/>
+                                <ColumnDefinition Width="2*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label x:Name="Data2Offset" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0"/>
+                            <Label x:Name="Data2Name" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0"/>
+                            <Label x:Name="Data2Data" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0"/>
+                        </Grid>
+                        <Grid Grid.Column="0" Grid.Row="2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="3*"/>
+                                <ColumnDefinition Width="2*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label x:Name="Data3Offset" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0"/>
+                            <Label x:Name="Data3Name" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0"/>
+                            <Label x:Name="Data3Data" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0"/>
+                        </Grid>
+                        <Grid Grid.Column="0" Grid.Row="3">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="3*"/>
+                                <ColumnDefinition Width="2*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label x:Name="Data4Offset" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0"/>
+                            <Label x:Name="Data4Name" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0"/>
+                            <Label x:Name="Data4Data" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0"/>
+                        </Grid>
+                    </Grid>
+
+                </Grid>
+            </Border>
+        </Grid>
+        <Grid Grid.Row="3">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0">
+                <Label Content="Data" Grid.ColumnSpan="2" HorizontalAlignment="Center" VerticalAlignment="Top" Height="26"/>
+            </Grid>
+            <Border Grid.Row="1" BorderBrush="Black" Margin="5" BorderThickness="1" ScrollViewer.HorizontalScrollBarVisibility="Auto" >
+                <TextBox x:Name="DataTextBlock" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap"/>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

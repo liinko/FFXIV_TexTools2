@@ -19,6 +19,8 @@ using FFXIV_TexTools2.IO;
 using FFXIV_TexTools2.Material;
 using FFXIV_TexTools2.Model;
 using FFXIV_TexTools2.Resources;
+using FFXIV_TexTools2.Views;
+using Microsoft.Win32;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -43,6 +45,7 @@ namespace FFXIV_TexTools2.ViewModel
         List<ComboBoxInfo> cbi = new List<ComboBoxInfo>();
         Composite3DViewModel CVM;
         ModelData modelData;
+        byte[] rawMDL;
 
         int raceIndex, meshIndex, bodyIndex, partIndex;
         bool raceEnabled, meshEnabled, bodyEnabled, partEnabled, modelRendering, secondModelRendering, thirdModelRendering, is3DLoaded, disposing, modelTabEnabled;
@@ -153,9 +156,10 @@ namespace FFXIV_TexTools2.ViewModel
                     {
                         if (categoryType.Equals("character"))
                         {
-                            for (int i = 0; i < 3; i++)
+                            for (int i = 0; i < 4; i++)
                             {
                                 var mdlFolder = String.Format(MDLFolder, raceID, i.ToString().PadLeft(4, '0'));
+
                                 if (selectedItem.ItemName.Equals(Strings.Face) && (raceID.Equals("0301") || raceID.Equals("0304") || raceID.Equals("0401") || raceID.Equals("0404")))
                                 {
                                    mdlFolder = String.Format(MDLFolder, raceID, "01" + i.ToString().PadLeft(2, '0'));
@@ -286,7 +290,7 @@ namespace FFXIV_TexTools2.ViewModel
         /// <param name="obj"></param>
         public void OpenFolder(object obj)
         {
-            string savePath = Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selectedItem.ItemName + "/3D";
+            string savePath = Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selectedItem.ItemName;
 
             Process.Start(savePath);
         }
@@ -297,23 +301,14 @@ namespace FFXIV_TexTools2.ViewModel
         /// <param name="obj"></param>
         private void ExportOBJ(object obj)
         {
-            SaveModel.Save(selectedCategory, modelName, SelectedMesh.ID, selectedItem.ItemName, meshData, meshList);
 
-            try
-            {
-                var result = SaveModel.SaveCollada(selectedCategory, modelName, selectedItem.ItemName, meshData, meshList, modelData);
-                if (result)
-                {
-                    Import3DEnabled = true;
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("[Collada] Error saving .dae File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                Debug.WriteLine(ex.StackTrace);
-            }
+            string savePath = "";
 
-            OpenEnabled = true;
+            savePath = Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selectedItem.ItemName;
+
+            Directory.CreateDirectory(savePath);
+
+            File.WriteAllBytes(savePath + "\\" + Path.GetFileName(fullPath), rawMDL);
         }
 
         /// <summary>
@@ -332,17 +327,33 @@ namespace FFXIV_TexTools2.ViewModel
         {
             if (!Helper.IsIndexLocked(true))
             {
-                ImportModel.ImportDAE(selectedCategory, selectedItem.ItemName, modelName, SelectedMesh.ID, fullPath, meshList[0].BoneStrings, modelData);
-                UpdateModel(selectedItem, selectedCategory);
+                string savePath = Properties.Settings.Default.Save_Directory + "\\" + selectedCategory + "\\" + selectedItem.ItemName;
+
+                OpenFileDialog openFileDialog = new OpenFileDialog();
+                openFileDialog.InitialDirectory = Path.GetFullPath(savePath);
+                openFileDialog.Filter = "MDL Files (*.mdl)|*.mdl";
+                if (openFileDialog.ShowDialog() == true)
+                {
+                    var filePath = openFileDialog.FileName;
+
+                    ImportRaw.ImportType2(filePath, selectedItem, fullPath, selectedCategory);
+                }
             }
         }
 
         /// <summary>
         /// Command for the Revert OBJ button
         /// </summary>
-        public ICommand RevertOBJCommand
+        public ICommand ViewMDLCommand
         {
-            get { return new RelayCommand(RevertOBJ); }
+            get { return new RelayCommand(ViewMDLInfo); }
+        }
+
+
+        private void ViewMDLInfo(object obj)
+        {
+            MDLInfo mdlInfo = new MDLInfo();
+            mdlInfo.Show();
         }
 
         /// <summary>
@@ -783,6 +794,7 @@ namespace FFXIV_TexTools2.ViewModel
                 materialStrings = mdl.GetMaterialStrings();
                 fullPath = mdl.GetInternalPath();
                 modelData = mdl.GetModelData();
+                rawMDL = mdl.GetRawMDL();
 
                 cbi.Add(new ComboBoxInfo() { Name = Strings.All, ID = Strings.All, IsNum = false });
 

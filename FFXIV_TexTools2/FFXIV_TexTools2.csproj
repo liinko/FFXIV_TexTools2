@@ -155,6 +155,7 @@
     <Compile Include="Helpers\TexHelper.cs" />
     <Compile Include="Helpers\TextureTypes.cs" />
     <Compile Include="IO\ImportModel.cs" />
+    <Compile Include="IO\ImportRaw.cs" />
     <Compile Include="IO\ImportTex.cs" />
     <Compile Include="IO\SaveModel.cs" />
     <Compile Include="IO\SaveTex.cs" />
@@ -232,8 +233,17 @@
     <Compile Include="Views\About.xaml.cs">
       <DependentUpon>About.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\AVFXInfo.xaml.cs">
+      <DependentUpon>AVFXInfo.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Directories.xaml.cs">
       <DependentUpon>Directories.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\IMCInfo.xaml.cs">
+      <DependentUpon>IMCInfo.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MDLInfo.xaml.cs">
+      <DependentUpon>MDLInfo.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\ModelSearch.xaml.cs">
       <DependentUpon>ModelSearch.xaml</DependentUpon>
@@ -243,6 +253,9 @@
     </Compile>
     <Compile Include="Views\ModList.xaml.cs">
       <DependentUpon>ModList.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MTRLInfo.xaml.cs">
+      <DependentUpon>MTRLInfo.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\ProblemCheckView.xaml.cs">
       <DependentUpon>ProblemCheckView.xaml</DependentUpon>
@@ -271,7 +284,19 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\AVFXInfo.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Directories.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\IMCInfo.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\MDLInfo.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -284,6 +309,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\ModList.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\MTRLInfo.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -381,6 +410,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Resources\BinaryFile.png" />
     <Content Include="sharpdx_direct3d11_1_effects_arm.dll" />
     <Content Include="sharpdx_direct3d11_1_effects_x64.dll" />
     <Content Include="sharpdx_direct3d11_1_effects_x86.dll" />

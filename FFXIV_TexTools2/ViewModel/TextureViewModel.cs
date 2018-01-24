@@ -20,6 +20,8 @@ using FFXIV_TexTools2.Material;
 using FFXIV_TexTools2.Model;
 using FFXIV_TexTools2.Resources;
 using FFXIV_TexTools2.Shader;
+using FFXIV_TexTools2.Views;
+using Microsoft.Win32;
 using Newtonsoft.Json;
 using System;
 using System.Collections.ObjectModel;
@@ -47,11 +49,12 @@ namespace FFXIV_TexTools2.ViewModel
 
         string activeToggle = "Enable/Disable";
         string selectedCategory, imcVersion, fullPath, textureType, textureDimensions, fullPathString, VFXVersion;
+        string fullIMCPath, fullAVFXPath;
 
         int raceIndex, mapIndex, typeIndex, partIndex, currMap;
 
         bool redChecked = true, greenChecked = true, blueChecked = true;
-        bool alphaChecked, raceEnabled, mapEnabled, typeEnabled, partEnabled, importEnabled, activeEnabled, saveEnabled, channelsEnabled, openEnabled;
+        bool alphaChecked, raceEnabled, mapEnabled, typeEnabled, partEnabled, importEnabled, activeEnabled, saveEnabled, saveAVFXEnabled, channelsEnabled, openEnabled;
 
 
         private ObservableCollection<ComboBoxInfo> raceComboInfo = new ObservableCollection<ComboBoxInfo>();
@@ -91,6 +94,7 @@ namespace FFXIV_TexTools2.ViewModel
         public bool ImportEnabled { get { return importEnabled; } set { importEnabled = value; NotifyPropertyChanged("ImportEnabled"); } }
         public bool ActiveEnabled { get { return activeEnabled; } set { activeEnabled = value; NotifyPropertyChanged("ActiveEnabled"); } }
         public bool SaveEnabled { get { return saveEnabled; } set { saveEnabled = value; NotifyPropertyChanged("SaveEnabled"); } }
+        public bool SaveAVFXEnabled { get { return saveAVFXEnabled; } set { saveAVFXEnabled = value; NotifyPropertyChanged("SaveAVFXEnabled"); } }
 
 
         /// <summary>
@@ -166,19 +170,36 @@ namespace FFXIV_TexTools2.ViewModel
         }
 
         /// <summary>
-        /// Command for the Export DDS Button
+        /// Command for the Export TEX Button
         /// </summary>
-        public ICommand SaveDDSCommand
+        public ICommand SaveMTRLCommand
         {
-            get{ return new RelayCommand(SaveDDS); }
+            get { return new RelayCommand(SaveMTRL); }
         }
 
         /// <summary>
-        /// Command for the Export PNG Button
+        /// Command for the Export DDS Button
         /// </summary>
-        public ICommand SavePNGCommand
+        public ICommand MTRLInfoCommand
         {
-            get{ return new RelayCommand(SavePNG); }
+            get { return new RelayCommand(ViewMTRLInfo); }
+        }
+
+
+        /// <summary>
+        /// Command for the Export DDS Button
+        /// </summary>
+        public ICommand SaveIMCCommand
+        {
+            get{ return new RelayCommand(SaveIMC); }
+        }
+
+        /// <summary>
+        /// Command for the Export DDS Button
+        /// </summary>
+        public ICommand IMCInfoCommand
+        {
+            get { return new RelayCommand(ViewIMCInfo); }
         }
 
         /// <summary>
@@ -192,10 +213,19 @@ namespace FFXIV_TexTools2.ViewModel
         /// <summary>
         /// Command for Enable/Disable button
         /// </summary>
-        public ICommand ActiveCommand
+        public ICommand SaveAVFXCommand
         {
-            get { return new RelayCommand(Revert); }
+            get { return new RelayCommand(SaveAVFX); }
         }
+
+        /// <summary>
+        /// Command for Enable/Disable button
+        /// </summary>
+        public ICommand AVFXInfoCommand
+        {
+            get { return new RelayCommand(ViewAVFXInfo); }
+        }
+
 
         /// <summary>
         /// Command for Open Folder button
@@ -209,20 +239,137 @@ namespace FFXIV_TexTools2.ViewModel
         /// Runs the SaveDDS method from SaveTex 
         /// </summary>
         /// <param name="obj"></param>
-        private void SaveDDS(object obj)
+        private void SaveIMC(object obj)
         {
-            SaveTex.SaveDDS(selectedCategory, selectedItem.ItemName, fullPath, SelectedMap.Name, mtrlData, texData, selectedItem.ItemCategory);
-            ImportEnabled = true;
+            Tuple<string, byte[]> imcData;
+
+            if (SelectedPart.Name.Equals("s"))
+            {
+                imcData = IMC.GetIMCData(selectedCategory, selectedItem, true);
+            }
+            else
+            {
+                imcData = IMC.GetIMCData(selectedCategory, selectedItem, false);
+
+            }
+
+            fullIMCPath = imcData.Item1;
+            string savePath = "";
+            if (selectedCategory.Equals("UI"))
+            {
+                savePath = Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selectedItem.ItemCategory;
+            }
+            else
+            {
+                savePath = Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selectedItem.ItemName;
+            }
+
+            Directory.CreateDirectory(savePath);
+
+            if (imcData != null)
+            {
+                File.WriteAllBytes(savePath + "\\" + Path.GetFileName(imcData.Item1), imcData.Item2);
+            }
+            else
+            {
+                MessageBox.Show("Could not find IMC Data for " + selectedItem.ItemName, "IMC Error", MessageBoxButton.OK, MessageBoxImage.Error);
+
+            }
+
             OpenEnabled = true;
+        }
+
+        private void ViewIMCInfo(object obj)
+        {
+            IMCInfo imcInfo;
+            if (SelectedPart.Name.Equals("s"))
+            {
+                imcInfo = new IMCInfo(selectedCategory, selectedItem, true);
+            }
+            else
+            {
+                imcInfo = new IMCInfo(selectedCategory, selectedItem, false);
+
+            }
+
+            imcInfo.Show();
+        }
+
+        private void ViewMTRLInfo(object obj)
+        {
+            MTRLInfo mtrlInfo = new MTRLInfo(mtrlData.MTRLPath);
+            mtrlInfo.Show();
+        }
+
+        /// <summary>
+        /// Runs the SaveDDS method from SaveTex 
+        /// </summary>
+        /// <param name="obj"></param>
+        private void SaveAVFX(object obj)
+        {
+            Tuple<string, byte[]> avfxData;
+
+            if (SelectedPart.Name.Equals("s"))
+            {
+                avfxData = VFXData.GetAVFX(selectedCategory, selectedItem, VFXVersion, true);
+            }
+            else
+            {
+                avfxData = VFXData.GetAVFX(selectedCategory, selectedItem, VFXVersion, false);
+            }
+
+            fullAVFXPath = avfxData.Item1;
+
+            var savePath = Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selectedItem.ItemName;
+
+            Directory.CreateDirectory(savePath);
+
+            if (avfxData != null)
+            {
+                File.WriteAllBytes(savePath + "\\" + Path.GetFileName(avfxData.Item1), avfxData.Item2);
+            }
+            else
+            {
+                MessageBox.Show("Could not find AVFX Data for " + selectedItem.ItemName, "AVFX Error", MessageBoxButton.OK, MessageBoxImage.Error);
+
+            }
+
+            OpenEnabled = true;
+        }
+
+        private void ViewAVFXInfo(object obj)
+        {
+            AVFXInfo avfxInfo = new AVFXInfo();
+            avfxInfo.Show();
         }
 
         /// <summary>
         /// Runs the SavePNG method from SaveTex
         /// </summary>
         /// <param name="obj"></param>
-        public void SavePNG(object obj)
+        public void SaveMTRL(object obj)
         {
-            SaveTex.SaveImage(selectedCategory, selectedItem.ItemName, fullPath, ImageSource, saveClone, SelectedMap.Name, selectedItem.ItemCategory);
+            var type = "";
+            if(SelectedType != null)
+            {
+                type = SelectedType.Name;
+            }
+            var saveMTRLData = MTRL.GetRawMTRL(mtrlData.MTRLPath);
+
+            string savePath = "";
+            if (selectedCategory.Equals("UI"))
+            {
+                savePath = Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selectedItem.ItemCategory;
+            }
+            else
+            {
+                savePath = Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selectedItem.ItemName;
+            }
+
+            Directory.CreateDirectory(savePath);
+
+            File.WriteAllBytes(savePath + "\\" + Path.GetFileName(mtrlData.MTRLPath), saveMTRLData);
+
             OpenEnabled = true;
         }
 
@@ -385,65 +532,52 @@ namespace FFXIV_TexTools2.ViewModel
         {
             if (!Helper.IsIndexLocked(true))
             {
-                if (SelectedMap.Name.Equals(Strings.ColorSet))
-                {
-                    var newData = ImportTex.ImportColor(mtrlData, selectedCategory, selectedItem.ItemName);
-                    if (newData.Item1 != 0)
-                    {
-                        UpdateImage(newData.Item1, true);
-                        ActiveToggle = "Disable";
-                        ActiveEnabled = true;
-                        mtrlData.ColorData = newData.Item2;
-                    }
-                }
-                else if (SelectedMap.ID.Contains("vfx"))
-                {
-                    int newOffset = ImportTex.ImportVFX(texData, selectedCategory, selectedItem.ItemName, SelectedMap.ID);
-                    if (newOffset != 0)
-                    {
-                        UpdateImage(newOffset, false);
-                        ActiveToggle = "Disable";
-                        ActiveEnabled = true;
-                    }
-                }
-                else
-                {
-                    int newOffset = ImportTex.ImportTexture(texData, selectedCategory, selectedItem.ItemCategory, selectedItem.ItemName, fullPath);
-                    if (newOffset != 0)
-                    {
-                        UpdateImage(newOffset, false);
-                        ActiveToggle = "Disable";
-                        ActiveEnabled = true;
+                string savePath = Properties.Settings.Default.Save_Directory + "\\" + selectedCategory + "\\" + selectedItem.ItemName;
 
-                        if (selectedMap.Name.Equals(Strings.Normal))
+                if (selectedCategory.Equals("UI"))
+                {
+                    savePath = Properties.Settings.Default.Save_Directory + "\\" + selectedCategory + "\\" + selectedItem.ItemCategory;
+                }
+
+                OpenFileDialog openFileDialog = new OpenFileDialog();
+                openFileDialog.InitialDirectory = Path.GetFullPath(savePath);
+                openFileDialog.Filter = "FFXIV Files (*.mtrl;*.imc;*.avfx)|*.mtrl;*.imc;*.avfx|MTRL Files (*.mtrl)|*.mtrl|IMC Files (*.imc)|*.imc|AVFX Files (*.avfx)|*.avfx";
+                if (openFileDialog.ShowDialog() == true)
+                {
+                    var filePath = openFileDialog.FileName;
+                    var ext = Path.GetExtension(filePath);
+                    var iFullPath = fullPath;
+
+                    if (ext.Contains("imc"))
+                    {
+                        if (SelectedPart.Name.Equals("s"))
                         {
-                            mtrlData.NormalOffset = newOffset;
+                            iFullPath = IMC.GetIMCPath(selectedCategory, selectedItem, true);
                         }
-                        else if (selectedMap.Name.Equals(Strings.Diffuse))
+                        else
                         {
-                            mtrlData.DiffuseOffset = newOffset;
-                        }
-                        else if (selectedMap.Name.Equals(Strings.Specular))
-                        {
-                            mtrlData.SpecularOffset = newOffset;
-                        }
-                        else if (selectedMap.Name.Equals(Strings.Mask))
-                        {
-                            mtrlData.MaskOffset = newOffset;
-                        }
-                        else if (selectedCategory.Equals("UI"))
-                        {
-                            if (SelectedMap.Name.Contains("HQ"))
-                            {
-                                mtrlData.UIHQOffset = newOffset;
-                            }
-                            else
-                            {
-                                mtrlData.UIOffset = newOffset;
-                            }
+                            iFullPath = IMC.GetIMCPath(selectedCategory, selectedItem, false);
                         }
                     }
+                    else if (ext.Contains("avfx"))
+                    {
+                        if (SelectedPart.Name.Equals("s"))
+                        {
+                            iFullPath = VFXData.GetAVFXPath(selectedCategory, selectedItem, VFXVersion, true);
+                        }
+                        else
+                        {
+                            iFullPath = VFXData.GetAVFXPath(selectedCategory, selectedItem, VFXVersion, false);
+                        }
+                    }
+                    else if (ext.Contains("mtrl"))
+                    {
+                        iFullPath = mtrlData.MTRLPath;
+                    }
+
+                    ImportRaw.ImportType2(filePath, selectedItem, iFullPath, selectedCategory);
                 }
+
             }
         }
 
@@ -1027,12 +1161,9 @@ namespace FFXIV_TexTools2.ViewModel
                 {
                     ActiveToggle = "Error";
                 }
-
-                ActiveEnabled = true;
             }
             else
             {
-                ActiveEnabled = false;
                 ActiveToggle = "Enable/Disable";
             }
 
@@ -1128,6 +1259,15 @@ namespace FFXIV_TexTools2.ViewModel
             }
 
             SaveEnabled = true;
+            ImportEnabled = true;
+            if(int.Parse(VFXVersion) > 0)
+            {
+                SaveAVFXEnabled = true;
+            }
+            else
+            {
+                SaveAVFXEnabled = false;
+            }
 
             texData.Dispose();
 
@@ -1139,14 +1279,14 @@ namespace FFXIV_TexTools2.ViewModel
                 savePath = Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selectedItem.ItemCategory + "/" + dxPath + ".dds";
             }
 
-            if (File.Exists(savePath))
-            {
-                ImportEnabled = true;
-            }
-            else
-            {
-                ImportEnabled= false;
-            }
+            //if (File.Exists(savePath))
+            //{
+            //    ImportEnabled = true;
+            //}
+            //else
+            //{
+            //    ImportEnabled= false;
+            //}
 
             string folderPath = Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selectedItem.ItemName;
             if (selectedCategory.Equals("UI"))

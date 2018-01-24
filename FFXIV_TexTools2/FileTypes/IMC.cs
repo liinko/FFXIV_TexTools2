@@ -18,6 +18,7 @@ using FFXIV_TexTools2.Helpers;
 using FFXIV_TexTools2.Model;
 using FFXIV_TexTools2.Resources;
 using System;
+using System.Diagnostics;
 using System.IO;
 
 namespace FFXIV_TexTools2.Material
@@ -39,7 +40,7 @@ namespace FFXIV_TexTools2.Material
         /// <returns>The version of the selected item</returns>
         public static Tuple<string, string> GetVersion(string selectedCategory, ItemData item, bool isSecondary)
         {
-            if(int.Parse(item.ItemCategory) < 22 || selectedCategory.Equals(Strings.Pets) || selectedCategory.Equals(Strings.Mounts) || selectedCategory.Equals(Strings.Minions))
+            if (int.Parse(item.ItemCategory) < 22 || selectedCategory.Equals(Strings.Pets) || selectedCategory.Equals(Strings.Mounts) || selectedCategory.Equals(Strings.Minions))
             {
                 var slotID = Info.slotID[selectedCategory];
                 var type = Helper.GetCategoryType(selectedCategory);
@@ -143,6 +144,84 @@ namespace FFXIV_TexTools2.Material
                 }
             }
             return new Tuple<string, string>(itemVersion, vfxVersion);
+        }
+
+
+
+        public static Tuple<string, byte[]> GetIMCData(string selectedCategory, ItemData item, bool isSecondary)
+        {
+            var fullPath = GetIMCPath(selectedCategory, item, isSecondary);
+
+            var folderHash = FFCRC.GetHash(fullPath.Substring(0, fullPath.LastIndexOf("/")));
+            var fileHash = FFCRC.GetHash(Path.GetFileName(fullPath));
+
+            var offset = Helper.GetDataOffset(folderHash, fileHash, Strings.ItemsDat);
+
+            if (offset != 0)
+            {
+                int datNum = ((offset / 8) & 0x000f) / 2;
+                return new Tuple<string, byte[]>(fullPath, Helper.GetType2DecompressedData(offset, datNum, Strings.ItemsDat));
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+
+        public static string GetIMCPath(string selectedCategory, ItemData item, bool isSecondary)
+        {
+            string imcFile = "";
+            string imcFolder = "";
+
+            if (int.Parse(item.ItemCategory) < 22 || selectedCategory.Equals(Strings.Pets) || selectedCategory.Equals(Strings.Mounts) || selectedCategory.Equals(Strings.Minions))
+            {
+                var slotID = Info.slotID[selectedCategory];
+                var type = Helper.GetCategoryType(selectedCategory);
+                string itemID, body, variant;
+
+                if (isSecondary)
+                {
+                    itemID = item.SecondaryModelID;
+                    body = item.SecondaryModelBody;
+                    variant = item.SecondaryModelVariant;
+                }
+                else
+                {
+                    itemID = item.PrimaryModelID;
+                    body = item.PrimaryModelBody;
+                    variant = item.PrimaryModelVariant;
+                }
+
+                if (type.Equals("monster"))
+                {
+                    imcFolder = string.Format(Strings.MonsterIMCFolder, itemID, body);
+                    imcFile = string.Format(Strings.MonsterIMCFile, body);
+
+                }
+                else if (type.Equals("food") || type.Equals("weapon"))
+                {
+                    imcFolder = string.Format(Strings.WeapIMCFolder, itemID, body);
+                    imcFile = string.Format(Strings.WeapIMCFile, body);
+                }
+                else if (type.Equals("equipment"))
+                {
+                    imcFolder = string.Format(Strings.EquipIMCFolder, itemID);
+                    imcFile = string.Format(Strings.EquipIMCFile, itemID);
+                }
+                else if (type.Equals("accessory"))
+                {
+                    imcFolder = string.Format(Strings.AccIMCFolder, itemID);
+                    imcFile = string.Format(Strings.AccIMCFile, itemID);
+                }
+                else
+                {
+                    imcFolder = "chara/" + type + "/" + type.Substring(0, 1) + itemID;
+                    imcFile = type.Substring(0, 1) + itemID + ".imc";
+                }
+            }
+
+            return imcFolder + "/" + imcFile;
         }
     }
 }

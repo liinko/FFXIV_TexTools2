@@ -41,7 +41,11 @@ namespace FFXIV_TexTools2.Helpers
         {
             List<byte> decompressedData = new List<byte>();
 
-            var EXDDatPath = string.Format(Info.datDir, Strings.EXDDat, Info.EXDDatNum);
+            int datNum = ((offset / 8) & 0x000f) / 2;
+
+            offset = OffsetCorrection(datNum, offset);
+
+            var EXDDatPath = string.Format(Info.datDir, Strings.EXDDat, datNum);
 
             try
             {
@@ -971,7 +975,6 @@ namespace FFXIV_TexTools2.Helpers
             if (selectedCategory.Equals(Strings.Main_Hand) || selectedCategory.Equals(Strings.Off_Hand) || selectedCategory.Equals(Strings.Main_Off) || selectedCategory.Equals(Strings.Two_Handed))
             {
                 itemType = "weapon";
-
             }
             else if (selectedCategory.Equals(Strings.Ears) || selectedCategory.Equals(Strings.Neck) || selectedCategory.Equals(Strings.Wrists) || selectedCategory.Equals(Strings.Rings))
             {

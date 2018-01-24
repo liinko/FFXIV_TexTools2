@@ -20,6 +20,7 @@ using FFXIV_TexTools2.Resources;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -770,6 +771,27 @@ namespace FFXIV_TexTools2.Material
             }
 
             return info;
+        }
+
+        public static byte[] GetRawMTRL(string fullPath)
+        {
+            var folderHash = FFCRC.GetHash(fullPath.Substring(0, fullPath.LastIndexOf("/")));
+            var fileHash = FFCRC.GetHash(Path.GetFileName(fullPath));
+
+            var offset = Helper.GetDataOffset(folderHash, fileHash, Strings.ItemsDat);
+
+            if (offset != 0)
+            {
+                int datNum = ((offset / 8) & 0x000f) / 2;
+
+                var data = Helper.GetType2DecompressedData(offset, datNum, Strings.ItemsDat);
+
+                return data;
+            }
+            else
+            {
+                return null;
+            }
         }
 
 

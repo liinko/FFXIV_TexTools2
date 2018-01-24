@@ -35,54 +35,15 @@
         </Style>
     </UserControl.Resources>
     <Grid Background="White">
-        <GroupBox x:Name="groupBox" Header="Viewer" Margin="10,47,10,63">
-            <Border>
-                <Border.Background>
-                    <DrawingBrush Viewport="0,0,20,20" ViewportUnits="Absolute" Stretch="None" TileMode="Tile">
-                        <DrawingBrush.Drawing>
-                            <DrawingGroup>
-                                <GeometryDrawing Brush="{DynamicResource DarkSquareColor}">
-                                    <GeometryDrawing.Geometry>
-                                        <GeometryGroup>
-                                            <RectangleGeometry Rect="0,0,10,10"/>
-                                            <RectangleGeometry Rect="10,10,10,10"/>
-                                        </GeometryGroup>
-                                    </GeometryDrawing.Geometry>
-                                </GeometryDrawing>
-                                <GeometryDrawing Brush="{DynamicResource LightSquareColor}">
-                                    <GeometryDrawing.Geometry>
-                                        <GeometryGroup>
-                                            <RectangleGeometry Rect="10,0,10,10"/>
-                                            <RectangleGeometry Rect="0,10,10,10"/>
-                                        </GeometryGroup>
-                                    </GeometryDrawing.Geometry>
-                                </GeometryDrawing>
-                            </DrawingGroup>
-                        </DrawingBrush.Drawing>
-                    </DrawingBrush>
-                </Border.Background>
-                <Grid>
-                    <xctk:Zoombox x:Name="zoomBox" DragModifiers="0" ZoomModifiers="0" KeepContentInBounds="True" MinScale="0.2" MaxScale="40" IsAnimated="False" ViewStackMode="Disabled" PanDistance="2">
-                        <Image x:Name="texImage" RenderOptions.BitmapScalingMode="NearestNeighbor" Effect="{Binding ImageEffect}" Source="{Binding ImageSource, NotifyOnSourceUpdated=True}" />
-                    </xctk:Zoombox>
-                    <Grid Margin="0" Background="#3FFFFFFF" Height="33" VerticalAlignment="Top" HorizontalAlignment="Right" Width="151" IsEnabled="{Binding ChannelsEnabled, FallbackValue=false}">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
-                            <ColumnDefinition/>
-                            <ColumnDefinition/>
-                            <ColumnDefinition/>
-                        </Grid.ColumnDefinitions>
-                        <CheckBox x:Name="redCheckBox" Content="R" HorizontalAlignment="Center" Margin="-2,0,0,0" VerticalAlignment="Center" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" IsChecked="{Binding RedChecked}"/>
-                        <CheckBox x:Name="greenCheckBox" Content="G" Grid.Column="1" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" IsChecked="{Binding GreenChecked}"/>
-                        <CheckBox x:Name="blueCheckBox" Content="B" Grid.Column="2" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" IsChecked="{Binding BlueChecked}"/>
-                        <CheckBox x:Name="alphaCheckBox" Content="A" Grid.Column="3" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" IsChecked="{Binding AlphaChecked}"/>
-                    </Grid>
-                    <Label x:Name="texTypeLabel" Content="{Binding TextureType}" Background="#66FFFFFF" HorizontalAlignment="Left" VerticalAlignment="Top" FontWeight="Bold"/>
-                    <Label x:Name="texDimensionLabel" Content="{Binding TextureDimensions}" Background="#66FFFFFF" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontWeight="Bold"/>
-                </Grid>
-            </Border>
-        </GroupBox>
-        <Grid Height="37" Margin="10,10,10,0" VerticalAlignment="Top">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="137*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid Height="37" Grid.Row="0" VerticalAlignment="Top">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
@@ -94,29 +55,93 @@
             <ComboBox x:Name="partComboBox" Grid.Column="2" Margin="5" IsSynchronizedWithCurrentItem="False" IsReadOnly="True" ItemsSource="{Binding PartComboBox}" DisplayMemberPath="Name" SelectedValuePath="Name" SelectedItem="{Binding SelectedPart}" SelectedIndex="{Binding PartIndex}" IsEnabled="{Binding PartEnabled, FallbackValue=false}"/>
             <ComboBox x:Name="typeComboBox" Grid.Column="3" Margin="5,5,6,5" IsSynchronizedWithCurrentItem="False" IsReadOnly="True" ItemsSource="{Binding TypeComboBox}" DisplayMemberPath="Name" SelectedValuePath="Name" SelectedItem="{Binding SelectedType}" SelectedIndex="{Binding TypeIndex}" IsEnabled="{Binding TypeEnabled, FallbackValue=false}"/>
         </Grid>
-        <Grid>
+        <Grid Grid.Row="1">
+            <GroupBox x:Name="groupBox" Header="Viewer">
+                <Border>
+                    <Border.Background>
+                        <DrawingBrush Viewport="0,0,20,20" ViewportUnits="Absolute" Stretch="None" TileMode="Tile">
+                            <DrawingBrush.Drawing>
+                                <DrawingGroup>
+                                    <GeometryDrawing Brush="{DynamicResource DarkSquareColor}">
+                                        <GeometryDrawing.Geometry>
+                                            <GeometryGroup>
+                                                <RectangleGeometry Rect="0,0,10,10"/>
+                                                <RectangleGeometry Rect="10,10,10,10"/>
+                                            </GeometryGroup>
+                                        </GeometryDrawing.Geometry>
+                                    </GeometryDrawing>
+                                    <GeometryDrawing Brush="{DynamicResource LightSquareColor}">
+                                        <GeometryDrawing.Geometry>
+                                            <GeometryGroup>
+                                                <RectangleGeometry Rect="10,0,10,10"/>
+                                                <RectangleGeometry Rect="0,10,10,10"/>
+                                            </GeometryGroup>
+                                        </GeometryDrawing.Geometry>
+                                    </GeometryDrawing>
+                                </DrawingGroup>
+                            </DrawingBrush.Drawing>
+                        </DrawingBrush>
+                    </Border.Background>
+                    <Grid>
+                        <xctk:Zoombox x:Name="zoomBox" DragModifiers="0" ZoomModifiers="0" KeepContentInBounds="True" MinScale="0.2" MaxScale="40" IsAnimated="False" ViewStackMode="Disabled" PanDistance="2">
+                            <Image x:Name="texImage" RenderOptions.BitmapScalingMode="NearestNeighbor" Effect="{Binding ImageEffect}" Source="{Binding ImageSource, NotifyOnSourceUpdated=True}" />
+                        </xctk:Zoombox>
+                        <Grid Margin="0" Background="#3FFFFFFF" Height="33" VerticalAlignment="Top" HorizontalAlignment="Right" Width="151" IsEnabled="{Binding ChannelsEnabled, FallbackValue=false}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox x:Name="redCheckBox" Content="R" HorizontalAlignment="Center" Margin="-2,0,0,0" VerticalAlignment="Center" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" IsChecked="{Binding RedChecked}"/>
+                            <CheckBox x:Name="greenCheckBox" Content="G" Grid.Column="1" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" IsChecked="{Binding GreenChecked}"/>
+                            <CheckBox x:Name="blueCheckBox" Content="B" Grid.Column="2" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" IsChecked="{Binding BlueChecked}"/>
+                            <CheckBox x:Name="alphaCheckBox" Content="A" Grid.Column="3" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" IsChecked="{Binding AlphaChecked}"/>
+                        </Grid>
+                        <Label x:Name="texTypeLabel" Content="{Binding TextureType}" Background="#66FFFFFF" HorizontalAlignment="Left" VerticalAlignment="Top" FontWeight="Bold"/>
+                        <Label x:Name="texDimensionLabel" Content="{Binding TextureDimensions}" Background="#66FFFFFF" HorizontalAlignment="Left" VerticalAlignment="Bottom" FontWeight="Bold"/>
+                    </Grid>
+                </Border>
+            </GroupBox>
+        </Grid>
+        <Grid Grid.Row="2" Margin="0,0,0,4" VerticalAlignment="Top">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="20*"/>
                 <ColumnDefinition Width="1*"/>
             </Grid.ColumnDefinitions>
-            <TextBox x:Name="fullPathLabel" Grid.Column="0" VerticalAlignment="Bottom" Margin="10,0,2,40" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}" HorizontalContentAlignment="Center" IsReadOnly="True" Text="{Binding FullPathString, Mode=OneWay}" TextChanged="fullPathLabel_TextChanged" />
-            <Button Grid.Column="1" Margin="0,0,0,40" VerticalAlignment="Bottom" MinWidth="20" MinHeight="20" MaxWidth="20" MaxHeight="20" Padding="0" Command="{Binding OpenFolderCommand}" IsEnabled="{Binding OpenEnabled, FallbackValue=false}">
+            <TextBox x:Name="fullPathLabel" Height="20" Grid.Column="0" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}" IsReadOnly="True" Text="{Binding FullPathString, Mode=OneWay}" TextChanged="fullPathLabel_TextChanged" Margin="10,0,0,0" VerticalAlignment="Top" />
+            <Button Grid.Column="1" VerticalAlignment="Bottom" MinWidth="20" MinHeight="20" MaxWidth="20" MaxHeight="20" Padding="0" Command="{Binding OpenFolderCommand}" IsEnabled="{Binding OpenEnabled, FallbackValue=false}">
                 <Button.Background>
                     <ImageBrush ImageSource="/FFXIV TexTools 2;component/Resources/FolderOpen_16x.png" Stretch="Uniform"/>
                 </Button.Background>
             </Button>
         </Grid>
-        <Grid x:Name="textureButtonGrid" Margin="10,0,10,0" Height="40" VerticalAlignment="Bottom">
+        <Grid x:Name="textureButtonGrid" Grid.Row="3" Margin="10,0,10,0" Height="40" VerticalAlignment="Top">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <Button Content="Export as Image" Margin="5" Command="{Binding SavePNGCommand}" IsEnabled="{Binding SaveEnabled, FallbackValue=false}"/>
-            <Button Content="Export as DDS" Grid.Column="1" Margin="5" Command="{Binding SaveDDSCommand}" IsEnabled="{Binding SaveEnabled, FallbackValue=false}"/>
-            <Button Content="Import" Grid.Column="2" Margin="5" Command="{Binding ImportCommand}" IsEnabled="{Binding ImportEnabled, FallbackValue=false}"/>
-            <Button Content="{Binding ActiveToggle, FallbackValue='Enable/Disable' }" Grid.Column="3" Margin="5" Command="{Binding ActiveCommand}" IsEnabled="{Binding ActiveEnabled, FallbackValue=false}"/>
+            <Button Content="Export IMC" Margin="5" Command="{Binding SaveIMCCommand}" IsEnabled="{Binding SaveEnabled, FallbackValue=false}"/>
+            <Button Content="Export MTRL" Grid.Column="1" Margin="5" Command="{Binding SaveMTRLCommand}" IsEnabled="{Binding SaveEnabled, FallbackValue=false}"/>
+            <Button Content="Export AFVX" Grid.Column="2" Margin="5" Command="{Binding SaveAVFXCommand}" IsEnabled="{Binding SaveAVFXEnabled, FallbackValue=false}"/>
+            <Button Content="Import..." Grid.Column="3" Margin="5" Command="{Binding ImportCommand}" IsEnabled="{Binding ImportEnabled, FallbackValue=false}"/>
+        </Grid>
+        <Grid x:Name="infoButtonGrid" Grid.Row="4" Margin="10,0,10,0" Height="40" VerticalAlignment="Top">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Button Content="IMC Info" Margin="5" Command="{Binding IMCInfoCommand}" IsEnabled="{Binding SaveEnabled, FallbackValue=false}"/>
+            <Button Content="MTRL Info" Grid.Column="1" Margin="5" Command="{Binding MTRLInfoCommand}" IsEnabled="{Binding SaveEnabled, FallbackValue=false}"/>
+            <Button Content="AVFX Info" Grid.Column="2" Margin="5" Command="{Binding AVFXInfoCommand}" IsEnabled="{Binding SaveAVFXEnabled, FallbackValue=false}"/>
+            <Button Content="-" Grid.Column="3" Margin="5" IsEnabled="False"/>
+        </Grid>
+        <Grid x:Name="experimentalNote" Grid.Row="5" VerticalAlignment="Top">
+            <TextBox x:Name="experimentalLabel" Height="20" Grid.Column="0" IsReadOnly="True" Text="This is an Experimental Version! | To enable/disable go to Mods > ModList  |  Don't forget to make Backups!" TextChanged="fullPathLabel_TextChanged" Margin="10,0,0,0" VerticalAlignment="Top" FontWeight="Bold" Foreground="DarkRed" />
         </Grid>
     </Grid>
 </UserControl>
