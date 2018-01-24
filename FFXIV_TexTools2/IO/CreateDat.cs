@@ -19,6 +19,8 @@ using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Windows;
+using System.Windows.Forms;
+
 
 namespace FFXIV_TexTools2
 {
@@ -50,7 +52,7 @@ namespace FFXIV_TexTools2
             }
             catch (Exception e)
             {
-                MessageBox.Show("[Create] Error Creating .Dat4 File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                FlexibleMessageBox.Show("[Create] Error Creating .Dat4 File \n" + e.Message, "Error", MessageBoxButtons.OK,MessageBoxIcon.Error);
             }
         }
 
@@ -76,7 +78,7 @@ namespace FFXIV_TexTools2
                 }
                 catch (Exception e)
                 {
-                    MessageBox.Show("[Create] Error Accessing Index File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    FlexibleMessageBox.Show("[Create] Error Accessing Index File \n" + e.Message, "Error", MessageBoxButtons.OK,MessageBoxIcon.Error);
                 }
 
 
@@ -90,7 +92,7 @@ namespace FFXIV_TexTools2
                 }
                 catch (Exception e)
                 {
-                    MessageBox.Show("[Create] Error Accessing Index 2 File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    FlexibleMessageBox.Show("[Create] Error Accessing Index 2 File \n" + e.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -172,7 +174,7 @@ namespace FFXIV_TexTools2
                 }
                 catch(Exception e)
                 {
-                    MessageBox.Show("[Create] Error Creating .modlist File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    FlexibleMessageBox.Show("[Create] Error Creating .modlist File \n" + e.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
                 }
             }

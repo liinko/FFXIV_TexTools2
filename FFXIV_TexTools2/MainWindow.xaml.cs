@@ -23,8 +23,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Windows;
+using System.Windows.Forms;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Application = System.Windows.Application;
 
 namespace FFXIV_TexTools2
 {
@@ -76,7 +78,7 @@ namespace FFXIV_TexTools2
             }
             catch (Exception ex)
             {
-                MessageBox.Show("[Main] DX Switch Error \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                FlexibleMessageBox.Show("[Main] DX Switch Error \n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -102,7 +104,7 @@ namespace FFXIV_TexTools2
             }
             catch (Exception ex)
             {
-                MessageBox.Show("[Main] DX Switch Error \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                FlexibleMessageBox.Show("[Main] DX Switch Error \n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
         }
@@ -127,7 +129,7 @@ namespace FFXIV_TexTools2
 
         private void Menu_English_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show("Changing language requires the application to restart. \nRestart now?", "Language Change", MessageBoxButton.OKCancel, MessageBoxImage.Information) == MessageBoxResult.OK)
+            if (FlexibleMessageBox.Show("Changing language requires the application to restart. \nRestart now?", "Language Change",MessageBoxButtons.OKCancel,MessageBoxIcon.Information) == System.Windows.Forms.DialogResult.OK)
             {
                 Properties.Settings.Default.Language = "en";
                 Properties.Settings.Default.Save();
@@ -145,7 +147,7 @@ namespace FFXIV_TexTools2
         {
 
 
-            if (MessageBox.Show("Changing language requires the application to restart. \nRestart now?", "Language Change", MessageBoxButton.OKCancel, MessageBoxImage.Information) == MessageBoxResult.OK)
+            if (FlexibleMessageBox.Show("Changing language requires the application to restart. \nRestart now?", "Language Change",MessageBoxButtons.OKCancel,MessageBoxIcon.Information) == System.Windows.Forms.DialogResult.OK)
             {
                 Properties.Settings.Default.Language = "ja";
                 Properties.Settings.Default.Save();
@@ -161,7 +163,7 @@ namespace FFXIV_TexTools2
 
         private void Menu_French_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show("Changing language requires the application to restart. \nRestart now?", "Language Change", MessageBoxButton.OKCancel, MessageBoxImage.Information) == MessageBoxResult.OK)
+            if (FlexibleMessageBox.Show("Changing language requires the application to restart. \nRestart now?", "Language Change",MessageBoxButtons.OKCancel,MessageBoxIcon.Information) == System.Windows.Forms.DialogResult.OK)
             {
                 Properties.Settings.Default.Language = "fr";
                 Properties.Settings.Default.Save();
@@ -177,7 +179,7 @@ namespace FFXIV_TexTools2
 
         private void Menu_German_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show("Changing language requires the application to restart. \nRestart now?", "Language Change", MessageBoxButton.OKCancel, MessageBoxImage.Information) == MessageBoxResult.OK)
+            if (FlexibleMessageBox.Show("Changing language requires the application to restart. \nRestart now?", "Language Change",MessageBoxButtons.OKCancel,MessageBoxIcon.Information) == System.Windows.Forms.DialogResult.OK)
             {
                 Properties.Settings.Default.Language = "de";
                 Properties.Settings.Default.Save();
@@ -216,7 +218,7 @@ namespace FFXIV_TexTools2
             }
             catch (Exception ex)
             {
-                MessageBox.Show("[Main] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                FlexibleMessageBox.Show("[Main] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
         }
@@ -261,7 +263,7 @@ namespace FFXIV_TexTools2
             }
             catch (Exception ex)
             {
-                MessageBox.Show("[Main] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                FlexibleMessageBox.Show("[Main] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
         }
@@ -335,11 +337,11 @@ namespace FFXIV_TexTools2
 
             if (!Helper.IsIndexLocked(true))
             {
-                if (MessageBox.Show("Starting over will:\n\n" +
+                if (FlexibleMessageBox.Show("Starting over will:\n\n" +
                     "Restore index files to their original state.\n" +
                     "Delete all mods and create new .dat files.\n" +
                     "Delete all .modlist file entries.\n\n" +
-                    "Do you want to start over?", "Start Over", MessageBoxButton.YesNo, MessageBoxImage.Information) == MessageBoxResult.Yes)
+                    "Do you want to start over?", "Start Over",MessageBoxButtons.YesNo,MessageBoxIcon.Information) == System.Windows.Forms.DialogResult.Yes)
                 {
 
                     RevertAll();

@@ -24,6 +24,8 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Windows;
+using System.Windows.Forms;
+
 
 namespace FFXIV_TexTools2.Helpers
 {
@@ -105,8 +107,7 @@ namespace FFXIV_TexTools2.Helpers
             }
             catch(Exception e)
             {
-                MessageBox.Show("There was an issue reading EXD Data, submit a bug report with the following:\n\nError: " + e.Message + "\nFile: " + file +
-                    "\nPath: " + EXDDatPath + "\nOffset: " + offset, "[Helper] Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                DisplayError(e, "EXD Data", true, EXDDatPath, offset);
             }
 
 
@@ -257,8 +258,7 @@ namespace FFXIV_TexTools2.Helpers
             }
             catch(Exception e)
             {
-                MessageBox.Show("There was an issue reading Type 4 Data, submit a bug report with the following:\n\nError: " + e.Message +
-            "\nPath: " + datPath + "\nOffset: " + offset, "[Helper] Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                DisplayError(e, "4 Data", true, datPath, offset);
             }
 
 
@@ -333,8 +333,7 @@ namespace FFXIV_TexTools2.Helpers
             }
             catch(Exception e)
             {
-                MessageBox.Show("There was an issue reading Type 2 Data, submit a bug report with the following:\n\nError: " + e.Message +
-                            "\nPath: " + datPath + "\nOffset: " + offset, "[Helper] Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                DisplayError(e, "2 Data", true, datPath, offset);
             }
 
             return type2Bytes.ToArray();
@@ -453,8 +452,7 @@ namespace FFXIV_TexTools2.Helpers
             }
             catch(Exception e)
             {
-                MessageBox.Show("There was an issue reading Type 3 Data, submit a bug report with the following:\n\nError: " + e.Message +
-                    "\nPath: " + datPath + "\nOffset: " + offset, "[Helper] Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                DisplayError(e, "3 Data", true, datPath, offset);
             }
 
 
@@ -525,7 +523,7 @@ namespace FFXIV_TexTools2.Helpers
             }
             catch(Exception e)
             {
-                MessageBox.Show("[Helper] Error Accessing Index File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                DisplayError(e, "Index File", false);
             }
 
             return itemOffset;
@@ -579,7 +577,7 @@ namespace FFXIV_TexTools2.Helpers
             }
             catch (Exception e)
             {
-                MessageBox.Show("[Helper] Error Accessing Index A File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                DisplayError(e, "Index A File", false);
             }
 
             return exdOffset;
@@ -642,7 +640,7 @@ namespace FFXIV_TexTools2.Helpers
             }
             catch (Exception e)
             {
-                MessageBox.Show("[Helper] Error Accessing Index File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                DisplayError(e, "Index File", false);
             }
 
             return oldOffset;
@@ -693,7 +691,7 @@ namespace FFXIV_TexTools2.Helpers
             }
             catch (Exception e)
             {
-                MessageBox.Show("[Helper] Error Accessing Index 2 File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                DisplayError(e, "Index 2 File", false);
             }
 
         }
@@ -736,7 +734,7 @@ namespace FFXIV_TexTools2.Helpers
             }
             catch (Exception e)
             {
-                MessageBox.Show("[Helper] Error Accessing Index File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                DisplayError(e, "Index File", false);
             }
 
             return false;
@@ -787,7 +785,7 @@ namespace FFXIV_TexTools2.Helpers
             }
             catch (Exception e)
             {
-                MessageBox.Show("[Helper] Error Accessing Index File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                DisplayError(e, "Index File", false);
             }
 
             return false;
@@ -827,7 +825,7 @@ namespace FFXIV_TexTools2.Helpers
             }
             catch (Exception e)
             {
-                MessageBox.Show("[Helper] Error Accessing Index File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                DisplayError(e, "Index File", false);
             }
 
             return parts;
@@ -869,7 +867,7 @@ namespace FFXIV_TexTools2.Helpers
             }
             catch (Exception e)
             {
-                MessageBox.Show("[Helper] Error Accessing Index File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                DisplayError(e, "Index File", false);
             }
 
             return raceList;
@@ -914,7 +912,7 @@ namespace FFXIV_TexTools2.Helpers
             }
             catch (Exception e)
             {
-                MessageBox.Show("[Helper] Error Accessing Index File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                DisplayError(e, "Index File", false);
             }
             return fileOffsetDict;
         }
@@ -939,7 +937,7 @@ namespace FFXIV_TexTools2.Helpers
                 }
                 catch (Exception e)
                 {
-                    MessageBox.Show("[Helper] Error Accessing Index File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    DisplayError(e, "Index File", false);
                 }
 
                 try
@@ -952,7 +950,7 @@ namespace FFXIV_TexTools2.Helpers
                 }
                 catch (Exception e)
                 {
-                    MessageBox.Show("[Helper] Error Accessing Index File \n" + e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    DisplayError(e, "Index File", false);
                 }
             }
         }
@@ -1014,11 +1012,11 @@ namespace FFXIV_TexTools2.Helpers
                 {
                     if (showMessage)
                     {
-                        MessageBox.Show("Error Accessing Index File\n\n" +
+                       FlexibleMessageBox.Show("Error Accessing Index File\n\n" +
                         "Please exit the game before proceeding.\n" +
                         "-----------------------------------------------------\n\n" +
                         "Error Message:\n" +
-                        e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        e.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
 
                     return true;
@@ -1040,6 +1038,18 @@ namespace FFXIV_TexTools2.Helpers
         public static string ToTitleCase(string mString)
         {
             return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(mString.ToLower());
+        }
+
+        private static void DisplayError(Exception e, string dataType, bool shouldSubmit, string datPath = null, int? offset = null)
+        {
+                var errorText =
+                    "There was an issue reading " + dataType + ", "
+                    + (shouldSubmit ? "submit a bug report with the following:\n" : "") +
+                    "\nError: " + e.Message +
+                    (datPath != null ? "\nPath: " + datPath : "") + 
+                    (offset.HasValue ? "\nOffset: " + offset : "");
+
+                FlexibleMessageBox.Show(errorText, "[Helper] Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
         #endregion Misc
     }

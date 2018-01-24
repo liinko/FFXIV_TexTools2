@@ -150,6 +150,7 @@
     <Compile Include="FileTypes\ModelContainers\ExtraIndexData.cs" />
     <Compile Include="FileTypes\ModelContainers\JsonSkeleton.cs" />
     <Compile Include="FileTypes\ModelContainers\Skeleton.cs" />
+    <Compile Include="Helpers\FlexibleMessageBox.cs" />
     <Compile Include="Helpers\JsonEntry.cs" />
     <Compile Include="Commands\RelayCommand.cs" />
     <Compile Include="Helpers\TexHelper.cs" />
@@ -381,9 +382,15 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="sharpdx_direct3d11_1_effects_arm.dll" />
-    <Content Include="sharpdx_direct3d11_1_effects_x64.dll" />
-    <Content Include="sharpdx_direct3d11_1_effects_x86.dll" />
+    <Content Include="sharpdx_direct3d11_1_effects_arm.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="sharpdx_direct3d11_1_effects_x64.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="sharpdx_direct3d11_1_effects_x86.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="x64\d3dcompiler_47.dll" />
     <Content Include="x86\d3dcompiler_47.dll" />
     <Resource Include="Resources\PaypalDonateButton.png" />
