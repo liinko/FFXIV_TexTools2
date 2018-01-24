@@ -1064,8 +1064,19 @@ namespace FFXIV_TexTools2.ViewModel
                     meshData.Add(mData);
                 }
 
+                // Preserve Camera settings before reset
+                var lookDir = CompositeVM.Camera.LookDirection;
+                var upDir = CompositeVM.Camera.UpDirection;
+                var pos = CompositeVM.Camera.Position;
+
+                // Reset 3d View for loading new model
                 CompositeVM = new Composite3DViewModel();
                 CompositeVM.UpdateModel(meshData, selectedItem);
+
+                // Re-apply original camera settings
+                CompositeVM.Camera.LookDirection = lookDir;
+                CompositeVM.Camera.UpDirection = upDir;
+                CompositeVM.Camera.Position = pos;
 
                 is3DLoaded = true;
 
