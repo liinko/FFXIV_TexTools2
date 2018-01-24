@@ -47,8 +47,8 @@ namespace FFXIV_TexTools2.ViewModel
 
         int raceIndex, meshIndex, bodyIndex, partIndex;
         bool raceEnabled, meshEnabled, bodyEnabled, partEnabled, modelRendering, secondModelRendering, thirdModelRendering, is3DLoaded, disposing, modelTabEnabled;
-        bool import3dEnabled, activeEnabled, openEnabled;
-        string selectedCategory, reflectionAmount, modelName, fullPath;
+        bool import3dEnabled, activeEnabled, openEnabled, newCat;
+        string selectedCategory, reflectionAmount, modelName, fullPath, prevCat;
         string activeToggle = "Enable/Disable";
 
         private ObservableCollection<ComboBoxInfo> raceComboInfo = new ObservableCollection<ComboBoxInfo>();
@@ -97,8 +97,14 @@ namespace FFXIV_TexTools2.ViewModel
             disposing = true;
             cbi.Clear();
 
+            prevCat = selectedCategory;
             selectedItem = item;
             selectedCategory = category;
+
+            if (!selectedCategory.Equals(prevCat))
+            {
+                newCat = true;
+            }
 
             try
             {
@@ -1064,21 +1070,29 @@ namespace FFXIV_TexTools2.ViewModel
                     meshData.Add(mData);
                 }
 
+                
                 // Preserve Camera settings before reset
                 var lookDir = CompositeVM.Camera.LookDirection;
                 var upDir = CompositeVM.Camera.UpDirection;
                 var pos = CompositeVM.Camera.Position;
 
+
                 // Reset 3d View for loading new model
                 CompositeVM = new Composite3DViewModel();
                 CompositeVM.UpdateModel(meshData, selectedItem);
 
-                // Re-apply original camera settings
-                CompositeVM.Camera.LookDirection = lookDir;
-                CompositeVM.Camera.UpDirection = upDir;
-                CompositeVM.Camera.Position = pos;
+                // Re-apply original camera settings 
+                // Applies when camera is not in the default position 
+                // and when within the same item category
+                if (lookDir.Z != -5 && !newCat)
+                {
+                    CompositeVM.Camera.LookDirection = lookDir;
+                    CompositeVM.Camera.UpDirection = upDir;
+                    CompositeVM.Camera.Position = pos;
+                }
 
                 is3DLoaded = true;
+                newCat = false;
 
                 ReflectionAmount = String.Format("{0:.##}", CompositeVM.CurrentSS);
 

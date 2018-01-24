@@ -127,7 +127,6 @@ namespace FFXIV_TexTools2.IO
 				string tang = "-textangents";
 				int tcStride = 2;
 				int indStride = 4;
-				bool hasTexc2 = false;
 				bool blender = false;
 
 				using (XmlReader reader = XmlReader.Create(savePath))
@@ -261,7 +260,6 @@ namespace FFXIV_TexTools2.IO
                                                 //Texture Coordinates2
                                                 else if (reader["id"].ToLower().Contains(texc2) && cData.vertex.Count > 0)
                                                 {
-                                                    hasTexc2 = true;
                                                     cData.texCoord2.AddRange((float[])reader.ReadElementContentAs(typeof(float[]), null));
                                                 }
                                                 //Tangents
@@ -280,7 +278,7 @@ namespace FFXIV_TexTools2.IO
                                             {
                                                 cData.index.AddRange((int[])reader.ReadElementContentAs(typeof(int[]), null));
 
-                                                if (!hasTexc2 && indStride == 6)
+                                                if (cData.texCoord2.Count < 1 && indStride == 6)
                                                 {
                                                     indStride = 4;
                                                 }
@@ -291,11 +289,11 @@ namespace FFXIV_TexTools2.IO
                                                     cData.nIndexList.Add(cData.index[i + 1]);
                                                     cData.tcIndexList.Add(cData.index[i + 2]);
 
-                                                    if (hasTexc2 && indStride == 6)
+                                                    if (cData.texCoord2.Count > 0 && indStride == 6)
                                                     {
                                                         cData.tc2IndexList.Add(cData.index[i + 4]);
                                                     }
-                                                    else if (hasTexc2 && indStride == 4)
+                                                    else if (cData.texCoord2.Count > 0 && indStride == 4)
                                                     {
                                                         cData.tc2IndexList.Add(cData.index[i + 2]);
                                                     }
@@ -448,11 +446,6 @@ namespace FFXIV_TexTools2.IO
 					return;
 				}
 
-				if (!hasTexc2 && indStride == 6)
-				{
-					indStride = 4;
-				}
-
                 for(int i = 0; i < pDict.Count; i++)
                 {
                     var mDict = pDict[i];
@@ -498,16 +491,21 @@ namespace FFXIV_TexTools2.IO
 					{
 						for (int j = 0; j < mDict.Count; j++)
 						{
-                            if (!mDict.ContainsKey(c))
+                            while (!mDict.ContainsKey(c))
                             {
 								cdDict[i].partsDict.Add(c, 0);
 								c++;
 							}
 
+                            if(mDict[c].texCoord2.Count < 1 && indStride == 6)
+                            {
+                                indStride = 4;
+                            }
+
 							cdDict[i].vertex.AddRange(mDict[c].vertex);
 							cdDict[i].normal.AddRange(mDict[c].normal);
 							cdDict[i].texCoord.AddRange(mDict[c].texCoord);
-							cdDict[i].texCoord2.AddRange(mDict[c].texCoord2);
+                            cdDict[i].texCoord2.AddRange(mDict[c].texCoord2);
 							cdDict[i].tangent.AddRange(mDict[c].tangent);
 							cdDict[i].biNormal.AddRange(mDict[c].biNormal);
 
@@ -517,7 +515,7 @@ namespace FFXIV_TexTools2.IO
                                 cdDict[i].index.Add(mDict[c].nIndexList[k] + nMax);
                                 cdDict[i].index.Add(mDict[c].tcIndexList[k] + tcMax);
 
-                                if (hasTexc2)
+                                if (mDict[c].texCoord2.Count > 0)
                                 {
                                     cdDict[i].index.Add(mDict[c].tc2IndexList[k] + tc2Max);
                                 }
@@ -532,7 +530,7 @@ namespace FFXIV_TexTools2.IO
                             nMax += mDict[c].nIndexList.Max() + 1;
                             tcMax += mDict[c].tcIndexList.Max() + 1;
 
-                            if (hasTexc2)
+                            if (mDict[c].texCoord2.Count > 0)
                             {
                                 tc2Max += mDict[c].tc2IndexList.Max() + 1;
                             }
@@ -818,7 +816,7 @@ namespace FFXIV_TexTools2.IO
 
                     var stride = 5;
 
-                    if (!hasTexc2)
+                    if (TexCoord2.Count < 1)
                     {
                         stride = 4;
                     }
@@ -840,17 +838,17 @@ namespace FFXIV_TexTools2.IO
 								nBlendWeights.Add(blendWeights[iList[i][0]]);
 								nNormals.Add(Normals[iList[i][1]]);
 								nTexCoord.Add(TexCoord[iList[i][2]]);
-								if (hasTexc2)
+								if (TexCoord2.Count > 0)
 								{
 									nTexCoord2.Add(TexCoord2[iList[i][3]]);
 								}
 
-								if (nTangents.Count > 0 && hasTexc2)
+								if (nTangents.Count > 0 && TexCoord2.Count > 0)
 								{
 									nTangents.Add(Tangents[iList[i][4]]);
 									nBiNormals.Add(BiNormals[iList[i][4]]);
 								}
-                                else if(nTangents.Count > 0 && !hasTexc2)
+                                else if(nTangents.Count > 0 && TexCoord2.Count < 1)
                                 {
                                     nTangents.Add(Tangents[iList[i][3]]);
                                     nBiNormals.Add(BiNormals[iList[i][3]]);

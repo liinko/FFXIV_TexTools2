@@ -45,6 +45,10 @@ namespace FFXIV_TexTools2.Helpers
 
             var EXDDatPath = string.Format(Info.datDir, Strings.EXDDat, Info.EXDDatNum);
 
+            int datNum = ((offset / 8) & 0x000f) / 2;
+
+            offset = OffsetCorrection(datNum, offset);
+
             try
             {
                 using (BinaryReader br = new BinaryReader(File.OpenRead(EXDDatPath)))

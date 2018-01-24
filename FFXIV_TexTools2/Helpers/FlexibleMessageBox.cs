@@ -78,7 +78,7 @@ namespace FFXIV_TexTools2.Helpers
      *  Version 1.0 - 15.April 2013
      *   - Initial Version
     */
-    public class FlexibleMessageBox
+    public static class FlexibleMessageBox
     {
         #region Public statics
 
@@ -122,7 +122,7 @@ namespace FFXIV_TexTools2.Helpers
         /// <returns>The dialog result.</returns>
         public static DialogResult Show(string text)
         {
-            return FlexibleMessageBoxForm.Show(null, text, string.Empty,MessageBoxButtons.OK,MessageBoxIcon.None,MessageBoxDefaultButton.Button1);
+            return FlexibleMessageBoxForm.Show(null, text, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.None, MessageBoxDefaultButton.Button1);
         }
 
         /// <summary>
@@ -133,7 +133,7 @@ namespace FFXIV_TexTools2.Helpers
         /// <returns>The dialog result.</returns>
         public static DialogResult Show(IWin32Window owner, string text)
         {
-            return FlexibleMessageBoxForm.Show(owner, text, string.Empty,MessageBoxButtons.OK,MessageBoxIcon.None,MessageBoxDefaultButton.Button1);
+            return FlexibleMessageBoxForm.Show(owner, text, string.Empty, MessageBoxButtons.OK, MessageBoxIcon.None, MessageBoxDefaultButton.Button1);
         }
 
         /// <summary>
@@ -156,7 +156,7 @@ namespace FFXIV_TexTools2.Helpers
         /// <returns>The dialog result.</returns>
         public static DialogResult Show(IWin32Window owner, string text, string caption)
         {
-            return FlexibleMessageBoxForm.Show(owner, text, caption,MessageBoxButtons.OK,MessageBoxIcon.None,MessageBoxDefaultButton.Button1);
+            return FlexibleMessageBoxForm.Show(owner, text, caption, MessageBoxButtons.OK, MessageBoxIcon.None, MessageBoxDefaultButton.Button1);
         }
 
         /// <summary>
@@ -166,9 +166,9 @@ namespace FFXIV_TexTools2.Helpers
         /// <param name="caption">The caption.</param>
         /// <param name="buttons">The buttons.</param>
         /// <returns>The dialog result.</returns>
-        public static DialogResult Show(string text, string caption,MessageBoxButtons buttons)
+        public static DialogResult Show(string text, string caption, MessageBoxButtons buttons)
         {
-            return FlexibleMessageBoxForm.Show(null, text, caption, buttons,MessageBoxIcon.None,MessageBoxDefaultButton.Button1);
+            return FlexibleMessageBoxForm.Show(null, text, caption, buttons, MessageBoxIcon.None, MessageBoxDefaultButton.Button1);
         }
 
         /// <summary>
@@ -179,9 +179,9 @@ namespace FFXIV_TexTools2.Helpers
         /// <param name="caption">The caption.</param>
         /// <param name="buttons">The buttons.</param>
         /// <returns>The dialog result.</returns>
-        public static DialogResult Show(IWin32Window owner, string text, string caption,MessageBoxButtons buttons)
+        public static DialogResult Show(IWin32Window owner, string text, string caption, MessageBoxButtons buttons)
         {
-            return FlexibleMessageBoxForm.Show(owner, text, caption, buttons,MessageBoxIcon.None,MessageBoxDefaultButton.Button1);
+            return FlexibleMessageBoxForm.Show(owner, text, caption, buttons, MessageBoxIcon.None, MessageBoxDefaultButton.Button1);
         }
 
         /// <summary>
@@ -192,9 +192,9 @@ namespace FFXIV_TexTools2.Helpers
         /// <param name="buttons">The buttons.</param>
         /// <param name="icon">The icon.</param>
         /// <returns></returns>
-        public static DialogResult Show(string text, string caption,MessageBoxButtons buttons,MessageBoxIcon icon)
+        public static DialogResult Show(string text, string caption, MessageBoxButtons buttons, MessageBoxIcon icon)
         {
-            return FlexibleMessageBoxForm.Show(null, text, caption, buttons, icon,MessageBoxDefaultButton.Button1);
+            return FlexibleMessageBoxForm.Show(null, text, caption, buttons, icon, MessageBoxDefaultButton.Button1);
         }
 
         /// <summary>
@@ -206,9 +206,9 @@ namespace FFXIV_TexTools2.Helpers
         /// <param name="buttons">The buttons.</param>
         /// <param name="icon">The icon.</param>
         /// <returns>The dialog result.</returns>
-        public static DialogResult Show(IWin32Window owner, string text, string caption,MessageBoxButtons buttons,MessageBoxIcon icon)
+        public static DialogResult Show(IWin32Window owner, string text, string caption, MessageBoxButtons buttons, MessageBoxIcon icon)
         {
-            return FlexibleMessageBoxForm.Show(owner, text, caption, buttons, icon,MessageBoxDefaultButton.Button1);
+            return FlexibleMessageBoxForm.Show(owner, text, caption, buttons, icon, MessageBoxDefaultButton.Button1);
         }
 
         /// <summary>
@@ -220,7 +220,7 @@ namespace FFXIV_TexTools2.Helpers
         /// <param name="icon">The icon.</param>
         /// <param name="defaultButton">The default button.</param>
         /// <returns>The dialog result.</returns>
-        public static DialogResult Show(string text, string caption,MessageBoxButtons buttons,MessageBoxIcon icon,MessageBoxDefaultButton defaultButton)
+        public static DialogResult Show(string text, string caption, MessageBoxButtons buttons, MessageBoxIcon icon, MessageBoxDefaultButton defaultButton)
         {
             return FlexibleMessageBoxForm.Show(null, text, caption, buttons, icon, defaultButton);
         }
@@ -235,7 +235,7 @@ namespace FFXIV_TexTools2.Helpers
         /// <param name="icon">The icon.</param>
         /// <param name="defaultButton">The default button.</param>
         /// <returns>The dialog result.</returns>
-        public static DialogResult Show(IWin32Window owner, string text, string caption,MessageBoxButtons buttons,MessageBoxIcon icon,MessageBoxDefaultButton defaultButton)
+        public static DialogResult Show(IWin32Window owner, string text, string caption, MessageBoxButtons buttons, MessageBoxIcon icon, MessageBoxDefaultButton defaultButton)
         {
             return FlexibleMessageBoxForm.Show(owner, text, caption, buttons, icon, defaultButton);
         }
@@ -416,7 +416,7 @@ namespace FFXIV_TexTools2.Helpers
 
             //These are the possible buttons (in a standardFlexibleMessageBox)
             private enum ButtonID { OK = 0, CANCEL, YES, NO, ABORT, RETRY, IGNORE };
-            
+
             //These are the buttons texts for different languages. 
             //If you want to add a new language, add it here and in the GetButtonText-Function
             private enum TwoLetterISOLanguageID { en, de, es, it };
@@ -477,14 +477,14 @@ namespace FFXIV_TexTools2.Helpers
             private string GetButtonText(ButtonID buttonID)
             {
                 var buttonTextArrayIndex = Convert.ToInt32(buttonID);
-                
+
                 switch (this.languageID)
                 {
                     case TwoLetterISOLanguageID.de: return BUTTON_TEXTS_GERMAN_DE[buttonTextArrayIndex];
                     case TwoLetterISOLanguageID.es: return BUTTON_TEXTS_SPANISH_ES[buttonTextArrayIndex];
                     case TwoLetterISOLanguageID.it: return BUTTON_TEXTS_ITALIAN_IT[buttonTextArrayIndex];
 
-                    default:                        return BUTTON_TEXTS_ENGLISH_EN[buttonTextArrayIndex];
+                    default: return BUTTON_TEXTS_ENGLISH_EN[buttonTextArrayIndex];
                 }
             }
 
@@ -544,13 +544,13 @@ namespace FFXIV_TexTools2.Helpers
 
                 //Calculate whole text height
                 var textHeight = TextRenderer.MeasureText(text, FONT).Height;
-                    
+
                 //Calculate width for longest text line
                 const int SCROLLBAR_WIDTH_OFFSET = 15;
                 var longestTextRowWidth = stringRows.Max(textForRow => TextRenderer.MeasureText(textForRow, FONT).Width);
                 var captionWidth = TextRenderer.MeasureText(caption, SystemFonts.CaptionFont).Width;
                 var textWidth = Math.Max(longestTextRowWidth + SCROLLBAR_WIDTH_OFFSET, captionWidth);
-                
+
                 //Calculate margins
                 var marginWidth = flexibleMessageBoxForm.Width - flexibleMessageBoxForm.richTextBoxMessage.Width;
                 var marginHeight = flexibleMessageBoxForm.Height - flexibleMessageBoxForm.richTextBoxMessage.Height;
@@ -566,7 +566,7 @@ namespace FFXIV_TexTools2.Helpers
             /// </summary>
             /// <param name="flexibleMessageBoxForm">The FlexibleMessageBox dialog.</param>
             /// <param name="icon">TheMessageBoxIcon.</param>
-            private static void SetDialogIcon(FlexibleMessageBoxForm flexibleMessageBoxForm,MessageBoxIcon icon)
+            private static void SetDialogIcon(FlexibleMessageBoxForm flexibleMessageBoxForm, MessageBoxIcon icon)
             {
                 switch (icon)
                 {
@@ -598,7 +598,7 @@ namespace FFXIV_TexTools2.Helpers
             /// <param name="flexibleMessageBoxForm">The FlexibleMessageBox dialog.</param>
             /// <param name="buttons">The buttons.</param>
             /// <param name="defaultButton">The default button.</param>
-            private static void SetDialogButtons(FlexibleMessageBoxForm flexibleMessageBoxForm,MessageBoxButtons buttons,MessageBoxDefaultButton defaultButton)
+            private static void SetDialogButtons(FlexibleMessageBoxForm flexibleMessageBoxForm, MessageBoxButtons buttons, MessageBoxDefaultButton defaultButton)
             {
                 //Set the buttons visibilities and texts
                 switch (buttons)
@@ -617,7 +617,7 @@ namespace FFXIV_TexTools2.Helpers
                         flexibleMessageBoxForm.button3.Visible = true;
                         flexibleMessageBoxForm.button3.Text = flexibleMessageBoxForm.GetButtonText(ButtonID.IGNORE);
                         flexibleMessageBoxForm.button3.DialogResult = DialogResult.Ignore;
-                        
+
                         flexibleMessageBoxForm.ControlBox = false;
                         break;
 
@@ -823,7 +823,7 @@ namespace FFXIV_TexTools2.Helpers
             /// <param name="icon">The icon.</param>
             /// <param name="defaultButton">The default button.</param>
             /// <returns>The dialog result.</returns>
-            public static DialogResult Show(IWin32Window owner, string text, string caption,MessageBoxButtons buttons,MessageBoxIcon icon,MessageBoxDefaultButton defaultButton)
+            public static DialogResult Show(IWin32Window owner, string text, string caption, MessageBoxButtons buttons, MessageBoxIcon icon, MessageBoxDefaultButton defaultButton)
             {
                 //Create a new instance of the FlexibleMessageBox form
                 var flexibleMessageBoxForm = new FlexibleMessageBoxForm();

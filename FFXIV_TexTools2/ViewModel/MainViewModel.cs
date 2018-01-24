@@ -76,6 +76,7 @@ namespace FFXIV_TexTools2.ViewModel
         {
 
             CultureInfo ci = new CultureInfo(Properties.Settings.Default.Language);
+            ci.NumberFormat.NumberDecimalSeparator = ".";
             CultureInfo.DefaultThreadCurrentCulture = ci;
             CultureInfo.DefaultThreadCurrentUICulture = ci;
 
