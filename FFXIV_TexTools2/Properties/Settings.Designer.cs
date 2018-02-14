@@ -106,5 +106,17 @@ namespace FFXIV_TexTools2.Properties {
                 this["IndexBackups_Directory"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string Default_Race {
+            get {
+                return ((string)(this["Default_Race"]));
+            }
+            set {
+                this["Default_Race"] = value;
+            }
+        }
     }
 }

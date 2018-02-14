@@ -107,36 +107,15 @@ namespace FFXIV_TexTools2.Material
                     isDemiHuman = selectedItem.PrimaryMTRLFolder.Contains("demihuman");
                 }
 
-                string ID = "";
-                string body = "";
-
-                if (selectedCategory.Equals(Strings.Pets))
-                {
-                    int part = 1;
-
-                    if (selectedItem.ItemName.Equals(Strings.Selene) || selectedItem.ItemName.Equals(Strings.Bishop_Autoturret))
-                    {
-                        part = 2;
-                    }
-
-                    ID = Info.petID[selectedItem.ItemName];
-                    body = part.ToString().PadLeft(4, '0');
-                }
-                else
-                {
-                    ID = selectedItem.PrimaryModelID.PadLeft(4, '0');
-                    body = selectedItem.PrimaryModelBody;
-                }
-
                 if (isDemiHuman)
                 {
-                    MDLFolder = string.Format(Strings.DemiMDLFolder, ID, body);
-                    MDLFile = string.Format(Strings.DemiMDLFile, ID, body, selectedPart);
+                    MDLFolder = string.Format(Strings.DemiMDLFolder, selectedItem.PrimaryModelID.PadLeft(4, '0'), selectedItem.PrimaryModelBody.PadLeft(4, '0'));
+                    MDLFile = string.Format(Strings.DemiMDLFile, selectedItem.PrimaryModelID.PadLeft(4, '0'), selectedItem.PrimaryModelBody, selectedPart.PadLeft(4, '0'));
                 }
                 else
                 {
-                    MDLFolder = string.Format(Strings.MonsterMDLFolder, ID, body);
-                    MDLFile = string.Format(Strings.MonsterMDLFile, ID, body);
+                    MDLFolder = string.Format(Strings.MonsterMDLFolder, selectedItem.PrimaryModelID.PadLeft(4, '0'), selectedItem.PrimaryModelBody.PadLeft(4, '0'));
+                    MDLFile = string.Format(Strings.MonsterMDLFile, selectedItem.PrimaryModelID.PadLeft(4, '0'), selectedItem.PrimaryModelBody.PadLeft(4, '0'));
                 }
             }
             else
@@ -316,6 +295,13 @@ namespace FFXIV_TexTools2.Material
                             IndexDataOffset = br.ReadInt32()
                         };
 
+                        var typeChar = materialStrings[meshInfo.MaterialNum][4].ToString() + materialStrings[meshInfo.MaterialNum][9].ToString();
+
+                        if (typeChar.Equals("cb"))
+                        {
+                            modelData.LoD[x].MeshList[i].IsBody = true;
+                        }
+
                         for (int j = 0; j < 3; j++)
                         {
                             meshInfo.VertexDataOffsets.Add(br.ReadInt32());
@@ -377,6 +363,7 @@ namespace FFXIV_TexTools2.Material
 
                 Dictionary<int, int> indexMin = new Dictionary<int, int>();
                 Dictionary<int, List<int>> extraIndices = new Dictionary<int, List<int>>();
+                Dictionary<int, List<int>> extraIndices2 = new Dictionary<int, List<int>>();
                 List<ExtraIndex> indexCounts = new List<ExtraIndex>();
 
                 var pCount = 0;
@@ -467,7 +454,7 @@ namespace FFXIV_TexTools2.Material
                 if (unknown3 > 0)
                 {
                     var unk3Remainder = (unknown3 * 4) - (totalLoD0MaskCount * 4);
-
+                    var c = 0;
                     foreach (var ic in indexCounts)
                     {
                         HashSet<int> mIndexList = new HashSet<int>();
@@ -475,18 +462,21 @@ namespace FFXIV_TexTools2.Material
                         for (int i = 0; i < ic.IndexCount; i++)
                         {
                             //index its replacing? attatched to?
-                            br.ReadBytes(2);
+                            var oIndex = br.ReadInt16();
                             //extra index following last equipment index
                             var mIndex = br.ReadInt16();
+
                             mIndexList.Add(mIndex);
 
                             if (extraIndices.ContainsKey(ic.IndexLocation))
                             {
                                 extraIndices[ic.IndexLocation].Add(mIndex);
+                                extraIndices2[ic.IndexLocation].Add(oIndex);
                             }
                             else
                             {
                                 extraIndices.Add(ic.IndexLocation, new List<int>() { mIndex });
+                                extraIndices2.Add(ic.IndexLocation, new List<int>() { oIndex });
                             }
                         }
 
@@ -498,6 +488,7 @@ namespace FFXIV_TexTools2.Material
                         {
                             totalExtraCounts.Add(ic.IndexLocation, mIndexList.Count);
                         }
+                        c++;
                     }
                     //the rest of unk3
                     br.ReadBytes(unk3Remainder);
@@ -516,6 +507,7 @@ namespace FFXIV_TexTools2.Material
                     extraIndexData.indexMin = indexMin;
                     extraIndexData.totalExtraCounts = totalExtraCounts;
                     extraIndexData.extraIndices = extraIndices;
+                    extraIndexData.extraIndices2 = extraIndices2;
 
                     modelData.ExtraData = extraIndexData;
                 }
@@ -598,6 +590,8 @@ namespace FFXIV_TexTools2.Material
                     var blendIndicesList = new List<int>();
                     var blendIndicesList2 = new List<int[]>();
                     var weightCounts = new List<int>();
+                    var extraVerts = new HashSet<Vector3>();
+                    Dictionary<int, Vector3> extraVertDict = new Dictionary<int, Vector3>();
 
 
                     Mesh mesh = modelData.LoD[0].MeshList[i];
@@ -988,6 +982,22 @@ namespace FFXIV_TexTools2.Material
                         MeshPartCount = mesh.MeshInfo.MeshPartCount,
                         MeshPartOffset = mesh.MeshInfo.MeshPartOffset
                     };
+
+                    if(extraIndices2.ContainsKey(i))
+                    {
+                        foreach (var id in extraIndices2[i])
+                        {
+                            if (!extraVertDict.ContainsKey(id))
+                            {
+                                var v = modelMeshData.Indices[id];
+
+                                extraVertDict.Add(id, modelMeshData.Vertices[v]);
+                            }
+                        }
+                    }
+
+
+                    mesh.extraVertDict = extraVertDict;
 
                     meshList.Add(modelMeshData);
                 }

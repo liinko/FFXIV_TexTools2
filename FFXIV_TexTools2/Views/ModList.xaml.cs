@@ -17,6 +17,11 @@
 using FFXIV_TexTools2.Helpers;
 using FFXIV_TexTools2.Model;
 using FFXIV_TexTools2.ViewModel;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
 using System.Windows;
 using System.Windows.Media;
 
@@ -49,60 +54,125 @@ namespace FFXIV_TexTools2.Views
 
         private void ModToggleButton_Click(object sender, RoutedEventArgs e)
         {
-            var selected = listBox.SelectedItem as ModListModel;
-            int offset = 0;
+            var selected = listBox.SelectedItems;
 
-            if (modToggleButton.Content.Equals("Disable"))
+            foreach(ModListModel s in selected)
             {
-                offset = selected.Entry.originalOffset;
-                selected.Active = Brushes.Gray;
-                selected.ActiveOpacity = 0.5f;
-                selected.ActiveBorder = Brushes.Red;
-                modToggleButton.Content = "Enable";
-            }
-            else if (modToggleButton.Content.Equals("Enable"))
-            {
-                offset = selected.Entry.modOffset;
-                selected.Active = Brushes.Transparent;
-                selected.ActiveOpacity = 1;
-                selected.ActiveBorder = Brushes.Green;
-                modToggleButton.Content = "Disable";
-            }
+                int offset = 0;
 
-            Helper.UpdateIndex(offset, selected.Entry.fullPath, selected.Entry.datFile);
-            Helper.UpdateIndex2(offset, selected.Entry.fullPath, selected.Entry.datFile);
+                if (s.Active == Brushes.Transparent)
+                {
+                    offset = s.Entry.originalOffset;
+                    s.Active = Brushes.Gray;
+                    s.ActiveOpacity = 0.5f;
+                    s.ActiveBorder = Brushes.Red;
+                    modToggleButton.Content = "Enable";
+                }
+                else
+                {
+                    offset = s.Entry.modOffset;
+                    s.Active = Brushes.Transparent;
+                    s.ActiveOpacity = 1;
+                    s.ActiveBorder = Brushes.Green;
+                    modToggleButton.Content = "Disable";
+                }
 
+                Helper.UpdateIndex(offset, s.Entry.fullPath, s.Entry.datFile);
+                Helper.UpdateIndex2(offset, s.Entry.fullPath, s.Entry.datFile);
+            }
         }
 
         private void ListBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            if (listBox.SelectedItem is ModListModel selected)
+            if(listBox.SelectedItems.Count < 2)
             {
-                if (selected.Active == Brushes.Transparent)
+                if (listBox.SelectedItem is ModListModel selected)
                 {
-                    modToggleButton.Content = "Disable";
+                    if (selected.Active == Brushes.Transparent)
+                    {
+                        modToggleButton.Content = "Disable";
+                    }
+                    else
+                    {
+                        modToggleButton.Content = "Enable";
+                    }
+
+                    //goToButton.IsEnabled = true;
+                    modToggleButton.IsEnabled = true;
+                    deleteButton.IsEnabled = true;
                 }
                 else
                 {
-                    modToggleButton.Content = "Enable";
+                    //goToButton.IsEnabled = false;
+                    modToggleButton.IsEnabled = false;
+                    deleteButton.IsEnabled = false;
                 }
-
-                //goToButton.IsEnabled = true;
-                modToggleButton.IsEnabled = true;
             }
             else
             {
-                //goToButton.IsEnabled = false;
-                modToggleButton.IsEnabled = false;
+                modToggleButton.Content = "Enable/Disable";
+                modToggleButton.IsEnabled = true;
             }
-
         }
 
-        private void GoToButton_Click(object sender, RoutedEventArgs e)
+        private void DeleteButton_Click(object sender, RoutedEventArgs e)
         {
-            var selected = listBox.SelectedItem as ModListModel;
+            var selected = listBox.SelectedItems;
 
-            //((MainWindow)Owner).GoToItem(selected);
+            List<ModListModel> removeList = new List<ModListModel>();
+
+            var mlm = (ObservableCollection<ModListModel>)listBox.ItemsSource;
+
+            foreach (ModListModel s in selected)
+            {
+                int offset = 0;
+
+                if (s.Active == Brushes.Transparent)
+                {
+                    offset = s.Entry.originalOffset;
+
+                    Helper.UpdateIndex(offset, s.Entry.fullPath, s.Entry.datFile);
+                    Helper.UpdateIndex2(offset, s.Entry.fullPath, s.Entry.datFile);
+                }
+
+                removeList.Add(s);
+            }
+
+            string[] lines = File.ReadAllLines(Properties.Settings.Default.Modlist_Directory);
+
+            foreach(var r in removeList)
+            {
+                for(int i = 0; i < lines.Length; i++)
+                {
+                    var modEntry = JsonConvert.DeserializeObject<JsonEntry>(lines[i]);
+
+                    if (r.Entry.fullPath.Equals(modEntry.fullPath))
+                    {
+                        JsonEntry replaceEntry = new JsonEntry()
+                        {
+                            category = String.Empty,
+                            name = String.Empty,
+                            fullPath = String.Empty,
+                            originalOffset = 0,
+                            modOffset = modEntry.modOffset,
+                            modSize = modEntry.modSize,
+                            datFile = modEntry.datFile
+                        };
+
+                        lines[i] = JsonConvert.SerializeObject(replaceEntry);
+                    }
+                }
+
+                mlm.Remove(r);
+            }
+
+            File.WriteAllLines(Properties.Settings.Default.Modlist_Directory, lines);
+
+            if(mlm.Count < 1)
+            {
+                ModListViewModel vm = new ModListViewModel();
+                modListTreeView.DataContext = vm;
+            }
         }
     }
 }

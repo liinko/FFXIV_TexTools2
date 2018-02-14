@@ -94,6 +94,14 @@ namespace FFXIV_TexTools2.Helpers
             {Strings.All, Strings.All}
         };
 
+        public static List<string> baseRace = new List<string>
+        {
+            {Strings.Hyur_M },
+            {Strings.Hyur_H },
+            {Strings.AuRa_Raen },
+            {Strings.AuRa_Xaela }
+        };
+
 
         public static Dictionary<string, string> IDRace = new Dictionary<string, string>
         {

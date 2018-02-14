@@ -28,8 +28,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Text;
-using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Xml;
@@ -56,12 +54,6 @@ namespace FFXIV_TexTools2.ViewModel
         public bool JapaneseEnabled { get { return !Properties.Settings.Default.Language.Equals("ja"); } } 
         public bool GermanEnabled { get { return !Properties.Settings.Default.Language.Equals("de"); } }
         public bool FrenchEnabled { get { return !Properties.Settings.Default.Language.Equals("fr"); } }
-
-        public bool IsDX9 { get { return Properties.Settings.Default.DX_Ver.Equals(Strings.DX9); } }
-        public bool IsDX11 { get { return Properties.Settings.Default.DX_Ver.Equals(Strings.DX11); } }
-
-        public bool DX9Enabled { get { return !Properties.Settings.Default.DX_Ver.Equals(Strings.DX9); } }
-        public bool DX11Enabled { get { return !Properties.Settings.Default.DX_Ver.Equals(Strings.DX11); } }
 
         public TextureViewModel TextureVM { get { return TVM; } set { TVM = value; NotifyPropertyChanged("TextureVM"); } }
         public ModelViewModel ModelVM { get { return MVM; } set { MVM = value; NotifyPropertyChanged("ModelVM"); } }

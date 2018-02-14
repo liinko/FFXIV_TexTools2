@@ -664,10 +664,10 @@ namespace FFXIV_TexTools2.ViewModel
                     }
                 }
 
-                if (selectedCategory.Equals(Strings.Pets))
-                {
-                    body = "a";
-                }
+                //if (selectedCategory.Equals(Strings.Pets))
+                //{
+                //    body = "a";
+                //}
                 var info = MTRL.GetMTRLData(selectedItem, selectedRace.ID, selectedCategory, part, imc, body, modelID, vfx);
                 mtrlData = info.Item1;
 
@@ -800,6 +800,7 @@ namespace FFXIV_TexTools2.ViewModel
             {
                 type = selectedType.Name;
             }
+
 
             var info = MTRL.GetMTRLDatafromType(selectedItem, selectedRace.ID, selectedPart.Name, type, imcVersion, selectedCategory, "a");
             mtrlData = info.Item1;

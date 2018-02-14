@@ -160,6 +160,7 @@
     <Compile Include="IO\SaveModel.cs" />
     <Compile Include="IO\SaveTex.cs" />
     <Compile Include="FileTypes\ModelContainers\Mesh.cs" />
+    <Compile Include="Model\ImportSettings.cs" />
     <Compile Include="Model\TreeNode.cs" />
     <Compile Include="Model\ModelMeshData.cs" />
     <Compile Include="FileTypes\ModelContainers\MeshDataInfo.cs" />
@@ -233,6 +234,9 @@
     <Compile Include="Views\About.xaml.cs">
       <DependentUpon>About.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\AdvImport.xaml.cs">
+      <DependentUpon>AdvImport.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Directories.xaml.cs">
       <DependentUpon>Directories.xaml</DependentUpon>
     </Compile>
@@ -269,6 +273,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="Views\About.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\AdvImport.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

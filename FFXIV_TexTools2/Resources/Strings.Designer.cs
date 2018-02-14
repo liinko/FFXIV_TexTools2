@@ -169,6 +169,24 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Au Ra Raen.
+        /// </summary>
+        internal static string AuRa_Raen {
+            get {
+                return ResourceManager.GetString("AuRa_Raen", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Au Ra Xaela.
+        /// </summary>
+        internal static string AuRa_Xaela {
+            get {
+                return ResourceManager.GetString("AuRa_Xaela", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Bahamut-Egi.
         /// </summary>
         internal static string Bahamut_Egi {

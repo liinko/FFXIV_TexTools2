@@ -122,12 +122,42 @@ namespace FFXIV_TexTools2.IO
                             ItemData item = new ItemData()
                             {
                                 ItemName = petName,
+                                PrimaryModelID = Info.petID[petName],
+                                PrimaryModelBody = "1",
+                                PrimaryModelVariant = "1",
                                 ItemCategory = "22"
                             };
+
+                            if (petName.Equals(Strings.Selene) || petName.Equals(Strings.Bishop_Autoturret))
+                            {
+                                item.PrimaryModelBody = "2";
+                            }
 
                             TreeNode itemNode = new TreeNode() { Name = petName, ItemData = item };
 
                             petNode._subNode.Add(itemNode);
+
+
+                            for (int j = 2; j < 11; j++)
+                            {
+                                var MTRLFolder = String.Format(Strings.MonsterMtrlFolder, item.PrimaryModelID, item.PrimaryModelBody.ToString().PadLeft(4, '0')) + j.ToString().PadLeft(4, '0');
+
+                                if (Helper.FolderExists(FFCRC.GetHash(MTRLFolder), Strings.ItemsDat))
+                                {
+                                    ItemData item2 = new ItemData()
+                                    {
+                                        ItemName = petName + " " + j,
+                                        PrimaryModelID = Info.petID[petName],
+                                        PrimaryModelBody = "1",
+                                        PrimaryModelVariant = j.ToString(),
+                                        ItemCategory = "22"
+                                    };
+
+                                    TreeNode itemNode2 = new TreeNode() { Name = item2.ItemName, ItemData = item2 };
+
+                                    petNode._subNode.Add(itemNode2);
+                                }
+                            }
                         }
 
                     }
@@ -136,6 +166,9 @@ namespace FFXIV_TexTools2.IO
                 ItemData extraItem = new ItemData()
                 {
                     ItemName = Strings.Ramuh_Egi,
+                    PrimaryModelID = Info.petID[Strings.Ramuh_Egi],
+                    PrimaryModelBody = "1",
+                    PrimaryModelVariant = "1",
                     ItemCategory = "22"
                 };
 
@@ -146,6 +179,9 @@ namespace FFXIV_TexTools2.IO
                 extraItem = new ItemData()
                 {
                     ItemName = Strings.Sephirot_Egi,
+                    PrimaryModelID = Info.petID[Strings.Sephirot_Egi],
+                    PrimaryModelBody = "1",
+                    PrimaryModelVariant = "1",
                     ItemCategory = "22"
                 };
 
@@ -156,6 +192,9 @@ namespace FFXIV_TexTools2.IO
                 extraItem = new ItemData()
                 {
                     ItemName = Strings.Bahamut_Egi,
+                    PrimaryModelID = Info.petID[Strings.Bahamut_Egi],
+                    PrimaryModelBody = "1",
+                    PrimaryModelVariant = "1",
                     ItemCategory = "22"
                 };
 
@@ -166,6 +205,9 @@ namespace FFXIV_TexTools2.IO
                 extraItem = new ItemData()
                 {
                     ItemName = Strings.Placeholder_Egi,
+                    PrimaryModelID = Info.petID[Strings.Placeholder_Egi],
+                    PrimaryModelBody = "1",
+                    PrimaryModelVariant = "1",
                     ItemCategory = "22"
                 };
 
@@ -1264,11 +1306,11 @@ namespace FFXIV_TexTools2.IO
                         {
                             ItemData item = new ItemData();
 
-                            br.ReadBytes(70);
+                            br.ReadBytes(22);
 
                             uint modelIndex = BitConverter.ToUInt16(br.ReadBytes(2).Reverse().ToArray(), 0);
 
-                            br.ReadBytes(40);
+                            br.ReadBytes(44);
 
                             item.ItemName = Helper.ToTitleCase(Encoding.UTF8.GetString(br.ReadBytes(firstText - 1)).Replace("\0", ""));
                             item.ItemCategory = Strings.Mount_Category;

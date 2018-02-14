@@ -21,6 +21,7 @@ using FFXIV_TexTools2.Resources;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -34,7 +35,7 @@ namespace FFXIV_TexTools2.ViewModel
 {
     public class ListViewModel : INotifyPropertyChanged
     {
-        List<ModListModel> mlmList = new List<ModListModel>();
+        ObservableCollection<ModListModel> mlmList = new ObservableCollection<ModListModel>();
         bool _isSelected;
 
         public ListViewModel(string selectedItem)
@@ -58,7 +59,7 @@ namespace FFXIV_TexTools2.ViewModel
 
         }
 
-        public List<ModListModel> ModList
+        public ObservableCollection<ModListModel> ModList
         {
             get { return mlmList; }
         }

@@ -27,5 +27,7 @@ namespace FFXIV_TexTools2.FileTypes.ModelContainers
         public Dictionary<int, int> totalExtraCounts;
 
         public Dictionary<int, List<int>> extraIndices;
+
+        public Dictionary<int, List<int>> extraIndices2;
     }
 }

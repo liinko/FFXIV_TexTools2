@@ -16,6 +16,7 @@
 
 using FFXIV_TexTools2.Material.ModelMaterial;
 using HelixToolkit.Wpf.SharpDX.Core;
+using SharpDX;
 using System.Collections.Generic;
 
 namespace FFXIV_TexTools2.Material
@@ -61,6 +62,11 @@ namespace FFXIV_TexTools2.Material
         /// The collection of vertex colors for the mesh
         /// </summary>
         public Color4Collection VertexColors = new Color4Collection();
+
+        /// <summary>
+        /// The list of extra vertices
+        /// </summary>
+        public List<Vector3> ExtraVerts = new List<Vector3>();
 
         /// <summary>
         /// The list of bone strings

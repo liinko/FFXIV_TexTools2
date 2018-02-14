@@ -44,9 +44,7 @@
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <StatusBar Height="21" VerticalAlignment="Bottom">
-            <Viewbox>
-                <Label x:Name="DXVerStatus" Content="DX Ver: " Padding="0"/>
-            </Viewbox>
+            <Button x:Name="DXVerButton" Content="DX Ver: 11" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" BorderThickness="0" Background="{x:Null}" Click="DXVerButton_Click"/>
         </StatusBar>
         <Menu x:Name="menu" Height="22" VerticalAlignment="Top">
             <MenuItem Header="Mods">
@@ -60,11 +58,9 @@
             </MenuItem>
             <MenuItem Header="Options" StaysOpenOnClick="True" Height="22">
                 <MenuItem x:Name="Menu_Directories" Header="Directories" Click="Menu_Directories_Click"/>
-                <MenuItem Header="DX Version">
-                    <MenuItem x:Name="Menu_DX9" Header="DX9" HorizontalAlignment="Left" Click="Menu_DX9_Click" IsCheckable="True" IsChecked="{Binding IsDX9, Mode=OneWay}" IsEnabled="{Binding DX9Enabled}"/>
-                    <MenuItem x:Name="Menu_DX11" Header="DX11" HorizontalAlignment="Left" Click="Menu_DX11_Click" IsCheckable="True" IsChecked="{Binding IsDX11, Mode=OneWay}" IsEnabled="{Binding DX11Enabled}"/>
-                </MenuItem>
                 <MenuItem x:Name="Save_All_DDS" Header="Save All DDS" Click="Save_All_DDS_Click" IsEnabled="False"/>
+                <MenuItem x:Name="Default_Race" Header="Default Race" Click="Default_Race_Click" />
+                
             </MenuItem>
             <MenuItem Header="Help">
                 <MenuItem x:Name="Menu_ProblemCheck" Header="Check For Problems" Click="Menu_ProblemCheck_Click"/>

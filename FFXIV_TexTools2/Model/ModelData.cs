@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using FFXIV_TexTools2.FileTypes.ModelContainers;
+using FFXIV_TexTools2.Material;
 using FFXIV_TexTools2.Material.ModelMaterial;
 using System.Collections.Generic;
 

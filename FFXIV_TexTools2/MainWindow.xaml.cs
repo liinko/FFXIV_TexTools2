@@ -21,8 +21,10 @@ using FFXIV_TexTools2.Views;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -45,68 +47,45 @@ namespace FFXIV_TexTools2
 
             var dxver = Properties.Settings.Default.DX_Ver;
 
-            if(dxver != Strings.DX11 && dxver != Strings.DX9)
+            if (dxver != Strings.DX11 && dxver != Strings.DX9)
             {
                 Properties.Settings.Default.DX_Ver = Strings.DX11;
                 Properties.Settings.Default.Save();
             }
 
-            DXVerStatus.Content = "DX Version: " + dxver.Substring(2);
+            DXVerButton.Content = "DX Version: " + dxver.Substring(2);
+
+            List<System.Windows.Controls.MenuItem> miList = new List<System.Windows.Controls.MenuItem>();
+            foreach(var br in Info.baseRace)
+            {
+                System.Windows.Controls.MenuItem mi = new System.Windows.Controls.MenuItem();
+                mi.Header = br;
+                miList.Add(mi);
+            }
+
+            Default_Race.ItemsSource = miList;
+
+            if (Properties.Settings.Default.Default_Race.Equals(""))
+            {
+                Properties.Settings.Default.Default_Race = Strings.Hyur_M;
+                Properties.Settings.Default.Save();
+            }
+
+            foreach(System.Windows.Controls.MenuItem br in Default_Race.Items)
+            {
+                if (br.Header.Equals(Properties.Settings.Default.Default_Race))
+                {
+                    br.IsChecked = true;
+                    br.IsEnabled = false;
+                }
+                else
+                {
+                    br.IsChecked = false;
+                }
+            }
+
 
             //HavokInterop.InitializeSTA();
-        }
-
-        private void Menu_DX9_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                Properties.Settings.Default.DX_Ver = Strings.DX9;
-                Properties.Settings.Default.Save();
-
-                Menu_DX9.IsEnabled = false;
-                Menu_DX11.IsEnabled = true;
-                Menu_DX11.IsChecked = false;
-
-                DXVerStatus.Content = "DX Version: 9";
-
-                if ((CategoryViewModel)textureTreeView.SelectedItem != null)
-                {
-                    var itemSelected = (CategoryViewModel)textureTreeView.SelectedItem;
-                    ((CategoryViewModel)textureTreeView.SelectedItem).IsSelected = false;
-                    itemSelected.IsSelected = true;
-                }
-            }
-            catch (Exception ex)
-            {
-                FlexibleMessageBox.Show("[Main] DX Switch Error \n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private void Menu_DX11_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                Properties.Settings.Default.DX_Ver = Strings.DX11;
-                Properties.Settings.Default.Save();
-
-                Menu_DX11.IsEnabled = false;
-                Menu_DX9.IsEnabled = true;
-                Menu_DX9.IsChecked = false;
-
-                DXVerStatus.Content = "DX Version: 11";
-
-                if ((CategoryViewModel)textureTreeView.SelectedItem != null)
-                {
-                    var itemSelected = (CategoryViewModel)textureTreeView.SelectedItem;
-                    ((CategoryViewModel)textureTreeView.SelectedItem).IsSelected = false;
-                    itemSelected.IsSelected = true;
-                }
-            }
-            catch (Exception ex)
-            {
-                FlexibleMessageBox.Show("[Main] DX Switch Error \n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-
         }
 
         private void Menu_ProblemCheck_Click(object sender, RoutedEventArgs e)
@@ -434,6 +413,61 @@ namespace FFXIV_TexTools2
         private void Menu_Tutorials_Click(object sender, RoutedEventArgs e)
         {
             System.Diagnostics.Process.Start("http://ffxivtextools.dualwield.net/app_tutorial.html");
+        }
+
+        private void Default_Race_Click(object sender, RoutedEventArgs e)
+        {
+            var selectedMenuItem = (e.OriginalSource as System.Windows.Controls.MenuItem);
+            var selectedRace = selectedMenuItem.Header.ToString();
+
+
+            Properties.Settings.Default.Default_Race = selectedRace;
+            Properties.Settings.Default.Save();
+
+            foreach (System.Windows.Controls.MenuItem br in Default_Race.Items)
+            {
+                if (br.Header.Equals(Properties.Settings.Default.Default_Race))
+                {
+                    br.IsChecked = true;
+                    br.IsEnabled = false;
+                }
+                else
+                {
+                    br.IsChecked = false;
+                    br.IsEnabled = true;
+                }
+            }
+        }
+
+        private void DXVerButton_Click(object sender, RoutedEventArgs e)
+        {
+            var dxver = Properties.Settings.Default.DX_Ver;
+
+            if (dxver.Equals(Strings.DX11))
+            {
+                Properties.Settings.Default.DX_Ver = Strings.DX9;
+                Properties.Settings.Default.Save();
+
+                DXVerButton.Content = "DX Version: 9";
+            }
+            else if (dxver.Equals(Strings.DX9))
+            {
+                Properties.Settings.Default.DX_Ver = Strings.DX11;
+                Properties.Settings.Default.Save();
+
+                DXVerButton.Content = "DX Version: 11";
+            }
+            else
+            {
+                DXVerButton.Content = "DX Version: ERROR";
+            }
+
+            if ((CategoryViewModel)textureTreeView.SelectedItem != null)
+            {
+                var itemSelected = (CategoryViewModel)textureTreeView.SelectedItem;
+                ((CategoryViewModel)textureTreeView.SelectedItem).IsSelected = false;
+                itemSelected.IsSelected = true;
+            }
         }
     }
 }

@@ -19,6 +19,7 @@ using FFXIV_TexTools2.IO;
 using FFXIV_TexTools2.Material;
 using FFXIV_TexTools2.Model;
 using FFXIV_TexTools2.Resources;
+using FFXIV_TexTools2.Views;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -47,7 +48,7 @@ namespace FFXIV_TexTools2.ViewModel
 
         int raceIndex, meshIndex, bodyIndex, partIndex;
         bool raceEnabled, meshEnabled, bodyEnabled, partEnabled, modelRendering, secondModelRendering, thirdModelRendering, is3DLoaded, disposing, modelTabEnabled;
-        bool import3dEnabled, activeEnabled, openEnabled, newCat;
+        bool import3dEnabled, activeEnabled, openEnabled, newCat, advImport3dEnabled;
         string selectedCategory, reflectionAmount, modelName, fullPath, prevCat;
         string activeToggle = "Enable/Disable";
 
@@ -76,6 +77,7 @@ namespace FFXIV_TexTools2.ViewModel
 
         public bool ModelTabEnabled { get { return modelTabEnabled; } set { modelTabEnabled = value; NotifyPropertyChanged("ModelTabEnabled"); } }
         public bool Import3DEnabled { get { return import3dEnabled; } set { import3dEnabled = value; NotifyPropertyChanged("Import3DEnabled"); } }
+        public bool AdvImport3DEnabled { get { return advImport3dEnabled; } set { advImport3dEnabled = value; NotifyPropertyChanged("AdvImport3DEnabled"); } }
         public bool ActiveEnabled { get { return activeEnabled; } set { activeEnabled = value; NotifyPropertyChanged("ActiveEnabled"); } }
         public bool OpenEnabled { get { return openEnabled; } set { openEnabled = value; NotifyPropertyChanged("OpenEnabled"); } }
 
@@ -96,6 +98,12 @@ namespace FFXIV_TexTools2.ViewModel
             CompositeVM.Dispose();
             disposing = true;
             cbi.Clear();
+            bool itemChanged = false;
+
+            if(selectedItem != null && !item.ItemName.Equals(selectedItem.ItemName))
+            {
+                itemChanged = true;
+            }
 
             prevCat = selectedCategory;
             selectedItem = item;
@@ -106,107 +114,117 @@ namespace FFXIV_TexTools2.ViewModel
                 newCat = true;
             }
 
-            try
+            if(RaceComboBox.Count > 0 && !itemChanged)
             {
-                string categoryType = Helper.GetCategoryType(selectedCategory);
+                RaceComboBoxChanged();
+                
+            }
+            else
+            {
+                try
+                {
+                    string categoryType = Helper.GetCategoryType(selectedCategory);
 
-                string MDLFolder = "";
-                string MDLFile = "";
+                    string MDLFolder = "";
+                    string MDLFile = "";
 
-                if (categoryType.Equals("weapon") || categoryType.Equals("food"))
-                {
-                    MDLFolder = "";
-                    cbi.Add(new ComboBoxInfo() { Name = Strings.All, ID = Strings.All, IsNum = false });
-                }
-                else if (categoryType.Equals("accessory"))
-                {
-                    MDLFolder = string.Format(Strings.AccMDLFolder, selectedItem.PrimaryModelID);
-                    MDLFile = string.Format(Strings.AccMDLFile, "{0}", selectedItem.PrimaryModelID, Info.slotAbr[selectedCategory]);
-                }
-                else if (categoryType.Equals("character"))
-                {
-                    if (selectedItem.ItemName.Equals(Strings.Body))
+                    if (categoryType.Equals("weapon") || categoryType.Equals("food"))
                     {
-                        MDLFolder = Strings.BodyMDLFolder;
+                        MDLFolder = "";
+                        cbi.Add(new ComboBoxInfo() { Name = Strings.All, ID = Strings.All, IsNum = false });
                     }
-                    else if (selectedItem.ItemName.Equals(Strings.Face))
+                    else if (categoryType.Equals("accessory"))
                     {
-                        MDLFolder = Strings.FaceMDLFolder;
+                        MDLFolder = string.Format(Strings.AccMDLFolder, selectedItem.PrimaryModelID);
+                        MDLFile = string.Format(Strings.AccMDLFile, "{0}", selectedItem.PrimaryModelID, Info.slotAbr[selectedCategory]);
                     }
-                    else if (selectedItem.ItemName.Equals(Strings.Hair))
+                    else if (categoryType.Equals("character"))
                     {
-                        MDLFolder = Strings.HairMDLFolder;
-                    }
-                    else if (selectedItem.ItemName.Equals(Strings.Tail))
-                    {
-                        MDLFolder = Strings.TailMDLFolder;
-                    }
-                }
-                else if (categoryType.Equals("monster"))
-                {
-                    cbi.Add(new ComboBoxInfo() { Name = Strings.All, ID = Strings.All, IsNum = false });
-                }
-                else
-                {
-                    MDLFolder = string.Format(Strings.EquipMDLFolder, selectedItem.PrimaryModelID);
-                    MDLFile = string.Format(Strings.EquipMDLFile, "{0}", selectedItem.PrimaryModelID, Info.slotAbr[selectedCategory]);
-                }
-
-                var fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(MDLFolder), Strings.ItemsDat);
-
-                if (!categoryType.Equals("weapon") && !categoryType.Equals("monster"))
-                {
-                    foreach (string raceID in Info.IDRace.Keys)
-                    {
-                        if (categoryType.Equals("character"))
+                        if (selectedItem.ItemName.Equals(Strings.Body))
                         {
-                            for (int i = 0; i < 3; i++)
+                            MDLFolder = Strings.BodyMDLFolder;
+                        }
+                        else if (selectedItem.ItemName.Equals(Strings.Face))
+                        {
+                            MDLFolder = Strings.FaceMDLFolder;
+                        }
+                        else if (selectedItem.ItemName.Equals(Strings.Hair))
+                        {
+                            MDLFolder = Strings.HairMDLFolder;
+                        }
+                        else if (selectedItem.ItemName.Equals(Strings.Tail))
+                        {
+                            MDLFolder = Strings.TailMDLFolder;
+                        }
+                    }
+                    else if (categoryType.Equals("monster"))
+                    {
+                        cbi.Add(new ComboBoxInfo() { Name = Strings.All, ID = Strings.All, IsNum = false });
+                    }
+                    else
+                    {
+                        MDLFolder = string.Format(Strings.EquipMDLFolder, selectedItem.PrimaryModelID);
+                        MDLFile = string.Format(Strings.EquipMDLFile, "{0}", selectedItem.PrimaryModelID, Info.slotAbr[selectedCategory]);
+                    }
+
+                    var fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(MDLFolder), Strings.ItemsDat);
+
+                    if (!categoryType.Equals("weapon") && !categoryType.Equals("monster"))
+                    {
+                        foreach (string raceID in Info.IDRace.Keys)
+                        {
+                            if (categoryType.Equals("character"))
                             {
-                                var mdlFolder = String.Format(MDLFolder, raceID, i.ToString().PadLeft(4, '0'));
-                                if (selectedItem.ItemName.Equals(Strings.Face) && (raceID.Equals("0301") || raceID.Equals("0304") || raceID.Equals("0401") || raceID.Equals("0404")))
+                                for (int i = 0; i < 3; i++)
                                 {
-                                   mdlFolder = String.Format(MDLFolder, raceID, "01" + i.ToString().PadLeft(2, '0'));
+                                    var mdlFolder = String.Format(MDLFolder, raceID, i.ToString().PadLeft(4, '0'));
+                                    if (selectedItem.ItemName.Equals(Strings.Face) && (raceID.Equals("0301") || raceID.Equals("0304") || raceID.Equals("0401") || raceID.Equals("0404")))
+                                    {
+                                        mdlFolder = String.Format(MDLFolder, raceID, "01" + i.ToString().PadLeft(2, '0'));
 
+                                    }
+
+
+                                    if (Helper.FolderExists(FFCRC.GetHash(mdlFolder), Strings.ItemsDat))
+                                    {
+                                        cbi.Add(new ComboBoxInfo() { Name = Info.IDRace[raceID], ID = raceID, IsNum = false });
+                                        break;
+                                    }
                                 }
+                            }
+                            else
+                            {
+                                var mdlFile = String.Format(MDLFile, raceID);
+                                var fileHash = FFCRC.GetHash(mdlFile);
 
-
-                                if (Helper.FolderExists(FFCRC.GetHash(mdlFolder), Strings.ItemsDat))
+                                if (fileHashList.Contains(fileHash))
                                 {
                                     cbi.Add(new ComboBoxInfo() { Name = Info.IDRace[raceID], ID = raceID, IsNum = false });
-                                    break;
                                 }
                             }
                         }
-                        else
-                        {
-                            var mdlFile = String.Format(MDLFile, raceID);
-                            var fileHash = FFCRC.GetHash(mdlFile);
+                    }
 
-                            if (fileHashList.Contains(fileHash))
-                            {
-                                cbi.Add(new ComboBoxInfo() { Name = Info.IDRace[raceID], ID = raceID, IsNum = false });
-                            }
-                        }
+                    RaceComboBox = new ObservableCollection<ComboBoxInfo>(cbi);
+                    RaceIndex = 0;
+
+                    if (cbi.Count <= 1)
+                    {
+                        RaceEnabled = false;
+                    }
+                    else
+                    {
+                        RaceEnabled = true;
                     }
                 }
-
-                RaceComboBox = new ObservableCollection<ComboBoxInfo>(cbi);
-                RaceIndex = 0;
-
-                if (cbi.Count <= 1)
+                catch (Exception ex)
                 {
-                    RaceEnabled = false;
-                }
-                else
-                {
-                    RaceEnabled = true;
+                    FlexibleMessageBox.Show("[Main] Model Error \n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Debug.WriteLine(ex.StackTrace);
                 }
             }
-            catch (Exception ex)
-            {
-                FlexibleMessageBox.Show("[Main] Model Error \n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Debug.WriteLine(ex.StackTrace);
-            }
+
+
         }
 
         /// <summary>
@@ -332,6 +350,14 @@ namespace FFXIV_TexTools2.ViewModel
         }
 
         /// <summary>
+        /// Command for the Import OBJ button
+        /// </summary>
+        public ICommand AdvImportOBJCommand
+        {
+            get { return new RelayCommand(AdvImport); }
+        }
+
+        /// <summary>
         /// Imports the model
         /// </summary>
         /// <param name="obj"></param>
@@ -339,8 +365,24 @@ namespace FFXIV_TexTools2.ViewModel
         {
             if (!Helper.IsIndexLocked(true))
             {
-                ImportModel.ImportDAE(selectedCategory, selectedItem.ItemName, modelName, SelectedMesh.ID, fullPath, meshList[0].BoneStrings, modelData);
+                ImportModel.ImportDAE(selectedCategory, selectedItem.ItemName, modelName, SelectedMesh.ID, fullPath, meshList[0].BoneStrings, modelData, null);
                 UpdateModel(selectedItem, selectedCategory);
+            }
+        }
+
+        /// <summary>
+        /// Imports the model
+        /// </summary>
+        /// <param name="obj"></param>
+        private void AdvImport(object obj)
+        {
+            if (!Helper.IsIndexLocked(true))
+            {
+                var savePath = Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selectedItem.ItemName + "/3D/" + modelName + ".DAE";
+                AdvImport advImport = new AdvImport(this, savePath, selectedCategory, selectedItem, modelName, SelectedMesh.ID, fullPath, meshList[0].BoneStrings, modelData);
+                advImport.Show();
+                //ImportModel.ImportDAE(selectedCategory, selectedItem.ItemName, modelName, SelectedMesh.ID, fullPath, meshList[0].BoneStrings, modelData);
+                //UpdateModel(selectedItem, selectedCategory);
             }
         }
 
@@ -1007,7 +1049,7 @@ namespace FFXIV_TexTools2.ViewModel
                             }
                         }
 
-                        if (mtrlData.SpecularOffset != 0)
+                        if (!isBody && mtrlData.SpecularOffset != 0)
                         {
                             specularData = TEX.GetTex(mtrlData.SpecularOffset, Strings.ItemsDat);
                             specularBMP = Imaging.CreateBitmapSourceFromHBitmap(specularData.BMP.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
@@ -1099,10 +1141,15 @@ namespace FFXIV_TexTools2.ViewModel
                 if (File.Exists(Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selectedItem.ItemName + "/3D/" + modelName + ".DAE"))
                 {
                     Import3DEnabled = true;
+                    if(modelData.ExtraData.totalExtraCounts != null && modelData.ExtraData.totalExtraCounts.Count > 0)
+                    {
+                        AdvImport3DEnabled = true;
+                    }
                 }
                 else
                 {
                     Import3DEnabled = false;
+                    AdvImport3DEnabled = false;
                 }
 
                 if (Directory.Exists(Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selectedItem.ItemName + "/3D/"))
@@ -1192,6 +1239,8 @@ namespace FFXIV_TexTools2.ViewModel
             var itemVersion = IMC.GetVersion(selectedCategory, selectedItem, false).Item1;
             var itemType = Helper.GetCategoryType(selectedCategory);
 
+            var MTRLFile = materialStrings[mNum].Substring(1);
+
             switch (typeChar)
             {
                 //equipment
@@ -1209,8 +1258,79 @@ namespace FFXIV_TexTools2.ViewModel
                     break;
                 //body
                 case "cb":
+
                     modelID = materialStrings[mNum].Substring(materialStrings[mNum].IndexOf("b") + 1, 4);
+
+                    var gender = 0;
+                    if (int.Parse(race.Substring(0, 2)) % 2 == 0)
+                    {
+                        gender = 1;
+                    }
+
+                    if (!race.Equals("1101"))
+                    {
+                        if (Properties.Settings.Default.Default_Race.Equals(Strings.Hyur_M))
+                        {
+                            if (gender == 0)
+                            {
+                                race = "0101";
+                            }
+                            else
+                            {
+                                race = "0201";
+                            }
+                        }
+                        else if (Properties.Settings.Default.Default_Race.Equals(Strings.Hyur_H))
+                        {
+                            if (gender == 0)
+                            {
+                                race = "0301";
+                            }
+                            else
+                            {
+                                race = "0401";
+                            }
+                        }
+                        else if (Properties.Settings.Default.Default_Race.Equals(Strings.AuRa_Raen))
+                        {
+                            if (gender == 0)
+                            {
+                                race = "1301";
+                            }
+                            else
+                            {
+                                race = "1401";
+                            }
+                        }
+                        else if (Properties.Settings.Default.Default_Race.Equals(Strings.AuRa_Xaela))
+                        {
+                            if (gender == 0)
+                            {
+                                race = "1301";
+                            }
+                            else
+                            {
+                                race = "1401";
+                            }
+
+                            modelID = "0101";
+                        }
+                        else if (Properties.Settings.Default.Default_Race.Equals(Strings.Roegadyn))
+                        {
+                            if (gender == 0)
+                            {
+                                race = "0901";
+                            }
+                            else
+                            {
+                                race = "1001";
+                            }
+                        }
+                    }
+
+
                     mtrlFolder = string.Format(Strings.BodyMtrlFolder, race, modelID);
+                    MTRLFile = string.Format(Strings.BodyMtrlFile, race, modelID);
                     break;
                 //face
                 case "cf":
@@ -1249,16 +1369,16 @@ namespace FFXIV_TexTools2.ViewModel
             }
             else if (typeChar.Equals("cb") || typeChar.Equals("ct"))
             {
-                var info = MTRL.GetMTRLInfo(Helper.GetDataOffset(FFCRC.GetHash(mtrlFolder), FFCRC.GetHash(materialStrings[mNum].Substring(1)), Strings.ItemsDat), true);
+                var info = MTRL.GetMTRLInfo(Helper.GetDataOffset(FFCRC.GetHash(mtrlFolder), FFCRC.GetHash(MTRLFile), Strings.ItemsDat), true);
                 return info;
             }
             else
             {
-                if (selectedCategory.Equals(Strings.Pets))
-                {
-                    body = part;
-                    part = SelectedPart.ID;
-                }
+                //if (selectedCategory.Equals(Strings.Pets))
+                //{
+                //    body = part;
+                //    part = SelectedPart.ID;
+                //}
                 var info = MTRL.GetMTRLData(selectedItem, race, selectedCategory, part, itemVersion, body, modelID, "0000");
                 return info.Item1;
             }

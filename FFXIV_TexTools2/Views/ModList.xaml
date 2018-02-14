@@ -122,7 +122,7 @@
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
                 <Button x:Name="modToggleButton" Content="Enable/Disable" Margin="10,0" Click="ModToggleButton_Click" IsEnabled="False"/>
-                <Button x:Name="goToButton" Content="Go To" Grid.Column="1" Margin="10,0" Click="GoToButton_Click" IsEnabled="False"/>
+                <Button x:Name="deleteButton" Content="Delete" Grid.Column="1" Margin="10,0" IsEnabled="False" Click="DeleteButton_Click"/>
             </Grid>
         </Grid>
     </Grid>

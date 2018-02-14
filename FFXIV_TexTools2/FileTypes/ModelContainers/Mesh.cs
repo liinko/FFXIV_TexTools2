@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using SharpDX;
 using System.Collections.Generic;
 
 namespace FFXIV_TexTools2.Material.ModelMaterial
@@ -44,5 +45,15 @@ namespace FFXIV_TexTools2.Material.ModelMaterial
         /// The meshes vertex data
         /// </summary>
         public List<byte[]> MeshVertexData = new List<byte[]>();
+
+        /// <summary>
+        /// The meshes extra vertex data
+        /// </summary>
+        public Dictionary<int, Vector3> extraVertDict = new Dictionary<int, Vector3>();
+
+        /// <summary>
+        /// True if mesh has a body texture, false otherwise.
+        /// </summary>
+        public bool IsBody { get; set; }
     }
 }

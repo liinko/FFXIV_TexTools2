@@ -163,6 +163,12 @@ namespace FFXIV_TexTools2
         public static void CreateModList()
         {
             string md = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/TexTools";
+
+            if (!Properties.Settings.Default.Modlist_Directory.Equals(""))
+            {
+                md = Path.GetDirectoryName(Properties.Settings.Default.Modlist_Directory);
+            }
+
             Directory.CreateDirectory(md);
 
             if(!File.Exists(md + "/TexTools.modlist"))

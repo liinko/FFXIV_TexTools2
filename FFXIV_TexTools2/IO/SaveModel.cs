@@ -196,7 +196,8 @@ namespace FFXIV_TexTools2.IO
                 skelName = "c0101";
             }
 
-            string[] skeleton1 = File.ReadAllLines(Directory.GetCurrentDirectory() + "/Skeletons/" + skelName + ".skel");
+            //string[] skeleton1 = File.ReadAllLines(Directory.GetCurrentDirectory() + "/Skeletons/" + skelName + ".skel");
+            string[] skeleton1 = File.ReadAllLines(Directory.GetCurrentDirectory() + "/Skeletons/c1401.skel");
 
             Dictionary<string, JsonSkeleton> skelDict = new Dictionary<string, JsonSkeleton>();
 
@@ -346,7 +347,83 @@ namespace FFXIV_TexTools2.IO
                 fullSkelnum.Clear();
             }
 
-            return true;
+            if(modelData.ExtraData.totalExtraCounts != null && modelData.ExtraData.totalExtraCounts.Count > 0)
+            {
+                using (XmlWriter xmlWriter = XmlWriter.Create(Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selectedItemName + "/3D/" + modelName + "_Settings.xml", xmlWriterSettings))
+                {
+                    xmlWriter.WriteStartDocument();
+
+                    xmlWriter.WriteComment("Note: Both Fix and DisableHide should not be True, if they are, TexTools will choose Hide over Fix");
+
+                    //<TexTools_Import>
+                    xmlWriter.WriteStartElement("TexTools_Import");
+
+                    //<Model>
+                    xmlWriter.WriteStartElement("Model");
+                    xmlWriter.WriteAttributeString("name", modelName);
+
+                    //<Mesh>
+                    xmlWriter.WriteStartElement("Mesh");
+                    xmlWriter.WriteAttributeString("name", "ALL");
+
+                    //<Fix>
+                    xmlWriter.WriteStartElement("Fix");
+                    xmlWriter.WriteString("false");
+                    xmlWriter.WriteEndElement();
+                    //</Fix>
+
+                    //<Hide>
+                    xmlWriter.WriteStartElement("DisableHide");
+                    xmlWriter.WriteString("false");
+                    xmlWriter.WriteEndElement();
+                    //</Hide>
+
+                    xmlWriter.WriteEndElement();
+                    //</Mesh>
+
+                    foreach(var m in modelData.ExtraData.totalExtraCounts)
+                    {
+
+                        var isBody = modelData.LoD[0].MeshList[m.Key].IsBody;
+                        //<Mesh>
+                        xmlWriter.WriteStartElement("Mesh");
+                        xmlWriter.WriteAttributeString("name", m.Key.ToString());
+                        if (isBody)
+                        {
+                            xmlWriter.WriteAttributeString("type", "Body Mesh");
+                        }
+
+                        //<Fix>
+                        xmlWriter.WriteStartElement("Fix");
+                        xmlWriter.WriteString("false");
+                        xmlWriter.WriteEndElement();
+                        //</Fix>
+
+                        //<Hide>
+                        xmlWriter.WriteStartElement("DisableHide");
+                        xmlWriter.WriteString("false");
+                        xmlWriter.WriteEndElement();
+                        //</Hide>
+
+                        xmlWriter.WriteEndElement();
+                        //</Mesh>
+                    }
+
+                    xmlWriter.WriteEndElement();
+                    //</Model>
+
+
+                    xmlWriter.WriteEndElement();
+                    //</TexTools_Import>
+
+                    xmlWriter.WriteEndDocument();
+
+                    xmlWriter.Flush();
+                }
+            }
+
+
+                return true;
         }
 
         private static void GetSkeleton(string modelName, string category)

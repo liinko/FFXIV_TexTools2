@@ -681,4 +681,10 @@
   <data name="Sephirot_Egi" xml:space="preserve">
     <value>Sephirot-Egi</value>
   </data>
+  <data name="AuRa_Raen" xml:space="preserve">
+    <value>Au Ra Raen</value>
+  </data>
+  <data name="AuRa_Xaela" xml:space="preserve">
+    <value>Au Ra Xaela</value>
+  </data>
 </root>

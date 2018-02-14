@@ -22,6 +22,7 @@ using FFXIV_TexTools2.Resources;
 using HelixToolkit.Wpf.SharpDX;
 using HelixToolkit.Wpf.SharpDX.Core;
 using Newtonsoft.Json;
+using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -48,8 +49,14 @@ namespace FFXIV_TexTools2.IO
 		/// </remarks>
 		public static int DatOffsetAmount = 64;
 
+        public static string dxImportVer = Strings.DX11;
 
-		public static int ImportOBJ(string category, string itemName, string modelName, string selectedMesh, string internalPath)
+        static Dictionary<int, int> nVertDict = new Dictionary<int, int>();
+        static Dictionary<string, ImportSettings> importSettings = new Dictionary<string, ImportSettings>();
+
+
+
+        public static int ImportOBJ(string category, string itemName, string modelName, string selectedMesh, string internalPath)
 		{
 			var savePath = Properties.Settings.Default.Save_Directory + "/" + category + "/" + itemName + "/3D/" + modelName + "_mesh_" + selectedMesh + ".obj";
 
@@ -97,19 +104,61 @@ namespace FFXIV_TexTools2.IO
 		}
 
 
-		public static void ImportDAE(string category, string itemName, string modelName, string selectedMesh, string internalPath, List<string> boneStrings, ModelData modelData)
+        public static void ImportDAE(string category, string itemName, string modelName, string selectedMesh, string internalPath, List<string> boneStrings, ModelData modelData, Dictionary<string, ImportSettings> settings)
 		{
+            importSettings = settings;
+
 			var savePath = Properties.Settings.Default.Save_Directory + "/" + category + "/" + itemName + "/3D/" + modelName + ".DAE";
 
-			var numMeshes = modelData.LoD[0].MeshCount;
+            if (importSettings != null)
+            {
+                savePath = importSettings[Strings.All].path;
+            }
+
+            var settingsFile = Path.Combine(Path.GetDirectoryName(savePath), Path.GetFileNameWithoutExtension(savePath) + "_Settings.xml");
+
+            if (importSettings == null && File.Exists(settingsFile))
+            {
+                importSettings = new Dictionary<string, ImportSettings>();
+                using (XmlReader reader = XmlReader.Create(settingsFile))
+                {
+                    while (reader.Read())
+                    {
+                        if (reader.IsStartElement())
+                        {
+                            if (reader.Name.Equals("Mesh"))
+                            {
+                                var name = reader["name"];
+                                importSettings.Add(name, new ImportSettings());
+                                while (reader.Read())
+                                {
+                                    if (reader.IsStartElement())
+                                    {
+                                        if (reader.Name.Contains("Fix"))
+                                        {
+                                            importSettings[name].Fix = bool.Parse(reader.ReadElementContentAsString().ToLower());
+                                        }
+
+                                        if (reader.Name.Contains("DisableHide"))
+                                        {
+                                            importSettings[name].Disable = bool.Parse(reader.ReadElementContentAsString().ToLower());
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            var numMeshes = modelData.LoD[0].MeshCount;
 
 			if (File.Exists(savePath))
 			{
 				Dictionary<int, ColladaData> cdDict = new Dictionary<int, ColladaData>();
 
 				Dictionary<int, Dictionary<int, ColladaData>> pDict = new Dictionary<int, Dictionary<int, ColladaData>>();
-
-
 
                 for (int i = 0; i < numMeshes; i++)
 				{
@@ -806,6 +855,16 @@ namespace FFXIV_TexTools2.IO
 							"TexTools removed the smallest weight counts from the following: \n\n" + errorString, "Over Weight Count",MessageBoxButtons.OK,MessageBoxIcon.Information);
 					}
 
+
+                    var extraVertDict = modelData.LoD[0].MeshList[m].extraVertDict;
+
+                    var totalExtras = 0;
+                    for(int i = 0; i < modelData.LoD[0].MeshList.Count; i++)
+                    {
+                        totalExtras += modelData.LoD[0].MeshList[i].extraVertDict.Count;
+                    }
+
+
 					Dictionary<int, int> indexDict = new Dictionary<int, int>();
 					var inCount = 0;
 
@@ -815,6 +874,7 @@ namespace FFXIV_TexTools2.IO
 					List<int[]> iList = new List<int[]>();
 
                     var stride = 5;
+                    var indexMax = 0;
 
                     if (TexCoord2.Count < 1)
                     {
@@ -826,7 +886,12 @@ namespace FFXIV_TexTools2.IO
 						iList.Add(cd.index.GetRange(i, stride).ToArray());
 					}
 
-					for (int i = 0; i < iList.Count; i++)
+                    if(cd.index.Count > 0)
+                    {
+                        indexMax = cd.index.Max();
+                    }
+
+                    for (int i = 0; i < iList.Count; i++)
 					{
 						if (!indexDict.ContainsKey(iList[i][0]))
 						{
@@ -838,10 +903,10 @@ namespace FFXIV_TexTools2.IO
 								nBlendWeights.Add(blendWeights[iList[i][0]]);
 								nNormals.Add(Normals[iList[i][1]]);
 								nTexCoord.Add(TexCoord[iList[i][2]]);
-								if (TexCoord2.Count > 0)
+								if (TexCoord2.Count > 0 && TexCoord2.Count >= indexMax)
 								{
-									nTexCoord2.Add(TexCoord2[iList[i][3]]);
-								}
+                                    nTexCoord2.Add(TexCoord2[iList[i][3]]);
+                                }
 
 								if (nTangents.Count > 0 && TexCoord2.Count > 0)
 								{
@@ -876,7 +941,9 @@ namespace FFXIV_TexTools2.IO
 						}
 					}
 
-					Indices.Clear();
+                    HashSet<int> nVertList = new HashSet<int>();
+
+                    Indices.Clear();
 
 					for (int i = 0; i < iList.Count; i++)
 					{
@@ -884,7 +951,43 @@ namespace FFXIV_TexTools2.IO
 						Indices.Add(nIndex);
 					}
 
-					MeshGeometry3D mg = new MeshGeometry3D
+                    if (importSettings != null && importSettings.ContainsKey(m.ToString()))
+                    {
+                        if (importSettings[Strings.All].Fix || importSettings[m.ToString()].Fix)
+                        {
+                            foreach (var ev in extraVertDict)
+                            {
+                                var a = 0;
+                                foreach (var v in nVertex)
+                                {
+                                    bool found = false;
+                                    if (Vector3.NearEqual(ev.Value, v, new Vector3(0.02f)))
+                                    {
+                                        for (int i = 0; i < Indices.Count; i++)
+                                        {
+                                            if (a == Indices[i] && !nVertList.Contains(i) && !nVertDict.ContainsKey(ev.Key))
+                                            {
+                                                nVertDict.Add(ev.Key, i);
+                                                nVertList.Add(i);
+                                                found = true;
+                                                break;
+
+                                            }
+
+                                        }
+
+                                        if (found)
+                                        {
+                                            break;
+                                        }
+                                    }
+                                    a++;
+                                }
+                            }
+                        }
+                    }
+
+                    MeshGeometry3D mg = new MeshGeometry3D
 					{
 						Positions = nVertex,
 						Indices = Indices,
@@ -1022,14 +1125,14 @@ namespace FFXIV_TexTools2.IO
 				{
 					if (type.Equals("weapon"))
 					{
-						var hx = Half.Parse(mg.Positions[i].X.ToString());
-						id.dataSet1.AddRange(Half.GetBytes(hx));
+						var hx = System.Half.Parse(mg.Positions[i].X.ToString());
+						id.dataSet1.AddRange(System.Half.GetBytes(hx));
 
-						var hy = Half.Parse(mg.Positions[i].Y.ToString());
-						id.dataSet1.AddRange(Half.GetBytes(hy));
+						var hy = System.Half.Parse(mg.Positions[i].Y.ToString());
+						id.dataSet1.AddRange(System.Half.GetBytes(hy));
 
-						var hz = Half.Parse(mg.Positions[i].Z.ToString());
-						id.dataSet1.AddRange(Half.GetBytes(hz));
+						var hz = System.Half.Parse(mg.Positions[i].Z.ToString());
+						id.dataSet1.AddRange(System.Half.GetBytes(hz));
 
 						id.dataSet1.AddRange(BitConverter.GetBytes((short)15360));
 					}
@@ -1060,25 +1163,41 @@ namespace FFXIV_TexTools2.IO
 
 				for (int i = 0; i < mg.Normals.Count; i++)
 				{
-					//Normal X (Half)
-					float nX = mg.Normals[i].X;
+                    if (dxImportVer.Equals(Strings.DX11))
+                    {
+                        //Normal X
+                        float nX = mg.Normals[i].X;
+                        id.dataSet2.AddRange(BitConverter.GetBytes(nX));
 
-					id.dataSet2.AddRange(BitConverter.GetBytes(nX));
+                        //Normal Y
+                        float nY = mg.Normals[i].Y;
+                        id.dataSet2.AddRange(BitConverter.GetBytes(nY));
 
-					//Normal Y (Half)
-					float nY = mg.Normals[i].Y;
+                        //Normal Z
+                        float nZ = mg.Normals[i].Z;
+                        id.dataSet2.AddRange(BitConverter.GetBytes(nZ));
+                    }
+                    else if (dxImportVer.Equals(Strings.DX9))
+                    {
+                        //Normal X
+                        var nX = System.Half.Parse(mg.Normals[i].X.ToString());
+                        id.dataSet2.AddRange(System.Half.GetBytes(nX));
 
-					id.dataSet2.AddRange(BitConverter.GetBytes(nY));
+                        //Normal Y
+                        var nY = System.Half.Parse(mg.Normals[i].Y.ToString());
+                        id.dataSet2.AddRange(System.Half.GetBytes(nY));
 
-					//Normal Z (Half)
-					float nZ = mg.Normals[i].Z;
+                        //Normal Z
+                        var nZ = System.Half.Parse(mg.Normals[i].Z.ToString());
+                        id.dataSet2.AddRange(System.Half.GetBytes(nZ));
 
-					id.dataSet2.AddRange(BitConverter.GetBytes(nZ));
+                        //Normal W (Half)
+                        id.dataSet2.AddRange(new byte[2]);
+                    }
 
-					////Normal W (Half)
-					//id.dataSet2.AddRange(new byte[2]);
 
-					var btn = mg.BiTangents[i];
+
+                    var btn = mg.BiTangents[i];
 					var h = cmd.handedness[i];
 					if (h > 0) { btn = SharpDX.Vector3.Normalize(-btn); }
 					int c = id.dataSet2.Count;
@@ -1111,30 +1230,61 @@ namespace FFXIV_TexTools2.IO
 					//Color
 					id.dataSet2.AddRange(BitConverter.GetBytes(4294967295));
 
-					//TexCoord X
-					float x = mg.TextureCoordinates[i].X;
+                    if (dxImportVer.Equals(Strings.DX11))
+                    {
+                        //TexCoord X
+                        float x = mg.TextureCoordinates[i].X;
+                        id.dataSet2.AddRange(BitConverter.GetBytes(x));
 
-					id.dataSet2.AddRange(BitConverter.GetBytes(x));
+                        //TexCoord Y
+                        float y = mg.TextureCoordinates[i].Y * -1;
+                        id.dataSet2.AddRange(BitConverter.GetBytes(y));
 
-					//TexCoord Y
-					float y = mg.TextureCoordinates[i].Y * -1;
+                        float z = 0f;
+                        float w = 0f;
 
-					id.dataSet2.AddRange(BitConverter.GetBytes(y));
+                        if (cmd.texCoord2.Count > 0)
+                        {
+                            //TexCoord2 X
+                            z = cmd.texCoord2[i].X;
 
-					float z = 0f;
-					float w = 0f;
+                            //TexCoord2 Y
+                            w = cmd.texCoord2[i].Y * -1;
+                        }
 
-					if(cmd.texCoord2.Count > 0)
-					{
-						//TexCoord Z
-						z = cmd.texCoord2[i].X;
+                        id.dataSet2.AddRange(BitConverter.GetBytes(z));
+                        id.dataSet2.AddRange(BitConverter.GetBytes(w));
+                    }
+                    else if (dxImportVer.Equals(Strings.DX9))
+                    {
+                        //TexCoord X
+                        var tX = System.Half.Parse(mg.TextureCoordinates[i].X.ToString());
+                        id.dataSet2.AddRange(System.Half.GetBytes(tX));
 
-						//TexCoord W
-						w = cmd.texCoord2[i].Y * -1;
-					}
+                        //TexCoord Y
+                        var tY = System.Half.Parse((mg.TextureCoordinates[i].Y * -1).ToString());
+                        id.dataSet2.AddRange(System.Half.GetBytes(tY));
 
-					id.dataSet2.AddRange(BitConverter.GetBytes(z));
-					id.dataSet2.AddRange(BitConverter.GetBytes(w));
+
+                        if (cmd.texCoord2.Count > 0)
+                        {
+                            //TexCoord2 X
+                            var tZ = System.Half.Parse(cmd.texCoord2[i].X.ToString());
+
+                            //TexCoord2 Y
+                            var tW = System.Half.Parse((cmd.texCoord2[i].Y * -1).ToString());
+
+                            id.dataSet2.AddRange(System.Half.GetBytes(tZ));
+                            id.dataSet2.AddRange(System.Half.GetBytes(tW));
+                        }
+                        else
+                        {
+                            id.dataSet2.AddRange(new byte[2]);
+                            id.dataSet2.AddRange(new byte[2]);
+                        }
+                    }
+
+
 					//id.dataSet2.AddRange(BitConverter.GetBytes((short)0));
 					//id.dataSet2.AddRange(BitConverter.GetBytes((short)15360));
 				}
@@ -1360,8 +1510,15 @@ namespace FFXIV_TexTools2.IO
                         OriginalLodList[i].VertexDataSize = originalSize;
 						int vertSize = 0;
 						int vDataSize = 20;
+                        int data2Stride = 36;
 
-						if (type.Equals("weapon"))
+                        if (dxImportVer.Equals(Strings.DX9))
+                        {
+                            data2Stride = 24;
+                        }
+
+
+                        if (type.Equals("weapon"))
 						{
 							vDataSize = 16;
 						}
@@ -1372,11 +1529,11 @@ namespace FFXIV_TexTools2.IO
 
 							if (extraIndexData.totalExtraCounts != null && extraIndexData.totalExtraCounts.ContainsKey(m))
 							{
-								vertSize += ((mg.Positions.Count + extraIndexData.totalExtraCounts[m]) * vDataSize) + ((mg.Positions.Count + extraIndexData.totalExtraCounts[m]) * 36);
+								vertSize += ((mg.Positions.Count + extraIndexData.totalExtraCounts[m]) * vDataSize) + ((mg.Positions.Count + extraIndexData.totalExtraCounts[m]) * data2Stride);
 							}
 							else
 							{
-								vertSize += (mg.Positions.Count * vDataSize) + (mg.Positions.Count * 36);
+								vertSize += (mg.Positions.Count * vDataSize) + (mg.Positions.Count * data2Stride);
 							}
 						}
 
@@ -1475,30 +1632,34 @@ namespace FFXIV_TexTools2.IO
 					lodList.Add(lod);
 				}
 
+
                 //Replace Half with Floats and compress VertexInfo data
-                for (int i = 0; i < lodList[0].MeshCount; i++)
-				{
-					var normType = (136 * i) + 26;
-					var bnOffset = (136 * i) + 33;
-					var clrOffset = (136 * i) + 41;
-					var tcOffset = (136 * i) + 49;
-					var tcType = (136 * i) + 50;
+                if (dxImportVer.Equals(Strings.DX11))
+                {
+                    for (int i = 0; i < lodList[0].MeshCount; i++)
+                    {
+                        var normType = (136 * i) + 26;
+                        var bnOffset = (136 * i) + 33;
+                        var clrOffset = (136 * i) + 41;
+                        var tcOffset = (136 * i) + 49;
+                        var tcType = (136 * i) + 50;
 
-					vertexInfoBlock.RemoveAt(normType);
-					vertexInfoBlock.Insert(normType, 2);
+                        vertexInfoBlock.RemoveAt(normType);
+                        vertexInfoBlock.Insert(normType, 2);
 
-					vertexInfoBlock.RemoveAt(bnOffset);
-					vertexInfoBlock.Insert(bnOffset, 12);
+                        vertexInfoBlock.RemoveAt(bnOffset);
+                        vertexInfoBlock.Insert(bnOffset, 12);
 
-					vertexInfoBlock.RemoveAt(clrOffset);
-					vertexInfoBlock.Insert(clrOffset, 16);
+                        vertexInfoBlock.RemoveAt(clrOffset);
+                        vertexInfoBlock.Insert(clrOffset, 16);
 
-					vertexInfoBlock.RemoveAt(tcOffset);
-					vertexInfoBlock.Insert(tcOffset, 20);
+                        vertexInfoBlock.RemoveAt(tcOffset);
+                        vertexInfoBlock.Insert(tcOffset, 20);
 
-					vertexInfoBlock.RemoveAt(tcType);
-					vertexInfoBlock.Insert(tcType, 3);
-				}
+                        vertexInfoBlock.RemoveAt(tcType);
+                        vertexInfoBlock.Insert(tcType, 3);
+                    }
+                }
 
 				var compVertexInfo = Compressor(vertexInfoBlock.ToArray());
 				compressedData.AddRange(BitConverter.GetBytes(16));
@@ -1548,8 +1709,12 @@ namespace FFXIV_TexTools2.IO
 
 						if (i == 0)
 						{
-							meshInfo.VertexSizes[1] = meshInfo.VertexSizes[1] + 12;
-							try
+                            if (dxImportVer.Equals(Strings.DX11))
+                            {
+                                meshInfo.VertexSizes[1] = meshInfo.VertexSizes[1] + 12;
+                            }
+
+                            try
 							{
 								var mg = cmdList[j].meshGeometry;
 								int vc;
@@ -1704,6 +1869,7 @@ namespace FFXIV_TexTools2.IO
 					modelDataBlock.AddRange(br.ReadBytes(unk6 * 20));
 				}
 
+                //Mesh Parts
 				List<MeshPart> meshPart = new List<MeshPart>();
 
 				int meshPadd = 0;
@@ -1720,7 +1886,7 @@ namespace FFXIV_TexTools2.IO
 							MeshPart mp = new MeshPart();
 
 							//Index Offset (int)
-							if (i == 0)
+							if (l == 0 && i == 0)
 							{
 								if (j != 0)
 								{
@@ -1734,7 +1900,7 @@ namespace FFXIV_TexTools2.IO
 									modelDataBlock.AddRange(BitConverter.GetBytes(mp.IndexOffset));
 								}
 							}
-							else if (i == 1)
+							else if (l == 0 && i == 1)
 							{
 								br.ReadBytes(4);
 								if (j == 0)
@@ -1755,7 +1921,7 @@ namespace FFXIV_TexTools2.IO
 							}
 
 							//Index Count (int)
-							if (i < cmdList.Count)
+							if (l == 0 && i < cmdList.Count)
 							{
 								var partsDict = cmdList[i].partsDict;
 
@@ -1783,7 +1949,7 @@ namespace FFXIV_TexTools2.IO
 								modelDataBlock.AddRange(BitConverter.GetBytes(mp.IndexCount));
 							}
 
-							if (i == 0)
+							if (l == 0 && i == 0)
 							{
 								if (j == mPartCount - 1)
 								{
@@ -1951,20 +2117,47 @@ namespace FFXIV_TexTools2.IO
                 {
                     var unk3Remainder = (unk3 * 4) - (totalLoD0MaskCount * 4);
 
+                    int meshNum = 0;
                     foreach (var ic in indexCounts)
                     {
                         HashSet<int> mIndexList = new HashSet<int>();
-
+                        
                         for (int i = 0; i < ic.IndexCount; i++)
                         {
                             short[] unk3Indices = new short[2];
                             //index its replacing? attatched to?
                             var oIndex = br.ReadInt16();
-                            unk3Indices[0] = oIndex;
-
                             //extra index following last equipment index
                             var mIndex = br.ReadInt16();
-                            unk3Indices[1] = mIndex;
+
+                            if(importSettings != null && importSettings.ContainsKey(meshNum.ToString()))
+                            {
+                                if (importSettings[Strings.All].Disable || importSettings[meshNum.ToString()].Disable)
+                                {
+                                    unk3Indices[0] = 0;
+                                    unk3Indices[1] = 0;
+                                }
+                                else if(importSettings[Strings.All].Fix || importSettings[meshNum.ToString()].Fix)
+                                {
+
+                                    if (nVertDict.ContainsKey(oIndex))
+                                    {
+                                        unk3Indices[0] = (short)nVertDict[oIndex];
+                                        unk3Indices[1] = mIndex;
+                                    }
+                                    else
+                                    {
+                                        unk3Indices[0] = 0;
+                                        unk3Indices[1] = 0;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                unk3Indices[0] = oIndex;
+                                unk3Indices[1] = mIndex;
+                            }
+
                             mIndexList.Add(mIndex);
 
                             if (extraIndices.ContainsKey(ic.IndexLocation))
@@ -1987,6 +2180,8 @@ namespace FFXIV_TexTools2.IO
                         {
                             totalExtraCounts.Add(ic.IndexLocation, mIndexList.Count);
                         }
+
+                        meshNum++;
                     }
 
                     foreach (var ei in extraIndices)
@@ -1994,20 +2189,28 @@ namespace FFXIV_TexTools2.IO
                         indexMin.Add(ei.Key, ei.Value.Min());
                     }
 
-                    foreach(var ic in indexCounts)
+                    var m = 0;
+                    foreach (var ic in indexCounts)
                     {
                         var iMax = nMax[ic.IndexLocation];
                         var iMin = indexMin[ic.IndexLocation];
 
                         for(int i = 0; i < ic.IndexCount; i++)
                         {
-                            modelDataBlock.AddRange(BitConverter.GetBytes(ic.IndexList[i][0]));
+                            var oIndex = ic.IndexList[i][0];
 
                             var mIndex = ic.IndexList[i][1];
-                            short sub = (short)(mIndex - iMin);
-                            short nIndex = (short)(sub + iMax + 1);
+                            short nIndex = 0;
+                            if(mIndex != 0)
+                            {
+                                short sub = (short)(mIndex - iMin);
+                                nIndex = (short)(sub + iMax + 1);
+                            }
+
+                            modelDataBlock.AddRange(BitConverter.GetBytes(oIndex));
                             modelDataBlock.AddRange(BitConverter.GetBytes(nIndex));
                         }
+                        m++;
                     }
 
                     //the rest of unk3
@@ -2106,42 +2309,50 @@ namespace FFXIV_TexTools2.IO
 
 						br.ReadBytes(baseVertsToRead * meshInfo.VertexSizes[1]);
 
-						for (int j = 0; j < extraVerts; j++)
-						{
-							//Normals
-							System.Half h1 = System.Half.ToHalf((ushort)br.ReadInt16());
-							System.Half h2 = System.Half.ToHalf((ushort)br.ReadInt16());
-							System.Half h3 = System.Half.ToHalf((ushort)br.ReadInt16());
-							System.Half h4 = System.Half.ToHalf((ushort)br.ReadInt16());
+                        if (dxImportVer.Equals(Strings.DX11))
+                        {
+                            for (int j = 0; j < extraVerts; j++)
+                            {
+                                //Normals
+                                System.Half h1 = System.Half.ToHalf((ushort)br.ReadInt16());
+                                System.Half h2 = System.Half.ToHalf((ushort)br.ReadInt16());
+                                System.Half h3 = System.Half.ToHalf((ushort)br.ReadInt16());
+                                System.Half h4 = System.Half.ToHalf((ushort)br.ReadInt16());
 
-							var x = HalfHelper.HalfToSingle(h1);
-							var y = HalfHelper.HalfToSingle(h2);
-							var z = HalfHelper.HalfToSingle(h3);
-							var w = HalfHelper.HalfToSingle(h4);
+                                var x = HalfHelper.HalfToSingle(h1);
+                                var y = HalfHelper.HalfToSingle(h2);
+                                var z = HalfHelper.HalfToSingle(h3);
+                                var w = HalfHelper.HalfToSingle(h4);
 
-							importDict[extraLoc].dataSet2.AddRange(BitConverter.GetBytes(x));
-							importDict[extraLoc].dataSet2.AddRange(BitConverter.GetBytes(y));
-							importDict[extraLoc].dataSet2.AddRange(BitConverter.GetBytes(z));
+                                importDict[extraLoc].dataSet2.AddRange(BitConverter.GetBytes(x));
+                                importDict[extraLoc].dataSet2.AddRange(BitConverter.GetBytes(y));
+                                importDict[extraLoc].dataSet2.AddRange(BitConverter.GetBytes(z));
 
-							importDict[extraLoc].dataSet2.AddRange(br.ReadBytes(4));
-							importDict[extraLoc].dataSet2.AddRange(br.ReadBytes(4));
+                                importDict[extraLoc].dataSet2.AddRange(br.ReadBytes(4));
+                                importDict[extraLoc].dataSet2.AddRange(br.ReadBytes(4));
 
-							//texCoord
-							h1 = System.Half.ToHalf((ushort)br.ReadInt16());
-							h2 = System.Half.ToHalf((ushort)br.ReadInt16());
-							h3 = System.Half.ToHalf((ushort)br.ReadInt16());
-							h4 = System.Half.ToHalf((ushort)br.ReadInt16());
+                                //texCoord
+                                h1 = System.Half.ToHalf((ushort)br.ReadInt16());
+                                h2 = System.Half.ToHalf((ushort)br.ReadInt16());
+                                h3 = System.Half.ToHalf((ushort)br.ReadInt16());
+                                h4 = System.Half.ToHalf((ushort)br.ReadInt16());
 
-							x = h1;
-							y = h2;
-							z = h3;
-							w = h4;
+                                x = h1;
+                                y = h2;
+                                z = h3;
+                                w = h4;
 
-							importDict[extraLoc].dataSet2.AddRange(BitConverter.GetBytes(x));
-							importDict[extraLoc].dataSet2.AddRange(BitConverter.GetBytes(y));
-							importDict[extraLoc].dataSet2.AddRange(BitConverter.GetBytes(z));
-							importDict[extraLoc].dataSet2.AddRange(BitConverter.GetBytes(w));
-						}
+                                importDict[extraLoc].dataSet2.AddRange(BitConverter.GetBytes(x));
+                                importDict[extraLoc].dataSet2.AddRange(BitConverter.GetBytes(y));
+                                importDict[extraLoc].dataSet2.AddRange(BitConverter.GetBytes(z));
+                                importDict[extraLoc].dataSet2.AddRange(BitConverter.GetBytes(w));
+                            }
+                        }
+                        else if (dxImportVer.Equals(Strings.DX9))
+                        {
+                            importDict[extraLoc].dataSet2.AddRange(br.ReadBytes(extraVerts * 24));
+                        }
+
 					}
 				}
 
