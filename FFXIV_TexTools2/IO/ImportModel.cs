@@ -704,29 +704,40 @@ namespace FFXIV_TexTools2.IO
                         blDict.Add(bld.BoneData[i], i);
                     }
 
+
                     try
                     {
                         for (int i = 0; i < Vertex.Count; i++)
                         {
                             int bCount = cd.vCount[i];
 
-                            if (bCount > 4)
-                            {
-                                errorDict.Add(i, bCount);
-                            }
+                            int boneSum = 0;
+                            //if (bCount > 4)
+                            //{
+                            //    errorDict.Add(i, bCount);
+                            //}
 
                             List<byte> biList = new List<byte>();
                             List<byte> bwList = new List<byte>();
 
+                            int newbCount = 0;
                             for (int j = 0; j < bCount * 2; j += 2)
                             {
                                 var b = cd.bIndex[vTrack * 2 + j];
                                 var bi = (byte)blDict[b];
                                 var bw = (byte)Math.Round(cd.weights[cd.bIndex[vTrack * 2 + j + 1]] * 255f);
 
-                                biList.Add(bi);
-                                bwList.Add(bw);
+                                if (bw != 0)
+                                {
+                                    biList.Add(bi);
+                                    bwList.Add(bw);
+                                    boneSum += bw;
+                                    newbCount++;
+                                }
+
                             }
+                            int originalbCount = bCount;
+                            bCount = newbCount;
 
                             if (bCount < 4)
                             {
@@ -746,15 +757,36 @@ namespace FFXIV_TexTools2.IO
                                 {
                                     var min = bwList.Min();
                                     var minIndex = bwList.IndexOf(min);
-
+                                    int count = (bwList.Count(x => x == min));
                                     bwList.Remove(min);
                                     biList.RemoveAt(minIndex);
+                                    boneSum -= min;
                                 }
                             }
 
+                            if (boneSum != 255)
+                            {
+                                int diff = boneSum - 255;
+                                var max = bwList.Max();
+                                var maxIndex = bwList.IndexOf(max);
+                                errorDict.Add(i, diff);
+                                if (diff < 0)
+                                {
+                                    bwList[maxIndex] += (byte)Math.Abs(diff);
+                                }
+                                else
+                                {
+                                    // Subtract difference when over-weight.
+                                    bwList[maxIndex] -= (byte)Math.Abs(diff);
+                                }
+                            }
+
+                            boneSum = 0;
+                            bwList.ForEach(x => boneSum += x);
+
                             blendIndices.Add(biList.ToArray());
                             blendWeights.Add(bwList.ToArray());
-                            vTrack += bCount;
+                            vTrack += originalbCount;
                         }
                     }
                     catch
@@ -846,13 +878,14 @@ namespace FFXIV_TexTools2.IO
 					{
 						string errorString = "";
 						foreach(var er in errorDict)
-						{
-							errorString += "Vertex: " + er.Key + "\tWeight Count: " + er.Value + "\n";
-						}
+                        {
+                            errorString += "Vertex: " + er.Key + "\t Correction Amount: " + er.Value + "\n";
+                        }
 
 
-						FlexibleMessageBox.Show("TexTools detected an affected bone count greater than 4.\n\n" +
-							"TexTools removed the smallest weight counts from the following: \n\n" + errorString, "Over Weight Count",MessageBoxButtons.OK,MessageBoxIcon.Information);
+                        FlexibleMessageBox.Show("Corrected bone weights on the following vertices :\n\n" + errorString, "Weight Correction", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        //FlexibleMessageBox.Show("TexTools detected an affected bone count greater than 4.\n\n" +
+						//	"TexTools removed the smallest weight counts from the following: \n\n" + errorString, "Over Weight Count",MessageBoxButtons.OK,MessageBoxIcon.Information);
 					}
 
 
