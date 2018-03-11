@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using FFXIV_TexTools2.Helpers;
+using FFXIV_TexTools2.Model;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -62,7 +63,7 @@ namespace FFXIV_TexTools2.ViewModel
             }
             catch (Exception e)
             {
-                FlexibleMessageBox.Show("[VM] Error Accessing .modlist File \n" + e.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                FlexibleMessageBox.Show("Error Accessing .modlist File \n" + e.Message, "MLTVVM Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
 

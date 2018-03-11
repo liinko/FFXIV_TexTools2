@@ -476,7 +476,7 @@ namespace FFXIV_TexTools2.ViewModel
                 }
                 catch (Exception ex)
                 {
-                    FlexibleMessageBox.Show("[TVM] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    FlexibleMessageBox.Show("Error Accessing .modlist File \n" + ex.Message, "TextureViewModel Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
 
                 if (modEntry != null)
@@ -676,7 +676,7 @@ namespace FFXIV_TexTools2.ViewModel
                     TypeComboBox = info.Item2;
                     TypeIndex = 0;
                 }
-                else if (selectedCategory.Equals(Strings.Mounts))
+                else if (selectedCategory.Equals(Strings.Mounts) || selectedCategory.Equals(Strings.Monster) || selectedCategory.Equals(Strings.DemiHuman))
                 {
                     bool isDemiHuman = selectedItem.PrimaryMTRLFolder.Contains("demihuman");
 
@@ -783,7 +783,7 @@ namespace FFXIV_TexTools2.ViewModel
         {
             string type;
 
-            if (selectedCategory.Equals(Strings.Mounts))
+            if (selectedCategory.Equals(Strings.Mounts) || selectedCategory.Equals(Strings.Monster) || selectedCategory.Equals(Strings.DemiHuman))
             {
                 bool isDemiHuman = selectedItem.PrimaryMTRLFolder.Contains("demihuman");
 
@@ -1011,7 +1011,7 @@ namespace FFXIV_TexTools2.ViewModel
             }
             catch (Exception ex)
             {
-                FlexibleMessageBox.Show("[TVM] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                FlexibleMessageBox.Show("Error Accessing .modlist File \n" + ex.Message, "TextureViewModel Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
             if (inModList)
@@ -1089,15 +1089,13 @@ namespace FFXIV_TexTools2.ViewModel
                 alphaBitmap = Imaging.CreateBitmapSourceFromHBitmap(texData.BMP.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
                 alphaBitmap.Freeze();
 
-                if (!isUI)
-                {
-                    var removeAlphaBitmap = SetAlpha(texData.BMP, 255);
 
-                    noAlphaBitmap = Imaging.CreateBitmapSourceFromHBitmap(removeAlphaBitmap.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-                    noAlphaBitmap.Freeze();
+                var removeAlphaBitmap = SetAlpha(texData.BMP, 255);
 
-                    removeAlphaBitmap.Dispose();
-                }
+                noAlphaBitmap = Imaging.CreateBitmapSourceFromHBitmap(removeAlphaBitmap.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                noAlphaBitmap.Freeze();
+
+                removeAlphaBitmap.Dispose();
             }
 
 
@@ -1113,22 +1111,9 @@ namespace FFXIV_TexTools2.ViewModel
                 Debug.WriteLine(ex.StackTrace);
             }
 
-            if (!isUI)
-            {
-                ImageSource = noAlphaBitmap;
+            SetColorChannelFilter(imageEffect);
 
-                SetColorChannelFilter(imageEffect);
-
-                ChannelsEnabled = true;
-            }
-            else
-            {
-                ImageSource = alphaBitmap;
-
-                SetColorChannelFilter(imageEffect);
-
-                ChannelsEnabled = true;
-            }
+            ChannelsEnabled = true;
 
             SaveEnabled = true;
 
@@ -1278,7 +1263,7 @@ namespace FFXIV_TexTools2.ViewModel
             }
             catch(Exception e)
             {
-                    FlexibleMessageBox.Show("[TVM] There was an error updating the image.\n" + e.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    FlexibleMessageBox.Show("There was an error updating the image.\n" + e.Message, "TextureViewModel Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
         }
@@ -1296,10 +1281,9 @@ namespace FFXIV_TexTools2.ViewModel
 
             BitmapSource img;
 
-            if (AlphaChecked== true)
+            if (AlphaChecked == true)
             {
                 img = alphaBitmap;
-
             }
             else
             {

@@ -23,7 +23,6 @@ using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Windows;
 using System.Windows.Forms;
 
 
@@ -45,9 +44,11 @@ namespace FFXIV_TexTools2.Helpers
 
             var EXDDatPath = string.Format(Info.datDir, Strings.EXDDat, Info.EXDDatNum);
 
-            int datNum = ((offset / 8) & 0x000f) / 2;
+            int datNum = ((offset / 8) & 0x0F) / 2;
 
             offset = OffsetCorrection(datNum, offset);
+
+            EXDDatPath = EXDDatPath.Substring(0, EXDDatPath.Length - 1) + datNum;
 
             try
             {
@@ -534,6 +535,78 @@ namespace FFXIV_TexTools2.Helpers
         }
 
         /// <summary>
+        /// Gets the offset of the item data.
+        /// </summary>
+        /// <remarks>
+        /// Used to obtain the offset of the items IMC, MTRL, MDL, and TEX data
+        /// </remarks>
+        /// <param name="folderHash">The hash value of the internal folder path.</param>
+        /// <param name="fileHash">The hash value of the internal file path.</param>
+        /// <returns>The offset in which the items data is located</returns>
+        public static bool IsActive(string fullPath, string indexName)
+        {
+            var folderHash = FFCRC.GetHash(fullPath.Substring(0, fullPath.LastIndexOf("/")));
+            var fileHash = FFCRC.GetHash(Path.GetFileName(fullPath));
+
+            int itemOffset = 0;
+
+            var indexPath = string.Format(Info.indexDir, indexName);
+
+            try
+            {
+                using (BinaryReader br = new BinaryReader(File.OpenRead(indexPath)))
+                {
+                    br.BaseStream.Seek(1036, SeekOrigin.Begin);
+                    int numOfFiles = br.ReadInt32();
+
+                    br.BaseStream.Seek(2048, SeekOrigin.Begin);
+                    for (int i = 0; i < numOfFiles; br.ReadBytes(4), i += 16)
+                    {
+                        int fileNameHash = br.ReadInt32();
+
+                        if (fileNameHash == fileHash)
+                        {
+                            int folderPathHash = br.ReadInt32();
+
+                            if (folderPathHash == folderHash)
+                            {
+                                itemOffset = br.ReadInt32() * 8;
+                                break;
+                            }
+                            else
+                            {
+                                br.ReadBytes(4);
+                            }
+                        }
+                        else
+                        {
+                            br.ReadBytes(8);
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                DisplayError(e, "Index File", false);
+            }
+
+            int datNum = ((itemOffset / 8) & 0x0F) / 2;
+
+            if(indexName.Equals(Strings.ItemsDat) && datNum == 4)
+            {
+                return true;
+            }
+            else if (indexName.Equals(Strings.UIDat) && datNum == 1)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Gets the offset of the EXD data.
         /// </summary>
         /// <param name="folderHash">The hash value of the internal folder path.</param>
@@ -983,7 +1056,8 @@ namespace FFXIV_TexTools2.Helpers
             {
                 itemType = "food";
             }
-            else if (selectedCategory.Equals(Strings.Mounts) || selectedCategory.Equals(Strings.Minions) || selectedCategory.Equals(Strings.Pets))
+            else if (selectedCategory.Equals(Strings.Mounts) || selectedCategory.Equals(Strings.Minions) || selectedCategory.Equals(Strings.Pets) 
+                || selectedCategory.Equals(Strings.Monster) || selectedCategory.Equals(Strings.DemiHuman))
             {
                 itemType = "monster";
             }
@@ -1001,10 +1075,17 @@ namespace FFXIV_TexTools2.Helpers
 
         public static bool IsIndexLocked(bool showMessage)
         {
-            foreach (var indexFile in Info.ModIndexDict)
+            var applicationVersion = FileVersionInfo.GetVersionInfo(System.Reflection.Assembly.GetExecutingAssembly().Location).FileVersion;
+
+            string indexDir = Properties.Settings.Default.FFXIV_Directory + "/{0}.win32.index";
+            string index2Dir = Properties.Settings.Default.FFXIV_Directory + "/{0}.win32.index2";
+
+            List<string> indexFileList = new List<string>() { Strings.ItemsDat, Strings.UIDat }; 
+
+            foreach (var indexFile in indexFileList)
             {
-                var indexPath = string.Format(Info.indexDir, indexFile.Key);
-                var index2Path = string.Format(Info.index2Dir, indexFile.Key);
+                var indexPath = string.Format(indexDir, indexFile);
+                var index2Path = string.Format(index2Dir, indexFile);
 
                 FileStream stream = null;
 
@@ -1020,7 +1101,7 @@ namespace FFXIV_TexTools2.Helpers
                         "Please exit the game before proceeding.\n" +
                         "-----------------------------------------------------\n\n" +
                         "Error Message:\n" +
-                        e.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        e.Message, "Helper Error " + applicationVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
 
                     return true;
@@ -1053,7 +1134,7 @@ namespace FFXIV_TexTools2.Helpers
                     (datPath != null ? "\nPath: " + datPath : "") + 
                     (offset.HasValue ? "\nOffset: " + offset : "");
 
-                FlexibleMessageBox.Show(errorText, "[Helper] Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                FlexibleMessageBox.Show(errorText, "Helper Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
         #endregion Misc
     }

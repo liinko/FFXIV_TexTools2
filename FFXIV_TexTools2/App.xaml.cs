@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Forms;
 using FFXIV_TexTools2.Helpers;
 using Clipboard = System.Windows.Clipboard;
+using System.Diagnostics;
 
 namespace FFXIV_TexTools2
 {
@@ -21,6 +22,7 @@ namespace FFXIV_TexTools2
 
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
+            string ver = FileVersionInfo.GetVersionInfo(System.Reflection.Assembly.GetExecutingAssembly().Location).FileVersion;
             const string lineBreak = "\n======================================================\n";
             var errorText = "TexTools ran into an error.\n\n" +
                             "Please submit a bug report with the following information.\n " +
@@ -28,7 +30,7 @@ namespace FFXIV_TexTools2
                             e.ExceptionObject +
                             lineBreak + "\n" +
                             "Copy to clipboard?";
-            if (FlexibleMessageBox.Show(errorText, "Crash Report",MessageBoxButtons.YesNo,MessageBoxIcon.Error) ==DialogResult.Yes)
+            if (FlexibleMessageBox.Show(errorText, "Crash Report " + ver,MessageBoxButtons.YesNo,MessageBoxIcon.Error) ==DialogResult.Yes)
             {
                 Clipboard.SetText(e.ExceptionObject.ToString());
             }

@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using FFXIV_TexTools2.Helpers;
+using FFXIV_TexTools2.Model;
 using FFXIV_TexTools2.Resources;
 using Newtonsoft.Json;
 using System;
@@ -76,6 +77,12 @@ namespace FFXIV_TexTools2.Views
             if (CheckBackups())
             {
                 AddText("\nBackup files are corrupt, request new backups from the TexTools discord.\n", "Orange");
+            }
+
+            AddText("\nChecking LoD settings....\n", "Blue");
+            if (CheckLoD())
+            {
+                AddText("\nLoD settings in the game are on, and are known to cause problems\nConsider turning LoD graphics settings off.\n", "Orange");
             }
 
 
@@ -302,7 +309,7 @@ namespace FFXIV_TexTools2.Views
                         while ((line = sr.ReadLine()) != null)
                         {
                             modEntry = JsonConvert.DeserializeObject<JsonEntry>(line);
-                            if (!modEntry.name.Equals(""))
+                            if (!modEntry.fullPath.Equals(""))
                             {
                                 var originalOffset = modEntry.originalOffset / 8;
                                 var modOffset = modEntry.modOffset / 8;
@@ -555,6 +562,44 @@ namespace FFXIV_TexTools2.Views
             }
 
             return true;
+        }
+
+        private bool CheckLoD()
+        {
+            var dir = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/My Games/FINAL FANTASY XIV - A Realm Reborn";
+
+            bool problem = false;
+            if (Directory.Exists(dir))
+            {
+                if (File.Exists(dir + "/FFXIV.cfg"))
+                {
+                    var lines = File.ReadAllLines(dir + "/FFXIV.cfg");
+
+                    foreach(var line in lines)
+                    {
+                        if (line.Contains("LodType"))
+                        {
+                            var val = line.Substring(line.Length - 1, 1);
+                            if (val.Equals("1"))
+                            {
+                                AddText("\t" + line.Substring(0, line.IndexOf("\t")) + " ON\t", "Black");
+                                AddText("\u2716\n", "Red");
+
+                                problem = true;
+                            }
+                            else
+                            {
+                                AddText("\t" + line.Substring(0, line.IndexOf("\t")) + " OFF\t", "Black");
+                                AddText("\u2714\n", "Green");
+                            }
+
+                        }
+                    }
+
+                }
+            }
+
+            return problem;
         }
 
 

@@ -22,6 +22,7 @@ using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Windows.Media.Imaging;
 using Media3D = System.Windows.Media.Media3D;
@@ -122,6 +123,7 @@ namespace FFXIV_TexTools2.ViewModel
             mg.Normals = mData[m].Mesh.Normals;
             mg.TextureCoordinates = mData[m].Mesh.TextureCoordinates;
             mg.Colors = mData[m].Mesh.VertexColors;
+            mg.Tangents = new HelixToolkit.Wpf.SharpDX.Core.Vector3Collection();
 
             MeshBuilder.ComputeTangents(mg);
 

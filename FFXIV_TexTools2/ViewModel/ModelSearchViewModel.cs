@@ -20,8 +20,6 @@ using FFXIV_TexTools2.Resources;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics;
-using System.IO;
 using System.Windows.Input;
 
 namespace FFXIV_TexTools2.ViewModel
@@ -157,6 +155,14 @@ namespace FFXIV_TexTools2.ViewModel
             if (SelectedType.Name.Equals(Strings.Weapon))
             {
                 category = Strings.Main_Hand;
+            }
+            else if (SelectedType.Name.Equals("DemiHuman"))
+            {
+                category = Strings.DemiHuman;
+            }
+            else if (SelectedType.Name.Equals(Strings.Monster))
+            {
+                category = Strings.Monster;
             }
 
 
@@ -409,9 +415,10 @@ namespace FFXIV_TexTools2.ViewModel
                 {
                     string slotName = Strings.Main_Hand;
 
+
                     if (SelectedType.Name.Equals(Strings.Monster))
                     {
-                        slotName = Strings.Mounts;
+                        slotName = Strings.Monster;
                     }
 
                     for (int i = 0; i <= 50; i++)
@@ -485,7 +492,9 @@ namespace FFXIV_TexTools2.ViewModel
                                 var fileHash = FFCRC.GetHash(wmFile);
                                 if (files.Contains(fileHash))
                                 {
-                                    workList.Add(new SearchItems() { Race = "-", Slot = equipSlotDict[eq], SlotID = Info.IDSlot[equipSlotDict[eq]], Body = bodyList[i].ToString(), Variant = j.ToString(), Part = eq });
+                                    //workList.Add(new SearchItems() { Race = "-", Slot = equipSlotDict[eq], SlotID = Info.IDSlot[equipSlotDict[eq]], Body = bodyList[i].ToString(), Variant = j.ToString(), Part = eq });
+                                    workList.Add(new SearchItems() { Race = "-", Slot = slotName, SlotID = Info.IDSlot[equipSlotDict[eq]], Body = bodyList[i].ToString(), Variant = j.ToString(), Part = "-" });
+                                    break;
                                 }
 
                                 ProgressLabel = "Body: " + bodyList[i] + " Variant: " + j;

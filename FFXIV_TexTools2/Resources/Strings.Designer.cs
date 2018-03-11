@@ -385,6 +385,15 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to DemiHuman.
+        /// </summary>
+        internal static string DemiHuman {
+            get {
+                return ResourceManager.GetString("DemiHuman", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to d{0}e{1}_{2}.mdl.
         /// </summary>
         internal static string DemiMDLFile {
@@ -795,6 +804,24 @@ namespace FFXIV_TexTools2.Resources {
         internal static string Female {
             get {
                 return ResourceManager.GetString("Female", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Field Marker.
+        /// </summary>
+        internal static string FieldMarker {
+            get {
+                return ResourceManager.GetString("FieldMarker", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to fieldmarker_0_{0}.exd.
+        /// </summary>
+        internal static string FieldMarkerEXD {
+            get {
+                return ResourceManager.GetString("FieldMarkerEXD", resourceCulture);
             }
         }
         

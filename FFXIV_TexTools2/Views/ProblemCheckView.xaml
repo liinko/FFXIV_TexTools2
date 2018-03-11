@@ -23,6 +23,6 @@
                 </Style>
             </RichTextBox.Resources>
         </RichTextBox>
-        <Button x:Name="CloseProblemView" Content="Close" Grid.Row="1" Width="75" HorizontalAlignment="Center" VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Click="CloseProblemView_Click" Grid.Column="1" Margin="99,6,191,6"/>
+        <Button x:Name="CloseProblemView" Content="Close" Grid.ColumnSpan="2" Grid.Row="1" Width="75" HorizontalAlignment="Center" VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Click="CloseProblemView_Click" />
     </Grid>
 </Window>

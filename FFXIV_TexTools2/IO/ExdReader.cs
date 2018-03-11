@@ -23,7 +23,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Windows;
 using System.Windows.Forms;
 
 using TreeNode = FFXIV_TexTools2.Model.TreeNode;
@@ -1169,13 +1168,99 @@ namespace FFXIV_TexTools2.IO
                             TreeNode itemNode = new TreeNode() { Name = item.ItemName, ItemData = item };
 
                             markerNode._subNode.Add(itemNode);
+                        }
 
+                        item = new ItemData();
+
+                        item.Icon = (iconNum + 100).ToString();
+
+                        item.ItemSubCategory = Strings.Marker;
+
+                        actionName = actionName + " (Large)";
+
+                        if (actionName.Length > 1)
+                        {
+                            item.ItemName = actionName;
+                            item.ItemCategory = Strings.Actions;
+                            TreeNode itemNode = new TreeNode() { Name = item.ItemName, ItemData = item };
+
+                            markerNode._subNode.Add(itemNode);
                         }
                     }
                 }
             }
             markerNode._subNode.Sort();
             actionsNode._subNode.Add(markerNode);
+
+
+            actionFile = String.Format(Strings.FieldMarkerEXD, Strings.Language);
+            actionBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(actionFile)), actionFile);
+
+            TreeNode fieldMarkerNode = new TreeNode() { Name = Strings.FieldMarker };
+
+            using (BinaryReader br = new BinaryReader(new MemoryStream(actionBytes)))
+            {
+                br.ReadBytes(8);
+                int offsetTableSize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                for (int i = 0; i < offsetTableSize; i += 8)
+                {
+                    br.BaseStream.Seek(i + 32, SeekOrigin.Begin);
+                    int index = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+                    int tableOffset = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                    br.BaseStream.Seek(tableOffset, SeekOrigin.Begin);
+
+                    int entrySize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                    br.ReadBytes(10);
+
+                    int iconNum = BitConverter.ToUInt16(br.ReadBytes(2).Reverse().ToArray(), 0);
+
+                    br.ReadBytes(2);
+                    if (iconNum != 0)
+                    {
+                        ItemData item = new ItemData();
+
+                        item.Icon = iconNum.ToString();
+
+                        item.ItemSubCategory = Strings.FieldMarker;
+
+                        var actionName = Encoding.UTF8.GetString(br.ReadBytes(entrySize - 12)).Replace("\0", "");
+
+                        if (actionName.Length > 1)
+                        {
+                            item.ItemName = actionName;
+                            item.ItemCategory = Strings.Actions;
+                            TreeNode itemNode = new TreeNode() { Name = item.ItemName, ItemData = item };
+
+                            fieldMarkerNode._subNode.Add(itemNode);
+                        }
+
+                        if (!actionName.Contains("Clear"))
+                        {
+                            item = new ItemData();
+
+                            item.Icon = (iconNum + 100).ToString();
+
+                            item.ItemSubCategory = Strings.FieldMarker;
+
+                            actionName = actionName + " (Large)";
+
+                            if (actionName.Length > 1)
+                            {
+                                item.ItemName = actionName;
+                                item.ItemCategory = Strings.Actions;
+                                TreeNode itemNode = new TreeNode() { Name = item.ItemName, ItemData = item };
+
+                                fieldMarkerNode._subNode.Add(itemNode);
+                            }
+                        }
+                    }
+                }
+            }
+            fieldMarkerNode._subNode.Sort();
+            actionsNode._subNode.Add(fieldMarkerNode);
 
             return actionsNode;
         }
@@ -1367,26 +1452,50 @@ namespace FFXIV_TexTools2.IO
             using (BinaryReader br = new BinaryReader(new MemoryStream(itemUICatBytes)))
             {
                 br.ReadBytes(8);
-                int offsetTableSize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+                int offsetTableSize = 0;
+                try
+                {
+                    offsetTableSize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+                }
+                catch (Exception e)
+                {
+                    FlexibleMessageBox.Show("Error reading Offset Table Size for ItemUICategory\nYou may have an older or unsupported version of the game.\n\n"
+                        + e.Message, "EXDReader (ItemUICategory) Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return null;
+                }
 
+                int errorCount = 0;
                 for (int i = 0; i < offsetTableSize; i += 8)
                 {
                     br.BaseStream.Seek(i + 32, SeekOrigin.Begin);
-                    int index = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
-                    int tableOffset = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
-
-                    br.BaseStream.Seek(tableOffset, SeekOrigin.Begin);
-
-                    int entrySize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
-
-                    br.ReadBytes(14);
-
-                    var catName = Encoding.UTF8.GetString(br.ReadBytes(entrySize - 12)).Replace("\0", "");
-
-                    if(catName.Length > 0 && !catName.Equals("  "))
+                    try
                     {
-                        UICategories.Add(index, catName);
+                        int index = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+                        int tableOffset = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                        br.BaseStream.Seek(tableOffset, SeekOrigin.Begin);
+
+                        int entrySize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+
+                        br.ReadBytes(14);
+
+                        var catName = Encoding.UTF8.GetString(br.ReadBytes(entrySize - 12)).Replace("\0", "");
+
+                        if (catName.Length > 0 && !catName.Equals("  "))
+                        {
+                            UICategories.Add(index, catName);
+                        }
                     }
+                    catch (Exception e)
+                    {
+                        if(errorCount < 4)
+                        {
+                            FlexibleMessageBox.Show("Error reading UI Category entry for ItemUICategory\nYou may have an older or unsupported version of the game.\n\n"
+                                + e.Message, "EXDReader (ItemUICategory) Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            errorCount++;
+                        }
+                    }
+
                 }
 
             }
@@ -1464,7 +1573,7 @@ namespace FFXIV_TexTools2.IO
             }
             catch(Exception e)
             {
-                FlexibleMessageBox.Show("Error at .\nItem: " + item.ItemName + "\nCategory: " + item.ItemCategory  + "\n\n" + e.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                FlexibleMessageBox.Show("Error at .\nItem: " + item.ItemName + "\nCategory: " + item.ItemCategory  + "\n\n" + e.Message, "EXDReader (Item) Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             var scNode = new TreeNode() { Name = item.ItemName, ItemData = item };
             itemDict.Add(catName, new TreeNode() { Name = catName, _subNode = new List<TreeNode>() { scNode } });
@@ -1531,202 +1640,215 @@ namespace FFXIV_TexTools2.IO
 
             foreach(int offset in itemOffsetDict.Keys)
             {
-                using (BinaryReader br = new BinaryReader(new MemoryStream(Helper.GetDecompressedEXDData(offset, itemOffsetDict[offset]))))
+                if(offset != 0)
                 {
-                    br.ReadBytes(8);
-                    int offsetTableSize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
-
-                    for (int i = 0; i < offsetTableSize; i += 8)
+                    using (BinaryReader br = new BinaryReader(new MemoryStream(Helper.GetDecompressedEXDData(offset, itemOffsetDict[offset]))))
                     {
-                        br.BaseStream.Seek(i + 32, SeekOrigin.Begin);
-                        int index = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
-                        int tableOffset = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
-
-                        br.BaseStream.Seek(tableOffset, SeekOrigin.Begin);
-                        int entrySize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
-                        br.ReadBytes(16);
-                        int lastText = BitConverter.ToInt16(br.ReadBytes(2).Reverse().ToArray(), 0);
-                        br.ReadBytes(3);
-
-                        if (lastText > 10)
+                        br.ReadBytes(8);
+                        int offsetTableSize = 0;
+                        try
                         {
-                            item = new ItemData();
-                            TreeNode category = new TreeNode();
+                            offsetTableSize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+                        }
+                        catch (Exception e)
+                        {
+                            FlexibleMessageBox.Show("Error reading Offset Table Size for " + itemOffsetDict[offset] + "\nYou may have an older or unsupported version of the game.\n\n"
+                                + e.Message, "EXDReader (Item) Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            continue;
+                        }
 
-                            bool hasSecondary = false;
-                            br.ReadBytes(7);
-                            byte[] textureDetails = br.ReadBytes(4).ToArray();
-                            int itemCheck = textureDetails[3];
+                        for (int i = 0; i < offsetTableSize; i += 8)
+                        {
+                            br.BaseStream.Seek(i + 32, SeekOrigin.Begin);
+                            int index = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+                            int tableOffset = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
 
-                            if (itemCheck != 0)
+                            br.BaseStream.Seek(tableOffset, SeekOrigin.Begin);
+                            int entrySize = BitConverter.ToInt32(br.ReadBytes(4).Reverse().ToArray(), 0);
+                            br.ReadBytes(16);
+                            int lastText = BitConverter.ToInt16(br.ReadBytes(2).Reverse().ToArray(), 0);
+                            br.ReadBytes(3);
+
+                            if (lastText > 10)
                             {
-                                int weaponCheck = textureDetails[1];
-                                if (weaponCheck == 0)
-                                {
-                                    item.PrimaryModelVariant = textureDetails[3].ToString().PadLeft(2, '0');
-                                }
-                                else
-                                {
-                                    item.PrimaryModelVariant = weaponCheck.ToString().PadLeft(2, '0');
-                                    item.PrimaryModelBody = textureDetails[3].ToString().PadLeft(4, '0');
-                                }
+                                item = new ItemData();
+                                TreeNode category = new TreeNode();
 
-                                item.PrimaryModelID = BitConverter.ToInt16(br.ReadBytes(2).Reverse().ToArray(), 0).ToString().PadLeft(4, '0');
-                                br.ReadBytes(2);
+                                bool hasSecondary = false;
+                                br.ReadBytes(7);
+                                byte[] textureDetails = br.ReadBytes(4).ToArray();
+                                int itemCheck = textureDetails[3];
 
-                                textureDetails = br.ReadBytes(4).ToArray();
-                                int secondaryCheck = textureDetails[3];
-                                if (secondaryCheck != 0)
+                                if (itemCheck != 0)
                                 {
-                                    hasSecondary = true;
-                                    weaponCheck = textureDetails[1];
+                                    int weaponCheck = textureDetails[1];
                                     if (weaponCheck == 0)
                                     {
-                                        item.SecondaryModelVariant = textureDetails[3].ToString().PadLeft(2, '0');
+                                        item.PrimaryModelVariant = textureDetails[3].ToString().PadLeft(2, '0');
                                     }
                                     else
                                     {
-                                        item.SecondaryModelVariant = weaponCheck.ToString().PadLeft(2, '0');
-                                        item.SecondaryModelBody = textureDetails[3].ToString().PadLeft(4, '0');
+                                        item.PrimaryModelVariant = weaponCheck.ToString().PadLeft(2, '0');
+                                        item.PrimaryModelBody = textureDetails[3].ToString().PadLeft(4, '0');
                                     }
 
-                                    item.SecondaryModelID = BitConverter.ToInt16(br.ReadBytes(2).Reverse().ToArray(), 0).ToString().PadLeft(4, '0');
+                                    item.PrimaryModelID = BitConverter.ToInt16(br.ReadBytes(2).Reverse().ToArray(), 0).ToString().PadLeft(4, '0');
                                     br.ReadBytes(2);
-                                }
 
-                                int icon = 0;
-
-                                if (!hasSecondary)
-                                {
-                                    br.ReadBytes(90);
-                                    icon = BitConverter.ToUInt16(br.ReadBytes(2).Reverse().ToArray(), 0);
-                                }
-                                else
-                                {
-                                    br.ReadBytes(86);
-                                    icon = BitConverter.ToUInt16(br.ReadBytes(2).Reverse().ToArray(), 0);
-                                }
-
-                                item.Icon = icon.ToString();
-
-                                br.ReadBytes(16);
-
-                                byte[] slotBytes = br.ReadBytes(4).ToArray();
-                                item.ItemCategory = slotBytes[0].ToString();
-
-                                br.ReadBytes(2);
-                                br.ReadBytes(lastText);
-
-                                var name = Encoding.UTF8.GetString(br.ReadBytes(entrySize - (lastText + 152))).Replace("\0", "");
-                                item.ItemName = new string(name.Where(c => !char.IsControl(c)).ToArray());
-
-                                if (item.ItemCategory.Equals("0") || item.ItemCategory.Equals("1") || item.ItemCategory.Equals("2") || item.ItemCategory.Equals("13") || item.ItemCategory.Equals("14"))
-                                {
-                                    item.PrimaryMTRLFolder = String.Format(Strings.WeapMtrlFolder, item.PrimaryModelID, item.PrimaryModelBody);
-                                    if (hasSecondary)
+                                    textureDetails = br.ReadBytes(4).ToArray();
+                                    int secondaryCheck = textureDetails[3];
+                                    if (secondaryCheck != 0)
                                     {
-                                        item.SecondaryMTRLFolder = String.Format(Strings.WeapMtrlFolder, item.SecondaryModelID, item.SecondaryModelBody);
-                                    }
-                                }
-                                else if (item.ItemCategory.Equals("9") || item.ItemCategory.Equals("10") || item.ItemCategory.Equals("11") || item.ItemCategory.Equals("12"))
-                                {
-                                    item.PrimaryMTRLFolder = String.Format(Strings.AccMtrlFolder, item.PrimaryModelID);
-                                }
-                                else
-                                {
-                                    item.PrimaryMTRLFolder = String.Format(Strings.EquipMtrlFolder, item.PrimaryModelID);
-                                }
+                                        hasSecondary = true;
+                                        weaponCheck = textureDetails[1];
+                                        if (weaponCheck == 0)
+                                        {
+                                            item.SecondaryModelVariant = textureDetails[3].ToString().PadLeft(2, '0');
+                                        }
+                                        else
+                                        {
+                                            item.SecondaryModelVariant = weaponCheck.ToString().PadLeft(2, '0');
+                                            item.SecondaryModelBody = textureDetails[3].ToString().PadLeft(4, '0');
+                                        }
 
-                                try
-                                {
-                                    var itemNode = new TreeNode { Name = item.ItemName, ItemData = item };
-                                    var itemCatName = "";
+                                        item.SecondaryModelID = BitConverter.ToInt16(br.ReadBytes(2).Reverse().ToArray(), 0).ToString().PadLeft(4, '0');
+                                        br.ReadBytes(2);
+                                    }
+
+                                    int icon = 0;
+
+                                    if (!hasSecondary)
+                                    {
+                                        br.ReadBytes(90);
+                                        icon = BitConverter.ToUInt16(br.ReadBytes(2).Reverse().ToArray(), 0);
+                                    }
+                                    else
+                                    {
+                                        br.ReadBytes(86);
+                                        icon = BitConverter.ToUInt16(br.ReadBytes(2).Reverse().ToArray(), 0);
+                                    }
+
+                                    item.Icon = icon.ToString();
+
+                                    br.ReadBytes(16);
+
+                                    byte[] slotBytes = br.ReadBytes(4).ToArray();
+                                    item.ItemCategory = slotBytes[0].ToString();
+
+                                    br.ReadBytes(2);
+                                    br.ReadBytes(lastText);
+
+                                    var name = Encoding.UTF8.GetString(br.ReadBytes(entrySize - (lastText + 152))).Replace("\0", "");
+                                    item.ItemName = new string(name.Where(c => !char.IsControl(c)).ToArray());
+
+                                    if (item.ItemCategory.Equals("0") || item.ItemCategory.Equals("1") || item.ItemCategory.Equals("2") || item.ItemCategory.Equals("13") || item.ItemCategory.Equals("14"))
+                                    {
+                                        item.PrimaryMTRLFolder = String.Format(Strings.WeapMtrlFolder, item.PrimaryModelID, item.PrimaryModelBody);
+                                        if (hasSecondary)
+                                        {
+                                            item.SecondaryMTRLFolder = String.Format(Strings.WeapMtrlFolder, item.SecondaryModelID, item.SecondaryModelBody);
+                                        }
+                                    }
+                                    else if (item.ItemCategory.Equals("9") || item.ItemCategory.Equals("10") || item.ItemCategory.Equals("11") || item.ItemCategory.Equals("12"))
+                                    {
+                                        item.PrimaryMTRLFolder = String.Format(Strings.AccMtrlFolder, item.PrimaryModelID);
+                                    }
+                                    else
+                                    {
+                                        item.PrimaryMTRLFolder = String.Format(Strings.EquipMtrlFolder, item.PrimaryModelID);
+                                    }
 
                                     try
                                     {
-                                        itemCatName = Info.IDSlotName[item.ItemCategory];
+                                        var itemNode = new TreeNode { Name = item.ItemName, ItemData = item };
+                                        var itemCatName = "";
+
+                                        try
+                                        {
+                                            itemCatName = Info.IDSlotName[item.ItemCategory];
+                                        }
+                                        catch
+                                        {
+                                            errorCount++;
+                                        }
+
+                                        if (!item.ItemCategory.Equals("6"))
+                                        {
+                                            if (itemDict.ContainsKey(itemCatName))
+                                            {
+                                                itemDict[itemCatName]._subNode.Add(itemNode);
+                                            }
+                                            else
+                                            {
+                                                itemDict.Add(itemCatName, new TreeNode() { Name = itemCatName, _subNode = new List<TreeNode>() { itemNode } });
+                                            }
+                                        }
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        Debug.WriteLine("EXD_MakeItemListError " + e);
+                                    }
+                                }
+                                else
+                                {
+                                    br.ReadBytes(98);
+
+                                    item.Icon = BitConverter.ToUInt16(br.ReadBytes(2).Reverse().ToArray(), 0).ToString();
+
+                                    br.ReadBytes(14);
+
+                                    var someByte = br.ReadByte();
+
+                                    try
+                                    {
+                                        item.ItemSubCategory = UICategoryDict[someByte];
                                     }
                                     catch
                                     {
                                         errorCount++;
                                     }
 
-                                    if (!item.ItemCategory.Equals("6"))
+                                    br.ReadBytes(7);
+
+                                    br.ReadBytes(lastText);
+
+                                    var name = Encoding.UTF8.GetString(br.ReadBytes(entrySize - (lastText + 152))).Replace("\0", "");
+                                    item.ItemName = new string(name.Where(c => !char.IsControl(c)).ToArray());
+
+                                    item.ItemCategory = Strings.Items;
+
+                                    try
                                     {
-                                        if (itemDict.ContainsKey(itemCatName))
+                                        TreeNode itemNode = new TreeNode() { Name = item.ItemName, ItemData = item };
+
+                                        itemIconList.Add(item);
+                                        if (itemIconDict.ContainsKey(item.ItemSubCategory))
                                         {
-                                            itemDict[itemCatName]._subNode.Add(itemNode);
+                                            itemIconDict[item.ItemSubCategory]._subNode.Add(itemNode);
                                         }
                                         else
                                         {
-                                            itemDict.Add(itemCatName, new TreeNode() { Name = itemCatName, _subNode = new List<TreeNode>() { itemNode } });
+                                            itemIconDict.Add(item.ItemSubCategory, new TreeNode() { Name = item.ItemSubCategory, _subNode = { itemNode } });
                                         }
+
                                     }
-                                }
-                                catch (Exception e)
-                                {
-                                    Debug.WriteLine("EXD_MakeItemListError " + e);
-                                }
-                            }
-                            else
-                            {
-                                br.ReadBytes(98);
-
-                                item.Icon = BitConverter.ToUInt16(br.ReadBytes(2).Reverse().ToArray(), 0).ToString();
-
-                                br.ReadBytes(14);
-
-                                var someByte = br.ReadByte();
-
-                                try
-                                {
-                                    item.ItemSubCategory = UICategoryDict[someByte];
-                                }
-                                catch
-                                {
-                                    errorCount++;
-                                }
-
-                                br.ReadBytes(7);
-
-                                br.ReadBytes(lastText);
-
-                                var name = Encoding.UTF8.GetString(br.ReadBytes(entrySize - (lastText + 152))).Replace("\0", "");
-                                item.ItemName = new string(name.Where(c => !char.IsControl(c)).ToArray());
-
-                                item.ItemCategory = Strings.Items;
-
-                                try
-                                {
-                                    TreeNode itemNode = new TreeNode() { Name = item.ItemName, ItemData = item };
-
-                                    itemIconList.Add(item);
-                                    if (itemIconDict.ContainsKey(item.ItemSubCategory))
+                                    catch (Exception e)
                                     {
-                                        itemIconDict[item.ItemSubCategory]._subNode.Add(itemNode);
-                                    }
-                                    else
-                                    {
-                                        itemIconDict.Add(item.ItemSubCategory, new TreeNode() { Name = item.ItemSubCategory, _subNode = { itemNode } });
+                                        Debug.WriteLine("EXD_MakeItemListError " + e);
                                     }
 
-                                }
-                                catch (Exception e)
-                                {
-                                    Debug.WriteLine("EXD_MakeItemListError " + e);
                                 }
 
                             }
-
                         }
-                    }
 
+                    }
                 }
             }
 
             if(errorCount > 0)
             {
-                FlexibleMessageBox.Show("TexTools ran into errors reading the items list.\n\nError Count: " + errorCount, "EXD Read Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                FlexibleMessageBox.Show("TexTools ran into errors reading the items list.\n\nError Count: " + errorCount, "EXDReader Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
             foreach (var i in itemDict.Values)

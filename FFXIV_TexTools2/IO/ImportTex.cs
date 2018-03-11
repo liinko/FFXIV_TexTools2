@@ -20,6 +20,7 @@ using FFXIV_TexTools2.Resources;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
@@ -78,7 +79,7 @@ namespace FFXIV_TexTools2.IO
                 }
                 catch (Exception ex)
                 {
-                    FlexibleMessageBox.Show("[Import] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    FlexibleMessageBox.Show("Error Accessing .modlist File \n" + ex.Message, "ImportTex Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
 
                 using (BinaryReader br = new BinaryReader(File.OpenRead(savePath)))
@@ -93,10 +94,18 @@ namespace FFXIV_TexTools2.IO
                     br.BaseStream.Seek(80, SeekOrigin.Begin);
 
                     var textureFlags = br.ReadInt32();
+                    var texType = br.ReadInt32();
+                    try
+                    {
+                        textureType = Info.DDSType[texType];
+                    }
+                    catch(Exception e)
+                    {
+                        FlexibleMessageBox.Show("DDS Type (" + texType + ") not recognized \n" + e.Message, "ImportTex Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return 0;
+                    }
 
-                    textureType = Info.DDSType[br.ReadInt32()];
-
-                    if(textureFlags == 2 && textureType == 5200)
+                    if (textureFlags == 2 && textureType == 5200)
                     {
                         textureType = TextureTypes.A8;
                     }
@@ -195,7 +204,7 @@ namespace FFXIV_TexTools2.IO
                 }
                 catch (Exception ex)
                 {
-                    FlexibleMessageBox.Show("[Import] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    FlexibleMessageBox.Show("Error Accessing .modlist File \n" + ex.Message, "ImportTex Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
 
 
@@ -347,7 +356,7 @@ namespace FFXIV_TexTools2.IO
                 }
                 catch (Exception ex)
                 {
-                    FlexibleMessageBox.Show("[Import] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    FlexibleMessageBox.Show("Error Accessing .modlist File \n" + ex.Message, "ImportTex Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
 
 
@@ -641,13 +650,13 @@ namespace FFXIV_TexTools2.IO
                 if(modEntry.modOffset == 0)
                 {
                    FlexibleMessageBox.Show("TexTools detected a Mod List entry with a Mod Offset of 0.\n\n" +
-                        "Please submit a bug report along with your modlist file.", "Import Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        "Please submit a bug report along with your modlist file.", "ImportTex Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return 0;
                 }
                 else if (modEntry.originalOffset == 0)
                 {
                    FlexibleMessageBox.Show("TexTools detected a Mod List entry with an Original Offset of 0.\n\n" +
-                        "Please submit a bug report along with your modlist file.", "Import Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        "Please submit a bug report along with your modlist file.", "ImportTex Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return 0;
                 }
             }
@@ -695,7 +704,7 @@ namespace FFXIV_TexTools2.IO
                             {
                                 JsonEntry emptyEntry = JsonConvert.DeserializeObject<JsonEntry>(line);
 
-                                if (emptyEntry.fullPath.Equals(""))
+                                if (emptyEntry.fullPath.Equals("") && emptyEntry.datFile.Equals(datName))
                                 {
                                     if(emptyEntry.modOffset != 0)
                                     {
@@ -726,7 +735,7 @@ namespace FFXIV_TexTools2.IO
                                                     originalOffset = 0,
                                                     modOffset = modEntry.modOffset,
                                                     modSize = modEntry.modSize,
-                                                    datFile = Strings.ItemsDat
+                                                    datFile = datName
                                                 };
 
                                                 string[] oLines = File.ReadAllLines(Properties.Settings.Default.Modlist_Directory);
@@ -762,7 +771,7 @@ namespace FFXIV_TexTools2.IO
                         }
                         catch (Exception ex)
                         {
-                            FlexibleMessageBox.Show("[Import] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            FlexibleMessageBox.Show("Error Accessing .modlist File \n" + ex.Message, "ImportTex Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
 
                         if (!dataOverwritten)
@@ -790,8 +799,8 @@ namespace FFXIV_TexTools2.IO
                             }
                             else
                             {
-                               FlexibleMessageBox.Show("[Import] There was an issue obtaining the .dat4 offset to write data to, try importing again. " +
-                                    "\n\n If the problem persists, please submit a bug report.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                               FlexibleMessageBox.Show("There was an issue obtaining the .dat4 offset to write data to, try importing again. " +
+                                    "\n\n If the problem persists, please submit a bug report.", "ImportTex Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
                             }
 
                         }
@@ -800,7 +809,7 @@ namespace FFXIV_TexTools2.IO
             }
             catch (Exception ex)
             {
-                FlexibleMessageBox.Show("[Import] Error Accessing .dat4 File \n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                FlexibleMessageBox.Show("Error Accessing .dat4 File \n" + ex.Message, "ImportTex Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return 0;
             }
 
@@ -857,7 +866,7 @@ namespace FFXIV_TexTools2.IO
                     }
                     catch (Exception ex)
                     {
-                        FlexibleMessageBox.Show("[Import] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        FlexibleMessageBox.Show("Error Accessing .modlist File \n" + ex.Message, "ImportTex Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
             }

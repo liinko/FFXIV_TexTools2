@@ -18,12 +18,16 @@ using FFXIV_TexTools2.Resources;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 
 namespace FFXIV_TexTools2.Helpers
 {
     public static class Info
     {
+        public static string appVersion = FileVersionInfo.GetVersionInfo(System.Reflection.Assembly.GetExecutingAssembly().Location).FileVersion;
+
         public static string EXDDatNum = "0";
+        public static string ModPackVersion = "1.0";
 
         public static string indexDir = Properties.Settings.Default.FFXIV_Directory + "/{0}.win32.index";
         public static string index2Dir = Properties.Settings.Default.FFXIV_Directory + "/{0}.win32.index2";
@@ -182,7 +186,9 @@ namespace FFXIV_TexTools2.Helpers
             {Strings.All, 1},
             {Strings.Food, 0},
             {Strings.Mounts, 0},
+            {Strings.DemiHuman, 0},
             {Strings.Minions, 0},
+            {Strings.Monster, 0},
             {Strings.Pets, 0}
         };
 
@@ -245,6 +251,8 @@ namespace FFXIV_TexTools2.Helpers
             {Strings.Pets, "22"},
             {Strings.Mounts, "23"},
             {Strings.Minions, "24"},
+            {Strings.Monster, "26"},
+            {Strings.DemiHuman, "27"},
             {Strings.Food, "0"}
         };
 
@@ -275,6 +283,8 @@ namespace FFXIV_TexTools2.Helpers
             {"22", Strings.Pets },
             {"23", Strings.Mounts },
             {"24", Strings.Minions },
+            {"26", Strings.Monster },
+            {"27", Strings.DemiHuman },
             {"0", Strings.Food }
         };
 

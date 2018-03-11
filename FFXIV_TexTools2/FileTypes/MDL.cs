@@ -27,6 +27,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Windows.Forms;
 
 namespace FFXIV_TexTools2.Material
 {
@@ -110,7 +112,7 @@ namespace FFXIV_TexTools2.Material
                 if (isDemiHuman)
                 {
                     MDLFolder = string.Format(Strings.DemiMDLFolder, selectedItem.PrimaryModelID.PadLeft(4, '0'), selectedItem.PrimaryModelBody.PadLeft(4, '0'));
-                    MDLFile = string.Format(Strings.DemiMDLFile, selectedItem.PrimaryModelID.PadLeft(4, '0'), selectedItem.PrimaryModelBody, selectedPart.PadLeft(4, '0'));
+                    MDLFile = string.Format(Strings.DemiMDLFile, selectedItem.PrimaryModelID.PadLeft(4, '0'), selectedItem.PrimaryModelBody, selectedPart);
                 }
                 else
                 {
@@ -409,6 +411,7 @@ namespace FFXIV_TexTools2.Material
                     for (int i = 0; i < modelData.LoD[0].MeshCount; i++)
                     {
                         var ido = modelData.LoD[0].MeshList[i].MeshInfo.IndexDataOffset;
+
                         indexLoc.Add(ido, i);
                     }
                 }
@@ -462,9 +465,9 @@ namespace FFXIV_TexTools2.Material
                         for (int i = 0; i < ic.IndexCount; i++)
                         {
                             //index its replacing? attatched to?
-                            var oIndex = br.ReadInt16();
+                            var oIndex = br.ReadUInt16();
                             //extra index following last equipment index
-                            var mIndex = br.ReadInt16();
+                            var mIndex = br.ReadUInt16();
 
                             mIndexList.Add(mIndex);
 
@@ -518,7 +521,7 @@ namespace FFXIV_TexTools2.Material
 
                 for (int i = 0; i < boneIndexSize / 2; i++)
                 {
-                    modelData.BoneIndicies.Add(br.ReadInt16());
+                    modelData.BoneIndicies.Add(br.ReadUInt16());
                 }
 
                 int padding = br.ReadByte();
@@ -647,9 +650,10 @@ namespace FFXIV_TexTools2.Material
                             Vector3 vVector = new Vector3();
                             if (meshDataInfoList[vertex].DataType == 13 || meshDataInfoList[vertex].DataType == 14)
                             {
-                                System.Half h1 = System.Half.ToHalf((ushort)br1.ReadInt16());
-                                System.Half h2 = System.Half.ToHalf((ushort)br1.ReadInt16());
-                                System.Half h3 = System.Half.ToHalf((ushort)br1.ReadInt16());
+                                
+                                System.Half h1 = System.Half.ToHalf(br1.ReadUInt16());
+                                System.Half h2 = System.Half.ToHalf(br1.ReadUInt16());
+                                System.Half h3 = System.Half.ToHalf(br1.ReadUInt16());
 
                                 float x = HalfHelper.HalfToSingle(h1);
                                 float y = HalfHelper.HalfToSingle(h2);
@@ -803,10 +807,10 @@ namespace FFXIV_TexTools2.Material
                             float w = 0; 
                             if (meshDataInfoList[coordinates].DataType == 13 || meshDataInfoList[coordinates].DataType == 14)
                             {
-                                var sx = (ushort)br1.ReadInt16();
-                                var sy = (ushort)br1.ReadInt16();
-                                var sz = (ushort)br1.ReadInt16();
-                                var sw = (ushort)br1.ReadInt16();
+                                var sx = br1.ReadUInt16();
+                                var sy = br1.ReadUInt16();
+                                var sz = br1.ReadUInt16();
+                                var sw = br1.ReadUInt16();
 
                                 var h1 = new SharpDX.Half(sx);
                                 var h2 = new SharpDX.Half(sy);
@@ -861,10 +865,10 @@ namespace FFXIV_TexTools2.Material
 
                             if (meshDataInfoList[normals].DataType == 13 || meshDataInfoList[normals].DataType == 14)
                             {
-                                System.Half h1 = System.Half.ToHalf((ushort)br1.ReadInt16());
-                                System.Half h2 = System.Half.ToHalf((ushort)br1.ReadInt16());
-                                System.Half h3 = System.Half.ToHalf((ushort)br1.ReadInt16());
-                                System.Half h4 = System.Half.ToHalf((ushort)br1.ReadInt16());
+                                System.Half h1 = System.Half.ToHalf(br1.ReadUInt16());
+                                System.Half h2 = System.Half.ToHalf(br1.ReadUInt16());
+                                System.Half h3 = System.Half.ToHalf(br1.ReadUInt16());
+                                System.Half h4 = System.Half.ToHalf(br1.ReadUInt16());
 
                                 x = HalfHelper.HalfToSingle(h1);
                                 y = HalfHelper.HalfToSingle(h2);
@@ -946,9 +950,9 @@ namespace FFXIV_TexTools2.Material
                     {
                         for (int j = 0; j < mesh.MeshInfo.IndexCount; j += 3)
                         {
-                            int i1 = br1.ReadInt16();
-                            int i2 = br1.ReadInt16();
-                            int i3 = br1.ReadInt16();
+                            int i1 = br1.ReadUInt16();
+                            int i2 = br1.ReadUInt16();
+                            int i3 = br1.ReadUInt16();
 
                             objBytes.Add("f " + (i1 + 1) + "/" + (i1 + 1) + "/" + (i1 + 1) + " " + (i2 + 1) + "/" + (i2 + 1) + "/" + (i2 + 1) + " " + (i3 + 1) + "/" + (i3 + 1) + "/" + (i3 + 1) + " ");
 
@@ -989,9 +993,29 @@ namespace FFXIV_TexTools2.Material
                         {
                             if (!extraVertDict.ContainsKey(id))
                             {
-                                var v = modelMeshData.Indices[id];
+                                if (modelMeshData.Indices.Count >= id)
+                                {
+                                    var v = 0;
+                                    try
+                                    {
+                                        v = modelMeshData.Indices[id];
+                                    }
+                                    catch
+                                    {
+                                        v = 0;
+                                    }
 
-                                extraVertDict.Add(id, modelMeshData.Vertices[v]);
+                                    extraVertDict.Add(id, modelMeshData.Vertices[v]);
+                                }
+                                else
+                                {
+                                    new Thread(() => MessageBox.Show("There was an error reading the models extra data.\n\n" +
+                                        "Mesh " + i + " Index " + id + "\n\n" +
+                                        "This is likely caused by parts of a mesh being deleted and may cause crashes in-game.\n\n" +
+                                        "Consider using Advanced Import to Fix or Disable Hiding for the above mesh.", "Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error)).Start();
+
+                                    break;
+                                }
                             }
                         }
                     }

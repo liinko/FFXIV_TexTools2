@@ -23,6 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -54,8 +55,10 @@ namespace FFXIV_TexTools2.ViewModel
             }
             catch (Exception e)
             {
-                FlexibleMessageBox.Show("[VM] Error Accessing .modlist File \n" + e.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                FlexibleMessageBox.Show("Error Accessing .modlist File \n" + e.Message, "ListViewModel Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Debug.WriteLine(e.StackTrace);
             }
+
 
         }
 
@@ -93,11 +96,17 @@ namespace FFXIV_TexTools2.ViewModel
                 else if (entry.fullPath.Contains("_c_"))
                 {
                     race = race.Substring(race.IndexOf("_c") + 2, 4);
-
                 }
                 else
                 {
-                    race = race.Substring(race.LastIndexOf('c') + 1, 4);
+                    if (entry.fullPath.Contains(".mdl") && entry.fullPath.Contains("_fac"))
+                    {
+                        race = race.Substring(race.IndexOf('c') + 1, 4);
+                    }
+                    else
+                    {
+                        race = race.Substring(race.LastIndexOf('c') + 1, 4);
+                    }
                 }
                 race = Info.IDRace[race];
             }

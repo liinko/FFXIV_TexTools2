@@ -1,11 +1,13 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Windows;
-using Microsoft.Win32;
+﻿using FFXIV_TexTools2.IO;
 using FFXIV_TexTools2.Model;
 using FFXIV_TexTools2.Resources;
-using FFXIV_TexTools2.IO;
 using FFXIV_TexTools2.ViewModel;
+using Microsoft.Win32;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Windows;
+using System.Xml;
 
 namespace FFXIV_TexTools2.Views
 {
@@ -58,6 +60,15 @@ namespace FFXIV_TexTools2.Views
             MeshComboBox.ItemsSource = meshCounts;
             MeshComboBox.SelectedIndex = 0;
             MeshCountLabel.Content = "Mesh Count: " + modelData.ExtraData.totalExtraCounts.Count;
+
+            if(File.Exists(Properties.Settings.Default.Save_Directory + "/" + category + "/" + itemName + "/3D/" + modelName + "_Settings.xml"))
+            {
+                CreateXMLButton.IsEnabled = false;
+            }
+            else
+            {
+                CreateXMLButton.IsEnabled = true;
+            }
         }
 
         private void AdvImportButton_Click(object sender, RoutedEventArgs e)
@@ -92,10 +103,94 @@ namespace FFXIV_TexTools2.Views
 
         }
 
+        private void CreateXMLButton_Click(object sender, RoutedEventArgs e)
+        {
+            MakeXML();
+        }
+
+        private void MakeXML()
+        {
+            XmlWriterSettings xmlWriterSettings = new XmlWriterSettings()
+            {
+                Indent = true,
+            };
+
+            using (XmlWriter xmlWriter = XmlWriter.Create(Properties.Settings.Default.Save_Directory + "/" + category + "/" + itemName + "/3D/" + modelName + "_Settings.xml", xmlWriterSettings))
+            {
+                xmlWriter.WriteStartDocument();
+
+                xmlWriter.WriteComment("Note: Both Fix and DisableHide should not be True, if they are, TexTools will choose Hide over Fix");
+
+                //<TexTools_Import>
+                xmlWriter.WriteStartElement("TexTools_Import");
+
+                //<Model>
+                xmlWriter.WriteStartElement("Model");
+                xmlWriter.WriteAttributeString("name", modelName);
+
+                //<Mesh>
+                xmlWriter.WriteStartElement("Mesh");
+                xmlWriter.WriteAttributeString("name", "ALL");
+
+                //<Fix>
+                xmlWriter.WriteStartElement("Fix");
+                xmlWriter.WriteString("false");
+                xmlWriter.WriteEndElement();
+                //</Fix>
+
+                //<Hide>
+                xmlWriter.WriteStartElement("DisableHide");
+                xmlWriter.WriteString("false");
+                xmlWriter.WriteEndElement();
+                //</Hide>
+
+                xmlWriter.WriteEndElement();
+                //</Mesh>
+
+                foreach (var m in modelData.ExtraData.totalExtraCounts)
+                {
+
+                    var isBody = modelData.LoD[0].MeshList[m.Key].IsBody;
+                    //<Mesh>
+                    xmlWriter.WriteStartElement("Mesh");
+                    xmlWriter.WriteAttributeString("name", m.Key.ToString());
+                    if (isBody)
+                    {
+                        xmlWriter.WriteAttributeString("type", "Body Mesh");
+                    }
+
+                    //<Fix>
+                    xmlWriter.WriteStartElement("Fix");
+                    xmlWriter.WriteString("false");
+                    xmlWriter.WriteEndElement();
+                    //</Fix>
+
+                    //<Hide>
+                    xmlWriter.WriteStartElement("DisableHide");
+                    xmlWriter.WriteString("false");
+                    xmlWriter.WriteEndElement();
+                    //</Hide>
+
+                    xmlWriter.WriteEndElement();
+                    //</Mesh>
+                }
+
+                xmlWriter.WriteEndElement();
+                //</Model>
+
+
+                xmlWriter.WriteEndElement();
+                //</TexTools_Import>
+
+                xmlWriter.WriteEndDocument();
+
+                xmlWriter.Flush();
+            }
+        }
+
         private void DisableCheckbox_Unchecked(object sender, RoutedEventArgs e)
         {
             importDict[MeshComboBox.SelectedItem.ToString()].Disable = false;
-
         }
 
         private void MeshComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
@@ -111,6 +206,34 @@ namespace FFXIV_TexTools2.Views
 
         private void ImportButton_Click(object sender, RoutedEventArgs e)
         {
+            var dir = Properties.Settings.Default.Save_Directory + "/" + category + "/" + itemName + "/3D/" + modelName + "_Settings.xml";
+
+            if (!File.Exists(dir))
+            {
+                MakeXML();
+            }
+
+            XmlDocument doc = new XmlDocument();
+            doc.Load(dir);
+
+            foreach (var imp in importDict)
+            {
+                XmlNode mesh = doc.SelectSingleNode("//Mesh[@name='" + imp.Key + "']");
+
+                var impSett = imp.Value;
+
+                if(mesh != null)
+                {
+                    var fix = mesh.SelectSingleNode("Fix");
+                    fix.InnerText = impSett.Fix.ToString().ToLower();
+
+                    var disable = mesh.SelectSingleNode("DisableHide");
+                    disable.InnerText = impSett.Disable.ToString().ToLower();
+                }
+            }
+
+            doc.Save(dir);
+
             ImportModel.ImportDAE(category, itemName, modelName, selectedMesh, internalPath, boneStrings, modelData, importDict);
             mvm.UpdateModel(item, category);
             Close();

@@ -39,7 +39,8 @@ namespace FFXIV_TexTools2.Material
         /// <returns>The version of the selected item</returns>
         public static Tuple<string, string> GetVersion(string selectedCategory, ItemData item, bool isSecondary)
         {
-            if(int.Parse(item.ItemCategory) < 22 || selectedCategory.Equals(Strings.Pets) || selectedCategory.Equals(Strings.Mounts) || selectedCategory.Equals(Strings.Minions))
+            if(int.Parse(item.ItemCategory) < 22 || selectedCategory.Equals(Strings.Pets) || selectedCategory.Equals(Strings.Mounts) 
+                || selectedCategory.Equals(Strings.Minions) || selectedCategory.Equals(Strings.Monster) || selectedCategory.Equals(Strings.DemiHuman))
             {
                 var slotID = Info.slotID[selectedCategory];
                 var type = Helper.GetCategoryType(selectedCategory);

@@ -37,6 +37,7 @@
                         <KeyBinding Key="L" Command="hx:ViewportCommands.LeftView" />
                         <KeyBinding Key="R" Command="hx:ViewportCommands.RightView" />
                         <KeyBinding Command="hx:ViewportCommands.ZoomExtents" Gesture="Control+E" />
+                        <KeyBinding Command="hx:ViewportCommands.Reset" Gesture="Control+R"/>
                         <MouseBinding Command="hx:ViewportCommands.Rotate" Gesture="RightClick" />
                         <MouseBinding Command="hx:ViewportCommands.Zoom" Gesture="MiddleClick" />
                         <MouseBinding Command="hx:ViewportCommands.Pan" Gesture="LeftClick" />
@@ -59,35 +60,34 @@
                 <ColumnDefinition/>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <Button Content="Transparency" Margin="5,0" Command="{Binding TransparencyCommand}"/>
-            <Grid Grid.Column="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="5*"/>
-                    <ColumnDefinition/>
-                </Grid.ColumnDefinitions>
-                <Button Content="Reflection" Margin="5,0" Command="{Binding ReflectionCommand}"/>
-                <Label Grid.Column="1" Content="{Binding ReflectionAmount, FallbackValue=30}" Padding="0"/>
-            </Grid>
-
+            <Button Content="{Binding ReflectionContent, FallbackValue=Reflection}" Grid.Column="1" Margin="5,0" Command="{Binding ReflectionCommand}"/>
             <Button Content="Lighting" Grid.Column="2" Margin="5,0" Command="{Binding LightingCommand}"/>
-
+            <Button Content="Update TEX" Grid.Column="3" Margin="5,0" Command="{Binding UpdateCommand}"/>
+            <Button Grid.Column="4" Margin="0" Command="{Binding OpenFolderCommand}" IsEnabled="{Binding OpenEnabled, FallbackValue=false}" MinHeight="20" MinWidth="20" MaxWidth="20" MaxHeight="20">
+                <Button.Background>
+                    <ImageBrush ImageSource="/FFXIV TexTools 2;component/Resources/FolderOpen_16x.png" Stretch="Uniform"/>
+                </Button.Background>
+            </Button>
         </Grid>
         <Grid x:Name="modelButtonGrid" Margin="10,0,10,7" Height="34" VerticalAlignment="Bottom">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
-                <ColumnDefinition />
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition />
                 <ColumnDefinition />
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <Button x:Name="exportObjButton" Content="Export Model + Materials" Margin="5" Command="{Binding ExportOBJCommand}"/>
             <Button x:Name="import3DButton" Content="Import" Grid.Column="2" Margin="5" Command="{Binding ImportOBJCommand}" IsEnabled="{Binding Import3DEnabled, FallbackValue=false}"/>
-            <Button x:Name="advImport3DButton" Content="Import (Advanced)" Grid.Column="1" Margin="5" Command="{Binding AdvImportOBJCommand}" IsEnabled="{Binding AdvImport3DEnabled, FallbackValue=false}"/>
+            <Button x:Name="advImport3DButton" Content="Import (Advanced)" Grid.Column="1" Margin="5" Command="{Binding AdvImportOBJCommand}" IsEnabled="{Binding AdvImport3DEnabled, FallbackValue=false}" Visibility="Collapsed"/>
             <Button x:Name="revert3DButton" Content="{Binding ActiveToggle, FallbackValue='Enable/Disable'}" Grid.Column="3" Margin="5,5,4.5,5" Command="{Binding RevertOBJCommand}" IsEnabled="{Binding ActiveEnabled, FallbackValue=false}"/>
-            <Button Grid.Column="4" Margin="0" Command="{Binding OpenFolderCommand}" IsEnabled="{Binding OpenEnabled, FallbackValue=false}" MinHeight="20" MinWidth="20" MaxWidth="20" MaxHeight="20">
+            <Button Grid.Column="4" Margin="0" Command="{Binding AdvImportOBJCommand}" IsEnabled="{Binding AdvImport3DEnabled, FallbackValue=false}" MinHeight="20" MinWidth="20" MaxWidth="20" MaxHeight="20">
                 <Button.Background>
-                    <ImageBrush ImageSource="/FFXIV TexTools 2;component/Resources/FolderOpen_16x.png" Stretch="Uniform"/>
+                    <ImageBrush ImageSource="/FFXIV TexTools 2;component/Resources/ImportFile_16x.png" Stretch="Uniform"/>
                 </Button.Background>
             </Button>
         </Grid>

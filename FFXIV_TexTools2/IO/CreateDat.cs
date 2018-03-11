@@ -52,7 +52,7 @@ namespace FFXIV_TexTools2
             }
             catch (Exception e)
             {
-                FlexibleMessageBox.Show("[Create] Error Creating .Dat4 File \n" + e.Message, "Error", MessageBoxButtons.OK,MessageBoxIcon.Error);
+                FlexibleMessageBox.Show("Error Creating .Dat4 File \n" + e.Message, "CreateDat Error " + Info.appVersion, MessageBoxButtons.OK,MessageBoxIcon.Error);
             }
         }
 
@@ -78,7 +78,7 @@ namespace FFXIV_TexTools2
                 }
                 catch (Exception e)
                 {
-                    FlexibleMessageBox.Show("[Create] Error Accessing Index File \n" + e.Message, "Error", MessageBoxButtons.OK,MessageBoxIcon.Error);
+                    FlexibleMessageBox.Show("Error Accessing Index File \n" + e.Message, "CreateDat Error " + Info.appVersion, MessageBoxButtons.OK,MessageBoxIcon.Error);
                 }
 
 
@@ -92,7 +92,7 @@ namespace FFXIV_TexTools2
                 }
                 catch (Exception e)
                 {
-                    FlexibleMessageBox.Show("[Create] Error Accessing Index 2 File \n" + e.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    FlexibleMessageBox.Show("Error Accessing Index 2 File \n" + e.Message, "CreateDat Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -180,7 +180,7 @@ namespace FFXIV_TexTools2
                 }
                 catch(Exception e)
                 {
-                    FlexibleMessageBox.Show("[Create] Error Creating .modlist File \n" + e.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    FlexibleMessageBox.Show("Error Creating .modlist File \n" + e.Message, "CreateDat Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
 
                 }
             }

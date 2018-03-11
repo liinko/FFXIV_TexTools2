@@ -49,7 +49,7 @@ namespace FFXIV_TexTools2.ViewModel
         int raceIndex, meshIndex, bodyIndex, partIndex;
         bool raceEnabled, meshEnabled, bodyEnabled, partEnabled, modelRendering, secondModelRendering, thirdModelRendering, is3DLoaded, disposing, modelTabEnabled;
         bool import3dEnabled, activeEnabled, openEnabled, newCat, advImport3dEnabled;
-        string selectedCategory, reflectionAmount, modelName, fullPath, prevCat;
+        string selectedCategory, modelName, fullPath, prevCat, reflectionContent;
         string activeToggle = "Enable/Disable";
 
         private ObservableCollection<ComboBoxInfo> raceComboInfo = new ObservableCollection<ComboBoxInfo>();
@@ -67,7 +67,7 @@ namespace FFXIV_TexTools2.ViewModel
         public int BodyIndex { get { return bodyIndex; } set { bodyIndex = value; NotifyPropertyChanged("BodyIndex"); } }
         public int PartIndex { get { return partIndex; } set { partIndex = value; NotifyPropertyChanged("PartIndex"); } }
 
-        public string ReflectionAmount { get { return reflectionAmount; } set { reflectionAmount = value; NotifyPropertyChanged("ReflectionAmount"); } }
+        public string ReflectionContent { get { return reflectionContent; } set { reflectionContent = value; NotifyPropertyChanged("ReflectionContent"); } }
         public string ActiveToggle { get { return activeToggle; } set { activeToggle = value; NotifyPropertyChanged("ActiveToggle"); } }
 
         public bool RaceEnabled { get { return raceEnabled; } set { raceEnabled = value; NotifyPropertyChanged("RaceEnabled"); } }
@@ -219,7 +219,7 @@ namespace FFXIV_TexTools2.ViewModel
                 }
                 catch (Exception ex)
                 {
-                    FlexibleMessageBox.Show("[Main] Model Error \n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    FlexibleMessageBox.Show("Model Error \n" + ex.Message, "ModelViewModel Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
                     Debug.WriteLine(ex.StackTrace);
                 }
             }
@@ -245,6 +245,24 @@ namespace FFXIV_TexTools2.ViewModel
         }
 
         /// <summary>
+        /// Command for the Update TEX button
+        /// </summary>
+        public ICommand UpdateCommand
+        {
+            get { return new RelayCommand(UpdateTEX); }
+        }
+
+        /// <summary>
+        /// updates the models textures
+        /// </summary>
+        /// <param name="obj"></param>
+        private void UpdateTEX(object obj)
+        {
+            is3DLoaded = false;
+            MeshComboBoxChanged();
+        }
+
+        /// <summary>
         /// Command for the Reflection button
         /// </summary>
         public ICommand ReflectionCommand
@@ -261,15 +279,7 @@ namespace FFXIV_TexTools2.ViewModel
         {
             CompositeVM.Reflections(selectedItem.ItemName);
 
-            if (selectedItem.ItemName.Equals(Strings.Face) || selectedItem.ItemName.Equals(Strings.Face))
-            {
-                
-                ReflectionAmount = String.Format("{0:0.##}", CompositeVM.CurrentSS);
-            }
-            else
-            {
-                ReflectionAmount = String.Format("{0:0.##}", CompositeVM.CurrentSS);
-            }
+            ReflectionContent = "Reflection " + string.Format("{0:0.##}", CompositeVM.CurrentSS);
         }
 
         /// <summary>
@@ -334,7 +344,7 @@ namespace FFXIV_TexTools2.ViewModel
             }
             catch (Exception ex)
             {
-                FlexibleMessageBox.Show("[Collada] Error saving .dae File \n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                FlexibleMessageBox.Show("Error saving .dae File \n" + ex.Message, "ModelViewModel Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Debug.WriteLine(ex.StackTrace);
             }
 
@@ -422,7 +432,7 @@ namespace FFXIV_TexTools2.ViewModel
                 }
                 catch (Exception ex)
                 {
-                    FlexibleMessageBox.Show("[MVM] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    FlexibleMessageBox.Show("Error Accessing .modlist File \n" + ex.Message, "ModelViewModel Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
 
                 if (modEntry != null)
@@ -822,42 +832,44 @@ namespace FFXIV_TexTools2.ViewModel
             }
 
 
+            List<ComboBoxInfo> cbi = new List<ComboBoxInfo>();
+
+            MDL mdl = new MDL(selectedItem, selectedCategory, Info.raceID[SelectedRace.Name], SelectedBody.ID, SelectedPart.ID);
+            meshList = mdl.GetMeshList();
+            modelName = mdl.GetModelName();
+            materialStrings = mdl.GetMaterialStrings();
+            fullPath = mdl.GetInternalPath();
+            modelData = mdl.GetModelData();
+
+            cbi.Add(new ComboBoxInfo() { Name = Strings.All, ID = Strings.All, IsNum = false });
+
+            if (meshList.Count > 1)
+            {
+                for (int i = 0; i < meshList.Count; i++)
+                {
+                    cbi.Add(new ComboBoxInfo() { Name = i.ToString(), ID = i.ToString(), IsNum = true });
+                }
+            }
+
+            MeshComboBox = new ObservableCollection<ComboBoxInfo>(cbi);
+            MeshIndex = 0;
+
+            if (cbi.Count > 1)
+            {
+                MeshEnabled = true;
+            }
+            else
+            {
+                MeshEnabled = false;
+            }
+
             try
             {
-                List<ComboBoxInfo> cbi = new List<ComboBoxInfo>();
 
-                MDL mdl = new MDL(selectedItem, selectedCategory, Info.raceID[SelectedRace.Name], SelectedBody.ID, SelectedPart.ID);
-                meshList = mdl.GetMeshList();
-                modelName = mdl.GetModelName();
-                materialStrings = mdl.GetMaterialStrings();
-                fullPath = mdl.GetInternalPath();
-                modelData = mdl.GetModelData();
-
-                cbi.Add(new ComboBoxInfo() { Name = Strings.All, ID = Strings.All, IsNum = false });
-
-                if (meshList.Count > 1)
-                {
-                    for (int i = 0; i < meshList.Count; i++)
-                    {
-                        cbi.Add(new ComboBoxInfo() { Name = i.ToString(), ID = i.ToString(), IsNum = true });
-                    }
-                }
-
-                MeshComboBox = new ObservableCollection<ComboBoxInfo>(cbi);
-                MeshIndex = 0;
-
-                if (cbi.Count > 1)
-                {
-                    MeshEnabled = true;
-                }
-                else
-                {
-                    MeshEnabled = false;
-                }
             }
             catch (Exception ex)
             {
-                FlexibleMessageBox.Show("[Main] part 3D Error \n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                FlexibleMessageBox.Show("part 3D Error \n" + ex.Message, "ModelViewModel Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Debug.WriteLine(ex.StackTrace);
             }
         }
@@ -1136,14 +1148,16 @@ namespace FFXIV_TexTools2.ViewModel
                 is3DLoaded = true;
                 newCat = false;
 
-                ReflectionAmount = String.Format("{0:.##}", CompositeVM.CurrentSS);
-
                 if (File.Exists(Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selectedItem.ItemName + "/3D/" + modelName + ".DAE"))
                 {
                     Import3DEnabled = true;
                     if(modelData.ExtraData.totalExtraCounts != null && modelData.ExtraData.totalExtraCounts.Count > 0)
                     {
                         AdvImport3DEnabled = true;
+                    }
+                    else
+                    {
+                        AdvImport3DEnabled = false;
                     }
                 }
                 else
@@ -1181,7 +1195,7 @@ namespace FFXIV_TexTools2.ViewModel
                 }
                 catch (Exception ex)
                 {
-                    FlexibleMessageBox.Show("[MVM] Error Accessing .modlist File \n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    FlexibleMessageBox.Show("Error Accessing .modlist File \n" + ex.Message, "ModelViewModel Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
 
                 if (inModList)
@@ -1208,6 +1222,9 @@ namespace FFXIV_TexTools2.ViewModel
                     ActiveEnabled = false;
                     ActiveToggle = "Enable/Disable";
                 }
+
+                ReflectionContent = "Reflection " + string.Format("{0:0.##}", CompositeVM.CurrentSS);
+
             }
             else
             {
@@ -1374,11 +1391,6 @@ namespace FFXIV_TexTools2.ViewModel
             }
             else
             {
-                //if (selectedCategory.Equals(Strings.Pets))
-                //{
-                //    body = part;
-                //    part = SelectedPart.ID;
-                //}
                 var info = MTRL.GetMTRLData(selectedItem, race, selectedCategory, part, itemVersion, body, modelID, "0000");
                 return info.Item1;
             }

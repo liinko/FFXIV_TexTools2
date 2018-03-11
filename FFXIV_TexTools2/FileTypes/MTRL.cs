@@ -106,7 +106,8 @@ namespace FFXIV_TexTools2.Material
                 ComboBoxInfo cbi = new ComboBoxInfo() { Name = Strings.All, ID = "0",  IsNum = true };
                 cbiList.Add(cbi);
             }
-            else if (selectedCategory.Equals(Strings.Pets) || selectedCategory.Equals(Strings.Mounts) || selectedCategory.Equals(Strings.Minions) || selectedCategory.Equals(Strings.Monster))
+            else if (selectedCategory.Equals(Strings.Pets) || selectedCategory.Equals(Strings.Mounts) || selectedCategory.Equals(Strings.Minions) 
+                || selectedCategory.Equals(Strings.Monster) || selectedCategory.Equals(Strings.DemiHuman))
             {
                 cbiList = new ObservableCollection<ComboBoxInfo>();
                 ComboBoxInfo cbi = new ComboBoxInfo() { Name = Strings.Monster, ID = "0", IsNum = true };
@@ -259,7 +260,7 @@ namespace FFXIV_TexTools2.Material
                 }
 
             }
-            else if (selectedCategory.Equals(Strings.Mounts))
+            else if (selectedCategory.Equals(Strings.Mounts) || selectedCategory.Equals(Strings.Monster) || selectedCategory.Equals(Strings.DemiHuman))
             {
                 cbiList = new List<ComboBoxInfo>();
 
@@ -537,7 +538,7 @@ namespace FFXIV_TexTools2.Material
                     return null;
                 }
             }
-            else if (selectedCategory.Equals(Strings.Mounts))
+            else if (selectedCategory.Equals(Strings.Mounts) || selectedCategory.Equals(Strings.Monster) || selectedCategory.Equals(Strings.DemiHuman))
             {
                 if (item.PrimaryMTRLFolder.Contains("demihuman"))
                 {
@@ -827,7 +828,7 @@ namespace FFXIV_TexTools2.Material
 
                 offset = Helper.GetDataOffset(FFCRC.GetHash(MTRLFolder), FFCRC.GetHash(MTRLFile), Strings.ItemsDat);
             }
-            else if (selectedCategory.Equals(Strings.Mounts))
+            else if (selectedCategory.Equals(Strings.Mounts) || selectedCategory.Equals(Strings.Monster) || selectedCategory.Equals(Strings.DemiHuman))
             {
                 isUncompressed = false;
 
