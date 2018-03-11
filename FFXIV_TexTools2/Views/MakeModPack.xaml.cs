@@ -272,10 +272,15 @@ namespace FFXIV_TexTools2.Views
                 totalModSize = totalModSize / 1024;
                 sizeSuffix = " KB";
             }
-            else if(totalModSize > 1048576)
+            else if(totalModSize > 1048576 && totalModSize < 1073741824)
             {
                 totalModSize = totalModSize / 1048576;
                 sizeSuffix = " MB";
+            }
+            else if (totalModSize > 1073741824)
+            {
+                totalModSize = totalModSize / 1073741824;
+                sizeSuffix = " GB";
             }
 
 
