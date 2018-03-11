@@ -8,24 +8,38 @@
         Title="Modpack Creator" Height="500" Width="700" WindowStyle="ToolWindow">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="12*"/>
+            <RowDefinition Height="20*"/>
+            <RowDefinition Height="2*"/>
             <RowDefinition Height="1*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
         <Grid Grid.Column="0">
+            <!--
+            <Grid.Resources>
+                <Style TargetType="ListViewItem">
+                    <Style.Triggers>
+                        <Trigger Property="ItemsControl.AlternationIndex" Value="0">
+                            <Setter Property="Background" Value="WhiteSmoke"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Resources>
+            -->
             <Grid.RowDefinitions>
                 <RowDefinition Height="2*"/>
+                <RowDefinition Height="1*"/>
                 <RowDefinition Height="15*"/>
             </Grid.RowDefinitions>
             <Grid Grid.Row="0">
                 <Label x:Name="InfoHeader" BorderBrush="Black" BorderThickness="0,1,0,0" />
             </Grid>
-            <ListView x:Name="listView" Grid.Row="1" SelectionChanged="listView_SelectionChanged" SelectionMode="Multiple" BorderBrush="Black" BorderThickness="0,1">
+            <ListView x:Name="listView" Grid.Row="2" SelectionChanged="listView_SelectionChanged" SelectionMode="Multiple" 
+                      BorderBrush="Black" BorderThickness="0,1" AlternationCount="2" GridViewColumnHeader.Click="Header_Click">
                 <ListView.View>
                     <GridView>
-                        <GridViewColumn>
+                        <GridViewColumn Header="_">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <CheckBox IsChecked="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListViewItem}}, Path=IsSelected}"/>
@@ -41,8 +55,13 @@
                     </GridView>
                 </ListView.View>
             </ListView>
+            <StackPanel Orientation="Horizontal" Grid.Row="1" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
+                <Button x:Name="SelectAllButton" Content="Select All" Margin="0,0,20,0" Click="SelectAllButton_Click"/>
+                <Button x:Name="SelectActiveButton" Content="Select Active" Margin="0,0,20,0" Click="SelectActiveButton_Click"/>
+                <Button x:Name="ClearSelectedButton" Content="Clear Selected" Margin="0,0,20,0" Click="ClearSelectedButton_Click"/>
+            </StackPanel>
         </Grid>
-        <Grid Grid.Row="1" Grid.ColumnSpan="2">
+        <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="3*"/>
                 <ColumnDefinition Width="1*"/>
@@ -61,5 +80,11 @@
                 <Button x:Name="CreateButton" Content="Create" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Left" Click="CreateButton_Click" IsEnabled="False" Padding="3,1"/>
             </Grid>
         </Grid>
+        <StatusBar x:Name="StatusBar" Grid.Row="2" >
+            <Label Content="Count: " Padding="0" />
+            <Label x:Name="ModCountLabel" Content="0 " Padding="0"/>
+            <Label Content=" Size: " Padding="0" />
+            <Label x:Name="ModSizeLabel" Content="0" Padding="0"/>
+        </StatusBar>
     </Grid>
 </Window>

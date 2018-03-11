@@ -191,7 +191,7 @@ namespace FFXIV_TexTools2.Views
 
             string sizeSuffix = " Bytes";
 
-            if(totalModSize > 1024)
+            if(totalModSize > 1024 && totalModSize < 1048576)
             {
                 totalModSize = totalModSize / 1024;
                 sizeSuffix = " KB";

@@ -4,12 +4,14 @@ using FFXIV_TexTools2.Resources;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Forms;
+using System.Windows.Data;
+using Forms = System.Windows.Forms;
 
 namespace FFXIV_TexTools2.Views
 {
@@ -22,6 +24,10 @@ namespace FFXIV_TexTools2.Views
         JsonEntry modEntry = null;
         List<ModPackItems> packList = new List<ModPackItems>();
         string mpDir = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\TexTools\\ModPacks";
+        int modCount = 0;
+        int modSize = 0;
+        ModPackItems selectedItem;
+        ListSortDirection lastDirection = ListSortDirection.Ascending;
 
 
         public MakeModPack()
@@ -53,7 +59,7 @@ namespace FFXIV_TexTools2.Views
                             {
                                 r = "Monster";
                             }
-                            else if (modEntry.fullPath.Contains(".tex") || modEntry.fullPath.Contains(".mdl"))
+                            else if (modEntry.fullPath.Contains(".tex") || modEntry.fullPath.Contains(".mdl") || modEntry.fullPath.Contains(".atex"))
                             {
                                 if (modEntry.fullPath.Contains("accessory") || modEntry.fullPath.Contains("weapon") || modEntry.fullPath.Contains("/common/"))
                                 {
@@ -137,6 +143,16 @@ namespace FFXIV_TexTools2.Views
                                         type = HairTypes[modEntry.fullPath.Substring(modEntry.fullPath.LastIndexOf("_") - 3, 3)];
                                     }
                                 }
+
+                                if (modEntry.fullPath.Contains("/vfx/"))
+                                {
+                                    type = "VFX";
+                                }
+                            }
+                            else if (modEntry.fullPath.Contains(".avfx"))
+                            {
+                                r = Strings.All;
+                                type = "AVFX";
                             }
 
                             var m = "3D";
@@ -146,7 +162,7 @@ namespace FFXIV_TexTools2.Views
                                 var t = modEntry.fullPath.Substring(modEntry.fullPath.IndexOf("/") + 1);
                                 m = t.Substring(0, t.IndexOf("/"));
                             }
-                            else if (modEntry.fullPath.Contains(".tex"))
+                            else if (modEntry.fullPath.Contains(".tex") || modEntry.fullPath.Contains(".atex"))
                             {
                                 m = GetMapName(modEntry.fullPath);
                             }
@@ -162,11 +178,11 @@ namespace FFXIV_TexTools2.Views
                     }
                 }
                 mpiList.Sort();
-                listView.ItemsSource = mpiList;
+                listView.ItemsSource = mpiList;               
             }
             catch (Exception ex)
             {
-                FlexibleMessageBox.Show("Error accessing or reading .modlist file \n" + ex.Message, "MakeModPack Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                FlexibleMessageBox.Show("Error accessing or reading .modlist file \n" + ex.Message, "MakeModPack Error " + Info.appVersion, Forms.MessageBoxButtons.OK, Forms.MessageBoxIcon.Error);
                 Debug.WriteLine(ex.StackTrace);
             }
 
@@ -217,6 +233,11 @@ namespace FFXIV_TexTools2.Views
                     return Strings.Mask;
                 }
             }
+            else if (fileName.Contains(".atex"))
+            {
+                var atex = Path.GetFileNameWithoutExtension(fileName);
+                return atex.Substring(0, 4);
+            }
             else if (fileName.Contains("decal"))
             {
                 return Strings.Mask;
@@ -232,14 +253,37 @@ namespace FFXIV_TexTools2.Views
             foreach (ModPackItems added in e.AddedItems)
             {
                 packList.Add(added);
+                modCount += 1;
+                modSize += added.Entry.modSize;
             }
 
             foreach (ModPackItems removed in e.RemovedItems)
             {
                 packList.Remove(removed);
+                modCount -= 1;
+                modSize -= removed.Entry.modSize;
             }
 
-            if(packList.Count > 0)
+            float totalModSize = modSize;
+            string sizeSuffix = " Bytes";
+
+            if(totalModSize > 1024 && totalModSize < 1048576)
+            {
+                totalModSize = totalModSize / 1024;
+                sizeSuffix = " KB";
+            }
+            else if(totalModSize > 1048576)
+            {
+                totalModSize = totalModSize / 1048576;
+                sizeSuffix = " MB";
+            }
+
+
+
+            ModCountLabel.Content = modCount;
+            ModSizeLabel.Content = totalModSize.ToString("0.##") + sizeSuffix;
+
+            if (packList.Count > 0)
             {
                 CreateButton.IsEnabled = true;
             }
@@ -311,7 +355,6 @@ namespace FFXIV_TexTools2.Views
 
                 using (BinaryReader br = new BinaryReader(File.OpenRead(datPath)))
                 {
-                    //Might need to correct offset
                     br.BaseStream.Seek(mOffset, SeekOrigin.Begin);
 
                     modPackData.AddRange(br.ReadBytes(mpi.Entry.modSize));
@@ -340,7 +383,7 @@ namespace FFXIV_TexTools2.Views
             }
             else
             {
-                FlexibleMessageBox.Show(modPackName.Text + " already exists. \n\n Please choose another name.", "MakeModPack Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                FlexibleMessageBox.Show(modPackName.Text + " already exists. \n\n Please choose another name.", "MakeModPack Error " + Info.appVersion, Forms.MessageBoxButtons.OK, Forms.MessageBoxIcon.Error);
             }
 
             ClearList();
@@ -348,8 +391,8 @@ namespace FFXIV_TexTools2.Views
 
         private void ClearList()
         {
-            listView.SelectedItems.Clear();
-
+            listView.UnselectAll();
+            
             var fn = 1;
             while (File.Exists(mpDir + "\\ModPack " + fn + ".ttmp"))
             {
@@ -362,6 +405,62 @@ namespace FFXIV_TexTools2.Views
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
             Close();
+        }
+
+        private void SelectAllButton_Click(object sender, RoutedEventArgs e)
+        {
+            listView.SelectAll();
+            listView.Focus();
+        }
+
+        private void SelectActiveButton_Click(object sender, RoutedEventArgs e)
+        {
+            for (int i = 0; i < listView.Items.Count; i++)
+            {
+                var item = (System.Windows.Controls.ListViewItem)listView.ItemContainerGenerator.ContainerFromIndex(i);
+                var mpi = (ModPackItems)listView.Items[i];
+                var isActive = mpi.Active;
+
+                if(item != null)
+                {
+                    if (isActive)
+                    {
+                        item.IsSelected = true;
+                    }
+                    else
+                    {
+                        item.IsSelected = false;
+                    }
+                }
+            }
+            listView.Focus();
+
+        }
+
+        private void ClearSelectedButton_Click(object sender, RoutedEventArgs e)
+        {
+            listView.UnselectAll();
+        }
+
+        private void Header_Click(object sender, RoutedEventArgs e)
+        {
+            if(lastDirection == ListSortDirection.Ascending)
+            {
+                lastDirection = ListSortDirection.Descending;
+            }
+            else
+            {
+                lastDirection = ListSortDirection.Ascending;
+            }
+
+            var h = e.OriginalSource as GridViewColumnHeader;
+
+            if(h != null && !h.Content.ToString().Equals("_"))
+            {
+                CollectionView cv = (CollectionView)CollectionViewSource.GetDefaultView(listView.ItemsSource);
+                cv.SortDescriptions.Clear();
+                cv.SortDescriptions.Add(new SortDescription(h.Content.ToString(), lastDirection));
+            }
         }
     }
 }
