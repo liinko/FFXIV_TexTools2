@@ -1,0 +1,33 @@
+﻿<Window x:Class="FFXIV_TexTools2.Views.ProgressDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:FFXIV_TexTools2.Views"
+        mc:Ignorable="d"
+        Title="ProgressDialog" Height="325" Width="500" ResizeMode="NoResize" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="5*"/>
+            <RowDefinition Height="1*"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" >
+            <Label x:Name="ImportingLabel" Content="Importing mods..." HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <Label x:Name="ProgressPercent" Content="0%" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </StackPanel>
+        <Border Grid.Row="1" BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}" BorderThickness="0,0,0,1">
+            <Grid>
+                <ProgressBar x:Name="Progress" VerticalAlignment="Center" MinHeight="30" Margin="10,0" />
+            </Grid>
+        </Border>
+        <Border Grid.Row="3" BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}" BorderThickness="0,1,0,0">
+            <Button x:Name="OKButton" Content="OK" HorizontalAlignment="Right"  Width="75" IsEnabled="False" Margin="5" Click="OKButton_Click" />
+        </Border>
+        <ScrollViewer x:Name="ScrollViewer" Grid.Row="2" BorderBrush="Black" BorderThickness="0,1">
+            <TextBox x:Name="ProgressText" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+        </ScrollViewer>
+
+    </Grid>
+</Window>

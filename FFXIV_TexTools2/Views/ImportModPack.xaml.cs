@@ -4,6 +4,7 @@ using FFXIV_TexTools2.Resources;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
@@ -20,6 +21,8 @@ namespace FFXIV_TexTools2.Views
     {
         List<ModPackItems> packList = new List<ModPackItems>();
         string packPath;
+        ProgressDialog pd;
+        string currentImport;
 
         public ImportModPack(string modPackPath)
         {
@@ -284,8 +287,61 @@ namespace FFXIV_TexTools2.Views
 
         private void ImportButton_Click(object sender, RoutedEventArgs e)
         {
+
+            BackgroundWorker backgroundWorker = new BackgroundWorker();
+            backgroundWorker.WorkerReportsProgress = true;
+            backgroundWorker.DoWork += BackgroundWorker_DoWork;
+            backgroundWorker.RunWorkerCompleted += BackgroundWorker_RunWorkerCompleted;
+            backgroundWorker.ProgressChanged += BackgroundWorker_ProgressChanged;
+
+            pd = new ProgressDialog();
+            pd.Show();
+
+            backgroundWorker.RunWorkerAsync();
+            Close();
+        }
+
+        private void BackgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            pd.Progress.Value = e.ProgressPercentage;
+            pd.ProgressPercent.Content = e.ProgressPercentage.ToString() + " %";
+            var name = (string)e.UserState;
+            if (name.Equals("Done."))
+            {
+                //pd.ProgressText.Inlines.Add(name + "\n");
+                pd.ProgressText.AppendText(name + "\n");
+            }
+            else
+            {
+                //pd.ProgressText.Inlines.Add(name + "....");
+                pd.ProgressText.AppendText(name + "....");
+                pd.ScrollViewer.ScrollToBottom();
+            }
+
+            if(e.ProgressPercentage == 100)
+            {
+                pd.ImportingLabel.Content = "Import Complete!";
+                //pd.ProgressText.Inlines.Add("All Imports Completed.");
+                pd.ProgressText.AppendText("All Imports Completed.");
+                pd.ScrollViewer.ScrollToBottom();
+            }
+        }
+
+        private void BackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            pd.OKButton.IsEnabled = true;
+        }
+
+        private void BackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            var backgroundWorker = sender as BackgroundWorker;
+
+            var packListCount = packList.Count;
+            var i = 0;
             foreach (var mpi in packList)
             {
+                currentImport = mpi.Name;
+                backgroundWorker.ReportProgress(((i / packListCount) * 100), currentImport);
                 //check if they are in modlist
                 //write data to dat
                 //update index files
@@ -307,7 +363,7 @@ namespace FFXIV_TexTools2.Views
                         if (entry.FullName.EndsWith(".mpd"))
                         {
                             var stream = entry.Open();
-                            using(var ms = new MemoryStream())
+                            using (var ms = new MemoryStream())
                             {
                                 stream.CopyTo(ms);
 
@@ -463,6 +519,9 @@ namespace FFXIV_TexTools2.Views
                 {
                     FlexibleMessageBox.Show("There was an error in importing. \n" + ex.Message, "ImportModPack Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
+
+                i++;
+                backgroundWorker.ReportProgress((i / packListCount) * 100, "Done.");
             }
         }
 
