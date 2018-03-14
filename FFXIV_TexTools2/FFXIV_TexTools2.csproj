@@ -426,6 +426,7 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\ImportFile_16x.png" />
+    <Resource Include="Resources\textureDNE.png" />
     <Content Include="sharpdx_direct3d11_1_effects_arm.dll" />
     <Content Include="sharpdx_direct3d11_1_effects_x64.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

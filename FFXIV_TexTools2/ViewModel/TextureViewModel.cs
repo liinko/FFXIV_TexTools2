@@ -1039,16 +1039,11 @@ namespace FFXIV_TexTools2.ViewModel
                 ActiveToggle = "Enable/Disable";
             }
 
-            if (offset == 0)
+            if (offset == 0 && colorBmp != null)
             {
                 TextureType = "Type: 16.16.16.16f ABGR\nMipMaps: None";
 
                 TextureDimensions = "(4 x 16)";
-
-                if(colorBmp == null) 
-                {
-                    colorBmp = new Bitmap(4, 16);
-                }
 
                 alphaBitmap = Imaging.CreateBitmapSourceFromHBitmap(colorBmp.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
                 alphaBitmap.Freeze();
@@ -1060,6 +1055,12 @@ namespace FFXIV_TexTools2.ViewModel
 
                 colorBmp.Dispose();
                 removeAlphaBitmap.Dispose();
+            }
+            else if (offset == 0 && colorBmp == null)
+            {
+                alphaBitmap = noAlphaBitmap =
+                    new BitmapImage(
+                        new Uri("pack://application:,,,/FFXIV TexTools 2;component/Resources/textureDNE.png"));
             }
             else
             {

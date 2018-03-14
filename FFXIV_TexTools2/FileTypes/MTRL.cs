@@ -190,6 +190,8 @@ namespace FFXIV_TexTools2.Material
             {
                 for (int i = 1; i < 251; i++)
                 {
+                    if (raceID.Equals(Info.raceID[Strings.Miqote + " " + Strings.Female]) &&
+                        (i == 104 || i == 109)) continue;
                     MTRLFolder = String.Format(Strings.HairMtrlFolder, raceID, i.ToString().PadLeft(4, '0'));
 
                     MTRLDict.Add(FFCRC.GetHash(MTRLFolder), i);
