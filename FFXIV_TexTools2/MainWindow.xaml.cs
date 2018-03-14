@@ -537,7 +537,7 @@ namespace FFXIV_TexTools2
 
         private void Menu_ImportModpack_Click(object sender, RoutedEventArgs e)
         {
-            string mpDir = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\TexTools\\ModPacks";
+            string mpDir = Properties.Settings.Default.ModPack_Directory;
 
             if (!Directory.Exists(mpDir))
             {

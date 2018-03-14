@@ -91,7 +91,7 @@
                 <ColumnDefinition Width="5"/>
                 <ColumnDefinition Width="272*"/>
             </Grid.ColumnDefinitions>
-            <GroupBox x:Name="TexturesGroup" Header="Textures" Margin="5">
+            <GroupBox x:Name="TexturesGroup" Header="Item List" Margin="5">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="257*"/>

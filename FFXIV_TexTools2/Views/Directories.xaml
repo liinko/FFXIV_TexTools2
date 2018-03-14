@@ -12,6 +12,7 @@
             <RowDefinition/>
             <RowDefinition/>
             <RowDefinition/>
+            <RowDefinition/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="10*" />
@@ -29,15 +30,20 @@
         <Grid Grid.Column="0" Grid.Row="3" Height="23" Margin="10,15,10,5" VerticalAlignment="Top">
             <TextBox x:Name="indexBackupsDir" TextWrapping="Wrap" IsReadOnly="True" Margin="0"/>
         </Grid>
+        <Grid Grid.Column="0" Grid.Row="4" Height="23" Margin="10,15,10,5" VerticalAlignment="Top">
+            <TextBox x:Name="ModPackDir" TextWrapping="Wrap" IsReadOnly="True" Margin="0"/>
+        </Grid>
 
-        <Button x:Name="FFXIVDirButton" Content="..." Grid.Row="0" Grid.Column="1" Margin="5" Click="FFXIVDirButton_Click" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="25" MinHeight="25" HorizontalContentAlignment="Center" VerticalContentAlignment="Top"/>
-        <Button x:Name="saveDirButton" Content="..." Grid.Row="1" Grid.Column="1" Margin="5" Click="SaveDirButton_Click" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="25" MinHeight="25" VerticalContentAlignment="Top" HorizontalContentAlignment="Center"/>
-        <Button x:Name="modlistDirButton" Content="..." Grid.Row="2" Grid.Column="1" Margin="5" Click="modlistDirButton_Click" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="25" MinHeight="25" VerticalContentAlignment="Top" HorizontalContentAlignment="Center"/>
-        <Button x:Name="indexbackupDirButton" Content="..." Grid.Row="3" Grid.Column="1" Margin="5" Click="indexbackupDirButton_Click" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="25" MinHeight="25" VerticalContentAlignment="Top" HorizontalContentAlignment="Center"/>
+        <Button Content="..." Grid.Row="0" Grid.Column="1" Margin="5" Click="FFXIVDirButton_Click" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="25" MinHeight="25" HorizontalContentAlignment="Center" VerticalContentAlignment="Top"/>
+        <Button Content="..." Grid.Row="1" Grid.Column="1" Margin="5" Click="SaveDirButton_Click" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="25" MinHeight="25" VerticalContentAlignment="Top" HorizontalContentAlignment="Center"/>
+        <Button Content="..." Grid.Row="2" Grid.Column="1" Margin="5" Click="modlistDirButton_Click" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="25" MinHeight="25" VerticalContentAlignment="Top" HorizontalContentAlignment="Center"/>
+        <Button Content="..." Grid.Row="3" Grid.Column="1" Margin="5" Click="indexbackupDirButton_Click" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="25" MinHeight="25" VerticalContentAlignment="Top" HorizontalContentAlignment="Center"/>
+        <Button Content="..." Grid.Row="4" Grid.Column="1" Margin="5" Click="ModPackButton_Click" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="25" MinHeight="25" VerticalContentAlignment="Top" HorizontalContentAlignment="Center"/>
         
-        <Label x:Name="label" Grid.Row="0" Content="FFXIV Directory" VerticalAlignment="Top"  Height="15" Padding="0" Margin="5,0,0,0"/>
-        <Label x:Name="label1" Grid.Row="1"  Content="Save Directory" VerticalAlignment="Top" Height="15" Padding="0" Margin="5,0,0,0"/>
-        <Label x:Name="label2" Grid.Row="2"  Content="Modlist Directory" VerticalAlignment="Top" Height="15" Padding="0" Margin="5,0,0,0"/>
-        <Label x:Name="label3" Grid.Row="3"  Content="Index Backups Directory" VerticalAlignment="Top" Height="15" Padding="0" Margin="5,0,0,0"/>
+        <Label Grid.Row="0" Content="FFXIV Directory" VerticalAlignment="Top"  Height="15" Padding="0" Margin="5,0,0,0"/>
+        <Label Grid.Row="1"  Content="Save Directory" VerticalAlignment="Top" Height="15" Padding="0" Margin="5,0,0,0"/>
+        <Label Grid.Row="2"  Content="Modlist Directory" VerticalAlignment="Top" Height="15" Padding="0" Margin="5,0,0,0"/>
+        <Label Grid.Row="3"  Content="Index Backups Directory" VerticalAlignment="Top" Height="15" Padding="0" Margin="5,0,0,0"/>
+        <Label Grid.Row="4"  Content="ModPack Directory" VerticalAlignment="Top" Height="15" Padding="0" Margin="5,0,0,0"/>
     </Grid>
 </Window>

@@ -23,7 +23,7 @@ namespace FFXIV_TexTools2.Views
 
         JsonEntry modEntry = null;
         List<ModPackItems> packList = new List<ModPackItems>();
-        string mpDir = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\TexTools\\ModPacks";
+        string mpDir = Properties.Settings.Default.ModPack_Directory;
         int modCount = 0;
         int modSize = 0;
         ModPackItems selectedItem;
