@@ -412,7 +412,7 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to mt_d{0}e{1}_{2}_a.mtrl.
+        ///   Looks up a localized string similar to mt_d{0}e{1}_{2}_{3}.mtrl.
         /// </summary>
         internal static string DemiMtrlFile {
             get {

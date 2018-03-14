@@ -203,6 +203,11 @@ namespace FFXIV_TexTools2.ViewModel
 
                 MTRLFile = string.Format(file, SelectedItem.RaceID, searchText.PadLeft(4, '0'), SelectedItem.SlotAbr, SelectedItem.Part);
             }
+            else if (SelectedType.Name.Equals("DemiHuman"))
+            {
+                MTRLFolder = string.Format(folder, searchText.PadLeft(4, '0'), SelectedItem.Body.PadLeft(4, '0')) + SelectedItem.Variant.PadLeft(4, '0');
+                MTRLFile = string.Format(file, searchText.PadLeft(4, '0'), SelectedItem.Body.PadLeft(4, '0'), SelectedItem.Part, "a");
+            }
             else
             {
                 MTRLFolder = string.Format(folder, searchText.PadLeft(4, '0'), SelectedItem.Body.PadLeft(4, '0')) + SelectedItem.Variant.PadLeft(4, '0');
@@ -487,7 +492,7 @@ namespace FFXIV_TexTools2.ViewModel
 
                             foreach (var eq in eqSlots)
                             {
-                                var wmFile = string.Format(file, searchText.PadLeft(4, '0'), bodyList[i].ToString().PadLeft(4, '0'), eq);
+                                var wmFile = string.Format(file, searchText.PadLeft(4, '0'), bodyList[i].ToString().PadLeft(4, '0'), eq, "a");
 
                                 var fileHash = FFCRC.GetHash(wmFile);
                                 if (files.Contains(fileHash))

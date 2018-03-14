@@ -782,6 +782,7 @@ namespace FFXIV_TexTools2.ViewModel
         private void TypeComboBoxChanged()
         {
             string type;
+            string part = "a";
 
             if (selectedCategory.Equals(Strings.Mounts) || selectedCategory.Equals(Strings.Monster) || selectedCategory.Equals(Strings.DemiHuman))
             {
@@ -789,7 +790,8 @@ namespace FFXIV_TexTools2.ViewModel
 
                 if (isDemiHuman)
                 {
-                    type = Info.slotAbr[selectedType.Name];
+                    type = Info.slotAbr[selectedPart.Name];
+                    part = selectedType.Name;
                 }
                 else
                 {
@@ -802,7 +804,7 @@ namespace FFXIV_TexTools2.ViewModel
             }
 
 
-            var info = MTRL.GetMTRLDatafromType(selectedItem, selectedRace.ID, selectedPart.Name, type, imcVersion, selectedCategory, "a");
+            var info = MTRL.GetMTRLDatafromType(selectedItem, selectedRace.ID, selectedPart.Name, type, imcVersion, selectedCategory, part);
             mtrlData = info.Item1;
 
             MapComboBox = info.Item2;

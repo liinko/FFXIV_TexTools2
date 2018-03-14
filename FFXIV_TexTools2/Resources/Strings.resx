@@ -328,7 +328,7 @@
     <value>chara/human/c{0}/obj/body/b{1}/material</value>
   </data>
   <data name="DemiMtrlFile" xml:space="preserve">
-    <value>mt_d{0}e{1}_{2}_a.mtrl</value>
+    <value>mt_d{0}e{1}_{2}_{3}.mtrl</value>
   </data>
   <data name="EquipDecalFile" xml:space="preserve">
     <value>-decal_{0}.tex</value>

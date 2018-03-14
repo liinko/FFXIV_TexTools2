@@ -268,11 +268,25 @@ namespace FFXIV_TexTools2.Material
 
                 if (item.PrimaryMTRLFolder.Contains("demihuman"))
                 {
-                    cbiList.Add(new ComboBoxInfo() { Name = "a", ID = "a", IsNum = false });
+                    SortedSet<ComboBoxInfo> typeSet = new SortedSet<ComboBoxInfo>();
+
+                    fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion), Strings.ItemsDat);
+
+                    foreach (string abr in Info.slotAbr.Values)
+                    {
+                        var MTRLFile = String.Format(Strings.DemiMtrlFile, item.PrimaryModelID.PadLeft(4, '0'), item.PrimaryModelBody.PadLeft(4, '0'), abr, "a");
+
+                        if (fileHashList.Contains(FFCRC.GetHash(MTRLFile)))
+                        {
+                            typeSet.Add(new ComboBoxInfo() { Name = Info.slotAbr.FirstOrDefault(x => x.Value == abr).Key, ID = "", IsNum = false });
+
+                        }
+                    }
+
+                    cbiList.AddRange(typeSet);
                 }
                 else
                 {
-                    Dictionary<string, int> mountMTRLDict = new Dictionary<string, int>();
                     string[] parts = { "a", "b", "c", "d", "e" };
 
                     fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion), Strings.ItemsDat);
@@ -290,7 +304,6 @@ namespace FFXIV_TexTools2.Material
             }
             else if (selectedCategory.Equals(Strings.Minions))
             {
-                Dictionary<string, int> minionMTRLDict = new Dictionary<string, int>();
                 string[] parts = { "a", "b", "c", "d", "e" };
                 cbiList = new List<ComboBoxInfo>();
 
@@ -548,14 +561,15 @@ namespace FFXIV_TexTools2.Material
 
                     var fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion), Strings.ItemsDat);
 
-                    foreach (string abr in Info.slotAbr.Values)
+                    string[] parts = { "a", "b", "c", "d", "e" };
+
+                    foreach (string p in parts)
                     {
-                        MTRLFile = String.Format(Strings.DemiMtrlFile, item.PrimaryModelID.PadLeft(4, '0'), item.PrimaryModelBody.PadLeft(4, '0'), abr);
+                        MTRLFile = String.Format(Strings.DemiMtrlFile, item.PrimaryModelID.PadLeft(4, '0'), item.PrimaryModelBody.PadLeft(4, '0'), Info.slotAbr[part], p);
 
                         if (fileHashList.Contains(FFCRC.GetHash(MTRLFile)))
                         {
-                            typeSet.Add(new ComboBoxInfo() { Name = Info.slotAbr.FirstOrDefault(x => x.Value == abr).Key, ID = "", IsNum = false });
-                            
+                            typeSet.Add(new ComboBoxInfo() { Name = p, ID = "", IsNum = false });
                         }
                     }
                     info = new Tuple<MTRLData, ObservableCollection<ComboBoxInfo>>(mtrlInfo, new ObservableCollection<ComboBoxInfo>(typeSet.ToList()));
@@ -836,7 +850,7 @@ namespace FFXIV_TexTools2.Material
 
                 if (item.PrimaryMTRLFolder.Contains("demihuman"))
                 {
-                    MTRLFile = String.Format(Strings.DemiMtrlFile, item.PrimaryModelID.PadLeft(4, '0'), item.PrimaryModelBody.PadLeft(4, '0'), type);
+                    MTRLFile = String.Format(Strings.DemiMtrlFile, item.PrimaryModelID.PadLeft(4, '0'), item.PrimaryModelBody.PadLeft(4, '0'), type, part);
                 }
                 else
                 {
