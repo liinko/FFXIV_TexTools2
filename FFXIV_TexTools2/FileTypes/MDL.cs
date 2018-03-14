@@ -1009,10 +1009,13 @@ namespace FFXIV_TexTools2.Material
                                 }
                                 else
                                 {
-                                    new Thread(() => MessageBox.Show("There was an error reading the models extra data.\n\n" +
-                                        "Mesh " + i + " Index " + id + "\n\n" +
-                                        "This is likely caused by parts of a mesh being deleted and may cause crashes in-game.\n\n" +
-                                        "Consider using Advanced Import to Fix or Disable Hiding for the above mesh.", "Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error)).Start();
+                                    //new Thread(() => MessageBox.Show("There was an error reading the models extra data.\n\n" +
+                                    //    "Mesh " + i + " Index " + id + "\n\n" +
+                                    //    "This is likely caused by parts of a mesh being deleted and may cause crashes in-game.\n\n" +
+                                    //    "Consider using Advanced Import to Fix or Disable Hiding for the above mesh.",
+                                    //    "Extra Data Warning" + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Warning)).Start();
+                                    new Thread(() => MessageBox.Show(string.Format(Dialogs.MDLExtraDataWarning, i, id),
+                                        Dialogs.ExtraDataWarning + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Warning)).Start();
 
                                     break;
                                 }

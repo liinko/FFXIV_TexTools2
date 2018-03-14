@@ -566,36 +566,71 @@ namespace FFXIV_TexTools2.Views
 
         private bool CheckLoD()
         {
-            var dir = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/My Games/FINAL FANTASY XIV - A Realm Reborn";
+            var dir = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\My Games\\FINAL FANTASY XIV - A Realm Reborn";
 
             bool problem = false;
+            bool DX11 = false;
             if (Directory.Exists(dir))
             {
-                if (File.Exists(dir + "/FFXIV.cfg"))
+                if (File.Exists(dir + "\\FFXIV_BOOT.cfg"))
                 {
-                    var lines = File.ReadAllLines(dir + "/FFXIV.cfg");
+                    var lines = File.ReadAllLines(dir + "\\FFXIV_BOOT.cfg");
+
+                    foreach (var line in lines)
+                    {
+                        if (line.Contains("DX11Enabled"))
+                        {
+                            var val = line.Substring(line.Length - 1, 1);
+                            if (val.Equals("1"))
+                            {
+                                DX11 = true;
+                            }
+                        }
+                    }
+                }
+
+                if (File.Exists(dir + "\\FFXIV.cfg"))
+                {
+                    var lines = File.ReadAllLines(dir + "\\FFXIV.cfg");
 
                     foreach(var line in lines)
                     {
                         if (line.Contains("LodType"))
                         {
                             var val = line.Substring(line.Length - 1, 1);
-                            if (val.Equals("1"))
+                            if (DX11 && line.Contains("DX11"))
                             {
-                                AddText("\t" + line.Substring(0, line.IndexOf("\t")) + " ON\t", "Black");
-                                AddText("\u2716\n", "Red");
+                                if (val.Equals("1"))
+                                {
+                                    AddText("\t" + line.Substring(0, line.IndexOf("\t")) + " ON\t", "Black");
+                                    AddText("\u2716\n", "Red");
 
-                                problem = true;
+                                    problem = true;
+                                }
+                                else
+                                {
+                                    AddText("\t" + line.Substring(0, line.IndexOf("\t")) + " OFF\t", "Black");
+                                    AddText("\u2714\n", "Green");
+                                }
                             }
-                            else
+                            else if (!DX11 && !line.Contains("DX11"))
                             {
-                                AddText("\t" + line.Substring(0, line.IndexOf("\t")) + " OFF\t", "Black");
-                                AddText("\u2714\n", "Green");
+                                if (val.Equals("1"))
+                                {
+                                    AddText("\t" + line.Substring(0, line.IndexOf("\t")) + " ON\t", "Black");
+                                    AddText("\u2716\n", "Red");
+
+                                    problem = true;
+                                }
+                                else
+                                {
+                                    AddText("\t" + line.Substring(0, line.IndexOf("\t")) + " OFF\t", "Black");
+                                    AddText("\u2714\n", "Green");
+                                }
                             }
 
                         }
                     }
-
                 }
             }
 
