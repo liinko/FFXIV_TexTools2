@@ -551,6 +551,7 @@ namespace FFXIV_TexTools2
             if(ofd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 ImportModPack imp = new ImportModPack(ofd.FileName);
+                imp.Owner = this;
                 imp.Show();
             }
 

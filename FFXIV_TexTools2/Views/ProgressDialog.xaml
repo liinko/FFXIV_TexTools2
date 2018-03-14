@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FFXIV_TexTools2.Views"
         mc:Ignorable="d"
-        Title="ProgressDialog" Height="325" Width="500" ResizeMode="NoResize" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner">
+        Title="ModPack Install" Height="325" Width="500" ResizeMode="NoResize" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="1*"/>
@@ -23,7 +23,17 @@
             </Grid>
         </Border>
         <Border Grid.Row="3" BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}" BorderThickness="0,1,0,0">
-            <Button x:Name="OKButton" Content="OK" HorizontalAlignment="Right"  Width="75" IsEnabled="False" Margin="5" Click="OKButton_Click" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Horizontal" Grid.Column="0">
+                    <Label Content="Time Elsapsed: "/>
+                    <Label x:Name="TimeElapsedLabel" Content="0:00"/>
+                </StackPanel>
+                <Button x:Name="OKButton" Grid.Column="1" Content="OK" HorizontalAlignment="Right"  Width="75" IsEnabled="False" Margin="5" Click="OKButton_Click" />
+            </Grid>
         </Border>
         <ScrollViewer x:Name="ScrollViewer" Grid.Row="2" BorderBrush="Black" BorderThickness="0,1">
             <TextBox x:Name="ProgressText" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Auto"/>
