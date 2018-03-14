@@ -1045,6 +1045,11 @@ namespace FFXIV_TexTools2.ViewModel
 
                 TextureDimensions = "(4 x 16)";
 
+                if(colorBmp == null) 
+                {
+                    colorBmp = new Bitmap(4, 16);
+                }
+
                 alphaBitmap = Imaging.CreateBitmapSourceFromHBitmap(colorBmp.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
                 alphaBitmap.Freeze();
 
