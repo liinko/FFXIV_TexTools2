@@ -84,7 +84,19 @@ namespace FFXIV_TexTools2.IO
             List<string> petNames = new List<string>();
 
             var petFile = String.Format(Strings.PetEXD, Strings.Language);
-            var petBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(petFile)), petFile);
+            byte[] petBytes;
+            try
+            {
+                petBytes =
+                    Helper.GetDecompressedEXDData(
+                        Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(petFile)), petFile);
+            }
+            catch (Exception e)
+            {
+                FlexibleMessageBox.Show("Error reading Pets EXD \nYou may have an older or unsupported version of the game.\n\n"
+                                        + e.Message, "EXDReader (MakePetsList) Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
 
             using (BinaryReader br = new BinaryReader(new MemoryStream(petBytes)))
             {
@@ -227,8 +239,19 @@ namespace FFXIV_TexTools2.IO
         {
             string minionFile = String.Format(Strings.MinionFile, Strings.Language);
 
-            byte[] minionsBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(minionFile)), minionFile);
-            byte[] modelChara = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(Strings.ModelCharaFile)), Strings.ModelCharaFile);
+            byte[] minionsBytes;
+            byte[] modelChara;
+            try
+            {
+                minionsBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(minionFile)), minionFile);
+                modelChara = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(Strings.ModelCharaFile)), Strings.ModelCharaFile);
+            }
+            catch (Exception e)
+            {
+                FlexibleMessageBox.Show("Error reading Minions EXD \nYou may have an older or unsupported version of the game.\n\n"
+                                        + e.Message, "EXDReader (MakeMinionsList) Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
 
             TreeNode minionNode = new TreeNode() { Name = Strings.Minions};
 
@@ -1445,7 +1468,18 @@ namespace FFXIV_TexTools2.IO
         {
             string itemUICatFile = String.Format(Strings.ItemUICategory, Strings.Language);
 
-            byte[] itemUICatBytes = Helper.GetDecompressedEXDData(Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(itemUICatFile)), itemUICatFile);
+            byte[] itemUICatBytes;
+            try
+            {
+                itemUICatBytes = Helper.GetDecompressedEXDData(
+                    Helper.GetEXDOffset(FFCRC.GetHash(Strings.ExdFolder), FFCRC.GetHash(itemUICatFile)), itemUICatFile);
+            }
+            catch (Exception e)
+            {
+                FlexibleMessageBox.Show("Error reading ItemUICategory EXD \nYou may have an older or unsupported version of the game.\n\n"
+                                        + e.Message, "EXDReader (ItemUICategory) Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
 
             Dictionary<int, string> UICategories = new Dictionary<int, string>();
 
