@@ -500,8 +500,6 @@ namespace FFXIV_TexTools2.IO
 					return;
 				}
 
-				bool passfail = false;
-
 				for(int i = 0; i < pDict.Count; i++)
 				{
 					var mDict = pDict[i];
@@ -535,11 +533,6 @@ namespace FFXIV_TexTools2.IO
 					}
 				}
 
-				if (passfail)
-				{
-					return;
-				}
-
 				for (int i = 0; i < pDict.Count; i++)
 				{
 					var mDict = pDict[i];
@@ -558,82 +551,93 @@ namespace FFXIV_TexTools2.IO
 					{
 						for (int j = 0; j < mDict.Count; j++)
 						{
-							while (!mDict.ContainsKey(c))
-							{
-								cdDict[i].partsDict.Add(c, 0);
-								c++;
-							}
+						    try
+						    {
+						        while (!mDict.ContainsKey(c))
+						        {
+						            cdDict[i].partsDict.Add(c, 0);
+						            c++;
+						        }
 
-							if(mDict[c].texCoord2.Count < 1 && indStride == 6)
-							{
-								indStride = 4;
-							}
+						        if (mDict[c].texCoord2.Count < 1 && indStride == 6)
+						        {
+						            indStride = 4;
+						        }
 
-							cdDict[i].vertex.AddRange(mDict[c].vertex);
-							cdDict[i].normal.AddRange(mDict[c].normal);
-							cdDict[i].texCoord.AddRange(mDict[c].texCoord);
-							cdDict[i].texCoord2.AddRange(mDict[c].texCoord2);
-							cdDict[i].tangent.AddRange(mDict[c].tangent);
-							cdDict[i].biNormal.AddRange(mDict[c].biNormal);
+						        cdDict[i].vertex.AddRange(mDict[c].vertex);
+						        cdDict[i].normal.AddRange(mDict[c].normal);
+						        cdDict[i].texCoord.AddRange(mDict[c].texCoord);
+						        cdDict[i].texCoord2.AddRange(mDict[c].texCoord2);
+						        cdDict[i].tangent.AddRange(mDict[c].tangent);
+						        cdDict[i].biNormal.AddRange(mDict[c].biNormal);
 
-							for(int k = 0; k < mDict[c].vIndexList.Count; k++)
-							{
-								cdDict[i].index.Add(mDict[c].vIndexList[k] + vMax);
-								cdDict[i].index.Add(mDict[c].nIndexList[k] + nMax);
-								cdDict[i].index.Add(mDict[c].tcIndexList[k] + tcMax);
+						        for (int k = 0; k < mDict[c].vIndexList.Count; k++)
+						        {
+						            cdDict[i].index.Add(mDict[c].vIndexList[k] + vMax);
+						            cdDict[i].index.Add(mDict[c].nIndexList[k] + nMax);
+						            cdDict[i].index.Add(mDict[c].tcIndexList[k] + tcMax);
 
-								if (mDict[c].texCoord2.Count > 0)
-								{
-									cdDict[i].index.Add(mDict[c].tc2IndexList[k] + tc2Max);
-								}
+						            if (mDict[c].texCoord2.Count > 0)
+						            {
+						                cdDict[i].index.Add(mDict[c].tc2IndexList[k] + tc2Max);
+						            }
 
-								if(mDict[c].biNormal.Count > 0)
-								{
-									cdDict[i].index.Add(mDict[c].bnIndexList[k] + bnMax);
-								}
-							}
+						            if (mDict[c].biNormal.Count > 0)
+						            {
+						                cdDict[i].index.Add(mDict[c].bnIndexList[k] + bnMax);
+						            }
+						        }
 
-							vMax += mDict[c].vIndexList.Max() + 1;
-							nMax += mDict[c].nIndexList.Max() + 1;
-							tcMax += mDict[c].tcIndexList.Max() + 1;
+						        vMax += mDict[c].vIndexList.Max() + 1;
+						        nMax += mDict[c].nIndexList.Max() + 1;
+						        tcMax += mDict[c].tcIndexList.Max() + 1;
 
-							if (mDict[c].texCoord2.Count > 0)
-							{
-								tc2Max += mDict[c].tc2IndexList.Max() + 1;
-							}
+						        if (mDict[c].texCoord2.Count > 0)
+						        {
+						            tc2Max += mDict[c].tc2IndexList.Max() + 1;
+						        }
 
-							if(mDict[c].biNormal.Count > 0)
-							{
-								bnMax += mDict[c].bnIndexList.Max() + 1;
-							}
+						        if (mDict[c].biNormal.Count > 0)
+						        {
+						            bnMax += mDict[c].bnIndexList.Max() + 1;
+						        }
 
-							cdDict[i].partsDict.Add(c, mDict[c].index.Count / indStride);
+						        cdDict[i].partsDict.Add(c, mDict[c].index.Count / indStride);
 
-							cdDict[i].weights.AddRange(mDict[c].weights);
-							cdDict[i].vCount.AddRange(mDict[c].vCount);
+						        cdDict[i].weights.AddRange(mDict[c].weights);
+						        cdDict[i].vCount.AddRange(mDict[c].vCount);
 
-							if (j > 0)
-							{
+						        if (j > 0)
+						        {
 
-								lastIndex = bInList.Max() + 1;
+						            lastIndex = bInList.Max() + 1;
 
-								for (int a = 0; a < mDict[c].bIndex.Count; a += 2)
-								{
-									cdDict[i].bIndex.Add(mDict[c].bIndex[a]);
-									cdDict[i].bIndex.Add(mDict[c].bIndex[a + 1] + lastIndex);
-									bInList.Add(mDict[c].bIndex[a + 1] + lastIndex);
-								}
-							}
-							else
-							{
-								for (int a = 0; a < mDict[c].bIndex.Count; a += 2)
-								{
-									cdDict[i].bIndex.Add(mDict[c].bIndex[a]);
-									cdDict[i].bIndex.Add(mDict[c].bIndex[a + 1]);
-									bInList.Add(mDict[c].bIndex[a + 1]);
-								}
-							}
-							c++;
+						            for (int a = 0; a < mDict[c].bIndex.Count; a += 2)
+						            {
+						                cdDict[i].bIndex.Add(mDict[c].bIndex[a]);
+						                cdDict[i].bIndex.Add(mDict[c].bIndex[a + 1] + lastIndex);
+						                bInList.Add(mDict[c].bIndex[a + 1] + lastIndex);
+						            }
+						        }
+						        else
+						        {
+						            for (int a = 0; a < mDict[c].bIndex.Count; a += 2)
+						            {
+						                cdDict[i].bIndex.Add(mDict[c].bIndex[a]);
+						                cdDict[i].bIndex.Add(mDict[c].bIndex[a + 1]);
+						                bInList.Add(mDict[c].bIndex[a + 1]);
+						            }
+						        }
+
+						        c++;
+						    }
+						    catch (Exception e)
+						    {
+						        FlexibleMessageBox.Show("There was an error reading data imported data at:" +
+						                                "\n\nMesh: " + i + " Part: " + c + "\n\n" + e.Message, "Data Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                return;
+						    }
+
 						}
 					}
 					else
@@ -946,52 +950,62 @@ namespace FFXIV_TexTools2.IO
 
 					for (int i = 0; i < iList.Count; i++)
 					{
-						if (!indexDict.ContainsKey(iList[i][0]))
-						{
-							if (!blender)
-							{
-								indexDict.Add(iList[i][0], inCount);
-								nVertex.Add(Vertex[iList[i][0]]);
-								nBlendIndices.Add(blendIndices[iList[i][0]]);
-								nBlendWeights.Add(blendWeights[iList[i][0]]);
-								nNormals.Add(Normals[iList[i][1]]);
-								nTexCoord.Add(TexCoord[iList[i][2]]);
-								if (TexCoord2.Count > 0 && TexCoord2.Count >= indexMax)
-								{
-									nTexCoord2.Add(TexCoord2[iList[i][3]]);
-								}
+					    try
+					    {
+					        if (!indexDict.ContainsKey(iList[i][0]))
+					        {
+					            if (!blender)
+					            {
+					                indexDict.Add(iList[i][0], inCount);
+					                nVertex.Add(Vertex[iList[i][0]]);
+					                nBlendIndices.Add(blendIndices[iList[i][0]]);
+					                nBlendWeights.Add(blendWeights[iList[i][0]]);
+					                nNormals.Add(Normals[iList[i][1]]);
+					                nTexCoord.Add(TexCoord[iList[i][2]]);
+					                if (TexCoord2.Count > 0 && TexCoord2.Count >= indexMax)
+					                {
+					                    nTexCoord2.Add(TexCoord2[iList[i][3]]);
+					                }
 
-								if (nTangents.Count > 0 && TexCoord2.Count > 0)
-								{
-									nTangents.Add(Tangents[iList[i][4]]);
-									nBiNormals.Add(BiNormals[iList[i][4]]);
-								}
-								else if(nTangents.Count > 0 && TexCoord2.Count < 1)
-								{
-									nTangents.Add(Tangents[iList[i][3]]);
-									nBiNormals.Add(BiNormals[iList[i][3]]);
-								}
-							}
-							else
-							{
-								indexDict.Add(iList[i][0], inCount);
-								nVertex.Add(Vertex[iList[i][0]]);
-								nBlendIndices.Add(blendIndices[iList[i][0]]);
-								nBlendWeights.Add(blendWeights[iList[i][0]]);
-								nNormals.Add(Normals[iList[i][0]]);
-								nTexCoord.Add(TexCoord[iList[i][0]]);
-								nTexCoord2.Add(TexCoord2[iList[i][0]]);
+					                if (nTangents.Count > 0 && TexCoord2.Count > 0)
+					                {
+					                    nTangents.Add(Tangents[iList[i][4]]);
+					                    nBiNormals.Add(BiNormals[iList[i][4]]);
+					                }
+					                else if (nTangents.Count > 0 && TexCoord2.Count < 1)
+					                {
+					                    nTangents.Add(Tangents[iList[i][3]]);
+					                    nBiNormals.Add(BiNormals[iList[i][3]]);
+					                }
+					            }
+					            else
+					            {
+					                indexDict.Add(iList[i][0], inCount);
+					                nVertex.Add(Vertex[iList[i][0]]);
+					                nBlendIndices.Add(blendIndices[iList[i][0]]);
+					                nBlendWeights.Add(blendWeights[iList[i][0]]);
+					                nNormals.Add(Normals[iList[i][0]]);
+					                nTexCoord.Add(TexCoord[iList[i][0]]);
+					                nTexCoord2.Add(TexCoord2[iList[i][0]]);
 
-								if (nTangents.Count > 0)
-								{
-									nTangents.Add(Tangents[iList[i][0]]);
-									nBiNormals.Add(BiNormals[iList[i][0]]);
-								}
-							}
+					                if (nTangents.Count > 0)
+					                {
+					                    nTangents.Add(Tangents[iList[i][0]]);
+					                    nBiNormals.Add(BiNormals[iList[i][0]]);
+					                }
+					            }
 
 
-							inCount++;
-						}
+					            inCount++;
+					        }
+					    }
+					    catch (Exception e)
+					    {
+					        FlexibleMessageBox.Show("There was an error reindexing the data at:" +
+					                                "\n\nIndex: " + i + "\n\n" + e.Message, "Reindexing Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+					        return;
+                        }
+
 					}
 
 					HashSet<int> nVertList = new HashSet<int>();
@@ -1000,8 +1014,17 @@ namespace FFXIV_TexTools2.IO
 
 					for (int i = 0; i < iList.Count; i++)
 					{
-						var nIndex = indexDict[iList[i][0]];
-						Indices.Add(nIndex);
+					    try
+					    {
+					        var nIndex = indexDict[iList[i][0]];
+					        Indices.Add(nIndex);
+					    }
+					    catch (Exception e)
+					    {
+					        FlexibleMessageBox.Show("There was an error finding the index data for:" +
+					                                "\n\nIndex: " + i + "\n\n" + e.Message, "Index Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+					        return;
+                        }
 					}
 
 					if (importSettings != null && importSettings.ContainsKey(m.ToString()))
