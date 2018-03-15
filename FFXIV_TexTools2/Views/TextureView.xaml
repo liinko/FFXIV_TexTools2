@@ -62,7 +62,7 @@
                     </DrawingBrush>
                 </Border.Background>
                 <Grid>
-                    <xctk:Zoombox x:Name="zoomBox" DragModifiers="0" ZoomModifiers="0" KeepContentInBounds="True" MinScale="0.2" MaxScale="40" IsAnimated="False" ViewStackMode="Disabled" PanDistance="2">
+                    <xctk:Zoombox x:Name="zoomBox" DragModifiers="0" ZoomModifiers="0" KeepContentInBounds="True" MinScale="0.2" MaxScale="20" IsAnimated="False" ViewStackMode="Disabled" PanDistance="2">
                         <Image x:Name="texImage" RenderOptions.BitmapScalingMode="NearestNeighbor" Effect="{Binding ImageEffect}" Source="{Binding ImageSource, NotifyOnSourceUpdated=True}" />
                     </xctk:Zoombox>
                     <Grid Margin="0" Background="#3FFFFFFF" Height="33" VerticalAlignment="Top" HorizontalAlignment="Right" Width="151" IsEnabled="{Binding ChannelsEnabled, FallbackValue=false}">

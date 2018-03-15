@@ -26,6 +26,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -33,7 +34,9 @@ using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using PixelFormat = System.Drawing.Imaging.PixelFormat;
 
 
 namespace FFXIV_TexTools2.ViewModel
@@ -1094,18 +1097,59 @@ namespace FFXIV_TexTools2.ViewModel
                 var clonerect = new Rectangle(0, 0, texData.Width, texData.Height);
                 saveClone = texData.BMP.Clone(new Rectangle(0, 0, texData.Width, texData.Height), PixelFormat.Format32bppArgb);
 
-                alphaBitmap = Imaging.CreateBitmapSourceFromHBitmap(texData.BMP.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                var scale = 1;
+
+                if (texData.BMP.Width >= 4096 || texData.BMP.Width >= 4096)
+                {
+                    scale = 4;
+                }
+                else if (texData.BMP.Width >= 2048 || texData.BMP.Width >= 2048)
+                {
+                    scale = 2;
+                }
+
+                var oBMP = new Bitmap(texData.BMP);
+                var nBMP = oBMP;
+                if (scale > 1)
+                {
+                    nBMP = new Bitmap(oBMP.Width / scale, oBMP.Height / scale);
+                    using (var graphic = Graphics.FromImage(nBMP))
+                    {
+                        graphic.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                        graphic.SmoothingMode = SmoothingMode.HighQuality;
+                        graphic.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                        graphic.DrawImage(oBMP, 0, 0, nBMP.Width, nBMP.Height);
+                    }
+                }
+                
+                alphaBitmap = Imaging.CreateBitmapSourceFromHBitmap(nBMP.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
                 alphaBitmap.Freeze();
-
-
+                oBMP.Dispose();
+                nBMP.Dispose();
+                
                 var removeAlphaBitmap = SetAlpha(texData.BMP, 255);
 
-                noAlphaBitmap = Imaging.CreateBitmapSourceFromHBitmap(removeAlphaBitmap.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                var oBMP1 = removeAlphaBitmap;
+                var nBMP1 = oBMP1;
+                if (scale > 1)
+                {
+                    nBMP1 = new Bitmap(oBMP1.Width / scale, oBMP1.Height / scale);
+                    using (var graphic = Graphics.FromImage(nBMP1))
+                    {
+                        graphic.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                        graphic.SmoothingMode = SmoothingMode.HighQuality;
+                        graphic.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                        graphic.DrawImage(oBMP1, 0, 0, nBMP1.Width, nBMP1.Height);
+                    }
+                }
+
+                noAlphaBitmap = Imaging.CreateBitmapSourceFromHBitmap(nBMP1.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
                 noAlphaBitmap.Freeze();
+                oBMP1.Dispose();
+                nBMP1.Dispose();
 
                 removeAlphaBitmap.Dispose();
             }
-
 
             try
             {
@@ -1250,12 +1294,59 @@ namespace FFXIV_TexTools2.ViewModel
                     TextureType = "Type: " + texData.TypeString + "\nMipMaps: " + mipMaps;
                     TextureDimensions = "(" + texData.Width + " x " + texData.Height + ")";
 
-                    alphaBitmap = Imaging.CreateBitmapSourceFromHBitmap(texData.BMP.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+
+                    var scale = 1;
+
+                    if (texData.BMP.Width >= 4096 || texData.BMP.Width >= 4096)
+                    {
+                        scale = 4;
+                    }
+                    else if (texData.BMP.Width >= 2048 || texData.BMP.Width >= 2048)
+                    {
+                        scale = 2;
+                    }
+
+                    var oBMP = new Bitmap(texData.BMP);
+                    var nBMP = oBMP;
+                    if (scale > 1)
+                    {
+                        nBMP = new Bitmap(oBMP.Width / scale, oBMP.Height / scale);
+                        using (var graphic = Graphics.FromImage(nBMP))
+                        {
+                            graphic.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                            graphic.SmoothingMode = SmoothingMode.HighQuality;
+                            graphic.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                            graphic.DrawImage(oBMP, 0, 0, nBMP.Width, nBMP.Height);
+                        }
+                    }
+
+                    alphaBitmap = Imaging.CreateBitmapSourceFromHBitmap(nBMP.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                    alphaBitmap.Freeze();
 
                     var removeAlphaBitmap = SetAlpha(texData.BMP, 255);
 
-                    noAlphaBitmap = Imaging.CreateBitmapSourceFromHBitmap(removeAlphaBitmap.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
 
+                    var oBMP1 = removeAlphaBitmap;
+                    var nBMP1 = oBMP1;
+                    if (scale > 1)
+                    {
+                        nBMP1 = new Bitmap(oBMP1.Width / scale, oBMP1.Height / scale);
+                        using (var graphic = Graphics.FromImage(nBMP1))
+                        {
+                            graphic.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                            graphic.SmoothingMode = SmoothingMode.HighQuality;
+                            graphic.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                            graphic.DrawImage(oBMP1, 0, 0, nBMP1.Width, nBMP1.Height);
+                        }
+                    }
+
+                    noAlphaBitmap = Imaging.CreateBitmapSourceFromHBitmap(nBMP1.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                    noAlphaBitmap.Freeze();
+
+                    oBMP.Dispose();
+                    nBMP.Dispose();
+                    oBMP1.Dispose();
+                    nBMP1.Dispose();
                     texData.Dispose();
                     removeAlphaBitmap.Dispose();
                 }

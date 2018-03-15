@@ -48,7 +48,7 @@ namespace FFXIV_TexTools2.Model
         /// <summary>
         /// The raw DDS texture data
         /// </summary>
-        public byte[] RawTexData { get; set; }
+        //public byte[] RawTexData { get; set; }
 
         /// <summary>
         /// The texture bitmap
@@ -59,6 +59,11 @@ namespace FFXIV_TexTools2.Model
         /// The texture dat name
         /// </summary>
         public string TEXDatName { get; set; }
+
+        /// <summary>
+        /// The texture offset
+        /// </summary>
+        public int TexOffset { get; set; }
 
         /// <summary>
         /// Disposes of the texture bitmap

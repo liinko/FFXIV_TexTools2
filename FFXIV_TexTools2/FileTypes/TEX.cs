@@ -19,11 +19,11 @@ using FFXIV_TexTools2.Model;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
+using Bitmap = System.Drawing.Bitmap;
+using Color = System.Drawing.Color;
 
 namespace FFXIV_TexTools2.Material
 {
@@ -42,6 +42,8 @@ namespace FFXIV_TexTools2.Material
             int datNum = ((offset / 8) & 0x0F) / 2;
 
             var datPath = string.Format(Info.datDir, datName, datNum);
+
+            var storeOffset = offset;
 
             offset = Helper.OffsetCorrection(datNum, offset);
            
@@ -170,10 +172,147 @@ namespace FFXIV_TexTools2.Material
 
             texData.BMP = TextureToBitmap(decompressedData.ToArray(), texData.Type, texData.Width, texData.Height);
             texData.TypeString = Info.TextureTypes[texData.Type];
-            texData.RawTexData = decompressedData.ToArray();
+            texData.TexOffset = storeOffset;
             texData.TEXDatName = datName;
 
             return texData;
+        }
+
+        public static byte[] TexRawData(TEXData td)
+        {
+            var offset = td.TexOffset;
+            var datName = td.TEXDatName;
+
+            TEXData texData = new TEXData();
+
+            int datNum = ((offset / 8) & 0x0F) / 2;
+
+            var datPath = string.Format(Info.datDir, datName, datNum);
+
+            offset = Helper.OffsetCorrection(datNum, offset);
+
+            List<byte> decompressedData = new List<byte>();
+
+            using (BinaryReader br = new BinaryReader(File.OpenRead(datPath)))
+            {
+                br.BaseStream.Seek(offset, SeekOrigin.Begin);
+
+                int headerLength = br.ReadInt32();
+                int fileType = br.ReadInt32();
+                int uncompressedFileSize = br.ReadInt32();
+                br.ReadBytes(8);
+                texData.MipCount = br.ReadInt32();
+
+                int endOfHeader = offset + headerLength;
+                int mipMapInfoOffset = offset + 24;
+
+                br.BaseStream.Seek(endOfHeader + 4, SeekOrigin.Begin);
+
+                texData.Type = br.ReadInt32();
+                texData.Width = br.ReadInt16();
+                texData.Height = br.ReadInt16();
+
+                for (int i = 0, j = 0; i < texData.MipCount; i++)
+                {
+                    br.BaseStream.Seek(mipMapInfoOffset + j, SeekOrigin.Begin);
+
+                    int offsetFromHeaderEnd = br.ReadInt32();
+                    int mipMapLength = br.ReadInt32();
+                    int mipMapSize = br.ReadInt32();
+                    int mipMapStart = br.ReadInt32();
+                    int mipMapParts = br.ReadInt32();
+
+                    int mipMapPartOffset = endOfHeader + offsetFromHeaderEnd;
+
+                    br.BaseStream.Seek(mipMapPartOffset, SeekOrigin.Begin);
+
+                    br.ReadBytes(8);
+                    int compressedSize = br.ReadInt32();
+                    int uncompressedSize = br.ReadInt32();
+
+                    if (mipMapParts > 1)
+                    {
+                        byte[] compressedData = br.ReadBytes(compressedSize);
+                        byte[] decompressedPartData = new byte[uncompressedSize];
+
+                        using (MemoryStream ms = new MemoryStream(compressedData))
+                        {
+                            using (DeflateStream ds = new DeflateStream(ms, CompressionMode.Decompress))
+                            {
+                                ds.Read(decompressedPartData, 0, uncompressedSize);
+                            }
+                        }
+
+                        decompressedData.AddRange(decompressedPartData);
+
+                        for (int k = 1; k < mipMapParts; k++)
+                        {
+                            byte check = br.ReadByte();
+                            while (check != 0x10)
+                            {
+                                check = br.ReadByte();
+                            }
+
+                            br.ReadBytes(7);
+                            compressedSize = br.ReadInt32();
+                            uncompressedSize = br.ReadInt32();
+
+                            if (compressedSize != 32000)
+                            {
+                                compressedData = br.ReadBytes(compressedSize);
+                                decompressedPartData = new byte[uncompressedSize];
+                                using (MemoryStream ms = new MemoryStream(compressedData))
+                                {
+                                    using (DeflateStream ds = new DeflateStream(ms, CompressionMode.Decompress))
+                                    {
+                                        ds.Read(decompressedPartData, 0, uncompressedSize);
+                                    }
+                                }
+                                decompressedData.AddRange(decompressedPartData);
+                            }
+                            else
+                            {
+                                decompressedPartData = br.ReadBytes(uncompressedSize);
+                                decompressedData.AddRange(decompressedPartData);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (compressedSize != 32000)
+                        {
+                            var compressedData = br.ReadBytes(compressedSize);
+                            var uncompressedData = new byte[uncompressedSize];
+
+                            using (MemoryStream ms = new MemoryStream(compressedData))
+                            {
+                                using (DeflateStream ds = new DeflateStream(ms, CompressionMode.Decompress))
+                                {
+                                    ds.Read(uncompressedData, 0, uncompressedSize);
+                                }
+                            }
+
+                            decompressedData.AddRange(uncompressedData);
+                        }
+                        else
+                        {
+                            var decompressedPartData = br.ReadBytes(uncompressedSize);
+                            decompressedData.AddRange(decompressedPartData);
+                        }
+                    }
+                    j = j + 20;
+                }
+
+                if (decompressedData.Count < uncompressedFileSize)
+                {
+                    int difference = uncompressedFileSize - decompressedData.Count;
+                    byte[] padding = new byte[difference];
+                    Array.Clear(padding, 0, difference);
+                    decompressedData.AddRange(padding);
+                }
+            }
+
+            return decompressedData.ToArray();
         }
 
         public static TEXData GetVFX(int offset, string datName)
@@ -198,10 +337,12 @@ namespace FFXIV_TexTools2.Material
 
                 br.ReadBytes(64);
 
-                texData.RawTexData = br.ReadBytes(VFXData.Length - 80);
+                //texData.RawTexData = br.ReadBytes(VFXData.Length - 80);
+                var rawData = br.ReadBytes(VFXData.Length - 80);
 
                 texData.TypeString = Info.TextureTypes[texData.Type];
-                texData.BMP = TextureToBitmap(texData.RawTexData, texData.Type, texData.Width, texData.Height);
+                //texData.BMP = TextureToBitmap(texData.RawTexData, texData.Type, texData.Width, texData.Height);
+                texData.BMP = TextureToBitmap(rawData, texData.Type, texData.Width, texData.Height);
                 texData.TEXDatName = datName;
             }
 
@@ -255,7 +396,9 @@ namespace FFXIV_TexTools2.Material
 
                 case TextureTypes.A8R8G8B8:
                 case TextureTypes.X8R8G8B8:
-                    bmp = new Bitmap(width, height, width * 4, System.Drawing.Imaging.PixelFormat.Format32bppArgb, Marshal.UnsafeAddrOfPinnedArrayElement(decompressedData, 0));
+                    var u = Marshal.UnsafeAddrOfPinnedArrayElement(decompressedData, 0);
+                    bmp = new Bitmap(width, height, width * 4,
+                        System.Drawing.Imaging.PixelFormat.Format32bppArgb, u);
                     break;
 
                 case TextureTypes.A16B16G16R16F:

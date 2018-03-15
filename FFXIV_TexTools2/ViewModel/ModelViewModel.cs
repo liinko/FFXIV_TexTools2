@@ -1107,6 +1107,12 @@ namespace FFXIV_TexTools2.ViewModel
                         }
                     }
 
+                    specularBMP?.Freeze();
+                    diffuseBMP?.Freeze();
+                    normalBMP?.Freeze();
+                    alphaBMP?.Freeze();
+                    emissiveBMP?.Freeze();
+
                     var mData = new MDLTEXData()
                     {
                         Specular = specularBMP,

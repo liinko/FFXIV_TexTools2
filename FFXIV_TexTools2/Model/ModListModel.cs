@@ -62,7 +62,6 @@ namespace FFXIV_TexTools2.Model
 
         public BitmapSource BMP { get; set; }
 
-
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected virtual void OnPropertyChanged(string propertyName)

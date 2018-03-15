@@ -25,6 +25,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Windows.Media.Imaging;
+using FFXIV_TexTools2.Material;
 
 namespace FFXIV_TexTools2.IO
 {
@@ -113,7 +114,7 @@ namespace FFXIV_TexTools2.IO
             else
             {
                 DDS.AddRange(CreateDDSHeader(texData));
-                DDS.AddRange(texData.RawTexData);
+                DDS.AddRange(TEX.TexRawData(texData));
             }
 
             File.WriteAllBytes(fullSavePath, DDS.ToArray());
