@@ -352,11 +352,31 @@ namespace FFXIV_TexTools2
 
                     foreach (var datName in Info.ModDatDict)
                     {
-                        var datPath = string.Format(Info.datDir, datName.Key, datName.Value);
+                        var datNum = 0;
 
-                        if (File.Exists(datPath))
+                        if (datName.Key.Equals(Strings.ItemsDat))
                         {
-                            File.Delete(datPath);
+                            for (int i = 4; i < 10; i++)
+                            {
+                                var datPath = string.Format(Info.datDir, datName.Key, i);
+
+                                if (File.Exists(datPath))
+                                {
+                                    File.Delete(datPath);
+                                }
+                            }
+                        }
+                        else if (datName.Key.Equals(Strings.UIDat))
+                        {
+                            for (int i = 1; i < 5; i++)
+                            {
+                                var datPath = string.Format(Info.datDir, datName.Key, i);
+
+                                if (File.Exists(datPath))
+                                {
+                                    File.Delete(datPath);
+                                }
+                            }
                         }
                     }
 

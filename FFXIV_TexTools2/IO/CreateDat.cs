@@ -20,6 +20,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Windows;
 using System.Windows.Forms;
+using FFXIV_TexTools2.Resources;
 
 
 namespace FFXIV_TexTools2
@@ -54,6 +55,61 @@ namespace FFXIV_TexTools2
             {
                 FlexibleMessageBox.Show("Error Creating .Dat4 File \n" + e.Message, "CreateDat Error " + Info.appVersion, MessageBoxButtons.OK,MessageBoxIcon.Error);
             }
+        }
+
+        /// <summary>
+        /// Creates a .Dat file in which to store modified data
+        /// </summary>
+        public static void MakeNewDat(string datName)
+        {
+            var modDatDir = Properties.Settings.Default.FFXIV_Directory + "\\{0}.win32.dat{1}";
+
+            var datNum = 0;
+
+            if (datName.Equals(Strings.ItemsDat))
+            {
+                for (int i = 4; i < 10; i++)
+                {
+                    if (!File.Exists(string.Format(modDatDir, datName, i)))
+                    {
+                        datNum = i;
+                        break;
+                    }
+                }
+            }
+            else if (datName.Equals(Strings.UIDat))
+            {
+                for (int i = 1; i < 5; i++)
+                {
+                    if (!File.Exists(string.Format(modDatDir, datName, i)))
+                    {
+                        datNum = i;
+                        break;
+                    }
+                }
+            }
+
+            try
+            {
+                var modDatPath = string.Format(Info.datDir, datName, datNum);
+
+                using (FileStream fs = File.Create(modDatPath))
+                {
+                    using (BinaryWriter bw = new BinaryWriter(fs))
+                    {
+                        bw.BaseStream.Seek(0, SeekOrigin.Begin);
+
+                        WriteSqPackHeader(bw);
+                        WriteDatHeader(bw);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                FlexibleMessageBox.Show("Error Creating .Dat4 File \n" + e.Message, "CreateDat Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+            ChangeDatAmount(datName, datNum+1);
         }
 
         /// <summary>
@@ -94,6 +150,43 @@ namespace FFXIV_TexTools2
                 {
                     FlexibleMessageBox.Show("Error Accessing Index 2 File \n" + e.Message, "CreateDat Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Changes the amount of dat files the game is to read upon loading 
+        /// </summary>
+        public static void ChangeDatAmount(string indexName, int indexVal)
+        {
+
+            var indexPath = string.Format(Info.indexDir, indexName);
+            var index2Path = string.Format(Info.index2Dir, indexName);
+
+
+            try
+            {
+                using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(indexPath)))
+                {
+                    bw.BaseStream.Seek(1104, SeekOrigin.Begin);
+                    bw.Write((byte)indexVal);
+                }
+            }
+            catch (Exception e)
+            {
+                FlexibleMessageBox.Show("Error Accessing Index File \n" + e.Message, "CreateDat Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+            try
+            {
+                using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(index2Path)))
+                {
+                    bw.BaseStream.Seek(1104, SeekOrigin.Begin);
+                    bw.Write((byte)indexVal);
+                }
+            }
+            catch (Exception e)
+            {
+                FlexibleMessageBox.Show("Error Accessing Index 2 File \n" + e.Message, "CreateDat Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

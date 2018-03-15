@@ -46,7 +46,6 @@ namespace FFXIV_TexTools2.IO
 		/// This is calculated by multiplying the dat file number by 16 bytes [.dat4]: (4 * 16 = 64)
 		/// This amount is added to the offset when reading and subtracted from the offset when writing
 		/// </remarks>
-		public static int DatOffsetAmount = 64;
 
 		static Dictionary<int, int> nVertDict = new Dictionary<int, int>();
 		static Dictionary<string, ImportSettings> importSettings = new Dictionary<string, ImportSettings>();
@@ -2857,9 +2856,23 @@ namespace FFXIV_TexTools2.IO
 				}
 			}
 
-			var modDatPath = string.Format(Info.datDir, Strings.ItemsDat, Info.ModDatDict[Strings.ItemsDat]);
+		    var datNum = int.Parse(Info.ModDatDict[Strings.ItemsDat]);
+		    var modDatPath = string.Format(Info.datDir, Strings.ItemsDat, datNum);
+ 
+		    var fileLength = new FileInfo(modDatPath).Length;
+		    while (fileLength >= 2000000000)
+		    {
+		        datNum += 1;
+		        modDatPath = string.Format(Info.datDir, Strings.ItemsDat, datNum);
+		        if (!File.Exists(modDatPath))
+		        {
+		            CreateDat.MakeNewDat(Strings.ItemsDat);
+		        }
+		        fileLength = new FileInfo(modDatPath).Length;
+		    }
 
-			try
+		    var datOffsetAmount = datNum * 16;
+            try
 			{
 				using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(modDatPath)))
 				{
@@ -2873,7 +2886,7 @@ namespace FFXIV_TexTools2.IO
 						{
 							int sizeDiff = modEntry.modSize - data.Count;
 
-							bw.BaseStream.Seek(modEntry.modOffset - DatOffsetAmount, SeekOrigin.Begin);
+							bw.BaseStream.Seek(modEntry.modOffset - datOffsetAmount, SeekOrigin.Begin);
 
 							bw.Write(data.ToArray());
 
@@ -2913,7 +2926,7 @@ namespace FFXIV_TexTools2.IO
 										{
 											int sizeDiff = emptyLength - data.Count;
 
-											bw.BaseStream.Seek(emptyEntry.modOffset - DatOffsetAmount, SeekOrigin.Begin);
+											bw.BaseStream.Seek(emptyEntry.modOffset - datOffsetAmount, SeekOrigin.Begin);
 
 											bw.Write(data.ToArray());
 
@@ -2990,7 +3003,7 @@ namespace FFXIV_TexTools2.IO
 								eof = eof + 16;
 							}
 
-							offset = (int)bw.BaseStream.Position + DatOffsetAmount;
+							offset = (int)bw.BaseStream.Position + datOffsetAmount;
 
 							if(offset != 0)
 							{

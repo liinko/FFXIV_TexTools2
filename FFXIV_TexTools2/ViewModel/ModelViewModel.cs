@@ -1031,8 +1031,6 @@ namespace FFXIV_TexTools2.ViewModel
                                     normalBMP = maps[2];
                                     alphaBMP = maps[3];
                                 }
-
-
                             }
                         }
                     }

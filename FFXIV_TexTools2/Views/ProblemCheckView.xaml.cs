@@ -531,13 +531,26 @@ namespace FFXIV_TexTools2.Views
             {
                 var indexPath = string.Format(Info.indexDir, indexFile.Key);
                 var index2Path = string.Format(Info.index2Dir, indexFile.Key);
+                var indexVal = indexFile.Value;
+
+                var datVal = indexVal - 1;
+                var datPath = string.Format(Info.datDir, indexFile.Key, datVal);
+                var fileLength = new FileInfo(datPath).Length;
+                while (fileLength >= 2000000000)
+                {
+                    datVal += 1;
+                    datPath = string.Format(Info.datDir, indexFile.Key, datVal);
+                    fileLength = new FileInfo(datPath).Length;
+                }
+
+                indexVal = datVal + 1;
 
                 try
                 {
                     using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(indexPath)))
                     {
                         bw.BaseStream.Seek(1104, SeekOrigin.Begin);
-                        bw.Write((byte)indexFile.Value);
+                        bw.Write((byte)indexVal);
                     }
                 }
                 catch (Exception e)
@@ -551,7 +564,7 @@ namespace FFXIV_TexTools2.Views
                     using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(index2Path)))
                     {
                         bw.BaseStream.Seek(1104, SeekOrigin.Begin);
-                        bw.Write((byte)indexFile.Value);
+                        bw.Write((byte)indexVal);
                     }
                 }
                 catch (Exception e)

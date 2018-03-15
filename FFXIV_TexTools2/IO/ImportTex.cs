@@ -638,11 +638,23 @@ namespace FFXIV_TexTools2.IO
             int offset = 0;
             bool dataOverwritten = false;
 
-            string datNum = Info.ModDatDict[datName];
+            var datNum = int.Parse(Info.ModDatDict[datName]);
 
             var modDatPath = string.Format(Info.datDir, datName, datNum);
 
-            var datOffsetAmount = 16 * int.Parse(datNum);
+            var fileLength = new FileInfo(modDatPath).Length;
+            while (fileLength >= 2000000000)
+            {
+                datNum += 1;
+                modDatPath = string.Format(Info.datDir, datName, datNum);
+                if (!File.Exists(modDatPath))
+                {
+                    CreateDat.MakeNewDat(datName);
+                }
+                fileLength = new FileInfo(modDatPath).Length;
+            }
+
+            var datOffsetAmount = 16 * datNum;
 
 
             if (inModList)

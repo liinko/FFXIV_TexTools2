@@ -419,6 +419,18 @@ namespace FFXIV_TexTools2.Views
 
                                             var modDatPath = string.Format(Info.datDir, mpi.mEntry.DatFile, datNum);
 
+                                            var fileLength = new FileInfo(modDatPath).Length;
+                                            while (fileLength >= 2000000000)
+                                            {
+                                                datNum += 1;
+                                                modDatPath = string.Format(Info.datDir, mpi.mEntry.DatFile, datNum);
+                                                if (!File.Exists(modDatPath))
+                                                {
+                                                    CreateDat.MakeNewDat(mpi.mEntry.DatFile);
+                                                }
+                                                fileLength = new FileInfo(modDatPath).Length;
+                                            }
+
                                             var datOffsetAmount = 16 * datNum;
 
                                             using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(modDatPath)))

@@ -338,7 +338,7 @@ namespace FFXIV_TexTools2.Views
             {
                 var mOffset = mpi.Entry.modOffset;
                 var datFile = mpi.Entry.datFile;
-                var datNum = int.Parse(Info.ModDatDict[mpi.Entry.datFile]);
+                int datNum = ((mOffset / 8) & 0x0F) / 2;
 
                 var datPath = string.Format(Info.datDir, datFile, datNum);
 
