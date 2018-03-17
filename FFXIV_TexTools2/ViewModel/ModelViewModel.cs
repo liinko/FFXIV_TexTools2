@@ -33,7 +33,9 @@ using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using PixelFormat = System.Drawing.Imaging.PixelFormat;
 
 namespace FFXIV_TexTools2.ViewModel
 {
@@ -979,36 +981,24 @@ namespace FFXIV_TexTools2.ViewModel
                         if (selectedItem.ItemName.Equals(Strings.Body))
                         {
                             normalData = TEX.GetTex(mtrlData.NormalOffset, Strings.ItemsDat);
+                            var normalRaw = TEX.TexRawData(normalData);
                             //specularTI = TEX.GetTex(mInfo.SpecularOffset);
                             diffuseData = TEX.GetTex(mtrlData.DiffuseOffset, Strings.ItemsDat);
+                            var diffuseRaw = TEX.TexRawData(diffuseData);
 
                             isBody = true;
-                            try
-                            {
-                                diffuseBMP = Imaging.CreateBitmapSourceFromHBitmap(diffuseData.BMP.GetHbitmap(),
-                                    IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-                            }
-                            catch(Exception e)
-                            {
-                                var diffBMP = new Bitmap(diffuseData.BMP);
-                                diffuseBMP = Imaging.CreateBitmapSourceFromHBitmap(diffBMP.GetHbitmap(),
-                                    IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-                                diffBMP.Dispose();
 
+                            if (normalData.Type.Equals(TextureTypes.A8R8G8B8))
+                            {
+                                diffuseBMP = ConvertToBitmapSourceFromArray(diffuseRaw, diffuseData);
+                                normalBMP = ConvertToBitmapSourceFromArray(normalRaw, normalData);
+                            }
+                            else
+                            {
+                                diffuseBMP = Imaging.CreateBitmapSourceFromHBitmap(diffuseData.BMP.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                                normalBMP = Imaging.CreateBitmapSourceFromHBitmap(normalData.BMP.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
                             }
 
-                            try
-                            {
-                                normalBMP = Imaging.CreateBitmapSourceFromHBitmap(normalData.BMP.GetHbitmap(),
-                                    IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-                            }
-                            catch(Exception e)
-                            {
-                                var normBMP = new Bitmap(normalData.BMP);
-                                normalBMP = Imaging.CreateBitmapSourceFromHBitmap(normBMP.GetHbitmap(),
-                                    IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-                                normBMP.Dispose();
-                            }
                         }
 
                         if (selectedItem.ItemName.Equals(Strings.Face))
@@ -1078,29 +1068,18 @@ namespace FFXIV_TexTools2.ViewModel
                             if (mtrlData.DiffusePath.Contains("human") && !mtrlData.DiffusePath.Contains("demi"))
                             {
                                 isBody = true;
-                                try
-                                {
-                                    diffuseBMP = Imaging.CreateBitmapSourceFromHBitmap(diffuseData.BMP.GetHbitmap(),
-                                        IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-                                }
-                                catch(Exception e)
-                                {
-                                    var diffBMP = new Bitmap(diffuseData.BMP);
-                                    diffuseBMP = Imaging.CreateBitmapSourceFromHBitmap(diffBMP.GetHbitmap(),
-                                        IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-                                    diffBMP.Dispose();
-                                }
+                                var normalRaw = TEX.TexRawData(normalData);
+                                var diffuseRaw = TEX.TexRawData(diffuseData);
 
-                                try
+                                if (normalData.Type.Equals(TextureTypes.A8R8G8B8))
                                 {
-                                    normalBMP = Imaging.CreateBitmapSourceFromHBitmap(normalData.BMP.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                                    diffuseBMP = ConvertToBitmapSourceFromArray(diffuseRaw, diffuseData);
+                                    normalBMP = ConvertToBitmapSourceFromArray(normalRaw, normalData);
                                 }
-                                catch(Exception e)
+                                else
                                 {
-                                    var normBMP = new Bitmap(normalData.BMP);
-                                    normalBMP = Imaging.CreateBitmapSourceFromHBitmap(normBMP.GetHbitmap(),
-                                        IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-                                    normBMP.Dispose();
+                                    diffuseBMP = Imaging.CreateBitmapSourceFromHBitmap(diffuseData.BMP.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                                    normalBMP = Imaging.CreateBitmapSourceFromHBitmap(normalData.BMP.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
                                 }
                             }
                         }
@@ -1108,17 +1087,15 @@ namespace FFXIV_TexTools2.ViewModel
                         if (!isBody && mtrlData.SpecularOffset != 0)
                         {
                             specularData = TEX.GetTex(mtrlData.SpecularOffset, Strings.ItemsDat);
-                            try
+                            var specularRaw = TEX.TexRawData(specularData);
+
+                            if (specularData.Type.Equals(TextureTypes.A8R8G8B8))
                             {
-                                specularBMP = Imaging.CreateBitmapSourceFromHBitmap(specularData.BMP.GetHbitmap(),
-                                    IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                                specularBMP = ConvertToBitmapSourceFromArray(specularRaw, specularData);
                             }
-                            catch
+                            else
                             {
-                                var specBMP = new Bitmap(specularData.BMP);
-                                specularBMP = Imaging.CreateBitmapSourceFromHBitmap(specBMP.GetHbitmap(),
-                                    IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-                                specBMP.Dispose();
+                                specularBMP = Imaging.CreateBitmapSourceFromHBitmap(specularData.BMP.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
                             }
                         }
 
@@ -1141,25 +1118,10 @@ namespace FFXIV_TexTools2.ViewModel
                             emissiveBMP = maps[4];
                         }
 
-                        if (normalData != null)
-                        {
-                            normalData.Dispose();
-                        }
-
-                        if (maskData != null)
-                        {
-                            maskData.Dispose();
-                        }
-
-                        if (diffuseData != null)
-                        {
-                            diffuseData.Dispose();
-                        }
-
-                        if (specularData != null)
-                        {
-                            specularData.Dispose();
-                        }
+                        normalData?.Dispose();
+                        maskData?.Dispose();
+                        diffuseData?.Dispose();
+                        specularData?.Dispose();
                     }
 
                     specularBMP?.Freeze();
@@ -1291,6 +1253,24 @@ namespace FFXIV_TexTools2.ViewModel
             {
                 CompositeVM.Rendering(SelectedMesh.Name);
             }
+        }
+
+        public BitmapSource ConvertToBitmapSourceFromArray(byte[] bitmapPixels, TEXData texData)
+        {
+            var bitmapData = texData.BMP.LockBits(
+                new Rectangle(0, 0, texData.BMP.Width, texData.BMP.Height),
+                System.Drawing.Imaging.ImageLockMode.ReadOnly, texData.BMP.PixelFormat);
+
+
+
+            var bitmapSource = BitmapSource.Create(
+                texData.Width, texData.Height,
+                texData.BMP.HorizontalResolution, texData.BMP.VerticalResolution,
+                PixelFormats.Bgr32, null,
+                bitmapPixels, bitmapData.Stride);
+
+            texData.BMP.UnlockBits(bitmapData);
+            return bitmapSource;
         }
 
         /// <summary>
