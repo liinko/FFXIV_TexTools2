@@ -29,7 +29,7 @@
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Orientation="Horizontal" Grid.Column="0">
-                    <Label Content="Time Elsapsed: "/>
+                    <Label Content="Time Elapsed: "/>
                     <Label x:Name="TimeElapsedLabel" Content="0:00"/>
                 </StackPanel>
                 <Button x:Name="OKButton" Grid.Column="1" Content="OK" HorizontalAlignment="Right"  Width="75" IsEnabled="False" Margin="5" Click="OKButton_Click" />
