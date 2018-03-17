@@ -27,7 +27,7 @@ namespace FFXIV_TexTools2.Views
 
         List<Struct1> struct1 = new List<Struct1>();
         List<Struct2> struct2 = new List<Struct2>();
-        Params par = new Params();
+        List<Params> paramsList = new List<Params>();
 
 
         public MTRLInfo(string MTRLPath)
@@ -148,7 +148,8 @@ namespace FFXIV_TexTools2.Views
                 Struct2Data.Content = struct2Size;
 
                 ParamOffset.Content = br.BaseStream.Position;
-                ParamData.Content = br.ReadUInt16();
+                int paramSize = br.ReadUInt16();
+                ParamData.Content = paramSize;
 
                 Unk1Offset.Content = br.BaseStream.Position;
                 Unk1Data.Content = br.ReadUInt16();
@@ -169,7 +170,10 @@ namespace FFXIV_TexTools2.Views
                     structList.Add("struct2 part " + (i + 1));
                 }
 
-                structList.Add("parameters");
+                for (int i = 0; i < paramSize; i++)
+                {
+                    structList.Add("parameter " + (i + 1));
+                }
 
                 DataComboBox.ItemsSource = structList;
 
@@ -202,17 +206,24 @@ namespace FFXIV_TexTools2.Views
                     struct2.Add(st2);
                 }
 
-                par.IDOffset = br.BaseStream.Position;
-                par.ID = br.ReadUInt32();
+                for (int i = 0; i < paramSize; i++)
+                {
+                    Params par = new Params();
+                    par.IDOffset = br.BaseStream.Position;
+                    par.ID = br.ReadUInt32();
 
-                par.Unknown1Offset = br.BaseStream.Position;
-                par.Unknown1 = br.ReadUInt16();
+                    par.Unknown1Offset = br.BaseStream.Position;
+                    par.Unknown1 = br.ReadUInt16();
 
-                par.Unknown2Offset = br.BaseStream.Position;
-                par.Unknown2 = br.ReadUInt16();
+                    par.Unknown2Offset = br.BaseStream.Position;
+                    par.Unknown2 = br.ReadUInt16();
 
-                par.TextureIndexOffset = br.BaseStream.Position;
-                par.TextureIndex = br.ReadUInt32();
+                    par.TextureIndexOffset = br.BaseStream.Position;
+                    par.TextureIndex = br.ReadUInt32();
+
+                    paramsList.Add(par);
+                }
+
 
                 string data = "";
 
@@ -496,36 +507,39 @@ namespace FFXIV_TexTools2.Views
             }
             else
             {
+                var part = int.Parse(selected.Substring(selected.Length - 1)) - 1;
 
-                Data1Offset.Content = par.IDOffset;
+                var p = paramsList[part];
+
+                Data1Offset.Content = p.IDOffset;
                 Data1Name.Content = "ID";
-                Data1Data.Content = par.ID;
+                Data1Data.Content = p.ID;
 
-                Data2Offset.Content = par.Unknown1Offset;
+                Data2Offset.Content = p.Unknown1Offset;
                 Data2Name.Content = "Unknown1";
-                Data2Data.Content = par.Unknown1;
+                Data2Data.Content = p.Unknown1;
 
-                Data3Offset.Content = par.Unknown2Offset;
+                Data3Offset.Content = p.Unknown2Offset;
                 Data3Name.Content = "Unknown2";
-                Data3Data.Content = par.Unknown2;
+                Data3Data.Content = p.Unknown2;
 
-                Data4Offset.Content = par.TextureIndexOffset;
+                Data4Offset.Content = p.TextureIndexOffset;
                 Data4Name.Content = "Texture Index";
-                Data4Data.Content = par.TextureIndex;
+                Data4Data.Content = p.TextureIndex;
 
                 if (HexCheck.IsChecked == true)
                 {
-                    Data1Offset.Content = par.IDOffset.ToString("X");
-                    Data1Data.Content = par.ID.ToString("X");
+                    Data1Offset.Content = p.IDOffset.ToString("X");
+                    Data1Data.Content = p.ID.ToString("X");
 
-                    Data2Offset.Content = par.Unknown1Offset.ToString("X");
-                    Data2Data.Content = par.Unknown1.ToString("X");
+                    Data2Offset.Content = p.Unknown1Offset.ToString("X");
+                    Data2Data.Content = p.Unknown1.ToString("X");
 
-                    Data3Offset.Content = par.Unknown2Offset.ToString("X");
-                    Data3Data.Content = par.Unknown2.ToString("X");
+                    Data3Offset.Content = p.Unknown2Offset.ToString("X");
+                    Data3Data.Content = p.Unknown2.ToString("X");
 
-                    Data4Offset.Content = par.TextureIndexOffset.ToString("X");
-                    Data4Data.Content = par.TextureIndex.ToString("X");
+                    Data4Offset.Content = p.TextureIndexOffset.ToString("X");
+                    Data4Data.Content = p.TextureIndex.ToString("X");
 
                 }
             }
