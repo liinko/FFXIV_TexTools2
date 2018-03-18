@@ -1180,7 +1180,8 @@ namespace FFXIV_TexTools2.ViewModel
                     }
                     else
                     {
-                        AdvImport3DEnabled = false;
+                        //AdvImport3DEnabled = false;
+                        AdvImport3DEnabled = true;
                     }
                 }
                 else

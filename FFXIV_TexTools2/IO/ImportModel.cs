@@ -2025,12 +2025,21 @@ namespace FFXIV_TexTools2.IO
 								}
 							}
 
-							//Attributes (int)
-							mp.Attributes = br.ReadInt32();
-							modelDataBlock.AddRange(BitConverter.GetBytes(mp.Attributes));
+						    //Attributes (int)
+                            mp.Attributes = br.ReadInt32();
 
-							//Bone reference offset (short)
-							mp.BoneOffset = br.ReadInt16();
+                            if (importSettings != null && importSettings.ContainsKey(i.ToString()) && l == 0)
+                            {
+                                var attr = importSettings[i.ToString()].PartDictionary[j];
+                                modelDataBlock.AddRange(BitConverter.GetBytes(attr));
+                            }
+                            else
+						    {
+						        modelDataBlock.AddRange(BitConverter.GetBytes(mp.Attributes));
+                            }
+
+                            //Bone reference offset (short)
+                            mp.BoneOffset = br.ReadInt16();
 							modelDataBlock.AddRange(BitConverter.GetBytes((short)mp.BoneOffset));
 
 							//Bone reference count (short)

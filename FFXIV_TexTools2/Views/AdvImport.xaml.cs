@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
+using System.Windows.Controls;
 using System.Xml;
 
 namespace FFXIV_TexTools2.Views
@@ -50,16 +51,75 @@ namespace FFXIV_TexTools2.Views
             importDict.Add(Strings.All, new ImportSettings());
             importDict[Strings.All].path = path;
 
-            foreach (var e in modelData.ExtraData.totalExtraCounts)
+            for (int i = 0; i < modelData.LoD[0].MeshCount; i++)
             {
-                meshCounts.Add(e.Key.ToString());
+                meshCounts.Add(i.ToString());
+                importDict.Add(i.ToString(), new ImportSettings());
+                importDict[i.ToString()].PartDictionary = new Dictionary<int, int>();
 
-                importDict.Add(e.Key.ToString(), new ImportSettings());
+                var partCount = modelData.LoD[0].MeshList[i].MeshPartList.Count;
+
+                for (int j = 0; j < partCount; j++)
+                {
+                    var partattr = modelData.LoD[0].MeshList[i].MeshPartList[j].Attributes;
+                    importDict[i.ToString()].PartDictionary.Add(j, partattr);
+                }
             }
+
+            FixCheckbox.IsEnabled = false;
+            DisableCheckbox.IsEnabled = false;
+
+            MeshCountLabel.Content = "Mesh Count: " + modelData.LoD[0].MeshCount;
+
+            //if (modelData.ExtraData.totalExtraCounts != null)
+            //{
+            //    foreach (var e in modelData.ExtraData.totalExtraCounts)
+            //    {
+            //        meshCounts.Add(e.Key.ToString());
+
+            //        importDict.Add(e.Key.ToString(), new ImportSettings());
+
+            //        importDict[e.Key.ToString()].PartDictionary = new Dictionary<int, int>();
+
+            //        var partCount = modelData.LoD[0].MeshList[e.Key].MeshPartList.Count;
+
+            //        for (int i = 0; i < partCount; i++)
+            //        {
+            //            var partattr = modelData.LoD[0].MeshList[e.Key].MeshPartList[i].Attributes;
+            //            importDict[e.Key.ToString()].PartDictionary.Add(i, partattr);
+            //        }
+            //    }
+
+            //    MeshCountLabel.Content = "Extra Mesh Count: " + modelData.ExtraData.totalExtraCounts.Count;
+
+            //}
+            //else
+            //{
+            //    for (int i = 0; i < modelData.LoD[0].MeshCount; i++)
+            //    {
+            //        meshCounts.Add(i.ToString());
+            //        importDict.Add(i.ToString(), new ImportSettings());
+            //        importDict[i.ToString()].PartDictionary = new Dictionary<int, int>();
+
+            //        var partCount = modelData.LoD[0].MeshList[i].MeshPartList.Count;
+
+            //        for (int j = 0; j < partCount; j++)
+            //        {
+            //            var partattr = modelData.LoD[0].MeshList[i].MeshPartList[j].Attributes;
+            //            importDict[i.ToString()].PartDictionary.Add(j, partattr);
+            //        }
+            //    }
+
+            //    FixCheckbox.IsEnabled = false;
+            //    DisableCheckbox.IsEnabled = false;
+
+            //    MeshCountLabel.Content = "Mesh Count: " + modelData.LoD[0].MeshCount;
+
+            //}
 
             MeshComboBox.ItemsSource = meshCounts;
             MeshComboBox.SelectedIndex = 0;
-            MeshCountLabel.Content = "Mesh Count: " + modelData.ExtraData.totalExtraCounts.Count;
+
 
             if(File.Exists(Properties.Settings.Default.Save_Directory + "/" + category + "/" + itemName + "/3D/" + modelName + "_Settings.xml"))
             {
@@ -188,6 +248,45 @@ namespace FFXIV_TexTools2.Views
             }
         }
 
+        private void PartComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            var meshString = MeshComboBox.SelectedItem.ToString();
+
+            if (e.AddedItems.Count > 0)
+            {
+                if (!meshString.Equals(Strings.All))
+                {
+                    var partNum = int.Parse(PartComboBox.SelectedItem.ToString());
+
+                    var partAttr = importDict[meshString].PartDictionary[partNum];
+
+                    partTextBox.Text = partAttr.ToString();
+                }
+            }
+        }
+
+        private void partTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            var num = sender as TextBox;
+            var newNum = -1;
+
+            try
+            {
+                newNum = int.Parse(num.Text);
+            }
+            catch
+            {
+                num.Clear();
+            }
+
+            if (newNum != -1)
+            {
+                var meshString = MeshComboBox.SelectedItem.ToString();
+                var partNum = int.Parse(PartComboBox.SelectedItem.ToString());
+                importDict[meshString].PartDictionary[partNum] = newNum;
+            }
+        }
+
         private void DisableCheckbox_Unchecked(object sender, RoutedEventArgs e)
         {
             importDict[MeshComboBox.SelectedItem.ToString()].Disable = false;
@@ -195,8 +294,75 @@ namespace FFXIV_TexTools2.Views
 
         private void MeshComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            DisableCheckbox.IsChecked = importDict[MeshComboBox.SelectedItem.ToString()].Disable;
-            FixCheckbox.IsChecked = importDict[MeshComboBox.SelectedItem.ToString()].Fix;
+            var selectedItem = -1;
+            if (!MeshComboBox.SelectedItem.ToString().Equals(Strings.All))
+            {
+                selectedItem = int.Parse(MeshComboBox.SelectedItem.ToString());
+
+                if (modelData.ExtraData.totalExtraCounts != null &&
+                    modelData.ExtraData.totalExtraCounts.ContainsKey(selectedItem))
+                {
+                    DisableCheckbox.IsEnabled = true;
+                    FixCheckbox.IsEnabled = true;
+
+                    AttemptFixText.Text =
+                        "Use this option if mesh appears to have holes, when another item is equipped.\n* It is recommended to try this option before disabling";
+                    DisableHidingText.Text =
+                        "Use this option to disable the mesh from hiding when another item is equipped.";
+                }
+                else
+                {
+                    AttemptFixText.Text = "This option is not available for this mesh.";
+                    DisableHidingText.Text = "This option is not available for this mesh.";
+                    DisableCheckbox.IsEnabled = false;
+                    FixCheckbox.IsEnabled = false;
+                }
+
+                DisableCheckbox.IsChecked = importDict[MeshComboBox.SelectedItem.ToString()].Disable;
+                FixCheckbox.IsChecked = importDict[MeshComboBox.SelectedItem.ToString()].Fix;
+            }
+            else if(modelData.ExtraData.totalExtraCounts != null)
+            {
+                selectedItem = -1;
+                DisableCheckbox.IsEnabled = true;
+                FixCheckbox.IsEnabled = true;
+
+                AttemptFixText.Text =
+                    "Use this option if mesh appears to have holes, when another item is equipped.\n* It is recommended to try this option before disabling";
+                DisableHidingText.Text =
+                    "Use this option to disable the mesh from hiding when another item is equipped.";
+            }
+            else
+            {
+                AttemptFixText.Text = "This option is not available for this mesh.";
+                DisableHidingText.Text = "This option is not available for this mesh.";
+                selectedItem = -1;
+            }
+
+
+            if (selectedItem != -1)
+            {
+                PartComboBox.IsEnabled = true;
+                partTextBox.IsEnabled = true;
+                var partcCount = importDict[MeshComboBox.SelectedItem.ToString()].PartDictionary.Count;
+
+                List<int> partList = new List<int>();
+                for (int i = 0; i < partcCount; i++)
+                {
+                    partList.Add(i);
+                }
+
+                PartComboBox.ItemsSource = partList;
+
+                PartComboBox.SelectedIndex = 0;
+            }
+            else
+            {
+                PartComboBox.ItemsSource = null;
+                partTextBox.Text = "";
+                partTextBox.IsEnabled = false;
+                PartComboBox.IsEnabled = false;
+            }
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
@@ -208,31 +374,34 @@ namespace FFXIV_TexTools2.Views
         {
             var dir = Properties.Settings.Default.Save_Directory + "/" + category + "/" + itemName + "/3D/" + modelName + "_Settings.xml";
 
-            if (!File.Exists(dir))
+            if (modelData.ExtraData.totalExtraCounts != null)
             {
-                MakeXML();
-            }
-
-            XmlDocument doc = new XmlDocument();
-            doc.Load(dir);
-
-            foreach (var imp in importDict)
-            {
-                XmlNode mesh = doc.SelectSingleNode("//Mesh[@name='" + imp.Key + "']");
-
-                var impSett = imp.Value;
-
-                if(mesh != null)
+                if (!File.Exists(dir))
                 {
-                    var fix = mesh.SelectSingleNode("Fix");
-                    fix.InnerText = impSett.Fix.ToString().ToLower();
-
-                    var disable = mesh.SelectSingleNode("DisableHide");
-                    disable.InnerText = impSett.Disable.ToString().ToLower();
+                    MakeXML();
                 }
-            }
 
-            doc.Save(dir);
+                XmlDocument doc = new XmlDocument();
+                doc.Load(dir);
+
+                foreach (var imp in importDict)
+                {
+                    XmlNode mesh = doc.SelectSingleNode("//Mesh[@name='" + imp.Key + "']");
+
+                    var impSett = imp.Value;
+
+                    if (mesh != null)
+                    {
+                        var fix = mesh.SelectSingleNode("Fix");
+                        fix.InnerText = impSett.Fix.ToString().ToLower();
+
+                        var disable = mesh.SelectSingleNode("DisableHide");
+                        disable.InnerText = impSett.Disable.ToString().ToLower();
+                    }
+                }
+
+                doc.Save(dir);
+            }
 
             ImportModel.ImportDAE(category, itemName, modelName, selectedMesh, internalPath, boneStrings, modelData, importDict);
             mvm.UpdateModel(item, category);
