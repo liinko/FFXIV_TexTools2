@@ -376,9 +376,11 @@ namespace FFXIV_TexTools2.Views
                             var stream = entry.Open();
                             var remainingPack = packListCount;
                             var currentPack = 0;
+                            var prevPack = 0;
                             long newOffset = 0;
                             long offsetSum = 0;
                             List<ModPackItems> pack;
+                            long cursor = 0;
 
                             while (currentPack != packListCount)
                             {
@@ -394,23 +396,37 @@ namespace FFXIV_TexTools2.Views
                                     currentPack += remainingPack;
                                 }
 
-                                backgroundWorker.ReportProgress((int)((i / packListCount) * 100), "\nReading Entries (" + currentPack + "/" + packListCount + ")\n\n");
+                                backgroundWorker.ReportProgress((int)((i / packListCount) * 100), $"\nReading Entries ({prevPack} - {currentPack}/{packListCount})\n\n");
 
-                                var totalSize = 0;
+                                long totalSize = 0;
+                                var modPackBytes = new List<byte>();
                                 foreach (var p in pack)
                                 {
+                                    if (p.mEntry.ModOffset < cursor)
+                                    {
+                                        backgroundWorker.ReportProgress((int)((i / packListCount) * 100), $"There was an warning in importing. \nImproper Mod Offset in ModPack for {p.mEntry.Name}. \nUnable to import {p.mEntry.Name}.");
+                                        continue;
+                                    }
                                     totalSize += p.mEntry.ModSize;
+                                    var buf = new byte[p.mEntry.ModSize];
+                                    while (p.mEntry.ModOffset > cursor)
+                                    {
+                                        cursor++;
+                                        stream.ReadByte(); //seek forward for next offset
+                                    }
+                                    stream.Read(buf, 0, buf.Length);
+                                    cursor += buf.Length;
+                                    modPackBytes.AddRange(buf);
                                 }
-                                byte[] uncompBytes = new byte[totalSize];
+                                var uncompBytes = modPackBytes.ToArray();
 
-                                stream.Read(uncompBytes, 0, totalSize);
                                 offsetSum += newOffset;
                                 newOffset = totalSize;
 
                                 using (var ms = new MemoryStream(uncompBytes))
                                 {
                                     //backgroundWorker.ReportProgress((int)((i / packListCount) * 100), "Reading TTMP Data...\n");
-
+                                    var dataOffset = 0;
                                     using (var br = new BinaryReader(ms))
                                     {
                                         //backgroundWorker.ReportProgress((int)((i / packListCount) * 100), "Begining Import...\n");
@@ -427,7 +443,6 @@ namespace FFXIV_TexTools2.Views
                                             int originalOffset = 0;
                                             int offset = 0;
 
-                                            var dataOffset = mpi.mEntry.ModOffset - offsetSum;
                                             byte[] dataBytes = new byte[mpi.mEntry.ModSize];
                                             List<byte> modDataList = new List<byte>();
 
@@ -576,7 +591,7 @@ namespace FFXIV_TexTools2.Views
 
                                             backgroundWorker.ReportProgress((int)((i / packListCount) * 100), "Done.");
 
-
+                                            dataOffset += mpi.mEntry.ModSize;
                                         }
 
                                     }
