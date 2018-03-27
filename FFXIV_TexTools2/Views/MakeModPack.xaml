@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FFXIV_TexTools2.Views"
         mc:Ignorable="d"
-        Title="Modpack Creator" Height="500" Width="700" WindowStyle="ToolWindow">
+        Title="Modpack Creator" Height="500" Width="700" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="20*"/>
@@ -35,8 +35,13 @@
             <Grid Grid.Row="0">
                 <Label x:Name="InfoHeader" BorderBrush="Black" BorderThickness="0,1,0,0" />
             </Grid>
-            <ListView x:Name="listView" Grid.Row="2" SelectionChanged="listView_SelectionChanged" SelectionMode="Multiple" 
+            <ListView x:Name="listView" Grid.Row="2" SelectionChanged="listView_SelectionChanged" SelectionMode="Multiple"
                       BorderBrush="Black" BorderThickness="0,1" AlternationCount="2" GridViewColumnHeader.Click="Header_Click">
+                <ListView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel></StackPanel>
+                    </ItemsPanelTemplate>
+                </ListView.ItemsPanel>
                 <ListView.View>
                     <GridView>
                         <GridViewColumn Header="_">

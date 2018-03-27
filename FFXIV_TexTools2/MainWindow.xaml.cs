@@ -100,6 +100,7 @@ namespace FFXIV_TexTools2
         private void Menu_ProblemCheck_Click(object sender, RoutedEventArgs e)
         {
             ProblemCheckView pcv = new ProblemCheckView();
+            pcv.Owner = this;
             pcv.Show();
         }
 
@@ -184,12 +185,14 @@ namespace FFXIV_TexTools2
         private void Menu_ModList_Click(object sender, RoutedEventArgs e)
         {
             ModList ml = new ModList();
+            ml.Owner = this;
             ml.Show();
         }
 
         private void Menu_Directories_Click(object sender, RoutedEventArgs e)
         {
             DirectoriesView dv = new DirectoriesView();
+            dv.Owner = this;
             dv.Show();
         }
 
@@ -474,12 +477,12 @@ namespace FFXIV_TexTools2
 
         private void Menu_Discord_Click(object sender, RoutedEventArgs e)
         {
-            System.Diagnostics.Process.Start("http://discord.gg/dVSMA8y");
+            System.Diagnostics.Process.Start("https://goo.gl/E1rUxP");
         }
 
         private void Menu_Tutorials_Click(object sender, RoutedEventArgs e)
         {
-            System.Diagnostics.Process.Start("http://ffxivtextools.dualwield.net/app_tutorial.html");
+            System.Diagnostics.Process.Start("https://textools.dualwield.net/tutorials/");
         }
 
         private void Default_Race_Click(object sender, RoutedEventArgs e)
@@ -552,6 +555,7 @@ namespace FFXIV_TexTools2
         private void Menu_MakeModpack_Click(object sender, RoutedEventArgs e)
         {
             MakeModPack mmp = new MakeModPack();
+            mmp.Owner = this;
             mmp.Show();
         }
 

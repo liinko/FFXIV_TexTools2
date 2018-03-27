@@ -14,7 +14,7 @@ namespace FFXIV_TexTools2.Model
 
         public string FullPath { get; set; }
 
-        public int ModOffset { get; set; }
+        public long ModOffset { get; set; }
 
         public int ModSize { get; set; }
 

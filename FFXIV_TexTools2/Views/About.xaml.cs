@@ -30,7 +30,7 @@ namespace FFXIV_TexTools2.Views
 
         private void WebsiteButton_Click(object sender, RoutedEventArgs e)
         {
-            System.Diagnostics.Process.Start("http://ffxivtextools.dualwield.net/");
+            System.Diagnostics.Process.Start("https://textools.dualwield.net/");
         }
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)

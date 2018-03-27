@@ -2030,8 +2030,16 @@ namespace FFXIV_TexTools2.IO
 
                             if (importSettings != null && importSettings.ContainsKey(i.ToString()) && l == 0)
                             {
-                                var attr = importSettings[i.ToString()].PartDictionary[j];
-                                modelDataBlock.AddRange(BitConverter.GetBytes(attr));
+                                if (importSettings[i.ToString()].PartDictionary != null)
+                                {
+                                    var attr = importSettings[i.ToString()].PartDictionary[j];
+                                    modelDataBlock.AddRange(BitConverter.GetBytes(attr));
+                                }
+                                else
+                                {
+                                    modelDataBlock.AddRange(BitConverter.GetBytes(mp.Attributes));
+                                }
+
                             }
                             else
 						    {

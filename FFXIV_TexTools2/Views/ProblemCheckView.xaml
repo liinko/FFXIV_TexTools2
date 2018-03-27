@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:FFXIV_TexTools2.Views"
         xmlns:toolkit="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
-        Title="Check For Problems" Height="382" Width="465" WindowStyle="ToolWindow">
+        Title="Check For Problems" Height="382" Width="465" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="92*"/>

@@ -58,7 +58,9 @@ namespace FFXIV_TexTools2.Views
 
                                 while(sr.Peek() >= 0)
                                 {
-                                    mpjList.Add(JsonConvert.DeserializeObject<ModPackJson>(sr.ReadLine()));
+                                    var data = JsonConvert.DeserializeObject<ModPackJson>(sr.ReadLine());
+                                    data.ModOffset = (uint)data.ModOffset;
+                                    mpjList.Add(data);
                                 }
                             }
                         }
@@ -341,7 +343,7 @@ namespace FFXIV_TexTools2.Views
             if(e.ProgressPercentage == 100)
             {
                 pd.ImportingLabel.Content = "Import Complete!";
-                pd.ProgressText.AppendText("All Imports Completed.");
+                pd.ProgressText.AppendText("\nAll Imports Completed.");
                 pd.ScrollViewer.ScrollToBottom();
             }
         }
@@ -356,10 +358,10 @@ namespace FFXIV_TexTools2.Views
         {
             var backgroundWorker = sender as BackgroundWorker;
 
-            float packListCount = packList.Count;
+            var packListCount = packList.Count;
             float i = 0;
 
-            List<string> modFileLines = new List<string>(File.ReadAllLines(Properties.Settings.Default.Modlist_Directory));File.ReadAllLines(Properties.Settings.Default.Modlist_Directory);
+            List<string> modFileLines = new List<string>(File.ReadAllLines(Properties.Settings.Default.Modlist_Directory));
 
             try
             {
@@ -372,180 +374,216 @@ namespace FFXIV_TexTools2.Views
                         if (entry.FullName.EndsWith(".mpd"))
                         {
                             var stream = entry.Open();
-                            using (var ms = new MemoryStream())
+                            var remainingPack = packListCount;
+                            var currentPack = 0;
+                            long newOffset = 0;
+                            long offsetSum = 0;
+                            List<ModPackItems> pack;
+
+                            while (currentPack != packListCount)
                             {
-                                backgroundWorker.ReportProgress(0, "Reading TTMP Data...\n");
-
-                                stream.CopyTo(ms);
-
-                                using (var br = new BinaryReader(ms))
+                                if (remainingPack > 100)
                                 {
-                                    backgroundWorker.ReportProgress(0, "Begining Import...\n");
+                                    pack = packList.GetRange(currentPack, 100);
+                                    currentPack += 100;
+                                    remainingPack -= 100;
+                                }
+                                else
+                                {
+                                    pack = packList.GetRange(currentPack, remainingPack);
+                                    currentPack += remainingPack;
+                                }
 
+                                backgroundWorker.ReportProgress((int)((i / packListCount) * 100), "\nReading Entries (" + currentPack + "/" + packListCount + ")\n\n");
 
-                                    foreach (var mpi in packList)
+                                var totalSize = 0;
+                                foreach (var p in pack)
+                                {
+                                    totalSize += p.mEntry.ModSize;
+                                }
+                                byte[] uncompBytes = new byte[totalSize];
+
+                                stream.Read(uncompBytes, 0, totalSize);
+                                offsetSum += newOffset;
+                                newOffset = totalSize;
+
+                                using (var ms = new MemoryStream(uncompBytes))
+                                {
+                                    //backgroundWorker.ReportProgress((int)((i / packListCount) * 100), "Reading TTMP Data...\n");
+
+                                    using (var br = new BinaryReader(ms))
                                     {
-                                        currentImport = mpi.Name + "....";
-                                        backgroundWorker.ReportProgress((int)((i / packListCount) * 100), currentImport);
+                                        //backgroundWorker.ReportProgress((int)((i / packListCount) * 100), "Begining Import...\n");
 
-                                        JsonEntry modEntry = null;
-                                        bool inModList = false;
-                                        bool overwrite = false;
-                                        int lineNum = 0;
-                                        int originalOffset = 0;
-                                        int offset = 0;
-
-                                        var dataOffset = mpi.mEntry.ModOffset;
-                                        byte[] dataBytes = new byte[mpi.mEntry.ModSize];
-                                        List<byte> modDataList = new List<byte>();
-
-                                        br.BaseStream.Seek(dataOffset, SeekOrigin.Begin);
-                                        modDataList.AddRange(br.ReadBytes(mpi.mEntry.ModSize));
-
-                                        try
+                                        foreach (var mpi in pack)
                                         {
-                                            foreach (var line in modFileLines)
+                                            currentImport = mpi.Name + "....";
+                                            backgroundWorker.ReportProgress((int)((i / packListCount) * 100), currentImport);
+
+                                            JsonEntry modEntry = null;
+                                            bool inModList = false;
+                                            bool overwrite = false;
+                                            int lineNum = 0;
+                                            int originalOffset = 0;
+                                            int offset = 0;
+
+                                            var dataOffset = mpi.mEntry.ModOffset - offsetSum;
+                                            byte[] dataBytes = new byte[mpi.mEntry.ModSize];
+                                            List<byte> modDataList = new List<byte>();
+
+                                            br.BaseStream.Seek(dataOffset, SeekOrigin.Begin);
+                                            modDataList.AddRange(br.ReadBytes(mpi.mEntry.ModSize));
+
+                                            try
                                             {
-                                                modEntry = JsonConvert.DeserializeObject<JsonEntry>(line);
-                                                if (modEntry.fullPath.Equals(mpi.mEntry.FullPath))
+                                                foreach (var line in modFileLines)
                                                 {
-                                                    inModList = true;
-                                                    break;
-                                                }
-                                                lineNum++;
-                                            }
-
-                                            var datNum = int.Parse(Info.ModDatDict[mpi.mEntry.DatFile]);
-
-                                            var modDatPath = string.Format(Info.datDir, mpi.mEntry.DatFile, datNum);
-
-                                            var fileLength = new FileInfo(modDatPath).Length;
-                                            while (fileLength >= 2000000000)
-                                            {
-                                                datNum += 1;
-                                                modDatPath = string.Format(Info.datDir, mpi.mEntry.DatFile, datNum);
-                                                if (!File.Exists(modDatPath))
-                                                {
-                                                    CreateDat.MakeNewDat(mpi.mEntry.DatFile);
-                                                }
-                                                fileLength = new FileInfo(modDatPath).Length;
-                                            }
-
-                                            var datOffsetAmount = 16 * datNum;
-
-                                            using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(modDatPath)))
-                                            {
-                                                //is in modlist and size of new mod is less than or equal to existing mod size
-                                                if (inModList && mpi.mEntry.ModSize <= modEntry.modSize)
-                                                {
-                                                    int sizeDiff = modEntry.modSize - modDataList.Count;
-
-                                                    bw.BaseStream.Seek(modEntry.modOffset - datOffsetAmount, SeekOrigin.Begin);
-
-                                                    bw.Write(modDataList.ToArray());
-
-                                                    bw.Write(new byte[sizeDiff]);
-
-                                                    Helper.UpdateIndex(modEntry.modOffset, mpi.mEntry.FullPath, mpi.mEntry.DatFile);
-                                                    Helper.UpdateIndex2(modEntry.modOffset, mpi.mEntry.FullPath, mpi.mEntry.DatFile);
-
-                                                    offset = modEntry.modOffset;
-
-                                                    overwrite = true;
-                                                }
-
-                                                if (!overwrite)
-                                                {
-                                                    bw.BaseStream.Seek(0, SeekOrigin.End);
-
-                                                    while ((bw.BaseStream.Position & 0xFF) != 0)
+                                                    modEntry = JsonConvert.DeserializeObject<JsonEntry>(line);
+                                                    if (modEntry.fullPath.Equals(mpi.mEntry.FullPath))
                                                     {
-                                                        bw.Write((byte)0);
+                                                        inModList = true;
+                                                        break;
                                                     }
+                                                    lineNum++;
+                                                }
 
-                                                    int eof = (int)bw.BaseStream.Position + modDataList.Count;
+                                                var datNum = int.Parse(Info.ModDatDict[mpi.mEntry.DatFile]);
 
-                                                    while ((eof & 0xFF) != 0)
+                                                var modDatPath = string.Format(Info.datDir, mpi.mEntry.DatFile, datNum);
+
+                                                var fileLength = new FileInfo(modDatPath).Length;
+                                                while (fileLength >= 2000000000)
+                                                {
+                                                    datNum += 1;
+                                                    modDatPath = string.Format(Info.datDir, mpi.mEntry.DatFile, datNum);
+                                                    if (!File.Exists(modDatPath))
                                                     {
-                                                        modDataList.AddRange(new byte[16]);
-                                                        eof = eof + 16;
+                                                        CreateDat.MakeNewDat(mpi.mEntry.DatFile);
                                                     }
+                                                    fileLength = new FileInfo(modDatPath).Length;
+                                                }
 
-                                                    offset = (int)bw.BaseStream.Position + datOffsetAmount;
+                                                var datOffsetAmount = 16 * datNum;
 
-                                                    if (offset != 0)
+                                                using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(modDatPath)))
+                                                {
+                                                    //is in modlist and size of new mod is less than or equal to existing mod size
+                                                    if (inModList && mpi.mEntry.ModSize <= modEntry.modSize)
                                                     {
+                                                        int sizeDiff = modEntry.modSize - modDataList.Count;
+
+                                                        bw.BaseStream.Seek(modEntry.modOffset - datOffsetAmount, SeekOrigin.Begin);
+
                                                         bw.Write(modDataList.ToArray());
+
+                                                        bw.Write(new byte[sizeDiff]);
+
+                                                        Helper.UpdateIndex(modEntry.modOffset, mpi.mEntry.FullPath, mpi.mEntry.DatFile);
+                                                        Helper.UpdateIndex2(modEntry.modOffset, mpi.mEntry.FullPath, mpi.mEntry.DatFile);
+
+                                                        offset = modEntry.modOffset;
+
+                                                        overwrite = true;
                                                     }
-                                                    else
+
+                                                    if (!overwrite)
                                                     {
-                                                        FlexibleMessageBox.Show("There was an issue obtaining the .dat4 offset to write data to, try importing again. " +
-                                                                        "\n\n If the problem persists, please submit a bug report.", "ImportModel Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                                        return;
-                                                    }
+                                                        bw.BaseStream.Seek(0, SeekOrigin.End);
 
-
-                                                    int oldOffset = Helper.UpdateIndex(offset, mpi.mEntry.FullPath, mpi.mEntry.DatFile) * 8;
-                                                    Helper.UpdateIndex2(offset, mpi.mEntry.FullPath, mpi.mEntry.DatFile);
-
-                                                    //is in modlist and size of new mod is larger than existing mod size 
-                                                    if (inModList && mpi.mEntry.ModSize > modEntry.modSize)
-                                                    {
-                                                        oldOffset = modEntry.originalOffset;
-
-                                                        JsonEntry replaceEntry = new JsonEntry()
+                                                        while ((bw.BaseStream.Position & 0xFF) != 0)
                                                         {
-                                                            category = String.Empty,
-                                                            name = String.Empty,
-                                                            fullPath = String.Empty,
-                                                            originalOffset = 0,
-                                                            modOffset = modEntry.modOffset,
-                                                            modSize = modEntry.modSize,
+                                                            bw.Write((byte)0);
+                                                        }
+
+                                                        int eof = (int)bw.BaseStream.Position + modDataList.Count;
+
+                                                        while ((eof & 0xFF) != 0)
+                                                        {
+                                                            modDataList.AddRange(new byte[16]);
+                                                            eof = eof + 16;
+                                                        }
+
+                                                        offset = (int)bw.BaseStream.Position + datOffsetAmount;
+
+                                                        if (offset != 0)
+                                                        {
+                                                            bw.Write(modDataList.ToArray());
+                                                        }
+                                                        else
+                                                        {
+                                                            FlexibleMessageBox.Show("There was an issue obtaining the .dat4 offset to write data to, try importing again. " +
+                                                                            "\n\n If the problem persists, please submit a bug report.", "ImportModel Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                                            return;
+                                                        }
+
+
+                                                        int oldOffset = Helper.UpdateIndex(offset, mpi.mEntry.FullPath, mpi.mEntry.DatFile) * 8;
+                                                        Helper.UpdateIndex2(offset, mpi.mEntry.FullPath, mpi.mEntry.DatFile);
+
+                                                        //is in modlist and size of new mod is larger than existing mod size 
+                                                        if (inModList && mpi.mEntry.ModSize > modEntry.modSize)
+                                                        {
+                                                            oldOffset = modEntry.originalOffset;
+
+                                                            JsonEntry replaceEntry = new JsonEntry()
+                                                            {
+                                                                category = String.Empty,
+                                                                name = String.Empty,
+                                                                fullPath = String.Empty,
+                                                                originalOffset = 0,
+                                                                modOffset = modEntry.modOffset,
+                                                                modSize = modEntry.modSize,
+                                                                datFile = mpi.mEntry.DatFile
+                                                            };
+
+
+                                                            modFileLines[lineNum] = JsonConvert.SerializeObject(replaceEntry);
+                                                            File.WriteAllLines(Properties.Settings.Default.Modlist_Directory, modFileLines);
+                                                        }
+
+                                                        JsonEntry jsonEntry = new JsonEntry()
+                                                        {
+                                                            category = mpi.Category,
+                                                            name = mpi.Name,
+                                                            fullPath = mpi.mEntry.FullPath,
+                                                            originalOffset = oldOffset,
+                                                            modOffset = offset,
+                                                            modSize = mpi.mEntry.ModSize,
                                                             datFile = mpi.mEntry.DatFile
                                                         };
 
+                                                        try
+                                                        {
+                                                            modFileLines.Add(JsonConvert.SerializeObject(jsonEntry));
+                                                            File.WriteAllLines(Properties.Settings.Default.Modlist_Directory, modFileLines);
+                                                        }
+                                                        catch (Exception ex)
+                                                        {
+                                                            FlexibleMessageBox.Show("Error Accessing .modlist File \n" + ex.Message, "ImportModel Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                                        }
 
-                                                        modFileLines[lineNum] = JsonConvert.SerializeObject(replaceEntry);
-                                                        File.WriteAllLines(Properties.Settings.Default.Modlist_Directory, modFileLines);
                                                     }
-
-                                                    JsonEntry jsonEntry = new JsonEntry()
-                                                    {
-                                                        category = mpi.Category,
-                                                        name = mpi.Name,
-                                                        fullPath = mpi.mEntry.FullPath,
-                                                        originalOffset = oldOffset,
-                                                        modOffset = offset,
-                                                        modSize = mpi.mEntry.ModSize,
-                                                        datFile = mpi.mEntry.DatFile
-                                                    };
-
-                                                    try
-                                                    {
-                                                        modFileLines.Add(JsonConvert.SerializeObject(jsonEntry));
-                                                        File.WriteAllLines(Properties.Settings.Default.Modlist_Directory, modFileLines);
-                                                    }
-                                                    catch (Exception ex)
-                                                    {
-                                                        FlexibleMessageBox.Show("Error Accessing .modlist File \n" + ex.Message, "ImportModel Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                                    }
-
                                                 }
+
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                FlexibleMessageBox.Show("There was an error in importing. \n" + ex.Message, "ImportModPack Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                                Debug.WriteLine(ex.StackTrace);
                                             }
 
-                                        }
-                                        catch (Exception ex)
-                                        {
-                                            FlexibleMessageBox.Show("There was an error in importing. \n" + ex.Message, "ImportModPack Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                            Debug.WriteLine(ex.StackTrace);
+                                            i++;
+
+                                            backgroundWorker.ReportProgress((int)((i / packListCount) * 100), "Done.");
+
+
                                         }
 
-                                        i++;
-
-                                        backgroundWorker.ReportProgress((int)((i / packListCount) * 100), "Done.");
                                     }
+
                                 }
                             }
+                    
                             stream.Dispose();
                             stream.Close();
                         }
@@ -556,7 +594,6 @@ namespace FFXIV_TexTools2.Views
             {
                 FlexibleMessageBox.Show("Error opening TexTools ModPack file. \n" + ex.Message, "ImportModPack Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Debug.WriteLine(ex.StackTrace);
-
             }
         }
 
@@ -624,8 +661,9 @@ namespace FFXIV_TexTools2.Views
                     s -= ms;
                     modSize.Content = s.ToString("0.##") + ss;
                 }
-
             }
+
+            packList.Sort((a, b) => a.mEntry.ModOffset.CompareTo(b.mEntry.ModOffset));
         }
 
         private void Header_Click(object sender, RoutedEventArgs e)

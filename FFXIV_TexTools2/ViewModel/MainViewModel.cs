@@ -295,6 +295,7 @@ namespace FFXIV_TexTools2.ViewModel
         private void IDSearch(object obj)
         {
             ModelSearch modelSearch = new ModelSearch(this);
+            modelSearch.Owner = App.Current.MainWindow;
             modelSearch.Show();
         }
 

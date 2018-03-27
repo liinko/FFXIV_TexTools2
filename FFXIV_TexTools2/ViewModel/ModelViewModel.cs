@@ -1326,7 +1326,7 @@ namespace FFXIV_TexTools2.ViewModel
                         gender = 1;
                     }
 
-                    if (!race.Equals("1101"))
+                    if (!race.Equals("0901") && !race.Equals("1001") && !race.Equals("1101"))
                     {
                         if (Properties.Settings.Default.Default_Race.Equals(Strings.Hyur_M))
                         {
@@ -1374,17 +1374,17 @@ namespace FFXIV_TexTools2.ViewModel
 
                             modelID = "0101";
                         }
-                        else if (Properties.Settings.Default.Default_Race.Equals(Strings.Roegadyn))
-                        {
-                            if (gender == 0)
-                            {
-                                race = "0901";
-                            }
-                            else
-                            {
-                                race = "1001";
-                            }
-                        }
+                        //else if (Properties.Settings.Default.Default_Race.Equals(Strings.Roegadyn))
+                        //{
+                        //    if (gender == 0)
+                        //    {
+                        //        race = "0901";
+                        //    }
+                        //    else
+                        //    {
+                        //        race = "1001";
+                        //    }
+                        //}
                     }
 
 
