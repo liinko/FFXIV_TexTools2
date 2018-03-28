@@ -74,6 +74,11 @@ namespace FFXIV_TexTools2.Material
         public List<string> BoneStrings = new List<string>();
 
         /// <summary>
+        /// The list of attribute strings
+        /// </summary>
+        public List<string> AttributeStrings = new List<string>();
+
+        /// <summary>
         /// The list of bone Indices
         /// </summary>
         public List<int> BoneIndices = new List<int>();
