@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FFXIV_TexTools2.Views"
         mc:Ignorable="d"
-        Title="3D Import Options" Height="250" Width="600" WindowStyle="ToolWindow">
+        Title="3D Import Options" Width="600" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner" Height="300">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -52,9 +52,9 @@
 
             <Grid Grid.Row="1">
                 <Grid.RowDefinitions>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
@@ -72,8 +72,10 @@
                            *It is recommended to try this option before disabling." VerticalAlignment="Center" Padding="0" Margin="20,0,10,0"/>
                 <TextBlock x:Name="DisableHidingText" Grid.Column="1" Grid.Row="1" TextWrapping="Wrap" Text="Use this option to disable the mesh from hiding when another item is equipped." VerticalAlignment="Center" Margin="20,0,10,0"/>
                 <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
-                    <TextBox x:Name="partTextBox" HorizontalAlignment="Left" VerticalAlignment="Center" MinWidth="50" TextChanged="partTextBox_TextChanged" />
-                    <Label Content="Part Attribute Number" VerticalAlignment="Center"/>
+                    <Label Content="Attribute(s):" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="OrigAttrText" Text="[ Attribute ]" VerticalAlignment="Center" TextWrapping="Wrap" MaxWidth="200"/>
+                    <Label Content="| Add/Remove: " VerticalAlignment="Center" Margin="15,0,0,0"/>
+                    <ComboBox x:Name="NewAttrComobBox" IsReadOnly="True" HorizontalAlignment="Left" VerticalAlignment="Center" SelectionChanged="NewAttrComobBox_SelectionChanged"/>
                 </StackPanel>
                 <Grid Grid.Column="1" Grid.Row="3" Margin="300,0,0,0">
                     <Grid.ColumnDefinitions>

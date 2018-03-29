@@ -6,9 +6,11 @@ using Microsoft.Win32;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Xml;
+using FFXIV_TexTools2.Helpers;
 
 namespace FFXIV_TexTools2.Views
 {
@@ -26,8 +28,10 @@ namespace FFXIV_TexTools2.Views
         ModelData modelData;
         ModelViewModel mvm;
         ItemData item;
-
-        public AdvImport(ModelViewModel mvm, string savePath, string category, ItemData item, string modelName, string selectedMesh, string internalPath, List<string> boneStrings, ModelData modelData)
+        Dictionary<int, string> attributeDictionary = new Dictionary<int, string>();
+        Dictionary<string, int> attrNameDict = new Dictionary<string, int>();
+        private int attrSum = 0;
+        public AdvImport(ModelViewModel mvm, string savePath, string category, ItemData item, string modelName, string selectedMesh, string internalPath, List<string> boneStrings, List<string> atrStrings, ModelData modelData)
         {
             this.category = category;
             this.itemName = item.ItemName;
@@ -71,51 +75,46 @@ namespace FFXIV_TexTools2.Views
 
             MeshCountLabel.Content = "Mesh Count: " + modelData.LoD[0].MeshCount;
 
-            //if (modelData.ExtraData.totalExtraCounts != null)
-            //{
-            //    foreach (var e in modelData.ExtraData.totalExtraCounts)
-            //    {
-            //        meshCounts.Add(e.Key.ToString());
 
-            //        importDict.Add(e.Key.ToString(), new ImportSettings());
+            attributeDictionary.Add(0, "none");
+            attrNameDict.Add("None", 0);
+            var a = 1;
+            foreach (var attr in atrStrings)
+            {
+                var hasNum = attr.Any(c => char.IsDigit(c));
 
-            //        importDict[e.Key.ToString()].PartDictionary = new Dictionary<int, int>();
+                if (hasNum)
+                {
+                    var attrNum = attr.Substring(attr.Length - 1);
+                    var attrName = attr.Substring(0, attr.Length - 1);
 
-            //        var partCount = modelData.LoD[0].MeshList[e.Key].MeshPartList.Count;
+                    attrNameDict.Add(Info.AttributeDict[attrName] + " " + attrNum, a);
+                }
+                else
+                {
+                    if (attr.Count(x => x == '_') > 1)
+                    {
+                        var mAtr = attr.Substring(0, attr.LastIndexOf("_"));
+                        var atrNum = attr.Substring(attr.LastIndexOf("_") + 1, 1);
+                        if (Info.AttributeDict.ContainsKey(mAtr))
+                        {
+                            attrNameDict.Add(Info.AttributeDict[mAtr] + atrNum, a);
+                        }
+                        else
+                        {
+                            attrNameDict.Add(attr, a);
+                        }
+                    }
+                    else
+                    {
+                        attrNameDict.Add(Info.AttributeDict[attr], a);
+                    }
+                }
+                attributeDictionary.Add(a, attr);
+                a *= 2;
+            }
 
-            //        for (int i = 0; i < partCount; i++)
-            //        {
-            //            var partattr = modelData.LoD[0].MeshList[e.Key].MeshPartList[i].Attributes;
-            //            importDict[e.Key.ToString()].PartDictionary.Add(i, partattr);
-            //        }
-            //    }
-
-            //    MeshCountLabel.Content = "Extra Mesh Count: " + modelData.ExtraData.totalExtraCounts.Count;
-
-            //}
-            //else
-            //{
-            //    for (int i = 0; i < modelData.LoD[0].MeshCount; i++)
-            //    {
-            //        meshCounts.Add(i.ToString());
-            //        importDict.Add(i.ToString(), new ImportSettings());
-            //        importDict[i.ToString()].PartDictionary = new Dictionary<int, int>();
-
-            //        var partCount = modelData.LoD[0].MeshList[i].MeshPartList.Count;
-
-            //        for (int j = 0; j < partCount; j++)
-            //        {
-            //            var partattr = modelData.LoD[0].MeshList[i].MeshPartList[j].Attributes;
-            //            importDict[i.ToString()].PartDictionary.Add(j, partattr);
-            //        }
-            //    }
-
-            //    FixCheckbox.IsEnabled = false;
-            //    DisableCheckbox.IsEnabled = false;
-
-            //    MeshCountLabel.Content = "Mesh Count: " + modelData.LoD[0].MeshCount;
-
-            //}
+            NewAttrComobBox.ItemsSource = attrNameDict.Keys;
 
             MeshComboBox.ItemsSource = meshCounts;
             MeshComboBox.SelectedIndex = 0;
@@ -260,30 +259,104 @@ namespace FFXIV_TexTools2.Views
 
                     var partAttr = importDict[meshString].PartDictionary[partNum];
 
-                    partTextBox.Text = partAttr.ToString();
+
+                    attrSum = partAttr;
+
+                    try
+                    {
+                        var attr = attributeDictionary[partAttr];
+                        var hasNum = attr.Any(c => char.IsDigit(c));
+                        var attrNum = " ]";
+
+                        if (hasNum)
+                        {
+                            attrNum = " " + attr.Substring(attr.Length - 1) + " ]";
+                            attr = attr.Substring(0, attr.Length - 1);
+                        }
+
+                        if (attr.Count(x => x == '_') > 1)
+                        {
+                            attrNum = " " + attr.Substring(attr.LastIndexOf("_") + 1, 1);
+                            attr = attr.Substring(0, attr.LastIndexOf("_"));
+                        }
+
+                        OrigAttrText.Text = "[ " +Info.AttributeDict[attr] + attrNum;
+                    }
+                    catch
+                    {
+                        OrigAttrText.Text = "";
+                        foreach (var atrd in attributeDictionary)
+                        {
+                            if (atrd.Key != 0)
+                            {
+                                var r = (atrd.Key & partAttr);
+                                if (r == atrd.Key)
+                                {
+                                    var attr = attributeDictionary[r];
+                                    var hasNum = attr.Any(c => char.IsDigit(c));
+                                    var attrNum = " ]";
+
+                                    if (hasNum)
+                                    {
+                                        attrNum = " " + attr.Substring(attr.Length - 1) + " ]";
+                                        attr = attr.Substring(0, attr.Length - 1);
+                                    }
+
+
+                                    OrigAttrText.Text += "[ " + Info.AttributeDict[attr] + attrNum;
+                                }
+                            }
+                        }
+                    }
                 }
+
+                NewAttrComobBox.IsEnabled = true;
             }
         }
 
-        private void partTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        private void NewAttrComobBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var num = sender as TextBox;
-            var newNum = -1;
+            if (e.AddedItems.Count > 0)
+            {
+                var selected = NewAttrComobBox.SelectedItem.ToString();
 
-            try
-            {
-                newNum = int.Parse(num.Text);
-            }
-            catch
-            {
-                num.Clear();
-            }
+                if (selected.Equals("None"))
+                {
+                    attrSum = 0;
+                    OrigAttrText.Text = "[ None ]";
+                }
+                else
+                {
+                    if (OrigAttrText.Text.Equals("[ None ]"))
+                    {
+                        OrigAttrText.Text = "";
+                    }
 
-            if (newNum != -1)
-            {
+                    var newText = "[ " + selected + " ]";
+
+                    if (OrigAttrText.Text.Contains(newText))
+                    {
+                        var repText = OrigAttrText.Text.Replace(newText, "");
+                        OrigAttrText.Text = repText;
+                        attrSum -= attrNameDict[selected];
+
+                        if (attrSum == 0)
+                        {
+                            OrigAttrText.Text = "[ None ]";
+                        }
+                    }
+                    else
+                    {
+                        OrigAttrText.Text += newText;
+                        attrSum += attrNameDict[selected];
+                    }
+                }
+
                 var meshString = MeshComboBox.SelectedItem.ToString();
                 var partNum = int.Parse(PartComboBox.SelectedItem.ToString());
-                importDict[meshString].PartDictionary[partNum] = newNum;
+                importDict[meshString].PartDictionary[partNum] = attrSum;
+
+                NewAttrComobBox.SelectedIndex = -1;
             }
         }
 
@@ -343,7 +416,8 @@ namespace FFXIV_TexTools2.Views
             if (selectedItem != -1)
             {
                 PartComboBox.IsEnabled = true;
-                partTextBox.IsEnabled = true;
+                NewAttrComobBox.IsEnabled = true;
+
                 var partcCount = importDict[MeshComboBox.SelectedItem.ToString()].PartDictionary.Count;
 
                 List<int> partList = new List<int>();
@@ -359,10 +433,11 @@ namespace FFXIV_TexTools2.Views
             else
             {
                 PartComboBox.ItemsSource = null;
-                partTextBox.Text = "";
-                partTextBox.IsEnabled = false;
+                NewAttrComobBox.IsEnabled = false;
                 PartComboBox.IsEnabled = false;
             }
+
+
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)

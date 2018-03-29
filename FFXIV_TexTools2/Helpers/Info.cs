@@ -288,6 +288,53 @@ namespace FFXIV_TexTools2.Helpers
             {"0", Strings.Food }
         };
 
+        public static Dictionary<string, string> AttributeDict = new Dictionary<string, string>
+        {
+            {"none", "None" },
+            {"atr_arm", "Arm"},
+            {"atr_arrow", "Arrow"},
+            {"atr_attach", "Attachment"},
+            {"atr_hair", "Hair"},
+            {"atr_hig", "Facial Hair"},
+            {"atr_hij", "Lower Arm"},
+            {"atr_hiz", "Upper Leg"},
+            {"atr_hrn", "Horns"},
+            {"atr_inr", "Neck"},
+            {"atr_kam", "Hair"},
+            {"atr_kao", "Face"},
+            {"atr_kod", "Waist"},
+            {"atr_leg", "Leg"},
+            {"atr_lod", "LoD"},
+            {"atr_lpd", "Feet Pads"},
+            {"atr_mim", "Ear"},
+            {"atr_nek", "Neck"},
+            {"atr_sne", "Lower Leg"},
+            {"atr_sta", "STA"},
+            {"atr_tlh", "Tail Hide"},
+            {"atr_tls", "Tail Show"},
+            {"atr_top", "Top"},
+            {"atr_ude", "Upper Arm"},
+            {"atr_bv", "Body Part "},
+            {"atr_dv", "Leg Part "},
+            {"atr_mv", "Head Part "},
+            {"atr_gv", "Hand Part "},
+            {"atr_sv", "Feet Part "},
+            {"atr_tv", "Top Part "},
+            {"atr_fv", "Face Part "},
+            {"atr_hv", "Hair Part "},
+            {"atr_nv", "Neck Part "},
+            {"atr_parts", "Part "},
+            {"atr_rv", "RV Part "},
+            {"atr_wv", "WV Part "},
+            {"atr_ev", "EV Part "},
+            {"atr_cn_ankle", "CN Ankle"},
+            {"atr_cn_neck", "CN Neck"},
+            {"atr_cn_waist", "CN Waist"},
+            {"atr_cn_wrist", "CN Wrist"},
+
+
+        };
+
 
         public static Dictionary<int, int> DDSType = new Dictionary<int, int>
         {
