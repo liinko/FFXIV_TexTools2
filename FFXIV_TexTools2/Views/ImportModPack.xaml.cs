@@ -384,6 +384,7 @@ namespace FFXIV_TexTools2.Views
 
                             while (currentPack != packListCount)
                             {
+                                prevPack = currentPack;
                                 if (remainingPack > 100)
                                 {
                                     pack = packList.GetRange(currentPack, 100);
@@ -462,20 +463,29 @@ namespace FFXIV_TexTools2.Views
                                                     lineNum++;
                                                 }
 
+
                                                 var datNum = int.Parse(Info.ModDatDict[mpi.mEntry.DatFile]);
 
                                                 var modDatPath = string.Format(Info.datDir, mpi.mEntry.DatFile, datNum);
 
-                                                var fileLength = new FileInfo(modDatPath).Length;
-                                                while (fileLength >= 2000000000)
+                                                if (inModList)
                                                 {
-                                                    datNum += 1;
-                                                    modDatPath = string.Format(Info.datDir, mpi.mEntry.DatFile, datNum);
-                                                    if (!File.Exists(modDatPath))
+                                                    datNum = ((modEntry.modOffset / 8) & 0x0F) / 2;
+                                                    modDatPath = string.Format(Info.datDir, modEntry.datFile, datNum);
+                                                }
+                                                else
+                                                {
+                                                    var fileLength = new FileInfo(modDatPath).Length;
+                                                    while (fileLength >= 2000000000)
                                                     {
-                                                        CreateDat.MakeNewDat(mpi.mEntry.DatFile);
+                                                        datNum += 1;
+                                                        modDatPath = string.Format(Info.datDir, mpi.mEntry.DatFile, datNum);
+                                                        if (!File.Exists(modDatPath))
+                                                        {
+                                                            CreateDat.MakeNewDat(mpi.mEntry.DatFile);
+                                                        }
+                                                        fileLength = new FileInfo(modDatPath).Length;
                                                     }
-                                                    fileLength = new FileInfo(modDatPath).Length;
                                                 }
 
                                                 var datOffsetAmount = 16 * datNum;

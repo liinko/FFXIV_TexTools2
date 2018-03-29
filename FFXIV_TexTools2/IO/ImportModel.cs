@@ -2946,18 +2946,26 @@ namespace FFXIV_TexTools2.IO
 
 		    var datNum = int.Parse(Info.ModDatDict[Strings.ItemsDat]);
 		    var modDatPath = string.Format(Info.datDir, Strings.ItemsDat, datNum);
- 
-		    var fileLength = new FileInfo(modDatPath).Length;
-		    while (fileLength >= 2000000000)
+
+		    if (inModList)
 		    {
-		        datNum += 1;
-		        modDatPath = string.Format(Info.datDir, Strings.ItemsDat, datNum);
-		        if (!File.Exists(modDatPath))
-		        {
-		            CreateDat.MakeNewDat(Strings.ItemsDat);
-		        }
-		        fileLength = new FileInfo(modDatPath).Length;
+		        datNum = ((modEntry.modOffset / 8) & 0x0F) / 2;
+		        modDatPath = string.Format(Info.datDir, modEntry.modOffset, datNum);
 		    }
+		    else
+		    {
+		        var fileLength = new FileInfo(modDatPath).Length;
+		        while (fileLength >= 2000000000)
+		        {
+		            datNum += 1;
+		            modDatPath = string.Format(Info.datDir, Strings.ItemsDat, datNum);
+		            if (!File.Exists(modDatPath))
+		            {
+		                CreateDat.MakeNewDat(Strings.ItemsDat);
+		            }
+		            fileLength = new FileInfo(modDatPath).Length;
+		        }
+            }
 
 		    var datOffsetAmount = datNum * 16;
             try
