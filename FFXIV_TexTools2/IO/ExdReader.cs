@@ -801,7 +801,14 @@ namespace FFXIV_TexTools2.IO
                             var subcat = br.ReadByte();
                             if (subcat != 0)
                             {
-                                item.ItemSubCategory = ActionCategoryDict[subcat];
+                                try
+                                {
+                                    item.ItemSubCategory = ActionCategoryDict[subcat];
+                                }
+                                catch
+                                {
+                                    item.ItemSubCategory = ActionCategoryDict[0];
+                                }
                             }
                             else
                             {
@@ -1544,6 +1551,7 @@ namespace FFXIV_TexTools2.IO
 
             Dictionary<int, string> actionCategories = new Dictionary<int, string>();
 
+            actionCategories.Add(0, "None");
             using (BinaryReader br = new BinaryReader(new MemoryStream(actionCatBytes)))
             {
                 br.ReadBytes(8);

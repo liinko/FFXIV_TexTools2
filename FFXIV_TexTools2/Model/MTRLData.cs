@@ -105,5 +105,10 @@ namespace FFXIV_TexTools2.Model
         /// The items Icon data offset
         /// </summary>
         public int UIHQOffset { get; set; }
+
+        /// <summary>
+        /// The shader number
+        /// </summary>
+        public int ShaderNum { get; set; }
     }
 }

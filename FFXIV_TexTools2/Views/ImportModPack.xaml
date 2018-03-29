@@ -20,6 +20,11 @@
             </Grid>
             <ListView x:Name="listView" Grid.Row="1" SelectionChanged="listView_SelectionChanged" SelectionMode="Multiple" 
                       BorderBrush="Black" BorderThickness="0,1" GridViewColumnHeader.Click="Header_Click">
+                <ListView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel></StackPanel>
+                    </ItemsPanelTemplate>
+                </ListView.ItemsPanel>
                 <ListView.View>
                     <GridView>
                         <GridViewColumn Header="_">

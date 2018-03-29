@@ -210,7 +210,6 @@ namespace FFXIV_TexTools2.IO
 
                 using (BinaryReader br = new BinaryReader(new MemoryStream(Helper.GetType2DecompressedData(offset, datNum, Strings.ItemsDat))))
                 {
-                    bool enableAlpha = false;
                     br.BaseStream.Seek(4, SeekOrigin.Begin);
                     fileSize = br.ReadInt16();
                     short colorDataSize = br.ReadInt16();
@@ -225,36 +224,9 @@ namespace FFXIV_TexTools2.IO
 
                     br.BaseStream.Seek(0, SeekOrigin.Begin);
 
-                    if (!enableAlpha)
-                    {
-                        mtrlBytes.AddRange(br.ReadBytes(endOfHeader));
-                        mtrlBytes.AddRange(br.ReadBytes(textureNameSize + 4));
-                        br.ReadBytes(colorDataSize);
-                    }
-                    else
-                    {
-                        //Currently in Testing
-                        mtrlBytes.AddRange(br.ReadBytes(4));
-                        br.ReadBytes(2);
-                        mtrlBytes.AddRange(BitConverter.GetBytes((short)(fileSize + 5)));
-                        br.ReadBytes(2);
-                        mtrlBytes.AddRange(BitConverter.GetBytes((short)(colorDataSize)));
-                        br.ReadBytes(2);
-                        var allTextSize = textureNameSize + 5;
-                        mtrlBytes.AddRange(BitConverter.GetBytes((short)(allTextSize)));
-                        br.ReadBytes(2);
-                        mtrlBytes.AddRange(BitConverter.GetBytes((short)(toSHPK)));
-                        mtrlBytes.AddRange(br.ReadBytes(4));
-                        mtrlBytes.AddRange(br.ReadBytes(endOfHeader - 16));
-                        mtrlBytes.AddRange(br.ReadBytes(toSHPK));
-                        var shpkSize = textureNameSize - toSHPK;
-                        br.ReadBytes(14);
-                        mtrlBytes.AddRange(Encoding.UTF8.GetBytes("characterglass.shpk"));
-                        mtrlBytes.AddRange(br.ReadBytes(shpkSize - 14));
-                        mtrlBytes.AddRange(br.ReadBytes(4));
-                        br.ReadBytes(colorDataSize);
-                    }
-
+                    mtrlBytes.AddRange(br.ReadBytes(endOfHeader));
+                    mtrlBytes.AddRange(br.ReadBytes(textureNameSize + 4));
+                    br.ReadBytes(colorDataSize);
 
                     if (colorDataSize == 544)
                     {
@@ -642,16 +614,24 @@ namespace FFXIV_TexTools2.IO
 
             var modDatPath = string.Format(Info.datDir, datName, datNum);
 
-            var fileLength = new FileInfo(modDatPath).Length;
-            while (fileLength >= 2000000000)
+            if (inModList)
             {
-                datNum += 1;
-                modDatPath = string.Format(Info.datDir, datName, datNum);
-                if (!File.Exists(modDatPath))
+                datNum = ((modEntry.modOffset / 8) & 0x0F) / 2;
+                modDatPath = string.Format(Info.datDir, modEntry.datFile, datNum);
+            }
+            else
+            {
+                var fileLength = new FileInfo(modDatPath).Length;
+                while (fileLength >= 2000000000)
                 {
-                    CreateDat.MakeNewDat(datName);
+                    datNum += 1;
+                    modDatPath = string.Format(Info.datDir, datName, datNum);
+                    if (!File.Exists(modDatPath))
+                    {
+                        CreateDat.MakeNewDat(datName);
+                    }
+                    fileLength = new FileInfo(modDatPath).Length;
                 }
-                fileLength = new FileInfo(modDatPath).Length;
             }
 
             var datOffsetAmount = 16 * datNum;

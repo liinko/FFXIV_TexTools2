@@ -592,11 +592,11 @@ namespace FFXIV_TexTools2.Helpers
 
             int datNum = ((itemOffset / 8) & 0x0F) / 2;
 
-            if(indexName.Equals(Strings.ItemsDat) && datNum == 4)
+            if(indexName.Equals(Strings.ItemsDat) && datNum >= 4)
             {
                 return true;
             }
-            else if (indexName.Equals(Strings.UIDat) && datNum == 1)
+            else if (indexName.Equals(Strings.UIDat) && datNum >= 1)
             {
                 return true;
             }

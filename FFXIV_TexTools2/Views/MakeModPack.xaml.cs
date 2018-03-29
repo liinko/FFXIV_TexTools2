@@ -342,6 +342,7 @@ namespace FFXIV_TexTools2.Views
 
             pd = new ProgressDialog();
             pd.Title = "ModPack Maker";
+            pd.ImportingLabel.Content = "Creating ModPack...";
             pd.Owner = App.Current.MainWindow;
             pd.Show();
 
@@ -350,6 +351,7 @@ namespace FFXIV_TexTools2.Views
 
             mpName = modPackName.Text;
 
+            CreateButton.IsEnabled = false;
             backgroundWorker.RunWorkerAsync();          
         }
 
