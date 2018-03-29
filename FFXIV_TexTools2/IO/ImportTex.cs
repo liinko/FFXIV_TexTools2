@@ -617,7 +617,7 @@ namespace FFXIV_TexTools2.IO
             if (inModList)
             {
                 datNum = ((modEntry.modOffset / 8) & 0x0F) / 2;
-                modDatPath = string.Format(Info.datDir, modEntry.modOffset, datNum);
+                modDatPath = string.Format(Info.datDir, modEntry.datFile, datNum);
             }
             else
             {
