@@ -20,6 +20,7 @@ using FFXIV_TexTools2.Resources;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -1010,6 +1011,11 @@ namespace FFXIV_TexTools2.Material
                         mtrlInfo.ColorData = br.ReadBytes(colorDataSize);
                     }
                 }
+
+                br.ReadBytes(8);
+
+               mtrlInfo.ShaderNum = br.ReadByte();
+
             }
 
             return mtrlInfo;
@@ -1232,10 +1238,11 @@ namespace FFXIV_TexTools2.Material
         /// </summary>
         /// <param name="offset">The offset of the MTRL file</param>
         /// <returns>Bitmap from the colorset</returns>
-        public static Tuple<Bitmap, byte[]> GetColorBitmap(int offset)
+        public static Tuple<Bitmap, byte[], int> GetColorBitmap(int offset)
         {
             int datNum = ((offset / 8) & 0x000f) / 2;
             byte[] colorData = null;
+            int shaderNum = 0;
 
             using (BinaryReader br = new BinaryReader(new MemoryStream(Helper.GetType2DecompressedData(offset, datNum, Strings.ItemsDat))))
             {
@@ -1255,11 +1262,15 @@ namespace FFXIV_TexTools2.Material
                     if (colorDataSize == 544)
                     {
                         colorData = br.ReadBytes(colorDataSize - 32);
+                        br.ReadBytes(32);
                     }
                     else
                     {
                         colorData = br.ReadBytes(colorDataSize);
                     }
+
+                    br.ReadBytes(8);
+                    shaderNum = br.ReadByte();
                 }
                 else
                 {
@@ -1267,7 +1278,7 @@ namespace FFXIV_TexTools2.Material
                 }
             }
 
-            return new Tuple<Bitmap, byte[]>(TEX.TextureToBitmap(colorData, 9312, 4, 16), colorData);
+            return new Tuple<Bitmap, byte[], int>(TEX.TextureToBitmap(colorData, 9312, 4, 16), colorData, shaderNum);
         }
 
         /// <summary>

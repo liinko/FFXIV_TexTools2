@@ -50,12 +50,13 @@ namespace FFXIV_TexTools2.ViewModel
         Bitmap saveClone;
 
         string activeToggle = "Enable/Disable";
+        string translucencyToggle = "Translucency OFF";
         string selectedCategory, imcVersion, fullPath, textureType, textureDimensions, fullPathString, VFXVersion;
 
         int raceIndex, mapIndex, typeIndex, partIndex, currMap;
 
         bool redChecked = true, greenChecked = true, blueChecked = true;
-        bool alphaChecked, raceEnabled, mapEnabled, typeEnabled, partEnabled, importEnabled, activeEnabled, saveEnabled, channelsEnabled, openEnabled;
+        bool alphaChecked, raceEnabled, mapEnabled, typeEnabled, partEnabled, importEnabled, activeEnabled, saveEnabled, channelsEnabled, openEnabled, translucencyEnabled;
 
 
         private ObservableCollection<ComboBoxInfo> raceComboInfo = new ObservableCollection<ComboBoxInfo>();
@@ -90,8 +91,10 @@ namespace FFXIV_TexTools2.ViewModel
         public bool TypeEnabled { get { return typeEnabled; } set { typeEnabled = value; NotifyPropertyChanged("TypeEnabled"); } }
         public bool PartEnabled { get { return partEnabled; } set { partEnabled = value; NotifyPropertyChanged("PartEnabled"); } }
         public bool OpenEnabled { get { return openEnabled; } set { openEnabled = value; NotifyPropertyChanged("OpenEnabled"); } }
+        public bool TranslucencyEnabled { get { return translucencyEnabled; } set { translucencyEnabled = value; NotifyPropertyChanged("TranslucencyEnabled"); } }
 
         public string ActiveToggle { get { return activeToggle; } set { activeToggle = value; NotifyPropertyChanged("ActiveToggle"); } }
+        public string TranslucencyToggle { get { return translucencyToggle; } set { translucencyToggle = value; NotifyPropertyChanged("TranslucencyToggle"); } }
         public bool ImportEnabled { get { return importEnabled; } set { importEnabled = value; NotifyPropertyChanged("ImportEnabled"); } }
         public bool ActiveEnabled { get { return activeEnabled; } set { activeEnabled = value; NotifyPropertyChanged("ActiveEnabled"); } }
         public bool SaveEnabled { get { return saveEnabled; } set { saveEnabled = value; NotifyPropertyChanged("SaveEnabled"); } }
@@ -202,11 +205,43 @@ namespace FFXIV_TexTools2.ViewModel
         }
 
         /// <summary>
+        /// Command for Enable/Disable button
+        /// </summary>
+        public ICommand TranslucencyCommand
+        {
+            get { return new RelayCommand(Translucency); }
+        }
+
+        /// <summary>
         /// Command for Open Folder button
         /// </summary>
         public ICommand OpenFolderCommand
         {
             get { return new RelayCommand(OpenFolder); }
+        }
+
+        /// <summary>
+        /// Runs the SaveDDS method from SaveTex 
+        /// </summary>
+        /// <param name="obj"></param>
+        private void Translucency(object obj)
+        {
+            var newOffset = 0;
+            if (TranslucencyToggle.Contains("OFF"))
+            {
+                newOffset = ChangeMTRL.TranslucencyToggle(mtrlData, selectedCategory, selectedItem.ItemName, true);
+                TranslucencyToggle = "Translucency ON";
+            }
+            else if (translucencyToggle.Contains("ON"))
+            {
+                newOffset = ChangeMTRL.TranslucencyToggle(mtrlData, selectedCategory, selectedItem.ItemName, false);
+                TranslucencyToggle = "Translucency OFF";
+            }
+
+            if (newOffset != 0)
+            {
+                mtrlData.MTRLOffset = newOffset;
+            }
         }
 
         /// <summary>
@@ -1201,6 +1236,25 @@ namespace FFXIV_TexTools2.ViewModel
             {
                 OpenEnabled = false;
             }
+
+            var shaderNum = mtrlData.ShaderNum;
+
+            if (shaderNum == 0x0D)
+            {
+                TranslucencyToggle = "Translucency OFF";
+                TranslucencyEnabled = true;
+            }
+            else if (shaderNum == 0x1D)
+            {
+                TranslucencyToggle = "Translucency ON";
+                TranslucencyEnabled = true;
+            }
+            else
+            {
+                TranslucencyToggle = "Not Supported";
+                TranslucencyEnabled = false;
+            }
+
         }
 
         /// <summary>
@@ -1266,6 +1320,15 @@ namespace FFXIV_TexTools2.ViewModel
 
                     colorBMP.Item1.Dispose();
                     removeAlphaBitmap.Dispose();
+
+                    if (colorBMP.Item3 == 0x0D)
+                    {
+                        TranslucencyToggle = "Translucency OFF";
+                    }
+                    else if (colorBMP.Item3 == 0x1D)
+                    {
+                        TranslucencyToggle = "Translucency ON";
+                    }
                 }
                 else
                 {

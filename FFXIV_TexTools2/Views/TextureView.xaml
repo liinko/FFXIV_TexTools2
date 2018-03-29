@@ -5,7 +5,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
+             d:DesignHeight="387" d:DesignWidth="506">
     <UserControl.Resources>
         <SolidColorBrush x:Key="DarkSquareColor" Color="#CC000000" />
         <SolidColorBrush x:Key="LightSquareColor" Color="#BF000000" />
@@ -112,11 +112,13 @@
                 <ColumnDefinition/>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
+                <ColumnDefinition/>
             </Grid.ColumnDefinitions>
             <Button Content="Export as Image" Margin="5" Command="{Binding SavePNGCommand}" IsEnabled="{Binding SaveEnabled, FallbackValue=false}"/>
             <Button Content="Export as DDS" Grid.Column="1" Margin="5" Command="{Binding SaveDDSCommand}" IsEnabled="{Binding SaveEnabled, FallbackValue=false}"/>
             <Button Content="Import" Grid.Column="2" Margin="5" Command="{Binding ImportCommand}" IsEnabled="{Binding ImportEnabled, FallbackValue=false}"/>
             <Button Content="{Binding ActiveToggle, FallbackValue='Enable/Disable' }" Grid.Column="3" Margin="5" Command="{Binding ActiveCommand}" IsEnabled="{Binding ActiveEnabled, FallbackValue=false}"/>
+            <Button Content="{Binding TranslucencyToggle, FallbackValue='Translucency Off' }" Grid.Column="4" Margin="5" Command="{Binding TranslucencyCommand}" IsEnabled="{Binding TranslucencyEnabled, FallbackValue=false}"/>
         </Grid>
     </Grid>
 </UserControl>
