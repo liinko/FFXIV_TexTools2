@@ -2039,7 +2039,6 @@ namespace FFXIV_TexTools2.IO
                                 {
                                     modelDataBlock.AddRange(BitConverter.GetBytes(mp.Attributes));
                                 }
-
                             }
                             else
 						    {
@@ -2947,10 +2946,10 @@ namespace FFXIV_TexTools2.IO
 		    var datNum = int.Parse(Info.ModDatDict[Strings.ItemsDat]);
 		    var modDatPath = string.Format(Info.datDir, Strings.ItemsDat, datNum);
 
-		    if (inModList)
+            if (inModList)
 		    {
 		        datNum = ((modEntry.modOffset / 8) & 0x0F) / 2;
-		        modDatPath = string.Format(Info.datDir, modEntry.modOffset, datNum);
+		        modDatPath = string.Format(Info.datDir, modEntry.datFile, datNum);
 		    }
 		    else
 		    {
