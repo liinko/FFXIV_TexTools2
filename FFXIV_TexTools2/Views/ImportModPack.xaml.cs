@@ -54,13 +54,20 @@ namespace FFXIV_TexTools2.Views
                         {
                             using (StreamReader sr = new StreamReader(entry.Open()))
                             {
-                                mpInfo = JsonConvert.DeserializeObject<ModPackInfo>(sr.ReadLine());
+                                var line = sr.ReadLine();
+                                if (line.ToLower().Contains("version"))
+                                {
+                                    mpInfo = JsonConvert.DeserializeObject<ModPackInfo>(line);
+                                }
+                                else
+                                {
+                                    mpjList.Add(deserializeModPackJsonLine(line));
+                                }
 
                                 while(sr.Peek() >= 0)
                                 {
-                                    var data = JsonConvert.DeserializeObject<ModPackJson>(sr.ReadLine());
-                                    data.ModOffset = (uint)data.ModOffset;
-                                    mpjList.Add(data);
+                                    line = sr.ReadLine();
+                                    mpjList.Add(deserializeModPackJsonLine(line));
                                 }
                             }
                         }
@@ -220,6 +227,12 @@ namespace FFXIV_TexTools2.Views
             }
 
             modSize.Content = totalModSize.ToString("0.##") + sizeSuffix;
+        }
+
+        private ModPackJson deserializeModPackJsonLine(string line) {
+            var data = JsonConvert.DeserializeObject<ModPackJson>(line);
+            data.ModOffset = (uint)data.ModOffset;
+            return data;
         }
 
         private void dt_Tick(object sender, EventArgs e)
