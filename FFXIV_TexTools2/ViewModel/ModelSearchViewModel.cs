@@ -313,7 +313,7 @@ namespace FFXIV_TexTools2.ViewModel
                             {
                                 foreach (var p in parts)
                                 {
-                                    var aFile = string.Format(file, searchText.PadLeft(4, '0'), s, p);
+                                    var aFile = string.Format(file, "0101", searchText.PadLeft(4, '0'), s, p);
 
                                     var fileHash = FFCRC.GetHash(aFile);
                                     if (files.Contains(fileHash))
