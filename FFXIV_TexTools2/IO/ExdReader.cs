@@ -474,7 +474,7 @@ namespace FFXIV_TexTools2.IO
 
         public static TreeNode MakeHUDList()
         {
-            var uldList = Properties.Resources.uldpaths.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+            var uldList = Properties.Resources.uldpaths.Split(new string[] { Environment.NewLine, "\n", "\r" }, StringSplitOptions.RemoveEmptyEntries);
 
             var uldFolder = "ui/uld/";
 
