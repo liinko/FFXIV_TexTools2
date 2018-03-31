@@ -491,9 +491,21 @@ namespace FFXIV_TexTools2.IO
 												{
 													var blend = tempbIndex[a];
 													var blendName = cData.bones[blend];
-													var blendBoneName = boneJointDict[blendName];
+												    string blendBoneName;
 
-													var bString = blendBoneName;
+												    try
+												    {
+												        blendBoneName = boneJointDict[blendName];
+												    }
+												    catch (Exception e)
+												    {
+                                                        FlexibleMessageBox.Show("Error reading bone data.\n\nBone: " + blendName +
+                                                                                "\n\n" + e.Message, "ImportModel Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
+												        return;
+												    }
+
+
+                                                    var bString = blendBoneName;
 													if (!blendBoneName.Contains("h0"))
 													{
 														bString = Regex.Replace(blendBoneName, @"[\d]", string.Empty);
@@ -508,8 +520,18 @@ namespace FFXIV_TexTools2.IO
 													}
 													else
 													{
-														cData.bIndex.Add(boneDict[bString]);
-														cData.bIndex.Add(tempbIndex[a + 1]);
+													    try
+													    {
+													        cData.bIndex.Add(boneDict[bString]);
+													    }
+													    catch (Exception e)
+													    {
+													        FlexibleMessageBox.Show("Error reading bone data.\n\nBone: " + bString +
+													                                "\n\n" + e.Message, "ImportModel Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
+													        return;
+                                                        }
+
+                                                        cData.bIndex.Add(tempbIndex[a + 1]);
 													}
 												}
 
@@ -876,80 +898,99 @@ namespace FFXIV_TexTools2.IO
 
 						for (int i = 0; i < Vertex.Count; i++)
 						{
-							int bCount = cd.vCount[i];
+						    try
+						    {
+						        int bCount = cd.vCount[i];
 
-							int boneSum = 0;
+						        int boneSum = 0;
 
-							List<byte> biList = new List<byte>();
-							List<byte> bwList = new List<byte>();
+						        List<byte> biList = new List<byte>();
+						        List<byte> bwList = new List<byte>();
 
-							int newbCount = 0;
-							for (int j = 0; j < bCount * 2; j += 2)
-							{
-								var b = cd.bIndex[vTrack * 2 + j];
-								var bi = (byte)blDict[b];
-								var bw = (byte)Math.Round(cd.weights[cd.bIndex[vTrack * 2 + j + 1]] * 255f);
+						        int newbCount = 0;
+						        for (int j = 0; j < bCount * 2; j += 2)
+						        {
+						            var b = cd.bIndex[vTrack * 2 + j];
+                                    try
+						            {
+						                var bi = (byte) blDict[b];
+						                var bw = (byte) Math.Round(cd.weights[cd.bIndex[vTrack * 2 + j + 1]] * 255f);
 
-								if (bw != 0)
-								{
-									biList.Add(bi);
-									bwList.Add(bw);
-									boneSum += bw;
-									newbCount++;
-								}
+						                if (bw != 0)
+						                {
+						                    biList.Add(bi);
+						                    bwList.Add(bw);
+						                    boneSum += bw;
+						                    newbCount++;
+						                }
+						            }
+						            catch (Exception ex)
+						            {
+						                FlexibleMessageBox.Show("There was an error reading imported bone data at:" +
+						                                        "\n\nVertex: " + i + " Bone: " + b + "\n\n" + ex.Message, "Bone Read Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                        return;
+                                    }
+						        }
 
-							}
-							int originalbCount = bCount;
-							bCount = newbCount;
+						        int originalbCount = bCount;
+						        bCount = newbCount;
 
-							if (bCount < 4)
-							{
-								int remainder = 4 - bCount;
+						        if (bCount < 4)
+						        {
+						            int remainder = 4 - bCount;
 
-								for (int k = 0; k < remainder; k++)
-								{
-									biList.Add(0);
-									bwList.Add(0);
-								}
-							}
-							else if (bCount > 4)
-							{
-								int extras = bCount - 4;
+						            for (int k = 0; k < remainder; k++)
+						            {
+						                biList.Add(0);
+						                bwList.Add(0);
+						            }
+						        }
+						        else if (bCount > 4)
+						        {
+						            int extras = bCount - 4;
 
-								for (int k = 0; k < extras; k++)
-								{
-									var min = bwList.Min();
-									var minIndex = bwList.IndexOf(min);
-									int count = (bwList.Count(x => x == min));
-									bwList.Remove(min);
-									biList.RemoveAt(minIndex);
-									boneSum -= min;
-								}
-							}
+						            for (int k = 0; k < extras; k++)
+						            {
+						                var min = bwList.Min();
+						                var minIndex = bwList.IndexOf(min);
+						                int count = (bwList.Count(x => x == min));
+						                bwList.Remove(min);
+						                biList.RemoveAt(minIndex);
+						                boneSum -= min;
+						            }
+						        }
 
-							if (boneSum != 255)
-							{
-								int diff = boneSum - 255;
-								var max = bwList.Max();
-								var maxIndex = bwList.IndexOf(max);
-								errorDict.Add(i, diff);
-								if (diff < 0)
-								{
-									bwList[maxIndex] += (byte)Math.Abs(diff);
-								}
-								else
-								{
-									// Subtract difference when over-weight.
-									bwList[maxIndex] -= (byte)Math.Abs(diff);
-								}
-							}
+						        if (boneSum != 255)
+						        {
+						            int diff = boneSum - 255;
+						            var max = bwList.Max();
+						            var maxIndex = bwList.IndexOf(max);
+						            errorDict.Add(i, diff);
+						            if (diff < 0)
+						            {
+						                bwList[maxIndex] += (byte) Math.Abs(diff);
+						            }
+						            else
+						            {
+						                // Subtract difference when over-weight.
+						                bwList[maxIndex] -= (byte) Math.Abs(diff);
+						            }
+						        }
 
-							boneSum = 0;
-							bwList.ForEach(x => boneSum += x);
+						        boneSum = 0;
+						        bwList.ForEach(x => boneSum += x);
 
-							blendIndices.Add(biList.ToArray());
-							blendWeights.Add(bwList.ToArray());
-							vTrack += originalbCount;
+						        blendIndices.Add(biList.ToArray());
+						        blendWeights.Add(bwList.ToArray());
+						        vTrack += originalbCount;
+						    }
+						    catch (Exception e)
+						    {
+						        FlexibleMessageBox.Show("There was an error reading imported bone data at:" +
+						                                "\n\nVertex: " + i + "\n\n" + e.Message, "Bone Read Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                return;
+						    }
+
 						}
 					}
 
