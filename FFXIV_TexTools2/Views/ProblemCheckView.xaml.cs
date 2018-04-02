@@ -111,7 +111,7 @@ namespace FFXIV_TexTools2.Views
 
                         var numDats = br.ReadInt16();
 
-                        if (numDats != indexFile.Value)
+                        if (numDats < indexFile.Value)
                         {
                             AddText("\t\u2716\n", "Red");
 
@@ -138,7 +138,7 @@ namespace FFXIV_TexTools2.Views
 
                         var numDats = br.ReadInt16();
 
-                        if (numDats != indexFile.Value)
+                        if (numDats < indexFile.Value)
                         {
                             AddText("\t\u2716\n", "Red");
 
@@ -312,9 +312,12 @@ namespace FFXIV_TexTools2.Views
                             if (!modEntry.fullPath.Equals(""))
                             {
                                 var originalOffset = modEntry.originalOffset / 8;
-                                var modOffset = modEntry.modOffset / 8;
+                                //var modOffset = modEntry.modOffset / 8;
+                                var modOffset = modEntry.modOffset;
+
 
                                 int datNum = (originalOffset & 0xF) / 2;
+                                int nDatNum = ((modOffset / 8) & 0xF) / 2;
 
                                 var tabs = "";
 
@@ -324,17 +327,40 @@ namespace FFXIV_TexTools2.Views
                                 }
 
                                 AddText("\t" + Path.GetFileName(modEntry.fullPath) + tabs, "Black");
+                                var datPath = string.Format(Info.datDir, modEntry.datFile, nDatNum);
+
+                                modOffsetList.Add(modOffset);
+                                modOffset -=  nDatNum * 16;
+
+                                using(BinaryReader br = new BinaryReader(File.OpenRead(datPath)))
+                                {
+                                    br.BaseStream.Seek(modOffset, SeekOrigin.Begin);
+
+                                    var hSize = br.ReadInt32();
+                                    var type = br.ReadInt32();
+
+                                    if (type != 2 && type != 3 && type != 4)
+                                    {
+                                        AddText("\t\u2716\n", "Red");
+                                        AddText("\tFound unkown file type ( " + type + " ) offset is most likely corrupt.\n", "Red");
+
+                                    }
+                                    else
+                                    {
+                                        AddText("\t\u2714", "Green");
+                                    }
+                                }
 
                                 if (modEntry.datFile.Equals(Strings.ItemsDat))
                                 {
                                     if (datNum > 3 || originalOffset == 0)
                                     {
-                                        AddText("\u2716\n", "Red");
+                                        AddText("\t\u2716\n", "Red");
                                         check = true;
                                     }
                                     else if (modOffset == 0)
                                     {
-                                        AddText("\u2716\n", "Red");
+                                        AddText("\t\u2716\n", "Red");
                                         AddText("\tMod Offset for the above texture was 0, Disable from File > Modlist and reimport.\n", "Red");
                                         check = true;
                                     }
@@ -347,12 +373,12 @@ namespace FFXIV_TexTools2.Views
                                 {
                                     if (datNum > 0 || originalOffset == 0)
                                     {
-                                        AddText("\u2716\n", "Red");
+                                        AddText("\t\u2716\n", "Red");
                                         check = true;
                                     }
                                     else if (modOffset == 0)
                                     {
-                                        AddText("\u2716\n", "Red");
+                                        AddText("\t\u2716\n", "Red");
                                         AddText("\tMod Offset for the above texture was 0, Disable from File > Modlist and reimport.\n", "Red");
                                         check = true;
                                     }
@@ -362,7 +388,6 @@ namespace FFXIV_TexTools2.Views
                                     }
                                 }
 
-                                modOffsetList.Add(modOffset);
                                 originalOffsetList.Add(originalOffset);
                             }
                         }
@@ -409,13 +434,13 @@ namespace FFXIV_TexTools2.Views
                             br.ReadBytes(8);
                             int offset = br.ReadInt32();
 
-                            int datNum = (offset & 0x000f) / 2;
+                            int datNum = (offset & 0xF) / 2;
 
                             if (indexFile.Key.Equals(Strings.ItemsDat))
                             {
-                                if (datNum == 4)
+                                if (datNum >= 4)
                                 {
-                                    if (!modOffsetList.Contains(offset))
+                                    if (!modOffsetList.Contains(offset * 8))
                                     {
                                         AddText(" \u2716\n", "Red");
                                         problem = true;
@@ -426,9 +451,9 @@ namespace FFXIV_TexTools2.Views
                             }
                             else if (indexFile.Key.Equals(Strings.UIDat))
                             {
-                                if (datNum == 1)
+                                if (datNum >= 1)
                                 {
-                                    if (!modOffsetList.Contains(offset))
+                                    if (!modOffsetList.Contains(offset * 8))
                                     {
                                         AddText("\u2716\n", "Red");
                                         problem = true;
@@ -475,9 +500,9 @@ namespace FFXIV_TexTools2.Views
 
                             if (indexFile.Key.Equals(Strings.ItemsDat))
                             {
-                                if (datNum == 4)
+                                if (datNum >= 4)
                                 {
-                                    if (!modOffsetList.Contains(offset))
+                                    if (!modOffsetList.Contains(offset * 8))
                                     {
                                         AddText("\u2716\n", "Red");
                                         problem = true;
@@ -488,9 +513,9 @@ namespace FFXIV_TexTools2.Views
                             }
                             else if (indexFile.Key.Equals(Strings.UIDat))
                             {
-                                if (datNum == 1)
+                                if (datNum >= 1)
                                 {
-                                    if (!modOffsetList.Contains(offset))
+                                    if (!modOffsetList.Contains(offset * 8))
                                     {
                                         AddText("\u2716\n", "Red");
                                         problem = true;

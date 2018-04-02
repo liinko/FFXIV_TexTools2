@@ -554,7 +554,6 @@ namespace FFXIV_TexTools2.Views
                                                             return;
                                                         }
 
-
                                                         int oldOffset = Helper.UpdateIndex(offset, mpi.mEntry.FullPath, mpi.mEntry.DatFile) * 8;
                                                         Helper.UpdateIndex2(offset, mpi.mEntry.FullPath, mpi.mEntry.DatFile);
 
