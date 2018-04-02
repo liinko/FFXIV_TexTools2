@@ -631,6 +631,8 @@ namespace FFXIV_TexTools2.Views
                 {
                     var lines = File.ReadAllLines(dir + "\\FFXIV.cfg");
 
+                    var lineNum = 0;
+                    string fixedLine = "";
                     foreach(var line in lines)
                     {
                         if (line.Contains("LodType"))
@@ -643,7 +645,12 @@ namespace FFXIV_TexTools2.Views
                                     AddText("\t" + line.Substring(0, line.IndexOf("\t")) + " ON\t", "Black");
                                     AddText("\u2716\n", "Red");
 
+                                    AddText("\nCertain mods have issues with LoD ON.\n", "Orange");
+                                    AddText("\tTurning off LoD...\n", "Black");
+
                                     problem = true;
+
+                                    break;
                                 }
                                 else
                                 {
@@ -668,6 +675,22 @@ namespace FFXIV_TexTools2.Views
                             }
 
                         }
+
+                        lineNum++;
+                    }
+
+                    if (problem)
+                    {
+                        var line = lines[lineNum];
+                        line = line.Substring(0, line.Length - 1) + 0;
+
+                        lines[lineNum] = line;
+
+                        File.WriteAllLines(dir + "\\FFXIV.cfg", lines);
+
+                        AddText("\tLoD OFF, running check...\n\n", "Black");
+                        CheckLoD();
+                        problem = false;
                     }
                 }
             }
