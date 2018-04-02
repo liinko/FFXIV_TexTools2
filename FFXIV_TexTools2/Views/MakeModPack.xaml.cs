@@ -334,6 +334,25 @@ namespace FFXIV_TexTools2.Views
 
         private void CreateButton_Click(object sender, RoutedEventArgs e)
         {
+            mpName = modPackName.Text;
+
+            if (File.Exists(mpDir + "\\" + mpName + ".ttmp"))
+            {
+                if (FlexibleMessageBox.Show(mpName + " already exists.\n\nWould you like to Overwrite the file?",
+                        "Overwrite Confimration", Forms.MessageBoxButtons.YesNo, Forms.MessageBoxIcon.Question) ==
+                    Forms.DialogResult.Yes)
+                {
+                    File.Delete(mpDir + "\\" + mpName + ".ttmp");
+                }
+                else
+                {
+                    FlexibleMessageBox.Show("Please choose a different name.", "Overwrite Declined",
+                        Forms.MessageBoxButtons.OK, Forms.MessageBoxIcon.Information);
+                    return;
+                }
+            }
+
+
             BackgroundWorker backgroundWorker = new BackgroundWorker();
             backgroundWorker.WorkerReportsProgress = true;
             backgroundWorker.DoWork += BackgroundWorker_DoWork;
@@ -348,8 +367,6 @@ namespace FFXIV_TexTools2.Views
 
             sw.Restart();
             dt.Start();
-
-            mpName = modPackName.Text;
 
             CreateButton.IsEnabled = false;
             backgroundWorker.RunWorkerAsync();          
@@ -421,96 +438,93 @@ namespace FFXIV_TexTools2.Views
             float i = 0;
             List<byte> modPackData = new List<byte>();
 
-            if (!File.Exists(mpDir + "\\" + mpName + ".ttmp"))
+            tempMPL = Path.GetTempFileName();
+            tempMPD = Path.GetTempFileName();
+
+            using (StreamWriter sw = new StreamWriter(tempMPL))
             {
-                tempMPL = Path.GetTempFileName();
-                tempMPD = Path.GetTempFileName();
-
-                using (StreamWriter sw = new StreamWriter(tempMPL))
+                using (BinaryWriter bw = new BinaryWriter(File.Open(tempMPD, FileMode.Open)))
                 {
-                    using (BinaryWriter bw = new BinaryWriter(File.Open(tempMPD, FileMode.Open)))
+                    while (currentPackCount < packCount)
                     {
-                        while (currentPackCount < packCount)
+                        List<ModPackItems> pack;
+
+                        if (packRemaining > 100)
                         {
-                            List<ModPackItems> pack;
+                            pack = packList.GetRange(currentPackCount, 100);
+                            packRemaining -= 100;
+                            currentPackCount += 100;
+                        }
+                        else
+                        {
+                            pack = packList.GetRange(currentPackCount, packRemaining);
+                            currentPackCount += packRemaining;
+                        }
 
-                            if (packRemaining > 100)
+                        backgroundWorker.ReportProgress((int)((i / packCount) * 100), "\nReading " + pack.Count + " Entries (" + currentPackCount + "/" + packList.Count + ")\n\n");
+
+                        foreach (var mpi in pack)
+                        {
+                            List<string> modPackList = new List<string>();
+
+                            var currentImport = mpi.Name + "....";
+                            backgroundWorker.ReportProgress((int)((i / packCount) * 100), currentImport);
+
+                            var mOffset = mpi.Entry.modOffset;
+                            var datFile = mpi.Entry.datFile;
+                            int datNum = ((mOffset / 8) & 0x0F) / 2;
+
+                            var datPath = string.Format(Info.datDir, datFile, datNum);
+
+                            mOffset = Helper.OffsetCorrection(datNum, mOffset);
+
+                            offset += modPackData.Count;
+
+                            var mpj = new ModPackJson()
                             {
-                                pack = packList.GetRange(currentPackCount, 100);
-                                packRemaining -= 100;
-                                currentPackCount += 100;
-                            }
-                            else
+                                Name = mpi.Name,
+                                Category = mpi.Entry.category,
+                                FullPath = mpi.Entry.fullPath,
+                                ModOffset = offset,
+                                ModSize = mpi.Entry.modSize,
+                                DatFile = mpi.Entry.datFile
+                            };
+
+                            modPackList.Add(JsonConvert.SerializeObject(mpj));
+
+                            modPackData.Clear();
+
+                            using (BinaryReader br = new BinaryReader(File.OpenRead(datPath)))
                             {
-                                pack = packList.GetRange(currentPackCount, packRemaining);
-                                currentPackCount += packRemaining;
+                                br.BaseStream.Seek(mOffset, SeekOrigin.Begin);
+
+                                modPackData.AddRange(br.ReadBytes(mpi.Entry.modSize));
                             }
 
-                            backgroundWorker.ReportProgress((int)((i / packCount) * 100), "\nReading " + pack.Count + " Entries (" + currentPackCount + "/" + packList.Count +")\n\n");
-
-                            foreach (var mpi in pack)
+                            foreach (var l in modPackList)
                             {
-                                List<string> modPackList = new List<string>();
-
-                                var currentImport = mpi.Name + "....";
-                                backgroundWorker.ReportProgress((int)((i / packCount) * 100), currentImport);
-
-                                var mOffset = mpi.Entry.modOffset;
-                                var datFile = mpi.Entry.datFile;
-                                int datNum = ((mOffset / 8) & 0x0F) / 2;
-
-                                var datPath = string.Format(Info.datDir, datFile, datNum);
-
-                                mOffset = Helper.OffsetCorrection(datNum, mOffset);
-
-                                offset += modPackData.Count;
-
-                                var mpj = new ModPackJson()
-                                {
-                                    Name = mpi.Name,
-                                    Category = mpi.Entry.category,
-                                    FullPath = mpi.Entry.fullPath,
-                                    ModOffset = offset,
-                                    ModSize = mpi.Entry.modSize,
-                                    DatFile = mpi.Entry.datFile
-                                };
-
-                                modPackList.Add(JsonConvert.SerializeObject(mpj));
-
-                                modPackData.Clear();
-
-                                using (BinaryReader br = new BinaryReader(File.OpenRead(datPath)))
-                                {
-                                    br.BaseStream.Seek(mOffset, SeekOrigin.Begin);
-
-                                    modPackData.AddRange(br.ReadBytes(mpi.Entry.modSize));
-                                }
-
-                                foreach (var l in modPackList)
-                                {
-                                    sw.WriteLine(l);
-                                }
-
-                                bw.Write(modPackData.ToArray());
-
-                                i++;
-                                backgroundWorker.ReportProgress((int)((i / packCount) * 100), "Done.");
+                                sw.WriteLine(l);
                             }
+
+                            bw.Write(modPackData.ToArray());
+
+                            i++;
+                            backgroundWorker.ReportProgress((int)((i / packCount) * 100), "Done.");
                         }
                     }
                 }
-
-
-                backgroundWorker.ReportProgress(-1, "\nCreating TTMP File, this may take some time...");
-
-                using (var zip = ZipFile.Open(mpDir + "\\" + mpName + ".ttmp", ZipArchiveMode.Create))
-                {
-                    zip.CreateEntryFromFile(tempMPL, "TTMPL.mpl");
-                    zip.CreateEntryFromFile(tempMPD, "TTMPD.mpd");
-                }
-
-                backgroundWorker.ReportProgress(-2, "Done.");
             }
+
+
+            backgroundWorker.ReportProgress(-1, "\nCreating TTMP File, this may take some time...");
+
+            using (var zip = ZipFile.Open(mpDir + "\\" + mpName + ".ttmp", ZipArchiveMode.Create))
+            {
+                zip.CreateEntryFromFile(tempMPL, "TTMPL.mpl");
+                zip.CreateEntryFromFile(tempMPD, "TTMPD.mpd");
+            }
+
+            backgroundWorker.ReportProgress(-2, "Done.");
         }
 
         private void ClearList()
