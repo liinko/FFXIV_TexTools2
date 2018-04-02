@@ -20,14 +20,12 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
-using System.Windows;
 using System.Windows.Forms;
 
 namespace FFXIV_TexTools2.ViewModel
 {
-    public class ModListTVViewModel : INotifyPropertyChanged
+    public class ModListTVViewModel : INotifyPropertyChanged, IComparable
     {
         readonly List<ModListTVViewModel> _children = new List<ModListTVViewModel>();
         readonly ModListTVViewModel _parent;
@@ -71,6 +69,8 @@ namespace FFXIV_TexTools2.ViewModel
             {
                 _children.Add(new ModListTVViewModel(name, this));
             }
+
+            _children.Sort();
         }
 
         public List<ModListTVViewModel> Children
@@ -130,5 +130,9 @@ namespace FFXIV_TexTools2.ViewModel
             }
         }
 
+        public int CompareTo(object obj)
+        {
+            return Name.CompareTo(((ModListTVViewModel)obj).Name);
+        }
     }
 }
