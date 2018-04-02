@@ -49,7 +49,6 @@
 
                 </Grid>
             </Border>
-
             <Grid Grid.Row="1">
                 <Grid.RowDefinitions>
                     <RowDefinition />
@@ -77,18 +76,21 @@
                     <Label Content="| Add/Remove: " VerticalAlignment="Center" Margin="15,0,0,0"/>
                     <ComboBox x:Name="NewAttrComobBox" IsReadOnly="True" HorizontalAlignment="Left" VerticalAlignment="Center" SelectionChanged="NewAttrComobBox_SelectionChanged"/>
                 </StackPanel>
-                <Grid Grid.Column="1" Grid.Row="3" Margin="300,0,0,0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <Button x:Name="CreateXMLButton" Grid.Column="0" Content="Make XML" Margin="5" Click="CreateXMLButton_Click" />
-                    <Button x:Name="CancelButton" Grid.Column="1" Content="Cancel" Margin="5" Click="CancelButton_Click" />
-                    <Button x:Name="ImportButton" Grid.Column="2" Content="Import" Margin="5" Click="ImportButton_Click" />
+                <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Orientation="Horizontal">
+                    <Label Content="*Note: These options are still in development and may not work properly." VerticalAlignment="Bottom" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Button x:Name="CreateXMLButton" Grid.Column="0" Content="Make XML" Margin="5" Click="CreateXMLButton_Click" />
+                        <Button x:Name="CancelButton" Grid.Column="1" Content="Cancel" Margin="5" Click="CancelButton_Click" />
+                        <Button x:Name="ImportButton" Grid.Column="2" Content="Import" Margin="5" Click="ImportButton_Click" />
+                    </Grid>
+                </StackPanel>
 
-                </Grid>
-                <Label Grid.ColumnSpan="2" Content="*Note: These options are still in development and may not work properly." Grid.Row="3" VerticalAlignment="Bottom" Margin="0,0,150,0" />
+
             </Grid>
         </Grid>
 

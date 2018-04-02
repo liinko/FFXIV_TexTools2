@@ -119,14 +119,14 @@ namespace FFXIV_TexTools2.Views
             MeshComboBox.ItemsSource = meshCounts;
             MeshComboBox.SelectedIndex = 0;
 
+            CreateXMLButton.IsEnabled = false;
 
-            if(File.Exists(Properties.Settings.Default.Save_Directory + "/" + category + "/" + itemName + "/3D/" + modelName + "_Settings.xml"))
+            if (!File.Exists(Properties.Settings.Default.Save_Directory + "/" + category + "/" + itemName + "/3D/" + modelName + "_Settings.xml"))
             {
-                CreateXMLButton.IsEnabled = false;
-            }
-            else
-            {
-                CreateXMLButton.IsEnabled = true;
+                if (modelData.ExtraData.totalExtraCounts != null)
+                {
+                    CreateXMLButton.IsEnabled = true;
+                }
             }
         }
 
@@ -165,6 +165,7 @@ namespace FFXIV_TexTools2.Views
         private void CreateXMLButton_Click(object sender, RoutedEventArgs e)
         {
             MakeXML();
+            CreateXMLButton.IsEnabled = false;
         }
 
         private void MakeXML()
