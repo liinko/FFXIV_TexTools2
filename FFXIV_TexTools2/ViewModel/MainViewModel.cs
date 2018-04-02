@@ -79,7 +79,7 @@ namespace FFXIV_TexTools2.ViewModel
             }
             else
             {
-                var indexCheck = Properties.Settings.Default.FFXIV_Directory + "\\040000.win32.index";
+                var indexCheck = Properties.Settings.Default.FFXIV_Directory + "\\0a0000.win32.index";
                 if (File.Exists(indexCheck))
                 {
                     var fileDate = File.GetLastWriteTime(indexCheck);
