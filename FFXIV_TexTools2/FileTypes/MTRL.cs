@@ -932,8 +932,17 @@ namespace FFXIV_TexTools2.Material
 
                 for(int i = 0; i < numOfTextures + 1; i++)
                 {
-                    texPathOffsets[i] = br.ReadInt16();
-                    br.ReadBytes(2);
+                    var tpo = br.ReadInt16();
+                    if (i != 0 && tpo == 0)
+                    {
+                        br.ReadBytes(2);
+                        i--;
+                    }
+                    else
+                    {
+                        texPathOffsets[i] = tpo;
+                        br.ReadBytes(2);
+                    }
                 }
 
                 br.ReadBytes((numOfMaps - 1) * 4);
