@@ -395,8 +395,6 @@ namespace FFXIV_TexTools2.ViewModel
                 AdvImport advImport = new AdvImport(this, savePath, selectedCategory, selectedItem, modelName, SelectedMesh.ID, fullPath, meshList[0].BoneStrings, meshList[0].AttributeStrings, modelData);
                 advImport.Owner = App.Current.MainWindow;
                 advImport.Show();
-                //ImportModel.ImportDAE(selectedCategory, selectedItem.ItemName, modelName, SelectedMesh.ID, fullPath, meshList[0].BoneStrings, modelData);
-                //UpdateModel(selectedItem, selectedCategory);
             }
         }
 
@@ -1368,17 +1366,6 @@ namespace FFXIV_TexTools2.ViewModel
 
                             modelID = "0101";
                         }
-                        //else if (Properties.Settings.Default.Default_Race.Equals(Strings.Roegadyn))
-                        //{
-                        //    if (gender == 0)
-                        //    {
-                        //        race = "0901";
-                        //    }
-                        //    else
-                        //    {
-                        //        race = "1001";
-                        //    }
-                        //}
                     }
 
 

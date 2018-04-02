@@ -48,11 +48,11 @@
         </StatusBar>
         <Menu x:Name="menu" Height="22" VerticalAlignment="Top">
             <MenuItem Header="Mods">
-                <MenuItem x:Name="Menu_ModList" Header="Mod List" BorderThickness="1" Click="Menu_ModList_Click" IsEnabled="{Binding ModlistOffEnabled}"/>
-                <MenuItem x:Name="Menu_MakeModpack" Header="Make ModPack" HorizontalAlignment="Left" Click="Menu_MakeModpack_Click" />
-                <MenuItem x:Name="Menu_ImportModpack" Header="Import ModPack" HorizontalAlignment="Left" Click="Menu_ImportModpack_Click" />
-                <MenuItem x:Name="Menu_RevertAll" Header="Disable All Mods" Click="Menu_RevertAll_Click" IsEnabled="{Binding ModlistOffEnabled}"/>
-                <MenuItem x:Name="Menu_ReapplyAll" Header="Re-enable All Mods" Click="Menu_ReapplyAll_Click" IsEnabled="{Binding ModlistOffEnabled}"/>
+                <MenuItem x:Name="Menu_ModList" Header="Mod List" BorderThickness="1" Click="Menu_ModList_Click"/>
+                <MenuItem x:Name="Menu_MakeModpack" Header="Make ModPack" Click="Menu_MakeModpack_Click" />
+                <MenuItem x:Name="Menu_ImportModpack" Header="Import ModPack" Click="Menu_ImportModpack_Click" />
+                <MenuItem x:Name="Menu_RevertAll" Header="Disable All Mods" Click="Menu_RevertAll_Click"/>
+                <MenuItem x:Name="Menu_ReapplyAll" Header="Re-enable All Mods" Click="Menu_ReapplyAll_Click"/>
             </MenuItem>
             <MenuItem Header="Search" StaysOpenOnClick="True">
                 <MenuItem Header="Model ID" Command="{Binding IDSearchCommand}"/>
@@ -66,21 +66,21 @@
             <MenuItem Header="Help">
                 <MenuItem x:Name="Menu_ProblemCheck" Header="Check For Problems" Click="Menu_ProblemCheck_Click"/>
                 <MenuItem x:Name="Menu_StartOver" Header="Start Over" Click="Menu_StartOver_Click" />
-                <MenuItem x:Name="Menu_BugReport" Header="Report Bug" HorizontalAlignment="Left" Width="188" Click="Menu_BugReport_Click"/>
-                <MenuItem x:Name="Menu_Tutorials" Header="Tutorials" HorizontalAlignment="Left" Width="188" Click="Menu_Tutorials_Click"/>
+                <MenuItem x:Name="Menu_BugReport" Header="Report Bug" Click="Menu_BugReport_Click"/>
+                <MenuItem x:Name="Menu_Tutorials" Header="Tutorials" Click="Menu_Tutorials_Click"/>
             </MenuItem>
             <MenuItem Header="About">
                 <MenuItem x:Name="Menu_About" Header="FFXIV TexTools" Click="Menu_About_Click"/>
             </MenuItem>
             <MenuItem Header="Language">
-                <MenuItem x:Name="Menu_English" Header="English" HorizontalAlignment="Left" Width="140" IsCheckable="True" Click="Menu_English_Click" IsEnabled="{Binding EnglishEnabled}" IsChecked="{Binding IsEnglish, Mode=OneWay}"/>
-                <MenuItem x:Name="Menu_Japanese" Header="Japanese" HorizontalAlignment="Left" Width="140" IsCheckable="True" Click="Menu_Japanese_Click" IsEnabled="{Binding JapaneseEnabled}" IsChecked="{Binding IsJapanese, Mode=OneWay}"/>
-                <MenuItem x:Name="Menu_French" Header="French" HorizontalAlignment="Left" Width="140" IsCheckable="True" Click="Menu_French_Click" IsEnabled="{Binding FrenchEnabled}" IsChecked="{Binding IsFrench, Mode=OneWay}"/>
-                <MenuItem x:Name="Menu_German" Header="German" HorizontalAlignment="Left" Width="140" IsCheckable="True" Click="Menu_German_Click" IsEnabled="{Binding GermanEnabled}" IsChecked="{Binding IsGerman, Mode=OneWay}"/>
+                <MenuItem x:Name="Menu_English" Header="English" IsCheckable="True" Click="Menu_English_Click" IsEnabled="{Binding EnglishEnabled}" IsChecked="{Binding IsEnglish, Mode=OneWay}"/>
+                <MenuItem x:Name="Menu_Japanese" Header="Japanese" IsCheckable="True" Click="Menu_Japanese_Click" IsEnabled="{Binding JapaneseEnabled}" IsChecked="{Binding IsJapanese, Mode=OneWay}"/>
+                <MenuItem x:Name="Menu_French" Header="French" IsCheckable="True" Click="Menu_French_Click" IsEnabled="{Binding FrenchEnabled}" IsChecked="{Binding IsFrench, Mode=OneWay}"/>
+                <MenuItem x:Name="Menu_German" Header="German" IsCheckable="True" Click="Menu_German_Click" IsEnabled="{Binding GermanEnabled}" IsChecked="{Binding IsGerman, Mode=OneWay}"/>
             </MenuItem>
             <MenuItem Header="Mod Repos">
-                <MenuItem x:Name="PKEmporium" Header="PrettyKitty Emporium" HorizontalAlignment="Left" Click="PKEmporium_Click"/>
-                <MenuItem x:Name="NexusMods" Header="Nexus Mods" HorizontalAlignment="Left" Click="NexusMods_Click"/>
+                <MenuItem x:Name="PKEmporium" Header="PrettyKitty Emporium" Click="PKEmporium_Click"/>
+                <MenuItem x:Name="NexusMods" Header="Nexus Mods" Click="NexusMods_Click"/>
             </MenuItem>
         </Menu>
         <Button Content="Join us on Discord!" VerticalAlignment="Top" HorizontalAlignment="Right" BorderBrush="{x:Null}" Background="{x:Null}" Click="Menu_Discord_Click">
