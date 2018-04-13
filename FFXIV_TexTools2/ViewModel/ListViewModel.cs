@@ -208,7 +208,7 @@ namespace FFXIV_TexTools2.ViewModel
             {
                 var info = MTRL.GetMTRLInfo(entry.modOffset, false);
 
-                var bitmap = TEX.TextureToBitmap(info.ColorData, 9312, 4, 16);
+                var bitmap = TEX.ColorSetToBitmap(info.ColorData);
 
                 mlm.BMP = Imaging.CreateBitmapSourceFromHBitmap(bitmap.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
                 mlm.BMP.Freeze();
@@ -240,34 +240,25 @@ namespace FFXIV_TexTools2.ViewModel
 
                 var scale = 1;
 
-                if (texData.BMP.Width >= 4096 || texData.BMP.Width >= 4096)
+                if (texData.Width >= 4096 || texData.Height >= 4096)
+                {
+                    scale = 16;
+                }
+                else if (texData.Width >= 2048 || texData.Height >= 2048)
                 {
                     scale = 8;
                 }
-                else if (texData.BMP.Width >= 2048 || texData.BMP.Width >= 2048)
+                else if (texData.Width >= 1024 || texData.Height >= 1024)
                 {
                     scale = 4;
                 }
 
-                var oBMP = new Bitmap(texData.BMP);
-                var nBMP = oBMP;
-                if (scale > 1)
-                {
-                    nBMP = new Bitmap(texData.BMP.Width / scale, texData.BMP.Height / scale);
-                    using (Graphics g = Graphics.FromImage(nBMP))
-                    {
-                        g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                        g.SmoothingMode = SmoothingMode.HighQuality;
-                        g.PixelOffsetMode = PixelOffsetMode.HighQuality;
-                        g.DrawImage(texData.BMP, new Rectangle(0, 0, nBMP.Width, nBMP.Height));
-                    }
-                }
+                var nWidth = texData.Width / scale;
+                var nHeight = texData.Height / scale;
 
-                mlm.BMP = Imaging.CreateBitmapSourceFromHBitmap(nBMP.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                var resizedImage = TexHelper.CreateResizedImage(texData.BMPSouceNoAlpha, nWidth, nHeight);
+                mlm.BMP = (BitmapSource)resizedImage;
                 mlm.BMP.Freeze();
-                oBMP.Dispose();
-                nBMP.Dispose();
-                texData.Dispose();
             }
 
             var offset = Helper.GetDataOffset(FFCRC.GetHash(entry.fullPath.Substring(0, entry.fullPath.LastIndexOf("/"))), FFCRC.GetHash(Path.GetFileName(entry.fullPath)), entry.datFile);

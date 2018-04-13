@@ -542,25 +542,34 @@ namespace FFXIV_TexTools2.ViewModel
         public void FillTree()
         {
             var exdDict = ExdReader.GetEXDData();
-
-            foreach(var cat in Info.MainCategoryList)
+            if (exdDict == null)
             {
+                Properties.Settings.Default.FFXIV_Directory = "";
+                Properties.Settings.Default.Language = "en";
+                Properties.Settings.Default.Save();
+                System.Windows.Application.Current.Shutdown();
+            }
+            else
+            {
+                foreach (var cat in Info.MainCategoryList)
+                {
 
-                TreeNode cm = new TreeNode
-                {
-                    Name = cat,
-                    _subNode = exdDict[cat]
-                };
-                if (Category == null)
-                {
-                    Category = new ObservableCollection<CategoryViewModel>();
+                    TreeNode cm = new TreeNode
+                    {
+                        Name = cat,
+                        _subNode = exdDict[cat]
+                    };
+                    if (Category == null)
+                    {
+                        Category = new ObservableCollection<CategoryViewModel>();
+                    }
+
+                    var cvm = new CategoryViewModel(cm);
+                    Category.Add(cvm);
                 }
 
-                var cvm = new CategoryViewModel(cm);
-                Category.Add(cvm);
+                oCategory = Category;
             }
-
-            oCategory = Category;
         }
 
 

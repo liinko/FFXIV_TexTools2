@@ -41,7 +41,7 @@ namespace FFXIV_TexTools2.IO
         /// <param name="selectedItem">The currently selected item</param>
         /// <param name="internalFilePath">The internal file path of the texture map</param>
         /// <param name="selectedBitmap">The bitmap of the texturemap currently being displayed</param>
-        public static void SaveImage(string selectedCategory, string selectedItem, string internalFilePath, BitmapSource selectedBitmap, Bitmap saveClone, string textureMap, string subCategory)
+        public static void SaveImage(string selectedCategory, string selectedItem, string internalFilePath, BitmapSource selectedBitmap, TEXData texData, string textureMap, string subCategory)
         {
 
             string savePath = "";
@@ -68,7 +68,12 @@ namespace FFXIV_TexTools2.IO
             }
             else
             {
-                saveClone.Save(fullSavePath, ImageFormat.Bmp);
+                using (var fileStream = new FileStream(fullSavePath, FileMode.Create))
+                {
+                    BitmapEncoder encoder = new BmpBitmapEncoder();
+                    encoder.Frames.Add(BitmapFrame.Create(texData.BMPSouceAlpha));
+                    encoder.Save(fileStream);
+                }
             }
         }
 

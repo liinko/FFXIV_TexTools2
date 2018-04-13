@@ -979,7 +979,8 @@ namespace FFXIV_TexTools2.Material
                     //    fileName = fileName.Replace("1301", "0101").Replace("met", "model");
                     //}
 
-                    if (fileName.Contains("_s.tex"))
+
+                    if (fileName.Contains("_s.tex") || fileName.Contains("skin"))
                     {
                         mtrlInfo.SpecularPath = fullPath.Substring(0, fullPath.LastIndexOf("/")) + "/" + fileName;
                         mtrlInfo.TextureMaps.Add(new ComboBoxInfo() { Name = mapName, ID = "", IsNum = false });
@@ -1287,7 +1288,7 @@ namespace FFXIV_TexTools2.Material
                 }
             }
 
-            return new Tuple<Bitmap, byte[], int>(TEX.TextureToBitmap(colorData, 9312, 4, 16), colorData, shaderNum);
+            return new Tuple<Bitmap, byte[], int>(TEX.ColorSetToBitmap(colorData), colorData, shaderNum);
         }
 
         /// <summary>

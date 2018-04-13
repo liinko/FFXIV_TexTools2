@@ -384,11 +384,13 @@
       <LastGenOutput>Strings.en.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Strings.ko.resx" />
     <EmbeddedResource Include="Resources\Strings.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Strings.zh.resx" />
     <None Include="app.manifest" />
     <None Include="packages.config">
       <SubType>Designer</SubType>

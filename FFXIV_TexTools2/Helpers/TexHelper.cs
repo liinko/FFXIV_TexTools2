@@ -27,6 +27,7 @@ using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using HelixToolkit.Wpf.SharpDX;
 
 namespace FFXIV_TexTools2.Helpers
 {
@@ -51,7 +52,7 @@ namespace FFXIV_TexTools2.Helpers
             int height = normalTexData.Height;
             int width = normalTexData.Width;
             int tSize = height * width;
-            Bitmap normalBitmap = null;
+            var normalBitmap = normalTexData.BMPSouceAlpha;
 
             if (diffuseTexData != null && (diffuseTexData.Height * diffuseTexData.Width) > tSize)
             {
@@ -87,7 +88,7 @@ namespace FFXIV_TexTools2.Helpers
 
             if (mtrlData.ColorData != null)
             {
-                var colorBitmap = TEX.TextureToBitmap(mtrlData.ColorData, 9312, 4, 16);
+                var colorBitmap = TEX.ColorSetToBitmap(mtrlData.ColorData);
                 var cbmp = SetAlpha(colorBitmap, 255);
                 var colorMap1 = Imaging.CreateBitmapSourceFromHBitmap(cbmp.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
 
@@ -134,20 +135,12 @@ namespace FFXIV_TexTools2.Helpers
             {
                 if (tSize > (maskTexData.Height * maskTexData.Width))
                 {
-                    var maskBitmap = ResizeImage(Image.FromHbitmap(maskTexData.BMP.GetHbitmap()), width, height);
-                    var maskData = maskBitmap.LockBits(new System.Drawing.Rectangle(0, 0, maskBitmap.Width, maskBitmap.Height), ImageLockMode.ReadOnly, maskBitmap.PixelFormat);
-                    var bitmapLength = maskData.Stride * maskData.Height;
-                    maskPixels = new byte[bitmapLength];
-                    Marshal.Copy(maskData.Scan0, maskPixels, 0, bitmapLength);
-                    maskBitmap.UnlockBits(maskData);
+                    var resized = CreateResizedImage(maskTexData.BMPSouceAlpha, width, height);
+                    maskPixels = GetBytesFromBitmapSource((BitmapSource)resized);
                 }
                 else
                 {
-                    var maskData = maskTexData.BMP.LockBits(new System.Drawing.Rectangle(0, 0, maskTexData.Width, maskTexData.Height), ImageLockMode.ReadOnly, maskTexData.BMP.PixelFormat);
-                    var bitmapLength = maskData.Stride * maskData.Height;
-                    maskPixels = new byte[bitmapLength];
-                    Marshal.Copy(maskData.Scan0, maskPixels, 0, bitmapLength);
-                    maskTexData.BMP.UnlockBits(maskData);
+                    maskPixels = GetBytesFromBitmapSource(maskTexData.BMPSouceAlpha);
                 }
             }
 
@@ -155,20 +148,12 @@ namespace FFXIV_TexTools2.Helpers
             {
                 if (tSize > (diffuseTexData.Height * diffuseTexData.Width))
                 {
-                    var diffuseBitmap = ResizeImage(Image.FromHbitmap(diffuseTexData.BMP.GetHbitmap()), width, height);
-                    var diffData = diffuseBitmap.LockBits(new System.Drawing.Rectangle(0, 0, diffuseBitmap.Width, diffuseBitmap.Height), ImageLockMode.ReadOnly, diffuseBitmap.PixelFormat);
-                    var bitmapLength = diffData.Stride * diffData.Height;
-                    diffusePixels = new byte[bitmapLength];
-                    Marshal.Copy(diffData.Scan0, diffusePixels, 0, bitmapLength);
-                    diffuseBitmap.UnlockBits(diffData);
+                    var resized = CreateResizedImage(diffuseTexData.BMPSouceAlpha, width, height);
+                    diffusePixels = GetBytesFromBitmapSource((BitmapSource)resized);
                 }
                 else
                 {
-                    var diffData = diffuseTexData.BMP.LockBits(new System.Drawing.Rectangle(0, 0, diffuseTexData.Width, diffuseTexData.Height), ImageLockMode.ReadOnly, diffuseTexData.BMP.PixelFormat);
-                    var bitmapLength = diffData.Stride * diffData.Height;
-                    diffusePixels = new byte[bitmapLength];
-                    Marshal.Copy(diffData.Scan0, diffusePixels, 0, bitmapLength);
-                    diffuseTexData.BMP.UnlockBits(diffData);
+                    diffusePixels = GetBytesFromBitmapSource(diffuseTexData.BMPSouceAlpha);
                 }
             }
 
@@ -176,20 +161,12 @@ namespace FFXIV_TexTools2.Helpers
             {
                 if (tSize > (specularTexData.Height * specularTexData.Width))
                 {
-                    var specularBitmap = ResizeImage(Image.FromHbitmap(specularTexData.BMP.GetHbitmap()), width, height);
-                    var specData = specularBitmap.LockBits(new System.Drawing.Rectangle(0, 0, specularBitmap.Width, specularBitmap.Height), ImageLockMode.ReadOnly, specularBitmap.PixelFormat);
-                    var bitmapLength = specData.Stride * specData.Height;
-                    specularPixels = new byte[bitmapLength];
-                    Marshal.Copy(specData.Scan0, specularPixels, 0, bitmapLength);
-                    specularBitmap.UnlockBits(specData);
+                    var resized = CreateResizedImage(specularTexData.BMPSouceAlpha, width, height);
+                    specularPixels = GetBytesFromBitmapSource((BitmapSource)resized);
                 }
                 else
                 {
-                    var specData = specularTexData.BMP.LockBits(new System.Drawing.Rectangle(0, 0, specularTexData.BMP.Width, specularTexData.BMP.Height), ImageLockMode.ReadOnly, specularTexData.BMP.PixelFormat);
-                    var bitmapLength = specData.Stride * specData.Height;
-                    specularPixels = new byte[bitmapLength];
-                    Marshal.Copy(specData.Scan0, specularPixels, 0, bitmapLength);
-                    specularTexData.BMP.UnlockBits(specData);
+                    specularPixels = GetBytesFromBitmapSource(specularTexData.BMPSouceAlpha);
                 }
             }
 
@@ -197,22 +174,12 @@ namespace FFXIV_TexTools2.Helpers
             {
                 if (tSize > (normalTexData.Height * normalTexData.Width))
                 {
-                    var normBitmap = ResizeImage(Image.FromHbitmap(normalTexData.BMP.GetHbitmap()), width, height);
-                    var normalData = normBitmap.LockBits(new System.Drawing.Rectangle(0, 0, normBitmap.Width, normBitmap.Height), ImageLockMode.ReadOnly, normBitmap.PixelFormat);
-                    var bitmapLength = normalData.Stride * normalData.Height;
-                    normalPixels = new byte[bitmapLength];
-                    Marshal.Copy(normalData.Scan0, normalPixels, 0, bitmapLength);
-                    normBitmap.UnlockBits(normalData);
-                    normalBitmap = normBitmap;
+                    var resized = CreateResizedImage(normalTexData.BMPSouceAlpha, width, height);
+                    normalPixels = GetBytesFromBitmapSource((BitmapSource)resized);
                 }
                 else
                 {
-                    var normalData = normalTexData.BMP.LockBits(new System.Drawing.Rectangle(0, 0, normalTexData.Width, normalTexData.Height), ImageLockMode.ReadOnly, normalTexData.BMP.PixelFormat);
-                    var bitmapLength = normalData.Stride * normalData.Height;
-                    normalPixels = new byte[bitmapLength];
-                    Marshal.Copy(normalData.Scan0, normalPixels, 0, bitmapLength);
-                    normalTexData.BMP.UnlockBits(normalData);
-                    normalBitmap = normalTexData.BMP;
+                    normalPixels = GetBytesFromBitmapSource(normalTexData.BMPSouceAlpha);
                 }
             }
 
@@ -325,54 +292,42 @@ namespace FFXIV_TexTools2.Helpers
                 alphaMap.AddRange(BitConverter.GetBytes(alphaColor.ToArgb()));
             }
 
-            int stride = normalBitmap.Width * (32 / 8);
-
-            BitmapSource bitmapSource = BitmapSource.Create(width, height, normalBitmap.HorizontalResolution, normalBitmap.VerticalResolution, PixelFormats.Bgra32, null, diffuseMap.ToArray(), stride);
-            texBitmaps[0] = bitmapSource;
-
-            bitmapSource = BitmapSource.Create(width, height, normalBitmap.HorizontalResolution, normalBitmap.VerticalResolution, PixelFormats.Bgra32, null, specularMap.ToArray(), stride);
-            texBitmaps[1] = bitmapSource;
-
-            var noAlphaNormal = SetAlpha(normalBitmap, 255);
-            texBitmaps[2] = Imaging.CreateBitmapSourceFromHBitmap(noAlphaNormal.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-
-            bitmapSource = BitmapSource.Create(width, height, normalBitmap.HorizontalResolution, normalBitmap.VerticalResolution, PixelFormats.Bgra32, null, alphaMap.ToArray(), stride);
-            texBitmaps[3] = bitmapSource;
-
-            bitmapSource = BitmapSource.Create(width, height, normalBitmap.HorizontalResolution, normalBitmap.VerticalResolution, PixelFormats.Bgra32, null, emissiveMap.ToArray(), stride);
-            texBitmaps[4] = bitmapSource;
+            int stride = (int)normalBitmap.Width * (32 / 8);
 
 
-            if (normalTexData != null)
+            var scale = 1;
+
+            if (width >= 4096 || height >= 4096)
             {
-                normalTexData.Dispose();
+                scale = 4;
+            }
+            else if (width >= 2048 || height >= 2048)
+            {
+                scale = 2;
             }
 
-            if (normalBitmap != null)
-            {
-                normalBitmap.Dispose();
-            }
+            var nWidth = width / scale;
+            var nHeight = height / scale;
 
-            if (diffuseTexData != null)
-            {
-                diffuseTexData.Dispose();
-            }
+            BitmapSource bitmapSource = BitmapSource.Create(width, height, normalBitmap.DpiX, normalBitmap.DpiY, PixelFormats.Bgra32, null, diffuseMap.ToArray(), stride);
+            texBitmaps[0] = (BitmapSource)CreateResizedImage(bitmapSource, nWidth, nHeight);
 
-            if (maskTexData != null)
-            {
-                maskTexData.Dispose();
-            }
+            bitmapSource = BitmapSource.Create(width, height, normalBitmap.DpiX, normalBitmap.DpiY, PixelFormats.Bgra32, null, specularMap.ToArray(), stride);
+            texBitmaps[1] = (BitmapSource)CreateResizedImage(bitmapSource, nWidth, nHeight);
 
-            if (specularTexData != null)
-            {
-                specularTexData.Dispose();
-            }
+            //texBitmaps[2] = normalTexData.BMPSouceNoAlpha;
+            texBitmaps[2] = (BitmapSource)CreateResizedImage(normalTexData.BMPSouceNoAlpha, nWidth, nHeight);
+
+            bitmapSource = BitmapSource.Create(width, height, normalBitmap.DpiX, normalBitmap.DpiY, PixelFormats.Bgra32, null, alphaMap.ToArray(), stride);
+            texBitmaps[3] = (BitmapSource)CreateResizedImage(bitmapSource, nWidth, nHeight);
+
+            bitmapSource = BitmapSource.Create(width, height, normalBitmap.DpiX, normalBitmap.DpiY, PixelFormats.Bgra32, null, emissiveMap.ToArray(), stride);
+            texBitmaps[4] = (BitmapSource)CreateResizedImage(bitmapSource, nWidth, nHeight);
 
             foreach (var tb in texBitmaps)
             {
                 tb.Freeze();
             }
-
 
             return texBitmaps;
         }
@@ -396,7 +351,7 @@ namespace FFXIV_TexTools2.Helpers
             int height = normalTexData.Height;
             int width = normalTexData.Width;
             int tSize = height * width;
-            Bitmap normalBitmap = null;
+            var normalBitmap = normalTexData.BMPSouceAlpha;
 
             if (diffuseTexData != null && (diffuseTexData.Height * diffuseTexData.Width) > tSize)
             {
@@ -430,20 +385,12 @@ namespace FFXIV_TexTools2.Helpers
             {
                 if (tSize > (maskTexData.Height * maskTexData.Width))
                 {
-                    var maskBitmap = ResizeImage(Image.FromHbitmap(maskTexData.BMP.GetHbitmap()), width, height);
-                    var maskData = maskBitmap.LockBits(new System.Drawing.Rectangle(0, 0, maskBitmap.Width, maskBitmap.Height), ImageLockMode.ReadOnly, maskBitmap.PixelFormat);
-                    var bitmapLength = maskData.Stride * maskData.Height;
-                    maskPixels = new byte[bitmapLength];
-                    Marshal.Copy(maskData.Scan0, maskPixels, 0, bitmapLength);
-                    maskBitmap.UnlockBits(maskData);
+                    var resized = CreateResizedImage(maskTexData.BMPSouceAlpha, width, height);
+                    maskPixels = GetBytesFromBitmapSource((BitmapSource)resized);
                 }
                 else
                 {
-                    var maskData = maskTexData.BMP.LockBits(new System.Drawing.Rectangle(0, 0, maskTexData.Width, maskTexData.Height), ImageLockMode.ReadOnly, maskTexData.BMP.PixelFormat);
-                    var bitmapLength = maskData.Stride * maskData.Height;
-                    maskPixels = new byte[bitmapLength];
-                    Marshal.Copy(maskData.Scan0, maskPixels, 0, bitmapLength);
-                    maskTexData.BMP.UnlockBits(maskData);
+                    maskPixels = GetBytesFromBitmapSource(maskTexData.BMPSouceAlpha);
                 }
             }
 
@@ -453,20 +400,13 @@ namespace FFXIV_TexTools2.Helpers
                 {
                     if (tSize > (diffuseTexData.Height * diffuseTexData.Width))
                     {
-                        var diffuseBitmap = ResizeImage(Image.FromHbitmap(diffuseTexData.BMP.GetHbitmap()), width, height);
-                        var diffuseData = diffuseBitmap.LockBits(new System.Drawing.Rectangle(0, 0, diffuseBitmap.Width, diffuseBitmap.Height), ImageLockMode.ReadOnly, diffuseBitmap.PixelFormat);
-                        var bitmapLength = diffuseData.Stride * diffuseData.Height;
-                        diffusePixels = new byte[bitmapLength];
-                        Marshal.Copy(diffuseData.Scan0, diffusePixels, 0, bitmapLength);
-                        diffuseBitmap.UnlockBits(diffuseData);
+                        var resized = CreateResizedImage(diffuseTexData.BMPSouceAlpha, width, height);
+                        diffusePixels = GetBytesFromBitmapSource((BitmapSource)resized);
                     }
                     else
                     {
-                        var diffuseData = diffuseTexData.BMP.LockBits(new System.Drawing.Rectangle(0, 0, diffuseTexData.Width, diffuseTexData.Height), ImageLockMode.ReadOnly, diffuseTexData.BMP.PixelFormat);
-                        var bitmapLength = diffuseData.Stride * diffuseData.Height;
-                        diffusePixels = new byte[bitmapLength];
-                        Marshal.Copy(diffuseData.Scan0, diffusePixels, 0, bitmapLength);
-                        diffuseTexData.BMP.UnlockBits(diffuseData);
+                        diffusePixels = GetBytesFromBitmapSource(diffuseTexData.BMPSouceAlpha);
+
                     }
 
                 }
@@ -483,20 +423,12 @@ namespace FFXIV_TexTools2.Helpers
                 {
                     if (tSize > (specularTexData.Height * specularTexData.Width))
                     {
-                        var specularBitmap = ResizeImage(Image.FromHbitmap(specularTexData.BMP.GetHbitmap()), width, height);
-                        var specularData = specularBitmap.LockBits(new System.Drawing.Rectangle(0, 0, specularBitmap.Width, specularBitmap.Height), ImageLockMode.ReadOnly, specularBitmap.PixelFormat);
-                        var bitmapLength = specularData.Stride * specularData.Height;
-                        specularPixels = new byte[bitmapLength];
-                        Marshal.Copy(specularData.Scan0, specularPixels, 0, bitmapLength);
-                        specularBitmap.UnlockBits(specularData);
+                        var resized = CreateResizedImage(specularTexData.BMPSouceAlpha, width, height);
+                        specularPixels = GetBytesFromBitmapSource((BitmapSource)resized);
                     }
                     else
                     {
-                        var specularData = specularTexData.BMP.LockBits(new System.Drawing.Rectangle(0, 0, specularTexData.BMP.Width, specularTexData.BMP.Height), ImageLockMode.ReadOnly, specularTexData.BMP.PixelFormat);
-                        var bitmapLength = specularData.Stride * specularData.Height;
-                        specularPixels = new byte[bitmapLength];
-                        Marshal.Copy(specularData.Scan0, specularPixels, 0, bitmapLength);
-                        specularTexData.BMP.UnlockBits(specularData);
+                        specularPixels = GetBytesFromBitmapSource(specularTexData.BMPSouceAlpha);
                     }
 
                 }
@@ -513,22 +445,12 @@ namespace FFXIV_TexTools2.Helpers
             {
                 if (tSize > (normalTexData.Height * normalTexData.Width))
                 {
-                    var normBitmap = ResizeImage(Image.FromHbitmap(normalTexData.BMP.GetHbitmap()), width, height);
-                    var normData = normBitmap.LockBits(new System.Drawing.Rectangle(0, 0, normBitmap.Width, normBitmap.Height), ImageLockMode.ReadOnly, normBitmap.PixelFormat);
-                    var bitmapLength = normData.Stride * normData.Height;
-                    normalPixels = new byte[bitmapLength];
-                    Marshal.Copy(normData.Scan0, normalPixels, 0, bitmapLength);
-                    normBitmap.UnlockBits(normData);
-                    normalBitmap = normBitmap;
+                    var resized = CreateResizedImage(normalTexData.BMPSouceAlpha, width, height);
+                    normalPixels = GetBytesFromBitmapSource((BitmapSource)resized);
                 }
                 else
                 {
-                    var normData = normalTexData.BMP.LockBits(new System.Drawing.Rectangle(0, 0, normalTexData.Width, normalTexData.Height), ImageLockMode.ReadOnly, normalTexData.BMP.PixelFormat);
-                    var bitmapLength = normData.Stride * normData.Height;
-                    normalPixels = new byte[bitmapLength];
-                    Marshal.Copy(normData.Scan0, normalPixels, 0, bitmapLength);
-                    normalTexData.BMP.UnlockBits(normData);
-                    normalBitmap = normalTexData.BMP;
+                    normalPixels = GetBytesFromBitmapSource(normalTexData.BMPSouceAlpha);
                 }
             }
 
@@ -542,7 +464,21 @@ namespace FFXIV_TexTools2.Helpers
             System.Drawing.Color specularColor;
             System.Drawing.Color alphaColor;
 
-            int stride = normalBitmap.Width * (32 / 8);
+            int stride = (int)normalBitmap.Width * (32 / 8);
+
+            var scale = 1;
+
+            if (width >= 4096 || height >= 4096)
+            {
+                scale = 4;
+            }
+            else if (width >= 2048 || height >= 2048)
+            {
+                scale = 2;
+            }
+
+            var nWidth = width / scale;
+            var nHeight = height / scale;
 
             if (diffuseTexData == null)
             {
@@ -552,7 +488,7 @@ namespace FFXIV_TexTools2.Helpers
 
                     diffuseColor = System.Drawing.Color.FromArgb(alpha, (int)((96f / 255f) * specularPixels[i - 1]), (int)((57f / 255f) * specularPixels[i - 1]), (int)((19f / 255f) * specularPixels[i - 1]));
 
-                    specularColor = System.Drawing.Color.FromArgb(255, specularPixels[i - 2], specularPixels[i - 2], specularPixels[i - 2]);
+                    specularColor = System.Drawing.Color.FromArgb(255, (int)(specularPixels[i - 2] * 0.1), (int)(specularPixels[i - 2] * 0.1), (int)(specularPixels[i - 2] * 0.1));
 
                     alphaColor = System.Drawing.Color.FromArgb(255, alpha, alpha, alpha);
 
@@ -561,8 +497,8 @@ namespace FFXIV_TexTools2.Helpers
                     alphaMap.AddRange(BitConverter.GetBytes(alphaColor.ToArgb()));
                 }
 
-                bitmapSource = BitmapSource.Create(width, height, normalBitmap.HorizontalResolution, normalBitmap.VerticalResolution, PixelFormats.Bgra32, null, diffuseMap.ToArray(), stride);
-                texBitmaps[0] = bitmapSource;
+                bitmapSource = BitmapSource.Create(width, height, normalBitmap.DpiX, normalBitmap.DpiY, PixelFormats.Bgra32, null, diffuseMap.ToArray(), stride);
+                texBitmaps[0] = (BitmapSource)CreateResizedImage(bitmapSource, nWidth, nHeight);
             }
             else
             {
@@ -573,49 +509,24 @@ namespace FFXIV_TexTools2.Helpers
                     diffuseColor = System.Drawing.Color.FromArgb(alpha, diffusePixels[i - 1], diffusePixels[i - 2], diffusePixels[i - 3]);
                     diffuseMap.AddRange(BitConverter.GetBytes(diffuseColor.ToArgb()));
 
-                    specularColor = System.Drawing.Color.FromArgb(255, specularPixels[i - 2], specularPixels[i - 2], specularPixels[i - 2]);
+                    specularColor = System.Drawing.Color.FromArgb(255, (int)(specularPixels[i - 2] * 0.1), (int)(specularPixels[i - 2] * 0.1), (int)(specularPixels[i - 2] * 0.1));
                     specularMap.AddRange(BitConverter.GetBytes(specularColor.ToArgb()));
 
                     alphaColor = System.Drawing.Color.FromArgb(255, alpha, alpha, alpha);
                     alphaMap.AddRange(BitConverter.GetBytes(alphaColor.ToArgb()));
                 }
 
-                bitmapSource = BitmapSource.Create(width, height, normalBitmap.HorizontalResolution, normalBitmap.VerticalResolution, PixelFormats.Bgra32, null, diffuseMap.ToArray(), stride);
-                texBitmaps[0] = bitmapSource;
+                bitmapSource = BitmapSource.Create(width, height, normalBitmap.DpiX, normalBitmap.DpiY, PixelFormats.Bgra32, null, diffuseMap.ToArray(), stride);
+                texBitmaps[0] = (BitmapSource)CreateResizedImage(bitmapSource, nWidth, nHeight);
             }
 
-            bitmapSource = BitmapSource.Create(width, height, normalBitmap.HorizontalResolution, normalBitmap.VerticalResolution, PixelFormats.Bgra32, null, specularMap.ToArray(), stride);
-            texBitmaps[1] = bitmapSource;
+            bitmapSource = BitmapSource.Create(width, height, normalBitmap.DpiX, normalBitmap.DpiY, PixelFormats.Bgra32, null, specularMap.ToArray(), stride);
+            texBitmaps[1] = (BitmapSource)CreateResizedImage(bitmapSource, nWidth, nHeight);
 
-            texBitmaps[2] = Imaging.CreateBitmapSourceFromHBitmap(normalBitmap.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+            texBitmaps[2] = (BitmapSource)CreateResizedImage(normalTexData.BMPSouceNoAlpha, nWidth, nHeight);
 
-            bitmapSource = BitmapSource.Create(width, height, normalBitmap.HorizontalResolution, normalBitmap.VerticalResolution, PixelFormats.Bgra32, null, alphaMap.ToArray(), stride);
-            texBitmaps[3] = bitmapSource;
-
-            if (normalTexData != null)
-            {
-                normalTexData.Dispose();
-            }
-
-            if (normalBitmap != null)
-            {
-                normalBitmap.Dispose();
-            }
-
-            if (diffuseTexData != null)
-            {
-                diffuseTexData.Dispose();
-            }
-
-            if (maskTexData != null)
-            {
-                maskTexData.Dispose();
-            }
-
-            if (specularTexData != null)
-            {
-                specularTexData.Dispose();
-            }
+            bitmapSource = BitmapSource.Create(width, height, normalBitmap.DpiX, normalBitmap.DpiY, PixelFormats.Bgra32, null, alphaMap.ToArray(), stride);
+            texBitmaps[3] = (BitmapSource)CreateResizedImage(bitmapSource, nWidth, nHeight);
 
             foreach(var tb in texBitmaps)
             {
@@ -655,6 +566,36 @@ namespace FFXIV_TexTools2.Helpers
             }
 
             return destImage;
+        }
+
+        /// <summary>
+        /// Creates a new ImageSource with the specified width/height
+        /// </summary>
+        /// <param name="source">Source image to resize</param>
+        /// <param name="width">Width of resized image</param>
+        /// <param name="height">Height of resized image</param>
+        /// <returns>Resized image</returns>
+        public static ImageSource CreateResizedImage(ImageSource source, int width, int height)
+        {
+            // Target Rect for the resize operation
+            Rect rect = new Rect(0, 0, width, height);
+
+            // Create a DrawingVisual/Context to render with
+            DrawingVisual drawingVisual = new DrawingVisual();
+            using (DrawingContext drawingContext = drawingVisual.RenderOpen())
+            {
+                drawingContext.DrawImage(source, rect);
+            }
+
+            // Use RenderTargetBitmap to resize the original image
+            RenderTargetBitmap resizedImage = new RenderTargetBitmap(
+                (int)rect.Width, (int)rect.Height,  // Resized dimensions
+                96, 96,                             // Default DPI values
+                PixelFormats.Default);              // Default pixel format
+            resizedImage.Render(drawingVisual);
+
+            // Return the resized image
+            return resizedImage;
         }
 
         /// <summary>
@@ -705,6 +646,19 @@ namespace FFXIV_TexTools2.Helpers
               data.Stride);
             bmp.UnlockBits(data);
             return bmp;
+        }
+
+        public static byte[] GetBytesFromBitmapSource(BitmapSource bmp)
+        {
+            int width = bmp.PixelWidth;
+            int height = bmp.PixelHeight;
+            int stride = width * ((bmp.Format.BitsPerPixel + 7) / 8);
+
+            byte[] pixels = new byte[height * stride];
+
+            bmp.CopyPixels(pixels, stride, 0);
+
+            return pixels;
         }
 
         /// <summary>Blends the specified colors together.</summary>

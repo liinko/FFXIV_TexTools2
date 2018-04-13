@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using System.Drawing;
+using System.Windows.Media.Imaging;
 
 namespace FFXIV_TexTools2.Model
 {
@@ -51,9 +52,14 @@ namespace FFXIV_TexTools2.Model
         //public byte[] RawTexData { get; set; }
 
         /// <summary>
-        /// The texture bitmap
+        /// The texture bitmapSouce with Alpha
         /// </summary>
-        public Bitmap BMP { get; set; }
+        public BitmapSource BMPSouceAlpha { get; set; }
+
+        /// <summary>
+        /// The texture bitmapSouce with no Alpha
+        /// </summary>
+        public BitmapSource BMPSouceNoAlpha { get; set; }
 
         /// <summary>
         /// The texture dat name
@@ -64,13 +70,5 @@ namespace FFXIV_TexTools2.Model
         /// The texture offset
         /// </summary>
         public int TexOffset { get; set; }
-
-        /// <summary>
-        /// Disposes of the texture bitmap
-        /// </summary>
-        public virtual void Dispose()
-        {
-            BMP.Dispose();
-        }
     }
 }

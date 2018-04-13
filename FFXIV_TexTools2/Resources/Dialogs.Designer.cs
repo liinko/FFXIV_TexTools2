@@ -61,6 +61,24 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Support for your client is off by default.
+        ///It can be turned on from the source code.
+        ///
+        ///한국어 서버 지원은 기본적으로 해제되어 있습니다.
+        ///소스 코드에서 켤 수 있습니다.
+        ///
+        ///对中文服务器的支持默认是关闭的。
+        ///它可以从源代码打开。
+        ///
+        ///.
+        /// </summary>
+        internal static string ClientSupportWarning {
+            get {
+                return ResourceManager.GetString("ClientSupportWarning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Extra Data Warning .
         /// </summary>
         internal static string ExtraDataWarning {
