@@ -277,7 +277,7 @@ namespace FFXIV_TexTools2.Views
 
                         if (attr.Count(x => x == '_') > 1)
                         {
-                            attrNum = " " + attr.Substring(attr.LastIndexOf("_") + 1, 1);
+                            attrNum = " " + attr.Substring(attr.LastIndexOf("_") + 1, 1) + " ]";
                             attr = attr.Substring(0, attr.LastIndexOf("_"));
                         }
 
@@ -302,6 +302,15 @@ namespace FFXIV_TexTools2.Views
                                         attrNum = " " + attr.Substring(attr.Length - 1) + " ]";
                                         attr = attr.Substring(0, attr.Length - 1);
                                     }
+                                    else if (attr.Count(x => x == '_') > 1)
+                                    {
+                                        if (!attr.Contains("_cn_"))
+                                        {
+                                            attrNum = attr.Substring(attr.LastIndexOf("_") + 1, 1) + " ]";
+                                            attr = attr.Substring(0, attr.LastIndexOf("_"));
+                                        }
+                                    }
+
 
 
                                     OrigAttrText.Text += "[ " + Info.AttributeDict[attr] + attrNum;
