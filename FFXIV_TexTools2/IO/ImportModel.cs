@@ -3010,151 +3010,163 @@ namespace FFXIV_TexTools2.IO
 		    var datOffsetAmount = datNum * 16;
             try
 			{
-				using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(modDatPath)))
-				{
-					/* 
-					 * If the item has been previously modified and the compressed data being imported is smaller or equal to the exisiting data
-					*  replace the existing data with new data.
-					*/
-					if (inModList && data.Count <= modEntry.modSize)
-					{
-						if(modEntry.modOffset != 0)
-						{
-							int sizeDiff = modEntry.modSize - data.Count;
+                /* 
+                * If the item has been previously modified and the compressed data being imported is smaller or equal to the exisiting data
+                * replace the existing data with new data.
+                */
+                if (inModList && data.Count <= modEntry.modSize)
+                {
+                    if (modEntry.modOffset != 0)
+                    {
+                        datNum = ((modEntry.modOffset / 8) & 0x0F) / 2;
+                        modDatPath = string.Format(Info.datDir, modEntry.datFile, datNum);
 
-							bw.BaseStream.Seek(modEntry.modOffset - datOffsetAmount, SeekOrigin.Begin);
+                        using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(modDatPath)))
+                        {
+                            int sizeDiff = modEntry.modSize - data.Count;
 
-							bw.Write(data.ToArray());
+                            bw.BaseStream.Seek(modEntry.modOffset - datOffsetAmount, SeekOrigin.Begin);
 
-							bw.Write(new byte[sizeDiff]);
+                            bw.Write(data.ToArray());
 
-							Helper.UpdateIndex(modEntry.modOffset, internalFilePath, Strings.ItemsDat);
-							Helper.UpdateIndex2(modEntry.modOffset, internalFilePath, Strings.ItemsDat);
+                            bw.Write(new byte[sizeDiff]);
 
-							offset = modEntry.modOffset;
+                            Helper.UpdateIndex(modEntry.modOffset, internalFilePath, Strings.ItemsDat);
+                            Helper.UpdateIndex2(modEntry.modOffset, internalFilePath, Strings.ItemsDat);
 
-							dataOverwritten = true;
-						}
-					}
-					else
-					{
-						int emptyLength = 0;
-						int emptyLine = 0;
+                            offset = modEntry.modOffset;
 
-						/* 
-						 * If there is an empty entry in the modlist and the compressed data being imported is smaller or equal to the available space
-						*  write the compressed data in the existing space.
-						*/
+                            dataOverwritten = true;
+                        }
+                    }
+                }
+                else
+                {
+                    int emptyLength = 0;
+                    int emptyLine = 0;
 
-						try
-						{
-							foreach (string line in File.ReadAllLines(Properties.Settings.Default.Modlist_Directory))
-							{
-								JsonEntry emptyEntry = JsonConvert.DeserializeObject<JsonEntry>(line);
+                    /* 
+                     * If there is an empty entry in the modlist and the compressed data being imported is smaller or equal to the available space
+                    *  write the compressed data in the existing space.
+                    */
 
-								if (emptyEntry.fullPath.Equals("") && emptyEntry.datFile.Equals(Strings.ItemsDat))
-								{
-									if(emptyEntry.modOffset != 0)
-									{
-										emptyLength = emptyEntry.modSize;
+                    try
+                    {
+                        foreach (string line in File.ReadAllLines(Properties.Settings.Default.Modlist_Directory))
+                        {
+                            JsonEntry emptyEntry = JsonConvert.DeserializeObject<JsonEntry>(line);
 
-										if (emptyLength > data.Count)
-										{
-											int sizeDiff = emptyLength - data.Count;
+                            if (emptyEntry.fullPath.Equals("") && emptyEntry.datFile.Equals(Strings.ItemsDat))
+                            {
+                                if (emptyEntry.modOffset != 0)
+                                {
+                                    emptyLength = emptyEntry.modSize;
 
-											bw.BaseStream.Seek(emptyEntry.modOffset - datOffsetAmount, SeekOrigin.Begin);
+                                    if (emptyLength > data.Count)
+                                    {
+                                        int sizeDiff = emptyLength - data.Count;
 
-											bw.Write(data.ToArray());
+                                        datNum = ((emptyEntry.modOffset / 8) & 0x0F) / 2;
+                                        modDatPath = string.Format(Info.datDir, emptyEntry.datFile, datNum);
 
-											bw.Write(new byte[sizeDiff]);
+                                        using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(modDatPath)))
+                                        {
+                                            bw.BaseStream.Seek(emptyEntry.modOffset - datOffsetAmount, SeekOrigin.Begin);
 
-											int originalOffset = Helper.UpdateIndex(emptyEntry.modOffset, internalFilePath, Strings.ItemsDat) * 8;
-											Helper.UpdateIndex2(emptyEntry.modOffset, internalFilePath, Strings.ItemsDat);
+                                            bw.Write(data.ToArray());
 
-											if (inModList)
-											{
-												originalOffset = modEntry.originalOffset;
+                                            bw.Write(new byte[sizeDiff]);
+                                        }
 
-												JsonEntry replaceOriginalEntry = new JsonEntry()
-												{
-													category = String.Empty,
-													name = String.Empty,
-													fullPath = String.Empty,
-													originalOffset = 0,
-													modOffset = modEntry.modOffset,
-													modSize = modEntry.modSize,
-													datFile = Strings.ItemsDat
-												};
+                                        int originalOffset = Helper.UpdateIndex(emptyEntry.modOffset, internalFilePath, Strings.ItemsDat) * 8;
+                                        Helper.UpdateIndex2(emptyEntry.modOffset, internalFilePath, Strings.ItemsDat);
 
-												string[] oLines = File.ReadAllLines(Properties.Settings.Default.Modlist_Directory);
-												oLines[lineNum] = JsonConvert.SerializeObject(replaceOriginalEntry);
-												File.WriteAllLines(Properties.Settings.Default.Modlist_Directory, oLines);
-											}
+                                        if (inModList)
+                                        {
+                                            originalOffset = modEntry.originalOffset;
 
-											JsonEntry replaceEntry = new JsonEntry()
-											{
-												category = category,
-												name = itemName,
-												fullPath = internalFilePath,
-												originalOffset = originalOffset,
-												modOffset = emptyEntry.modOffset,
-												modSize = emptyEntry.modSize,
-												datFile = Strings.ItemsDat
-											};
+                                            JsonEntry replaceOriginalEntry = new JsonEntry()
+                                            {
+                                                category = String.Empty,
+                                                name = String.Empty,
+                                                fullPath = String.Empty,
+                                                originalOffset = 0,
+                                                modOffset = modEntry.modOffset,
+                                                modSize = modEntry.modSize,
+                                                datFile = Strings.ItemsDat
+                                            };
 
-											string[] lines = File.ReadAllLines(Properties.Settings.Default.Modlist_Directory);
-											lines[emptyLine] = JsonConvert.SerializeObject(replaceEntry);
-											File.WriteAllLines(Properties.Settings.Default.Modlist_Directory, lines);
+                                            string[] oLines = File.ReadAllLines(Properties.Settings.Default.Modlist_Directory);
+                                            oLines[lineNum] = JsonConvert.SerializeObject(replaceOriginalEntry);
+                                            File.WriteAllLines(Properties.Settings.Default.Modlist_Directory, oLines);
+                                        }
 
-											offset = emptyEntry.modOffset;
+                                        JsonEntry replaceEntry = new JsonEntry()
+                                        {
+                                            category = category,
+                                            name = itemName,
+                                            fullPath = internalFilePath,
+                                            originalOffset = originalOffset,
+                                            modOffset = emptyEntry.modOffset,
+                                            modSize = emptyEntry.modSize,
+                                            datFile = Strings.ItemsDat
+                                        };
 
-											dataOverwritten = true;
-											break;
-										}
-									}
-								}
-								emptyLine++;
-							}
-						}
-						catch (Exception ex)
-						{
-							FlexibleMessageBox.Show("Error Accessing .modlist File \n" + ex.Message, "ImportModel Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
-						}
+                                        string[] lines = File.ReadAllLines(Properties.Settings.Default.Modlist_Directory);
+                                        lines[emptyLine] = JsonConvert.SerializeObject(replaceEntry);
+                                        File.WriteAllLines(Properties.Settings.Default.Modlist_Directory, lines);
+
+                                        offset = emptyEntry.modOffset;
+
+                                        dataOverwritten = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            emptyLine++;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        FlexibleMessageBox.Show("Error Accessing .modlist File \n" + ex.Message, "ImportModel Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
 
 
-						if (!dataOverwritten)
-						{
-							bw.BaseStream.Seek(0, SeekOrigin.End);
+                    if (!dataOverwritten)
+                    {
+                        using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(modDatPath)))
+                        {
+                            bw.BaseStream.Seek(0, SeekOrigin.End);
 
-							while ((bw.BaseStream.Position & 0xFF) != 0)
-							{
-								bw.Write((byte)0);
-							}
+                            while ((bw.BaseStream.Position & 0xFF) != 0)
+                            {
+                                bw.Write((byte)0);
+                            }
 
-							int eof = (int)bw.BaseStream.Position + data.Count;
+                            int eof = (int)bw.BaseStream.Position + data.Count;
 
-							while ((eof & 0xFF) != 0)
-							{
-								data.AddRange(new byte[16]);
-								eof = eof + 16;
-							}
+                            while ((eof & 0xFF) != 0)
+                            {
+                                data.AddRange(new byte[16]);
+                                eof = eof + 16;
+                            }
 
-							offset = (int)bw.BaseStream.Position + datOffsetAmount;
+                            offset = (int)bw.BaseStream.Position + datOffsetAmount;
 
-							if(offset != 0)
-							{
-								bw.Write(data.ToArray());
-							}
-							else
-							{
-								FlexibleMessageBox.Show("There was an issue obtaining the .dat4 offset to write data to, try importing again. " +
-												"\n\n If the problem persists, please submit a bug report.", "ImportModel Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
-								return 0;
-							}
-						}
-					}
-				}
-			}
+                            if (offset != 0)
+                            {
+                                bw.Write(data.ToArray());
+                            }
+                            else
+                            {
+                                FlexibleMessageBox.Show("There was an issue obtaining the .dat4 offset to write data to, try importing again. " +
+                                                        "\n\n If the problem persists, please submit a bug report.", "ImportModel Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                return 0;
+                            }
+                        }
+                    }
+                }
+            }
 			catch (Exception ex)
 			{
 				FlexibleMessageBox.Show("Error Accessing .dat4 File \n" + ex.Message, "ImportModel Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
