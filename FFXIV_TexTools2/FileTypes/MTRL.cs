@@ -858,7 +858,11 @@ namespace FFXIV_TexTools2.Material
                     MTRLFile = String.Format(Strings.MonsterMtrlFile, item.PrimaryModelID.PadLeft(4, '0'), item.PrimaryModelBody.PadLeft(4, '0'), partNum);
                 }
 
+
                 MTRLPath = item.PrimaryMTRLFolder + IMCVersion + "/" + MTRLFile;
+
+
+                Debug.WriteLine(MTRLPath);
 
                 offset = Helper.GetDataOffset(FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion), FFCRC.GetHash(MTRLFile), Strings.ItemsDat);
             }

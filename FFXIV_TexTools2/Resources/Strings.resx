@@ -696,4 +696,10 @@
   <data name="DemiHuman" xml:space="preserve">
     <value>DemiHuman</value>
   </data>
+  <data name="DemiIMCFile" xml:space="preserve">
+    <value>e{0}.imc</value>
+  </data>
+  <data name="DemiIMCFolder" xml:space="preserve">
+    <value>chara/demihuman/d{0}/obj/equipment/e{1}</value>
+  </data>
 </root>

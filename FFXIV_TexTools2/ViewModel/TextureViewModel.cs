@@ -111,7 +111,7 @@ namespace FFXIV_TexTools2.ViewModel
 
             if (!category.Equals("UI"))
             {
-                var imcData = IMC.GetVersion(selectedCategory, selectedItem, false);
+                var imcData = IMC.GetVersion(selectedCategory, selectedItem, false, false);
 
                 imcVersion = imcData.Item1;
                 VFXVersion = imcData.Item2;
@@ -673,7 +673,7 @@ namespace FFXIV_TexTools2.ViewModel
                 {
                     if (selectedItem.PrimaryMTRLFolder.Contains("weapon"))
                     {
-                        var imcData = IMC.GetVersion(selectedCategory, selectedItem, false);
+                        var imcData = IMC.GetVersion(selectedCategory, selectedItem, false, false);
 
                         imc = imcData.Item1;
                         vfx = imcData.Item2;
@@ -687,7 +687,7 @@ namespace FFXIV_TexTools2.ViewModel
 
                 if (SelectedPart.Name.Equals("s"))
                 {
-                    var imcData = IMC.GetVersion(selectedCategory, selectedItem, true);
+                    var imcData = IMC.GetVersion(selectedCategory, selectedItem, true, false);
 
                     imc = imcData.Item1;
                     vfx = imcData.Item2;

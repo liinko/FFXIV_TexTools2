@@ -394,6 +394,24 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to e{0}.imc.
+        /// </summary>
+        internal static string DemiIMCFile {
+            get {
+                return ResourceManager.GetString("DemiIMCFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to chara/demihuman/d{0}/obj/equipment/e{1}.
+        /// </summary>
+        internal static string DemiIMCFolder {
+            get {
+                return ResourceManager.GetString("DemiIMCFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to d{0}e{1}_{2}.mdl.
         /// </summary>
         internal static string DemiMDLFile {

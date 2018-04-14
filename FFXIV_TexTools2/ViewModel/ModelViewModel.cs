@@ -1225,7 +1225,17 @@ namespace FFXIV_TexTools2.ViewModel
             }
 
             var part = materialStrings[mNum].Substring(materialStrings[mNum].LastIndexOf("_") + 1, 1);
-            var itemVersion = IMC.GetVersion(selectedCategory, selectedItem, false).Item1;
+            string itemVersion;
+            if (selectedCategory.Equals("DemiHuman"))
+            {
+                itemVersion = IMC.GetVersion(selectedPart.Name, selectedItem, false, true).Item1;
+            }
+            else
+            {
+                itemVersion = IMC.GetVersion(selectedCategory, selectedItem, false, false).Item1;
+            }
+
+            Debug.WriteLine("itemVersion " + itemVersion);
             var itemType = Helper.GetCategoryType(selectedCategory);
 
             var MTRLFile = materialStrings[mNum].Substring(1);
