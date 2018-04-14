@@ -12,13 +12,18 @@
         </Grid.RowDefinitions>
         <Grid Grid.Column="0">
             <Grid.RowDefinitions>
-                <RowDefinition Height="16*"/>
-                <RowDefinition Height="119*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="10*"/>
             </Grid.RowDefinitions>
             <Grid Grid.Row="0">
                 <Label x:Name="InfoHeader" BorderBrush="Black" BorderThickness="0,1,0,0" />
             </Grid>
-            <ListView x:Name="listView" Grid.Row="1" SelectionChanged="listView_SelectionChanged" SelectionMode="Multiple" 
+            <StackPanel Orientation="Horizontal" Grid.Row="1">
+                <Button x:Name="SelectAllButton" HorizontalAlignment="Left" VerticalAlignment="Center" Content="Select All" Margin="10,0,0,0" Click="SelectAllButton_Click" />
+                <Button x:Name="DeselectAllButton" HorizontalAlignment="Left" VerticalAlignment="Center" Content="Deselect All" Margin="10,0,0,0" Click="DeselectAllButton_Click" />
+            </StackPanel>
+            <ListView x:Name="listView" Grid.Row="2" SelectionChanged="listView_SelectionChanged" SelectionMode="Multiple" 
                       BorderBrush="Black" BorderThickness="0,1" GridViewColumnHeader.Click="Header_Click">
                 <ListView.ItemsPanel>
                     <ItemsPanelTemplate>

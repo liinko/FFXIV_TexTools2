@@ -700,7 +700,15 @@ namespace FFXIV_TexTools2.Views
                 }
             }
 
-            packList.Sort((a, b) => a.mEntry.ModOffset.CompareTo(b.mEntry.ModOffset));
+            if (packList.Count > 0)
+            {
+                ImportButton.IsEnabled = true;
+                packList.Sort((a, b) => a.mEntry.ModOffset.CompareTo(b.mEntry.ModOffset));
+            }
+            else
+            {
+                ImportButton.IsEnabled = false;
+            }
         }
 
         private void Header_Click(object sender, RoutedEventArgs e)
@@ -722,6 +730,17 @@ namespace FFXIV_TexTools2.Views
                 cv.SortDescriptions.Clear();
                 cv.SortDescriptions.Add(new SortDescription(h.Content.ToString(), lastDirection));
             }
+        }
+
+        private void DeselectAllButton_Click(object sender, RoutedEventArgs e)
+        {
+            listView.UnselectAll();
+        }
+
+        private void SelectAllButton_Click(object sender, RoutedEventArgs e)
+        {
+            listView.SelectAll();
+            listView.Focus();
         }
     }
 }
