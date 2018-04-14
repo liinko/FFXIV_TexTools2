@@ -230,11 +230,13 @@ namespace FFXIV_TexTools2.ViewModel
             {
                 newOffset = ChangeMTRL.TranslucencyToggle(mtrlData, selectedCategory, selectedItem.ItemName, true);
                 TranslucencyToggle = "Translucency ON";
+                mtrlData.ShaderNum = 0x1D;
             }
-            else if (translucencyToggle.Contains("ON"))
+            else if (TranslucencyToggle.Contains("ON"))
             {
                 newOffset = ChangeMTRL.TranslucencyToggle(mtrlData, selectedCategory, selectedItem.ItemName, false);
                 TranslucencyToggle = "Translucency OFF";
+                mtrlData.ShaderNum = 0x0D;
             }
 
             if (newOffset != 0)
@@ -1318,6 +1320,8 @@ namespace FFXIV_TexTools2.ViewModel
 
                     colorBMP.Item1.Dispose();
                     removeAlphaBitmap.Dispose();
+
+                    mtrlData.ShaderNum = colorBMP.Item3;
 
                     if (colorBMP.Item3 == 0x0D)
                     {
