@@ -325,6 +325,7 @@ namespace FFXIV_TexTools2.Material
             var VFXData = Helper.GetType2DecompressedData(offset, datNum, datName);
 
             TEXData texData = new TEXData();
+            texData.TexOffset = offset;
 
             using(BinaryReader br = new BinaryReader(new MemoryStream(VFXData)))
             {
@@ -349,6 +350,30 @@ namespace FFXIV_TexTools2.Material
             }
 
             return texData;
+        }
+
+        public static byte[] GetRawVFX(TEXData td)
+        {
+            int datNum = ((td.TexOffset / 8) & 0x0F) / 2;
+
+            var VFXData = Helper.GetType2DecompressedData(td.TexOffset, datNum, td.TEXDatName);
+
+            using (BinaryReader br = new BinaryReader(new MemoryStream(VFXData)))
+            {
+                br.BaseStream.Seek(4, SeekOrigin.Begin);
+
+                var type = br.ReadInt32();
+                var width = br.ReadInt16();
+                var height = br.ReadInt16();
+
+                br.ReadBytes(2);
+
+                var mipCount = br.ReadInt16();
+
+                br.ReadBytes(64);
+
+                return br.ReadBytes(VFXData.Length - 80);
+            }
         }
 
         /// <summary>

@@ -89,6 +89,8 @@ namespace FFXIV_TexTools2.IO
         /// <param name="texData">The items tex file data</param>
         public static void SaveDDS(string selectedCategory, string selectedItem, string internalFilePath, string textureMap, MTRLData mtrlData, TEXData texData, string subCategory)
         {
+            bool isVFX = internalFilePath.Contains("/vfx/");
+
             string savePath = "";
             if (selectedCategory.Equals("UI"))
             {
@@ -115,6 +117,11 @@ namespace FFXIV_TexTools2.IO
 
                 DDS.AddRange(CreateColorDDSHeader());
                 DDS.AddRange(mtrlData.ColorData);
+            }
+            else if (isVFX)
+            {
+                DDS.AddRange(CreateDDSHeader(texData));
+                DDS.AddRange(TEX.GetRawVFX(texData));
             }
             else
             {
