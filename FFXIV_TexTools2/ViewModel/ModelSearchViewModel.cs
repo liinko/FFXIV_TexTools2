@@ -31,7 +31,7 @@ namespace FFXIV_TexTools2.ViewModel
         SearchItems selectedItem;
         ObservableCollection<SearchItems> resultList = new ObservableCollection<SearchItems>();
         int typeIndex, progressValue;
-        bool openEnabled;
+        bool openEnabled, searchEnabled = true;
 
         MainViewModel parentVM;
 
@@ -45,6 +45,7 @@ namespace FFXIV_TexTools2.ViewModel
         public int ProgressValue { get { return progressValue; } set { progressValue = value; NotifyPropertyChanged("ProgressValue"); } }
         public ObservableCollection<SearchItems> ResultList { get { return resultList; } set { resultList = value; NotifyPropertyChanged("ResultList"); } }
         public bool OpenEnabled { get { return openEnabled; } set { openEnabled = value; NotifyPropertyChanged("OpenEnabled"); } }
+        public bool SearchEnabled { get { return searchEnabled; } set { searchEnabled = value; NotifyPropertyChanged("SearchEnabled"); } }
 
         Dictionary<string, string> equipSlotDict = new Dictionary<string, string>()
         {
@@ -222,6 +223,7 @@ namespace FFXIV_TexTools2.ViewModel
         public void ModelSearch(object obj)
         {
             resultList.Clear();
+            SearchEnabled = false;
             if(searchText != null && searchText.Length > 0)
             {
                 BackgroundWorker bw = new BackgroundWorker();
@@ -243,6 +245,7 @@ namespace FFXIV_TexTools2.ViewModel
             var list = e.Result as List<SearchItems>;
 
             ResultList = new ObservableCollection<SearchItems>(list);
+            SearchEnabled = true;
         }
 
         private void Bw_DoWork(object sender, DoWorkEventArgs e)

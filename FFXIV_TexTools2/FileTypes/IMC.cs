@@ -18,7 +18,6 @@ using FFXIV_TexTools2.Helpers;
 using FFXIV_TexTools2.Model;
 using FFXIV_TexTools2.Resources;
 using System;
-using System.Diagnostics;
 using System.IO;
 
 namespace FFXIV_TexTools2.Material
@@ -143,13 +142,8 @@ namespace FFXIV_TexTools2.Material
                 int vfx = br.ReadByte();
 
                 vfxVersion = vfx.ToString().PadLeft(4, '0');
-                
 
                 if (version <= 0)
-                {
-                    itemVersion = "0001";
-                }
-                else if (version > 100)
                 {
                     itemVersion = "0001";
                 }

@@ -20,7 +20,6 @@ using FFXIV_TexTools2.Resources;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -119,6 +118,11 @@ namespace FFXIV_TexTools2.Material
                 string type = Helper.GetCategoryType(selectedCategory);
 
                 ObservableCollection<ComboBoxInfo> cbiInfo = new ObservableCollection<ComboBoxInfo>();
+
+                if (!Helper.FolderExists(FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion), Strings.ItemsDat))
+                {
+                    IMCVersion = "0001";
+                }
 
                 var fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion), Strings.ItemsDat);
 
@@ -271,6 +275,11 @@ namespace FFXIV_TexTools2.Material
                 {
                     SortedSet<ComboBoxInfo> typeSet = new SortedSet<ComboBoxInfo>();
 
+                    if (!Helper.FolderExists(FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion), Strings.ItemsDat))
+                    {
+                        IMCVersion = "0001";
+                    }
+
                     fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion), Strings.ItemsDat);
 
                     foreach (string abr in Info.slotAbr.Values)
@@ -290,6 +299,11 @@ namespace FFXIV_TexTools2.Material
                 {
                     string[] parts = { "a", "b", "c", "d", "e" };
 
+                    if (!Helper.FolderExists(FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion), Strings.ItemsDat))
+                    {
+                        IMCVersion = "0001";
+                    }
+
                     fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion), Strings.ItemsDat);
 
                     foreach (string c in parts)
@@ -308,6 +322,11 @@ namespace FFXIV_TexTools2.Material
                 string[] parts = { "a", "b", "c", "d", "e" };
                 cbiList = new List<ComboBoxInfo>();
 
+                if (!Helper.FolderExists(FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion), Strings.ItemsDat))
+                {
+                    IMCVersion = "0001";
+                }
+
                 fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion), Strings.ItemsDat);
 
                 foreach (string c in parts)
@@ -325,6 +344,11 @@ namespace FFXIV_TexTools2.Material
                 string type = Helper.GetCategoryType(selectedCategory);
                 string[] parts = { "a", "b", "c", "d", "e" };
                 cbiList = new List<ComboBoxInfo>();
+
+                if (!Helper.FolderExists(FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion), Strings.ItemsDat))
+                {
+                    IMCVersion = "0001";
+                }
 
                 fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion), Strings.ItemsDat);
 
@@ -560,6 +584,11 @@ namespace FFXIV_TexTools2.Material
                 {
                     SortedSet<ComboBoxInfo> typeSet = new SortedSet<ComboBoxInfo>();
 
+                    if (!Helper.FolderExists(FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion), Strings.ItemsDat))
+                    {
+                        IMCVersion = "0001";
+                    }
+
                     var fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion), Strings.ItemsDat);
 
                     string[] parts = { "a", "b", "c", "d", "e" };
@@ -579,6 +608,11 @@ namespace FFXIV_TexTools2.Material
                 {
                     MTRLFile = String.Format(Strings.MonsterMtrlFile, item.PrimaryModelID.PadLeft(4, '0'), item.PrimaryModelBody.PadLeft(4, '0'), part);
 
+                    if (!Helper.FolderExists(FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion), Strings.ItemsDat))
+                    {
+                        IMCVersion = "0001";
+                    }
+
                     if (Helper.FileExists(FFCRC.GetHash(MTRLFile), FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion), Strings.ItemsDat))
                     {
                         offset = Helper.GetDataOffset(FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion), FFCRC.GetHash(MTRLFile), Strings.ItemsDat);
@@ -597,6 +631,11 @@ namespace FFXIV_TexTools2.Material
             else if (selectedCategory.Equals(Strings.Minions))
             {
                 MTRLFile = String.Format(Strings.MonsterMtrlFile, item.PrimaryModelID.PadLeft(4, '0'), item.PrimaryModelBody.PadLeft(4, '0'), part);
+
+                if (!Helper.FolderExists(FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion), Strings.ItemsDat))
+                {
+                    IMCVersion = "0001";
+                }
 
                 if (Helper.FileExists(FFCRC.GetHash(MTRLFile), FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion), Strings.ItemsDat))
                 {
@@ -668,6 +707,11 @@ namespace FFXIV_TexTools2.Material
                 if (item.PrimaryModelID.Equals("9982"))
                 {
                     MTRLFile = "guide_model.mtrl";
+                }
+
+                if (!Helper.FolderExists(FFCRC.GetHash(item.PrimaryMTRLFolder + imcVersion), Strings.ItemsDat))
+                {
+                    imcVersion = "0001";
                 }
 
                 if (Helper.FileExists(FFCRC.GetHash(MTRLFile), FFCRC.GetHash(MTRLFolder + imcVersion), Strings.ItemsDat))
@@ -861,8 +905,10 @@ namespace FFXIV_TexTools2.Material
 
                 MTRLPath = item.PrimaryMTRLFolder + IMCVersion + "/" + MTRLFile;
 
-
-                Debug.WriteLine(MTRLPath);
+                if (!Helper.FolderExists(FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion), Strings.ItemsDat))
+                {
+                    IMCVersion = "0001";
+                };
 
                 offset = Helper.GetDataOffset(FFCRC.GetHash(item.PrimaryMTRLFolder + IMCVersion), FFCRC.GetHash(MTRLFile), Strings.ItemsDat);
             }

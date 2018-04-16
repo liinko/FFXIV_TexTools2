@@ -1235,7 +1235,6 @@ namespace FFXIV_TexTools2.ViewModel
                 itemVersion = IMC.GetVersion(selectedCategory, selectedItem, false, false).Item1;
             }
 
-            Debug.WriteLine("itemVersion " + itemVersion);
             var itemType = Helper.GetCategoryType(selectedCategory);
 
             var MTRLFile = materialStrings[mNum].Substring(1);

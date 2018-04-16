@@ -56,7 +56,7 @@
             </Grid.ColumnDefinitions>
             <ComboBox Grid.Column="0" Margin="5" ItemsSource="{Binding TypeComboBox}" DisplayMemberPath="Name" SelectedValuePath="Name" SelectedItem="{Binding SelectedType}" SelectedIndex="{Binding TypeIndex}" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
             <TextBox Grid.Column="1" Text="{Binding ModelSearchText}" VerticalContentAlignment="Center" Margin="5"/>
-            <Button Content="Search" Command="{Binding ModelSearchCommand}" Grid.Column="2" Margin="5"/>
+            <Button Content="Search" Command="{Binding ModelSearchCommand}" IsEnabled="{Binding SearchEnabled}" Grid.Column="2" Margin="5"/>
         </Grid>
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
