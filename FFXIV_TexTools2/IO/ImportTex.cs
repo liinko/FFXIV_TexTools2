@@ -91,6 +91,14 @@ namespace FFXIV_TexTools2.IO
                     br.ReadBytes(8);
                     var newMipCount = br.ReadInt32();
 
+                    if (newHeight % 2 != 0 || newWidth % 2 != 0)
+                    {
+                        FlexibleMessageBox.Show("Resolution must be multiple of 2\n\n" +
+                                                "Current Resolution: " + newHeight + " x " + newWidth, 
+                                                "Resolution Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return 0;
+                    }
+
                     br.BaseStream.Seek(80, SeekOrigin.Begin);
 
                     var textureFlags = br.ReadInt32();
