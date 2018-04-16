@@ -175,6 +175,7 @@ namespace FFXIV_TexTools2.Helpers
                 if (tSize > (normalTexData.Height * normalTexData.Width))
                 {
                     var resized = CreateResizedImage(normalTexData.BMPSouceAlpha, width, height);
+                    normalBitmap = (BitmapSource)resized;
                     normalPixels = GetBytesFromBitmapSource((BitmapSource)resized);
                 }
                 else
@@ -440,12 +441,12 @@ namespace FFXIV_TexTools2.Helpers
 
             }
 
-
             if (normalTexData != null)
             {
                 if (tSize > (normalTexData.Height * normalTexData.Width))
                 {
                     var resized = CreateResizedImage(normalTexData.BMPSouceAlpha, width, height);
+                    normalBitmap = (BitmapSource)resized;
                     normalPixels = GetBytesFromBitmapSource((BitmapSource)resized);
                 }
                 else

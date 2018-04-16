@@ -22,7 +22,6 @@ using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Windows.Media.Imaging;
 using Media3D = System.Windows.Media.Media3D;

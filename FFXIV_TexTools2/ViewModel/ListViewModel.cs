@@ -74,6 +74,11 @@ namespace FFXIV_TexTools2.ViewModel
             ModListModel mlm = new ModListModel();
             string race, map, part, type;
 
+            if (entry.fullPath.Contains("mt_"))
+            {
+                Debug.WriteLine(entry.fullPath);
+            }
+
             if (entry.fullPath.Contains("weapon") || entry.fullPath.Contains("accessory") || entry.fullPath.Contains("decal") || entry.fullPath.Contains("vfx") || entry.fullPath.Contains("ui/"))
             {
                 race = Strings.All;
@@ -85,8 +90,11 @@ namespace FFXIV_TexTools2.ViewModel
             else
             {
                 race = entry.fullPath.Substring(entry.fullPath.LastIndexOf('/'));
-
-                if ((entry.fullPath.Contains("_fac_") || entry.fullPath.Contains("_etc_") || entry.fullPath.Contains("_acc_")) && Properties.Settings.Default.DX_Ver.Equals(Strings.DX11))
+                if(entry.fullPath.Contains("mt_") && entry.fullPath.Contains("_acc_"))
+                {
+                    race = race.Substring(race.IndexOf("_") + 2, 4);
+                }
+                else if ((entry.fullPath.Contains("_fac_") || entry.fullPath.Contains("_etc_") || entry.fullPath.Contains("_acc_")) && Properties.Settings.Default.DX_Ver.Equals(Strings.DX11))
                 {
                     race = race.Substring(race.LastIndexOf("--c") + 3, 4);
                 }
@@ -110,6 +118,12 @@ namespace FFXIV_TexTools2.ViewModel
                         race = race.Substring(race.LastIndexOf('c') + 1, 4);
                     }
                 }
+
+                if (entry.fullPath.Contains("mt_"))
+                {
+                    Debug.WriteLine(race + "\n");
+                }
+
                 race = Info.IDRace[race];
             }
 
