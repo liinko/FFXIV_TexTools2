@@ -358,15 +358,15 @@ namespace FFXIV_TexTools2.Helpers
             var normalBitmap = normalTexData.BMPSouceAlpha;
             Color charaColor;
 
-            if (itemName.Equals(Strings.Body))
+            if (path.Contains("/body/b"))
             {
                 charaColor = (Color)ColorConverter.ConvertFromString(Properties.Settings.Default.Skin_Color);
             }
-            else if (itemName.Equals(Strings.Hair))
+            else if (path.Contains("/hair/h"))
             {
                 charaColor = (Color)ColorConverter.ConvertFromString(Properties.Settings.Default.Hair_Color);
             }
-            else if (itemName.Equals(Strings.Face))
+            else if (path.Contains("/face/f"))
             {
                 if (path.Contains("_etc_"))
                 {
@@ -381,7 +381,7 @@ namespace FFXIV_TexTools2.Helpers
                     charaColor = (Color)ColorConverter.ConvertFromString(Properties.Settings.Default.Skin_Color);
                 }
             }
-            else if (itemName.Equals(Strings.Tail))
+            else if (path.Contains("tail/t"))
             {
                 if (!path.Contains("c1401") && !path.Contains("c1301"))
                 {
