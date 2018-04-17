@@ -959,7 +959,7 @@ namespace FFXIV_TexTools2.Material
         /// <returns>Data from MTRL file</returns>
         public static MTRLData GetMTRLInfo(int offset, bool isUncompressed)
         {
-            int datNum = ((offset / 8) & 0x000f) / 2;
+            int datNum = ((offset / 8) & 0xF) / 2;
 
             MTRLData mtrlInfo = new MTRLData();
 

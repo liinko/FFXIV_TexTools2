@@ -3007,7 +3007,6 @@ namespace FFXIV_TexTools2.IO
 		        }
             }
 
-		    var datOffsetAmount = datNum * 16;
             try
 			{
                 /* 
@@ -3020,6 +3019,7 @@ namespace FFXIV_TexTools2.IO
                     {
                         datNum = ((modEntry.modOffset / 8) & 0x0F) / 2;
                         modDatPath = string.Format(Info.datDir, modEntry.datFile, datNum);
+                        var datOffsetAmount = datNum * 16;
 
                         using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(modDatPath)))
                         {
@@ -3068,6 +3068,7 @@ namespace FFXIV_TexTools2.IO
 
                                         datNum = ((emptyEntry.modOffset / 8) & 0x0F) / 2;
                                         modDatPath = string.Format(Info.datDir, emptyEntry.datFile, datNum);
+                                        var datOffsetAmount = datNum * 16;
 
                                         using (BinaryWriter bw = new BinaryWriter(File.OpenWrite(modDatPath)))
                                         {
@@ -3151,6 +3152,7 @@ namespace FFXIV_TexTools2.IO
                                 eof = eof + 16;
                             }
 
+                            var datOffsetAmount = datNum * 16;
                             offset = (int)bw.BaseStream.Position + datOffsetAmount;
 
                             if (offset != 0)

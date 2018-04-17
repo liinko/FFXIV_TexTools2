@@ -248,6 +248,9 @@
     <Compile Include="Views\AdvImport.xaml.cs">
       <DependentUpon>AdvImport.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Customize.xaml.cs">
+      <DependentUpon>Customize.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Directories.xaml.cs">
       <DependentUpon>Directories.xaml</DependentUpon>
     </Compile>
@@ -297,6 +300,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\AdvImport.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Customize.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

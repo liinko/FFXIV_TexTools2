@@ -1,0 +1,67 @@
+﻿<Window x:Class="FFXIV_TexTools2.Views.Customize"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:FFXIV_TexTools2.Views"
+        mc:Ignorable="d"
+        Title="Customize" Height="300" Width="400" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal">
+            <Label Content="Default Race: " HorizontalAlignment="Left" VerticalAlignment="Center" />
+            <ComboBox x:Name="RaceComboBox" VerticalAlignment="Center" MinWidth="100"/>
+            <Label Content="This only affects shared races" HorizontalAlignment="Left" VerticalAlignment="Center" />
+
+        </StackPanel>
+        <StackPanel Grid.Row="1" Orientation="Horizontal">
+            <Label Content="Skin Color" HorizontalAlignment="Left" VerticalAlignment="Center" />
+            <Label Content="R" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0" />
+            <TextBox x:Name="SkinR" TextWrapping="Wrap" VerticalAlignment="Center" MinWidth="30" TextChanged="SkinR_TextChanged" />
+            <Label Content="G" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0"  />
+            <TextBox x:Name="SkinG" TextWrapping="Wrap" VerticalAlignment="Center" MinWidth="30" TextChanged="SkinG_TextChanged" />
+            <Label Content="B" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0"  />
+            <TextBox x:Name="SkinB" TextWrapping="Wrap" VerticalAlignment="Center" MinWidth="30" TextChanged="SkinB_TextChanged" />
+            <Rectangle x:Name="SkinColor"  Width="20" Height="20" HorizontalAlignment="Left" Margin="20,0,0,0" Stroke="Black"/>
+        </StackPanel>
+        <StackPanel Grid.Row="2" Orientation="Horizontal">
+            <Label Content="Hair Color" HorizontalAlignment="Left" VerticalAlignment="Center" />
+            <Label Content="R" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0"  />
+            <TextBox x:Name="HairR" TextWrapping="Wrap" VerticalAlignment="Center" MinWidth="30" TextChanged="HairR_TextChanged" />
+            <Label Content="G" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0"  />
+            <TextBox x:Name="HairG" TextWrapping="Wrap" VerticalAlignment="Center" MinWidth="30" TextChanged="HairG_TextChanged" />
+            <Label Content="B" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0"  />
+            <TextBox x:Name="HairB" TextWrapping="Wrap" VerticalAlignment="Center" MinWidth="30" TextChanged="HairB_TextChanged" />
+            <Rectangle x:Name="HairColor"  Width="20" Height="20" HorizontalAlignment="Left" Margin="20,0,0,0" Stroke="Black"/>
+
+        </StackPanel>
+        <StackPanel Grid.Row="3" Orientation="Horizontal">
+            <Label Content="Eye Color " HorizontalAlignment="Left" VerticalAlignment="Center" />
+            <Label Content="R" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0"  />
+            <TextBox x:Name="EyeR" TextWrapping="Wrap" VerticalAlignment="Center" MinWidth="30" TextChanged="EyeR_TextChanged" />
+            <Label Content="G" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0"  />
+            <TextBox x:Name="EyeG" TextWrapping="Wrap" VerticalAlignment="Center" MinWidth="30" TextChanged="EyeG_TextChanged" />
+            <Label Content="B" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0"  />
+            <TextBox x:Name="EyeB" TextWrapping="Wrap" VerticalAlignment="Center" MinWidth="30" TextChanged="EyeB_TextChanged" />
+            <Rectangle x:Name="EyeColor"  Width="20" Height="20" HorizontalAlignment="Left" Margin="20,0,0,0" Stroke="Black"/>
+        </StackPanel>
+        <StackPanel Grid.Row="4" Orientation="Horizontal">
+            <Label Content="Etc. Color " HorizontalAlignment="Left" VerticalAlignment="Center" />
+            <Label Content="R" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0"  />
+            <TextBox x:Name="EtcR" TextWrapping="Wrap" VerticalAlignment="Center" MinWidth="30" TextChanged="EtcR_TextChanged" />
+            <Label Content="G" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0"  />
+            <TextBox x:Name="EtcG" TextWrapping="Wrap" VerticalAlignment="Center" MinWidth="30" TextChanged="EtcG_TextChanged" />
+            <Label Content="B" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0"  />
+            <TextBox x:Name="EtcB" TextWrapping="Wrap" VerticalAlignment="Center" MinWidth="30" TextChanged="EtcB_TextChanged" />
+            <Rectangle x:Name="EtcColor"  Width="20" Height="20" HorizontalAlignment="Left" Margin="20,0,0,0" Stroke="Black"/>
+        </StackPanel>
+        <Button x:Name="SetButton" Content="Set" HorizontalAlignment="Right" Grid.Row="5" Width="75" VerticalAlignment="Center" Margin="0,0,20,0" Click="SetButton_Click"/>
+    </Grid>
+</Window>

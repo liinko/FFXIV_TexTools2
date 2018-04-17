@@ -773,7 +773,7 @@ namespace FFXIV_TexTools2.ViewModel
                             br.ReadBytes(8);
                             int offset = br.ReadInt32();
 
-                            int datNum = (offset & 0x000f) / 2;
+                            int datNum = (offset & 0xF) / 2;
 
                             if (indexFile.Key.Equals(Strings.ItemsDat))
                             {
@@ -816,7 +816,7 @@ namespace FFXIV_TexTools2.ViewModel
                         {
                             br.ReadBytes(4);
                             int offset = br.ReadInt32();
-                            int datNum = (offset & 0x000f) / 2;
+                            int datNum = (offset & 0xF) / 2;
 
                             if (indexFile.Key.Equals(Strings.ItemsDat))
                             {

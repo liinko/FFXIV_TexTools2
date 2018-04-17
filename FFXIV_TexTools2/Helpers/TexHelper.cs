@@ -27,7 +27,10 @@ using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using FFXIV_TexTools2.Resources;
 using HelixToolkit.Wpf.SharpDX;
+using Color = System.Windows.Media.Color;
+using ColorConverter = System.Windows.Media.ColorConverter;
 
 namespace FFXIV_TexTools2.Helpers
 {
@@ -347,12 +350,52 @@ namespace FFXIV_TexTools2.Helpers
         /// <param name="maskTexData">The texture data of the mask map</param>
         /// <param name="specularTexData">The texture data of the normal map</param>
         /// <returns>An array of bitmaps to be used on the model</returns>
-        public static BitmapSource[] MakeCharacterMaps(TEXData normalTexData, TEXData diffuseTexData, TEXData maskTexData, TEXData specularTexData)
+        public static BitmapSource[] MakeCharacterMaps(TEXData normalTexData, TEXData diffuseTexData, TEXData maskTexData, TEXData specularTexData, string itemName, string path)
         {
             int height = normalTexData.Height;
             int width = normalTexData.Width;
             int tSize = height * width;
             var normalBitmap = normalTexData.BMPSouceAlpha;
+            Color charaColor;
+
+            if (itemName.Equals(Strings.Body))
+            {
+                charaColor = (Color)ColorConverter.ConvertFromString(Properties.Settings.Default.Skin_Color);
+            }
+            else if (itemName.Equals(Strings.Hair))
+            {
+                charaColor = (Color)ColorConverter.ConvertFromString(Properties.Settings.Default.Hair_Color);
+            }
+            else if (itemName.Equals(Strings.Face))
+            {
+                if (path.Contains("_etc_"))
+                {
+                    charaColor = (Color)ColorConverter.ConvertFromString(Properties.Settings.Default.Etc_Color);
+                }
+                else if (path.Contains("_iri_"))
+                {
+                    charaColor = (Color)ColorConverter.ConvertFromString(Properties.Settings.Default.Iris_Color);
+                }
+                else
+                {
+                    charaColor = (Color)ColorConverter.ConvertFromString(Properties.Settings.Default.Skin_Color);
+                }
+            }
+            else if (itemName.Equals(Strings.Tail))
+            {
+                if (!path.Contains("c1401") && !path.Contains("c1301"))
+                {
+                    charaColor = (Color)ColorConverter.ConvertFromString(Properties.Settings.Default.Hair_Color);
+                }
+                else
+                {
+                    charaColor = Color.FromArgb(255, 255, 255, 255);
+                }
+            }
+            else
+            {
+                charaColor = Color.FromArgb(255, 96, 57, 19);
+            }
 
             if (diffuseTexData != null && (diffuseTexData.Height * diffuseTexData.Width) > tSize)
             {
@@ -487,7 +530,7 @@ namespace FFXIV_TexTools2.Helpers
                 {
                     int alpha = normalPixels[i];
 
-                    diffuseColor = System.Drawing.Color.FromArgb(alpha, (int)((96f / 255f) * specularPixels[i - 1]), (int)((57f / 255f) * specularPixels[i - 1]), (int)((19f / 255f) * specularPixels[i - 1]));
+                    diffuseColor = System.Drawing.Color.FromArgb(alpha, (int)((charaColor.R / 255f) * specularPixels[i - 1]), (int)((charaColor.G / 255f) * specularPixels[i - 1]), (int)((charaColor.B / 255f) * specularPixels[i - 1]));
 
                     specularColor = System.Drawing.Color.FromArgb(255, (int)(specularPixels[i - 2] * 0.1), (int)(specularPixels[i - 2] * 0.1), (int)(specularPixels[i - 2] * 0.1));
 
@@ -507,7 +550,7 @@ namespace FFXIV_TexTools2.Helpers
                 {
                     int alpha = normalPixels[i-3];
 
-                    diffuseColor = System.Drawing.Color.FromArgb(alpha, diffusePixels[i - 1], diffusePixels[i - 2], diffusePixels[i - 3]);
+                    diffuseColor = System.Drawing.Color.FromArgb(alpha, (int)((charaColor.R / 255f) * diffusePixels[i - 1]), (int)((charaColor.G / 255f) * diffusePixels[i - 2]), (int)((charaColor.B / 255f) * diffusePixels[i - 3]));
                     diffuseMap.AddRange(BitConverter.GetBytes(diffuseColor.ToArgb()));
 
                     specularColor = System.Drawing.Color.FromArgb(255, (int)(specularPixels[i - 2] * 0.1), (int)(specularPixels[i - 2] * 0.1), (int)(specularPixels[i - 2] * 0.1));

@@ -954,7 +954,7 @@ namespace FFXIV_TexTools2.ViewModel
                                     diffuseData = TEX.GetTex(mtrlData.DiffuseOffset, Strings.ItemsDat);
                                 }
 
-                                var maps = TexHelper.MakeCharacterMaps(normalData, diffuseData, null, specularData);
+                                var maps = TexHelper.MakeCharacterMaps(normalData, diffuseData, null, specularData, selectedItem.ItemName, mtrlData.MTRLPath);
 
                                 diffuseBMP = maps[0];
                                 specularBMP = maps[1];
@@ -971,7 +971,7 @@ namespace FFXIV_TexTools2.ViewModel
 
                             isBody = true;
 
-                            var maps = TexHelper.MakeCharacterMaps(normalData, diffuseData, null, specularData);
+                            var maps = TexHelper.MakeCharacterMaps(normalData, diffuseData, null, specularData, selectedItem.ItemName, mtrlData.MTRLPath);
 
                             diffuseBMP = maps[0];
                             specularBMP = maps[1];
@@ -988,7 +988,7 @@ namespace FFXIV_TexTools2.ViewModel
                                 specularData = TEX.GetTex(mtrlData.SpecularOffset, Strings.ItemsDat);
                                 diffuseData = TEX.GetTex(mtrlData.DiffuseOffset, Strings.ItemsDat);
 
-                                var maps = TexHelper.MakeCharacterMaps(normalData, diffuseData, null, specularData);
+                                var maps = TexHelper.MakeCharacterMaps(normalData, diffuseData, null, specularData, selectedItem.ItemName, mtrlData.MTRLPath);
 
                                 diffuseBMP = maps[0];
                                 specularBMP = maps[1];
@@ -1012,7 +1012,7 @@ namespace FFXIV_TexTools2.ViewModel
                                 else
                                 {
                                     specularData = TEX.GetTex(mtrlData.SpecularOffset, Strings.ItemsDat);
-                                    var maps = TexHelper.MakeCharacterMaps(normalData, diffuseData, null, specularData);
+                                    var maps = TexHelper.MakeCharacterMaps(normalData, diffuseData, null, specularData, selectedItem.ItemName, mtrlData.MTRLPath);
 
                                     diffuseBMP = maps[0];
                                     specularBMP = maps[1];
@@ -1044,7 +1044,7 @@ namespace FFXIV_TexTools2.ViewModel
                             {
                                 isBody = true;
 
-                                var maps = TexHelper.MakeCharacterMaps(normalData, diffuseData, null, specularData);
+                                var maps = TexHelper.MakeCharacterMaps(normalData, diffuseData, null, specularData, selectedItem.ItemName, mtrlData.MTRLPath);
 
                                 diffuseBMP = maps[0];
                                 specularBMP = maps[1];
@@ -1357,6 +1357,7 @@ namespace FFXIV_TexTools2.ViewModel
             else if (typeChar.Equals("cb") || typeChar.Equals("ct"))
             {
                 var info = MTRL.GetMTRLInfo(Helper.GetDataOffset(FFCRC.GetHash(mtrlFolder), FFCRC.GetHash(MTRLFile), Strings.ItemsDat), true);
+                info.MTRLPath = mtrlFolder + "/" + MTRLFile;
                 return info;
             }
             else

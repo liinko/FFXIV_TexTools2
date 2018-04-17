@@ -29,5 +29,17 @@
     <Setting Name="ModPack_Directory" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
+    <Setting Name="Hair_Color" Type="System.String" Scope="User">
+      <Value Profile="(Default)">#FF603913</Value>
+    </Setting>
+    <Setting Name="Iris_Color" Type="System.String" Scope="User">
+      <Value Profile="(Default)">#FF603913</Value>
+    </Setting>
+    <Setting Name="Skin_Color" Type="System.String" Scope="User">
+      <Value Profile="(Default)">#FFFFFFFF</Value>
+    </Setting>
+    <Setting Name="Etc_Color" Type="System.String" Scope="User">
+      <Value Profile="(Default)">#FF603913</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

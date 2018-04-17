@@ -40,13 +40,7 @@ namespace FFXIV_TexTools2
         MainViewModel mViewModel;
         CategoryViewModel selectedItem;
 
-        List<string> baseRace = new List<string>
-        {
-            {Strings.Hyur_M },
-            {Strings.Hyur_H },
-            {Strings.AuRa_Raen },
-            {Strings.AuRa_Xaela }
-        };
+
 
         public MainWindow()
         {
@@ -63,35 +57,6 @@ namespace FFXIV_TexTools2
             }
 
             DXVerButton.Content = "DX Version: " + dxver.Substring(2);
-
-            List<System.Windows.Controls.MenuItem> miList = new List<System.Windows.Controls.MenuItem>();
-            foreach(var br in baseRace)
-            {
-                System.Windows.Controls.MenuItem mi = new System.Windows.Controls.MenuItem();
-                mi.Header = br;
-                miList.Add(mi);
-            }
-
-            Default_Race.ItemsSource = miList;
-
-            if (Properties.Settings.Default.Default_Race.Equals(""))
-            {
-                Properties.Settings.Default.Default_Race = Strings.Hyur_M;
-                Properties.Settings.Default.Save();
-            }
-
-            foreach(System.Windows.Controls.MenuItem br in Default_Race.Items)
-            {
-                if (br.Header.Equals(Properties.Settings.Default.Default_Race))
-                {
-                    br.IsChecked = true;
-                    br.IsEnabled = false;
-                }
-                else
-                {
-                    br.IsChecked = false;
-                }
-            }
 
 
             //HavokInterop.InitializeSTA();
@@ -485,30 +450,6 @@ namespace FFXIV_TexTools2
             System.Diagnostics.Process.Start("https://textools.dualwield.net/tutorials/");
         }
 
-        private void Default_Race_Click(object sender, RoutedEventArgs e)
-        {
-            var selectedMenuItem = (e.OriginalSource as System.Windows.Controls.MenuItem);
-            var selectedRace = selectedMenuItem.Header.ToString();
-
-
-            Properties.Settings.Default.Default_Race = selectedRace;
-            Properties.Settings.Default.Save();
-
-            foreach (System.Windows.Controls.MenuItem br in Default_Race.Items)
-            {
-                if (br.Header.Equals(Properties.Settings.Default.Default_Race))
-                {
-                    br.IsChecked = true;
-                    br.IsEnabled = false;
-                }
-                else
-                {
-                    br.IsChecked = false;
-                    br.IsEnabled = true;
-                }
-            }
-        }
-
         private void DXVerButton_Click(object sender, RoutedEventArgs e)
         {
             var dxver = Properties.Settings.Default.DX_Ver;
@@ -578,8 +519,13 @@ namespace FFXIV_TexTools2
                 imp.Owner = this;
                 imp.Show();
             }
+        }
 
-
+        private void Menu_Customize_Click(object sender, RoutedEventArgs e)
+        {
+            Customize customize = new Customize();
+            customize.Owner = this;
+            customize.Show();
         }
     }
 }

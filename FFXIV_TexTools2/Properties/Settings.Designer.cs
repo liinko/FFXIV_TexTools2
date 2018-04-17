@@ -130,5 +130,53 @@ namespace FFXIV_TexTools2.Properties {
                 this["ModPack_Directory"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("#FF603913")]
+        public string Hair_Color {
+            get {
+                return ((string)(this["Hair_Color"]));
+            }
+            set {
+                this["Hair_Color"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("#FF603913")]
+        public string Iris_Color {
+            get {
+                return ((string)(this["Iris_Color"]));
+            }
+            set {
+                this["Iris_Color"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("#FFFFFFFF")]
+        public string Skin_Color {
+            get {
+                return ((string)(this["Skin_Color"]));
+            }
+            set {
+                this["Skin_Color"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("#FF603913")]
+        public string Etc_Color {
+            get {
+                return ((string)(this["Etc_Color"]));
+            }
+            set {
+                this["Etc_Color"] = value;
+            }
+        }
     }
 }
