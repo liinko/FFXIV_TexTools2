@@ -231,6 +231,9 @@
   <data name="Legs_Feet" xml:space="preserve">
     <value>Legs + Feet</value>
   </data>
+  <data name="LoadingImage" xml:space="preserve">
+    <value>Loading Image</value>
+  </data>
   <data name="Main_Hand" xml:space="preserve">
     <value>Main Hand</value>
   </data>

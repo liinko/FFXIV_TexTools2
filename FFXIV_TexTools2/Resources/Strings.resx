@@ -624,7 +624,7 @@
   <data name="Status" xml:space="preserve">
     <value>Status</value>
   </data>
-  <data name="LoadingImage" xml:space="preserve">
+  <data name="LoadingImageTexFile" xml:space="preserve">
     <value>-nowloading_base{0}.tex</value>
   </data>
   <data name="MapSymbol" xml:space="preserve">
@@ -701,5 +701,8 @@
   </data>
   <data name="DemiIMCFolder" xml:space="preserve">
     <value>chara/demihuman/d{0}/obj/equipment/e{1}</value>
+  </data>
+  <data name="LoadingImage" xml:space="preserve">
+    <value>Loading Image</value>
   </data>
 </root>
