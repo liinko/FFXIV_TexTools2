@@ -1123,14 +1123,23 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to -nowloading_base{0}.tex.
+        ///   Looks up a localized string similar to Loading Image.
         /// </summary>
         internal static string LoadingImage {
             get {
                 return ResourceManager.GetString("LoadingImage", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to -nowloading_base{0}.tex.
+        /// </summary>
+        internal static string LoadingImageTexFile {
+            get {
+                return ResourceManager.GetString("LoadingImageTexFile", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Main Hand.
         /// </summary>

@@ -210,22 +210,7 @@ namespace FFXIV_TexTools2.Helpers
             {Strings.Placeholder_Egi, "7103" }
         };
 
-        public static Dictionary<string, string> petIDKO = new Dictionary<string, string>
-        {
-            {"요정 에오스", "7001"},
-            {"요정 셀레네", "7001"},
-            {"카벙클", "7002"},
-            {"이프리트 에기", "7003"},
-            {"타이탄 에기", "7004"},
-            {"가루다 에기", "7005"},
-            {Strings.Ramuh_Egi, "7006"},
-            {"자동포탑 룩", "7101"},
-            {"자동포탑 비숍", "7101"},
-            {Strings.Sephirot_Egi, "7007" },
-            {Strings.Bahamut_Egi, "7102" },
-            {Strings.Placeholder_Egi, "7103" }
-        };
-
+        /*
         public static Dictionary<string, string> petIDCHS = new Dictionary<string, string>
         {
             {"朝日小仙女", "7001"},
@@ -241,6 +226,7 @@ namespace FFXIV_TexTools2.Helpers
             {Strings.Bahamut_Egi, "7102" },
             {Strings.Placeholder_Egi, "7103" }
         };
+        */
 
         public static Dictionary<string, string> FaceTypes = new Dictionary<string, string>
         {

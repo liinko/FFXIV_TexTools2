@@ -139,11 +139,7 @@ namespace FFXIV_TexTools2.IO
                             petNames.Add(petName);
                             string petID = "";
 
-                            if (Properties.Settings.Default.Language.Equals("ko"))
-                            {
-                                petID = Info.petIDKO[petName];
-                            }
-                            else if (Properties.Settings.Default.Language.Equals("zh"))
+                            if (Properties.Settings.Default.Language.Equals("zh"))
                             {
                                 petID = Info.petIDCHS[petName];
                             }
@@ -560,21 +556,21 @@ namespace FFXIV_TexTools2.IO
         public static TreeNode MakeLoadingImageList()
         {
             var loadingImageFolder = "ui/loadingimage/";
-            var loadingImageFile = string.Format(Strings.LoadingImage, "");
+            var loadingImageFile = string.Format(Strings.LoadingImageTexFile, "");
 
             var folders = Helper.GetAllFilesInFolder(FFCRC.GetHash(loadingImageFolder.Substring(0, 15)), Strings.UIDat);
 
-            TreeNode LINode = new TreeNode() { Name = "Loading Image" };
+            TreeNode LINode = new TreeNode() { Name = Strings.LoadingImage };
 
             for (int i = 0; i < 20; i++)
             {
                 ItemData item = new ItemData();
 
-                loadingImageFile = string.Format(Strings.LoadingImage, i.ToString().PadLeft(2, '0'));
+                loadingImageFile = string.Format(Strings.LoadingImageTexFile, i.ToString().PadLeft(2, '0'));
 
                 if (i == 0)
                 {
-                    loadingImageFile = string.Format(Strings.LoadingImage, "");
+                    loadingImageFile = string.Format(Strings.LoadingImageTexFile, "");
                 }
 
                 if (folders.Contains(FFCRC.GetHash(loadingImageFile)))
