@@ -569,12 +569,23 @@ namespace FFXIV_TexTools2.IO
 					}
 					return;
 				}
-
 				for(int i = 0; i < pDict.Count; i++)
-				{
-					var mDict = pDict[i];
+                {
+                    // If the file has more mesh parts than the original model data did, create them.
+                    var mDict = pDict[i];
+                    if(modelData.LoD[0].MeshList[i].MeshPartList.Count() < mDict.Count())
+                    {
+                        MeshPart newPart = new MeshPart();
+                        modelData.LoD[0].MeshList[i].MeshPartList.Add(newPart);
+                        //MeshPart newPart2 = new MeshPart();
+                        //modelData.LoD[1].MeshList[i].MeshPartList.Add(newPart2);
+                        //MeshPart newPart3 = new MeshPart();
+                        //modelData.LoD[2].MeshList[i].MeshPartList.Add(newPart3);
+                    }
+                    
 
-					for (int j = 0; j < mDict.Count; j++)
+
+                    for (int j = 0; j < mDict.Count; j++)
 					{
 						if (mDict.ContainsKey(j))
 						{
@@ -1051,7 +1062,7 @@ namespace FFXIV_TexTools2.IO
 					                nBlendWeights.Add(blendWeights[iList[i][0]]);
 					                nNormals.Add(Normals[iList[i][1]]);
 					                nTexCoord.Add(TexCoord[iList[i][2]]);
-					                if (TexCoord2.Count > 0 && TexCoord2.Count >= indexMax)
+					                if (TexCoord2.Count > 0)
 					                {
 					                    nTexCoord2.Add(TexCoord2[iList[i][3]]);
 					                }
@@ -1180,38 +1191,38 @@ namespace FFXIV_TexTools2.IO
 					//    mg.Tangents = Tangents;
 					//}
 
-					SharpDX.Vector3[] tan1 = new SharpDX.Vector3[Vertex.Count];
-					SharpDX.Vector3[] tan2 = new SharpDX.Vector3[Vertex.Count];
+					SharpDX.Vector3[] tangents = new SharpDX.Vector3[Vertex.Count];
+					SharpDX.Vector3[] bitangents = new SharpDX.Vector3[Vertex.Count];
 					for (int a = 0; a < Indices.Count; a += 3)
 					{
-						int i1 = Indices[a];
-						int i2 = Indices[a + 1];
-						int i3 = Indices[a + 2];
-						SharpDX.Vector3 v1 = nVertex[i1];
-						SharpDX.Vector3 v2 = nVertex[i2];
-						SharpDX.Vector3 v3 = nVertex[i3];
-						SharpDX.Vector2 w1 = nTexCoord[i1];
-						SharpDX.Vector2 w2 = nTexCoord[i2];
-						SharpDX.Vector2 w3 = nTexCoord[i3];
-						float x1 = v2.X - v1.X;
-						float x2 = v3.X - v1.X;
-						float y1 = v2.Y - v1.Y;
-						float y2 = v3.Y - v1.Y;
-						float z1 = v2.Z - v1.Z;
-						float z2 = v3.Z - v1.Z;
-						float s1 = w2.X - w1.X;
-						float s2 = w3.X - w1.X;
-						float t1 = w2.Y - w1.Y;
-						float t2 = w3.Y - w1.Y;
-						float r = 1.0f / (s1 * t2 - s2 * t1);
-						SharpDX.Vector3 sdir = new SharpDX.Vector3((t2 * x1 - t1 * x2) * r, (t2 * y1 - t1 * y2) * r, (t2 * z1 - t1 * z2) * r);
-						SharpDX.Vector3 tdir = new SharpDX.Vector3((s1 * x2 - s2 * x1) * r, (s1 * y2 - s2 * y1) * r, (s1 * z2 - s2 * z1) * r);
-						tan1[i1] += sdir;
-						tan1[i2] += sdir;
-						tan1[i3] += sdir;
-						tan2[i1] += tdir;
-						tan2[i2] += tdir;
-						tan2[i3] += tdir;
+						int idx1 = Indices[a];
+						int idx2 = Indices[a + 1];
+						int idx3 = Indices[a + 2];
+						SharpDX.Vector3 vert1 = nVertex[idx1];
+						SharpDX.Vector3 vert2 = nVertex[idx2];
+						SharpDX.Vector3 vert3 = nVertex[idx3];
+						SharpDX.Vector2 uv1 = nTexCoord[idx1];
+						SharpDX.Vector2 uv2 = nTexCoord[idx2];
+						SharpDX.Vector2 uv3 = nTexCoord[idx3];
+						float deltaX1 = vert2.X - vert1.X;
+						float deltaX2 = vert3.X - vert1.X;
+						float deltaY1 = vert2.Y - vert1.Y;
+						float deltaY2 = vert3.Y - vert1.Y;
+						float deltaZ1 = vert2.Z - vert1.Z;
+						float deltaZ2 = vert3.Z - vert1.Z;
+						float deltaU1 = uv2.X - uv1.X;
+						float deltaU2 = uv3.X - uv1.X;
+						float deltaV1 = uv2.Y - uv1.Y;
+						float deltaV2 = uv3.Y - uv1.Y;
+						float r = 1.0f / (deltaU1 * deltaV2 - deltaU2 * deltaV1);
+						SharpDX.Vector3 uDir = new SharpDX.Vector3((deltaV2 * deltaX1 - deltaV1 * deltaX2) * r, (deltaV2 * deltaY1 - deltaV1 * deltaY2) * r, (deltaV2 * deltaZ1 - deltaV1 * deltaZ2) * r);
+						SharpDX.Vector3 vDir = new SharpDX.Vector3((deltaU1 * deltaX2 - deltaU2 * deltaX1) * r, (deltaU1 * deltaY2 - deltaU2 * deltaY1) * r, (deltaU1 * deltaZ2 - deltaU2 * deltaZ1) * r);
+						tangents[idx1] += uDir;
+						tangents[idx2] += uDir;
+						tangents[idx3] += uDir;
+						bitangents[idx1] += vDir;
+						bitangents[idx2] += vDir;
+						bitangents[idx3] += vDir;
 					}
 
 					float d;
@@ -1219,8 +1230,8 @@ namespace FFXIV_TexTools2.IO
 					for (int a = 0; a < nVertex.Count; ++a)
 					{
 						SharpDX.Vector3 n = SharpDX.Vector3.Normalize(nNormals[a]);
-						SharpDX.Vector3 t = SharpDX.Vector3.Normalize(tan1[a]);
-						d = (SharpDX.Vector3.Dot(SharpDX.Vector3.Cross(n, t), tan2[a]) < 0.0f) ? -1.0f : 1.0f;
+						SharpDX.Vector3 t = SharpDX.Vector3.Normalize(tangents[a]);
+						d = (SharpDX.Vector3.Dot(SharpDX.Vector3.Cross(n, t), bitangents[a]) < 0.0f) ? -1.0f : 1.0f;
 						tmpt = new SharpDX.Vector3(t.X, t.Y, t.Z);
 						mg.BiTangents.Add(tmpt);
 						cmd.handedness.Add((int)d);
@@ -1479,109 +1490,235 @@ namespace FFXIV_TexTools2.IO
 				modelDataBlock.AddRange(br.ReadBytes(4));
 
 				//string block size (int)
-				int stringBlockSize = br.ReadInt32();
-				modelDataBlock.AddRange(BitConverter.GetBytes(stringBlockSize));
+				int originalStringBlockSize = br.ReadInt32();
 
-				//string block
-				var stringBlock = br.ReadBytes(stringBlockSize);
+                //string block
+                var originalStringBlock = br.ReadBytes(originalStringBlockSize);
 
-				modelDataBlock.AddRange(stringBlock);
-
-				//unknown (int)
-				modelDataBlock.AddRange(br.ReadBytes(4));
+                //unknown (int)
+                byte[] unknownInt = br.ReadBytes(4);
 
 				//mesh count (short)
-				short meshCount = br.ReadInt16();
-				modelDataBlock.AddRange(BitConverter.GetBytes(meshCount));
+				short oldMeshCount = br.ReadInt16();
 
 				//num of atr strings (short)
-				short atrStringCount = br.ReadInt16();
-				modelDataBlock.AddRange(BitConverter.GetBytes(atrStringCount));
+				short oldAtrStringCount = br.ReadInt16();
 
 				//num of mesh parts (short)
-				short meshPartCount = br.ReadInt16();
-				modelDataBlock.AddRange(BitConverter.GetBytes(meshPartCount));
+                //modelData.LoD[0].
+				short oldMeshPartCount = br.ReadInt16();
 
 				//num of material strings (short)
-				short matStringCount = br.ReadInt16();
-				modelDataBlock.AddRange(BitConverter.GetBytes(matStringCount));
+				short oldMatStringCount = br.ReadInt16();
 
 				//num of bone strings (short)
-				short boneStringCount = br.ReadInt16();
-				modelDataBlock.AddRange(BitConverter.GetBytes(boneStringCount));
+				short oldBoneStringCount = br.ReadInt16();
 
 				//bone list count (short)
 				short boneListCount = br.ReadInt16();
-				modelDataBlock.AddRange(BitConverter.GetBytes(boneListCount));
 
-				short unk1 = br.ReadInt16();
-				modelDataBlock.AddRange(BitConverter.GetBytes(unk1));
 
-				short unk2 = br.ReadInt16();
-				modelDataBlock.AddRange(BitConverter.GetBytes(unk2));
+                short unk1 = br.ReadInt16();
 
-				short unk3 = br.ReadInt16();
-				modelDataBlock.AddRange(BitConverter.GetBytes(unk3));
+                short unk2 = br.ReadInt16();
 
-				short unk4 = br.ReadInt16();
-				modelDataBlock.AddRange(BitConverter.GetBytes(unk4));
+                short unk3 = br.ReadInt16();
 
-				short unk5 = br.ReadInt16();
-				modelDataBlock.AddRange(BitConverter.GetBytes(unk5));
+                short unk4 = br.ReadInt16();
 
-				short unk6 = br.ReadInt16();
-				modelDataBlock.AddRange(BitConverter.GetBytes(unk6));
+                short unk5 = br.ReadInt16();
 
-				short unk7 = br.ReadInt16();
-				modelDataBlock.AddRange(BitConverter.GetBytes(unk7));
+                short unk6 = br.ReadInt16();
 
-				short unk8 = br.ReadInt16();
-				modelDataBlock.AddRange(BitConverter.GetBytes(unk8));
+                short unk7 = br.ReadInt16();
 
-				short unk9 = br.ReadInt16();
-				modelDataBlock.AddRange(BitConverter.GetBytes(unk9));
+                short unk8 = br.ReadInt16();
 
-				short unk10 = br.ReadInt16();
-				modelDataBlock.AddRange(BitConverter.GetBytes(unk10));
+                // Unknown - Differential between gloves
+                short unk9 = br.ReadInt16();
 
-				short unk11 = br.ReadInt16();
-				modelDataBlock.AddRange(BitConverter.GetBytes(unk11));
+                short unk10 = br.ReadInt16();
 
-				short unk12 = br.ReadInt16();
-				modelDataBlock.AddRange(BitConverter.GetBytes(unk12));
+                // Unknown - Differential between gloves
+                short unk11 = br.ReadInt16();
 
-				List<string> materials = new List<string>();
-				using (BinaryReader br1 = new BinaryReader(new MemoryStream(stringBlock)))
-				{
-					br1.BaseStream.Seek(0, SeekOrigin.Begin);
+                short unk12 = br.ReadInt16();
 
-					for (int i = 0; i < atrStringCount; i++)
-					{
-						while (br1.ReadByte() != 0)
-						{
-							//extract each atribute string here
-						}
-					}
 
-					for (int i = 0; i < boneStringCount; i++)
-					{
 
-					}
+                // Parse the string block out.
+                List<string> materials = new List<string>();
+                List<string> bones = new List<string>();
+                List<string> attributes = new List<string>();
+                List<byte> extraStringBlockData = new List<byte>();
+                using (BinaryReader br1 = new BinaryReader(new MemoryStream(originalStringBlock)))
+                {
+                    br1.BaseStream.Seek(0, SeekOrigin.Begin);
+                    int pos = 0;
 
-					for (int i = 0; i < matStringCount; i++)
-					{
-						byte b;
-						List<byte> name = new List<byte>();
-						while ((b = br1.ReadByte()) != 0)
-						{
-							name.Add(b);
-						}
-						string material = Encoding.ASCII.GetString(name.ToArray());
-						material = material.Replace("\0", "");
+                    // Attributes
+                    for (int i = 0; i < oldAtrStringCount; i++)
+                    {
+                        byte b;
+                        List<byte> name = new List<byte>();
+                        while ((b = br1.ReadByte()) != 0)
+                        {
+                            pos++;
+                            name.Add(b);
+                        }
 
-						materials.Add(material);
-					}
-				}
+                        pos++;
+                        string atrName = Encoding.ASCII.GetString(name.ToArray());
+                        atrName = atrName.Replace("\0", "");
+
+                        attributes.Add(atrName);
+                    }
+
+                    // Bones
+                    for (int i = 0; i < oldBoneStringCount; i++)
+                    {
+                        byte b;
+                        List<byte> name = new List<byte>();
+                        while ((b = br1.ReadByte()) != 0)
+                        {
+                            pos++;
+                            name.Add(b);
+                        }
+
+                        pos++;
+                        string boneName = Encoding.ASCII.GetString(name.ToArray());
+                        boneName = boneName.Replace("\0", "");
+
+                        bones.Add(boneName);
+                    }
+
+                    // Materials
+                    for (int i = 0; i < oldMatStringCount; i++)
+                    {
+                        byte b;
+                        List<byte> name = new List<byte>();
+                        while ((b = br1.ReadByte()) != 0)
+                        {
+                            pos++;
+                            name.Add(b);
+                        }
+
+                        pos++;
+                        string material = Encoding.ASCII.GetString(name.ToArray());
+                        material = material.Replace("\0", "");
+
+                        materials.Add(material);
+                    }
+
+                    // Finish reading off the rest of the data and store it for later.
+                    while (pos < originalStringBlockSize)
+                    {
+                        extraStringBlockData.Add(br1.ReadByte());
+                        pos++;
+                    }
+
+                }
+
+                // Make sure we're using new counts
+                short newBoneStringCount = (short)bones.Count;
+                short newAtrStringCount = (short)attributes.Count;
+                short newMatStringCount = (short)materials.Count;
+
+                // Write the string block data back together with our modification.
+                List<byte> stringBlockBytes = new List<byte>();
+                for (int i = 0; i < attributes.Count; i++)
+                {
+                    stringBlockBytes.AddRange(Encoding.ASCII.GetBytes(attributes[i]));
+                    stringBlockBytes.Add(0);
+                }
+                for (int i = 0; i < bones.Count; i++)
+                {
+                    stringBlockBytes.AddRange(Encoding.ASCII.GetBytes(bones[i]));
+                    stringBlockBytes.Add(0);
+                }
+                for (int i = 0; i < materials.Count; i++)
+                {
+                    stringBlockBytes.AddRange(Encoding.ASCII.GetBytes(materials[i]));
+                    stringBlockBytes.Add(0);
+                }
+
+                stringBlockBytes.AddRange(extraStringBlockData);
+
+                // Save the differential so that we can correct our offsets down the line.
+                int stringBlockDelta = stringBlockBytes.Count - originalStringBlockSize;
+                if(oldAtrStringCount != newAtrStringCount)
+                {
+                    // Delta needs to include the offset from the 4 bytes per attribute string later down the line.
+                    stringBlockDelta += ((newAtrStringCount - oldAtrStringCount) * 4);
+                }
+
+                if (oldBoneStringCount != newBoneStringCount)
+                {
+                    // 36 Total bytes per bone after this.
+                    // 4 for the bone increment data.
+                    // 32 for the transforms (4 bytes per float * 4 floats * 2 transforms) 
+                    stringBlockDelta += ((newBoneStringCount - oldBoneStringCount) * 36);
+                }
+
+                if (oldMatStringCount != newMatStringCount)
+                {
+                    // 4 bytes per material after this (one int32)
+                    stringBlockDelta += ((newMatStringCount - oldMatStringCount) * 4);
+
+                }
+
+                short newMeshCount = 0;
+                for (int lodIndex = 0; lodIndex < modelData.LoD.Count; lodIndex++)
+                {
+                    newMeshCount += (short)(modelData.LoD[lodIndex].MeshList.Count());
+                }
+
+                short newMeshPartCount = 0;
+                for (int lodIndex = 0; lodIndex < modelData.LoD.Count; lodIndex++ )
+                {
+                    for (int meshIndex = 0; meshIndex < modelData.LoD[lodIndex].MeshList.Count; meshIndex++)
+                    {
+                        newMeshPartCount+= (short)(modelData.LoD[lodIndex].MeshList[meshIndex].MeshPartList.Count());
+                    }
+                }
+
+                int meshPartDelta = 0;
+                int meshDelta = 0;
+                if (newMeshCount != oldMeshCount)
+                {
+                    meshDelta = newMeshCount - oldMeshCount;
+                    MessageBox.Show(String.Format("Mesh Count differs from original: Old-{0} : New-{1}", oldMeshCount, newMeshCount));
+                }
+
+
+                if (newMeshPartCount != oldMeshPartCount)
+                {
+                    meshPartDelta = newMeshPartCount - oldMeshPartCount;
+                    MessageBox.Show(String.Format("Mesh Part Count differs from original: Old-{0} : New-{1}", oldMeshPartCount, newMeshPartCount));
+                }
+
+                // Finally ready to push all the data into the binary block.
+                modelDataBlock.AddRange(BitConverter.GetBytes(stringBlockBytes.Count));
+                modelDataBlock.AddRange(stringBlockBytes);
+                modelDataBlock.AddRange(unknownInt);
+                modelDataBlock.AddRange(BitConverter.GetBytes(newMeshCount));
+                modelDataBlock.AddRange(BitConverter.GetBytes(newAtrStringCount));
+                modelDataBlock.AddRange(BitConverter.GetBytes(newMeshPartCount));
+                modelDataBlock.AddRange(BitConverter.GetBytes(newMatStringCount));
+                modelDataBlock.AddRange(BitConverter.GetBytes(newBoneStringCount));
+                modelDataBlock.AddRange(BitConverter.GetBytes(boneListCount));
+                modelDataBlock.AddRange(BitConverter.GetBytes(unk1));
+                modelDataBlock.AddRange(BitConverter.GetBytes(unk2));
+                modelDataBlock.AddRange(BitConverter.GetBytes(unk3));
+                modelDataBlock.AddRange(BitConverter.GetBytes(unk4));
+                modelDataBlock.AddRange(BitConverter.GetBytes(unk5));
+                modelDataBlock.AddRange(BitConverter.GetBytes(unk6));
+                modelDataBlock.AddRange(BitConverter.GetBytes(unk7));
+                modelDataBlock.AddRange(BitConverter.GetBytes(unk8));
+                modelDataBlock.AddRange(BitConverter.GetBytes(unk9));
+                modelDataBlock.AddRange(BitConverter.GetBytes(unk10));
+                modelDataBlock.AddRange(BitConverter.GetBytes(unk11));
+                modelDataBlock.AddRange(BitConverter.GetBytes(unk12));
 
 				//Unknown (short) * 20
 				modelDataBlock.AddRange(br.ReadBytes(16));
@@ -1646,10 +1783,10 @@ namespace FFXIV_TexTools2.IO
 					}
 					else
 					{
-						lod.VertexDataSize = br.ReadInt32();
-						OriginalLodList[i].VertexDataSize = lod.VertexDataSize;
+						OriginalLodList[i].VertexDataSize = br.ReadInt32();
+                        lod.VertexDataSize = 0;
 
-					}
+                    }
 
 					//LoD Index Buffer Size (int)
 					if (i == 0)
@@ -1676,16 +1813,18 @@ namespace FFXIV_TexTools2.IO
 					}
 					else
 					{
-						lod.IndexDataSize = br.ReadInt32();
-						OriginalLodList[i].IndexDataSize = lod.IndexDataSize;
+						OriginalLodList[i].IndexDataSize = br.ReadInt32();
+                        lod.VertexDataSize = 0;
 
-					}
+                    }
 
 					//LoD Vertex Offset (int)
 					if (i == 0)
 					{
 						lod.VertexOffset = br.ReadInt32();
 						OriginalLodList[i].VertexOffset = lod.VertexOffset;
+                        lod.VertexOffset += stringBlockDelta;
+                        lod.VertexOffset += meshPartDelta * 16;
 
 					}
 					else
@@ -1777,6 +1916,7 @@ namespace FFXIV_TexTools2.IO
 
 				//Meshes
 				Dictionary<int, List<MeshInfo>> meshInfoDict = new Dictionary<int, List<MeshInfo>>();
+                short meshPartOffset = 0;
 
 				for(int i = 0; i < lodList.Count; i++)
 				{
@@ -1800,15 +1940,37 @@ namespace FFXIV_TexTools2.IO
 							VertexDataBlockCount = br.ReadByte()
 						};
 
-						OriginalLodList[i].MeshList[j].MeshInfo = new MeshInfo()
-						{
-							VertexCount = meshInfo.VertexCount,
-							IndexCount = meshInfo.IndexCount,
-							IndexDataOffset = meshInfo.IndexDataOffset,
-							VertexDataOffsets = new List<int>(meshInfo.VertexDataOffsets),
-							VertexSizes = new List<int>(meshInfo.VertexSizes)
+                        //meshInfo.MaterialNum = 0;
+
+                        OriginalLodList[i].MeshList[j].MeshInfo = new MeshInfo()
+                        {
+                            VertexCount = meshInfo.VertexCount,
+                            IndexCount = meshInfo.IndexCount,
+                            IndexDataOffset = meshInfo.IndexDataOffset,
+                            VertexDataOffsets = new List<int>(meshInfo.VertexDataOffsets),
+                            VertexSizes = new List<int>(meshInfo.VertexSizes),
+                            MeshPartCount = meshInfo.MeshPartCount,
+                            MeshPartOffset = meshInfo.MeshPartOffset
 						};
 
+                        // Use the updated count from the user's file.
+                        meshInfo.MeshPartCount = modelData.LoD[i].MeshList[j].MeshPartList.Count;
+                        meshInfo.MeshPartOffset = meshPartOffset;
+                        meshPartOffset += (short) meshInfo.MeshPartCount;
+
+
+                        // LoD Non-Zero
+                        if(i != 0 )
+                        {
+                            meshInfo.VertexCount = 0;
+                            meshInfo.IndexCount = 0;
+                        }
+
+                        // Pull over the mesh part count the user specified
+                        //  Should only really be applicable to LoD 0, but best to be consistent.
+                        meshInfo.MeshPartCount = modelData.LoD[i].MeshList[j].MeshPartList.Count();
+
+                        // LoD level 0
 						if (i == 0)
 						{
 							meshInfo.VertexSizes[1] = meshInfo.VertexSizes[1] + 12;
@@ -1844,9 +2006,10 @@ namespace FFXIV_TexTools2.IO
 								meshInfo.IndexCount = 0;
 							}
 
-						}
-						else
-						{
+                        }
+                        // Other LoD levels
+                        else
+                        {
 							//Vertex Count (int)
 							modelDataBlock.AddRange(BitConverter.GetBytes(meshInfo.VertexCount));
 
@@ -1857,7 +2020,7 @@ namespace FFXIV_TexTools2.IO
 						//material index (short)
 						modelDataBlock.AddRange(BitConverter.GetBytes((short)meshInfo.MaterialNum));
 
-						//mesh part table offset (short)
+                        // mesh part table offset (short)
 						modelDataBlock.AddRange(BitConverter.GetBytes((short)meshInfo.MeshPartOffset));
 
 						//mesh part count (short)
@@ -1868,6 +2031,7 @@ namespace FFXIV_TexTools2.IO
 
 						if(j != 0)
 						{
+                            // Mesh Groups other than 0
 							//index data offset (int)
 							int meshIndexPadding = 8 - (meshInfoList[j - 1].IndexCount % 8);
 							if (meshIndexPadding == 8)
@@ -1880,10 +2044,12 @@ namespace FFXIV_TexTools2.IO
 						}
 						else
 						{
+                            // Mesh Group 0
 							//index data offset (int)
 							modelDataBlock.AddRange(BitConverter.GetBytes(meshInfo.IndexDataOffset));
 						}
 
+                        // LoD Level 0
 						if (i == 0)
 						{
 							int posCount = 0;
@@ -1904,7 +2070,7 @@ namespace FFXIV_TexTools2.IO
 								posCount = 0;
 							}
 
-
+                            // Mesh Group not-Zero
 							if(j != 0)
 							{
 								//vertex data offset[0] (int)
@@ -1918,6 +2084,7 @@ namespace FFXIV_TexTools2.IO
 								//vertex data offset[2] (int)
 								modelDataBlock.AddRange(BitConverter.GetBytes(meshInfo.VertexDataOffsets[2]));
 							}
+                            // Mesh Group 0
 							else
 							{
 								//vertex data offset[0] (int)
@@ -1927,12 +2094,12 @@ namespace FFXIV_TexTools2.IO
 								meshInfo.VertexDataOffsets[1] = posCount * meshInfo.VertexSizes[0];
 								modelDataBlock.AddRange(BitConverter.GetBytes(meshInfo.VertexDataOffsets[1]));
 
-
 								//vertex data offset[2] (int)
 								modelDataBlock.AddRange(BitConverter.GetBytes(meshInfo.VertexDataOffsets[2]));
 							}
 
 						}
+                        // LoD Level non-Zero
 						else
 						{
 							//vertex data offset[0] (int)
@@ -1961,10 +2128,40 @@ namespace FFXIV_TexTools2.IO
 
 				}
 
-				modelDataBlock.AddRange(br.ReadBytes(atrStringCount * 4));
 
+                // What does this data do?
+                // Does it vary in some way?-				
+                //modelDataBlock.AddRange(br.ReadBytes(oldAtrStringCount * 4));
+                byte[] oldAttrBytes = br.ReadBytes(oldAtrStringCount * 4);
+
+                List<int> newAttrBytes = new List<int>();
+                for(byte i = 0; i < newAtrStringCount; i++)
+                {
+                    int oldValue = 0;
+                    int newValue = (i * 8);
+                    if (i < oldAtrStringCount)
+                    {
+                        byte[] bytes = new byte[4];
+                        bytes[0] = oldAttrBytes[i * 4];
+                        bytes[1] = oldAttrBytes[(i * 4) + 1];
+                        bytes[2] = oldAttrBytes[(i * 4) + 2];
+                        bytes[3] = oldAttrBytes[(i * 4) + 3];
+                        oldValue = BitConverter.ToInt32(bytes, 0);
+                    }
+
+                    if(oldValue != 0 && oldValue != newValue)
+                    {
+                        MessageBox.Show(String.Format("Attribute Data mismatch: {0} : Old-{1} : New-Calculated-{2}", attributes[i], oldValue, newValue));
+                    }
+
+                    modelDataBlock.AddRange(BitConverter.GetBytes(newValue));
+                    newAttrBytes.Add(newValue);
+                }
+                
+                
 				if(unk6 > 0)
 				{
+                    // Magical Unknown Data
 					modelDataBlock.AddRange(br.ReadBytes(unk6 * 20));
 				}
 
@@ -1972,6 +2169,9 @@ namespace FFXIV_TexTools2.IO
 				List<MeshPart> meshPart = new List<MeshPart>();
 
 				int meshPadd = 0;
+                short lastBoneOffset = 0;
+                short lastBoneCount = 0;
+                short maxBoneCount = 0;
 
 				for (int l = 0; l < lodList.Count; l++)
 				{
@@ -1984,47 +2184,104 @@ namespace FFXIV_TexTools2.IO
 						{
 							MeshPart mp = new MeshPart();
 
-							//Index Offset (int)
-							if (l == 0 && i == 0)
-							{
-								if (j != 0)
-								{
-									br.ReadBytes(4);
-									mp.IndexOffset = meshPart[meshPart.Count - 1].IndexOffset + meshPart[meshPart.Count - 1].IndexCount;
-									modelDataBlock.AddRange(BitConverter.GetBytes(mp.IndexOffset));
-								}
-								else
-								{
-									mp.IndexOffset = br.ReadInt32();
-									modelDataBlock.AddRange(BitConverter.GetBytes(mp.IndexOffset));
-								}
-							}
-							else if (l == 0 && i == 1)
-							{
-								br.ReadBytes(4);
-								if (j == 0)
-								{
-									mp.IndexOffset = meshPart[meshPart.Count - 1].IndexOffset + meshPart[meshPart.Count - 1].IndexCount + meshPadd;
-								}
-								else
-								{
-									mp.IndexOffset = meshPart[meshPart.Count - 1].IndexOffset + meshPart[meshPart.Count - 1].IndexCount;
-								}
+                            // == Index Offsets (int) ==
 
-								modelDataBlock.AddRange(BitConverter.GetBytes(mp.IndexOffset));
-							}
-							else
-							{
-								mp.IndexOffset = br.ReadInt32();
-								modelDataBlock.AddRange(BitConverter.GetBytes(mp.IndexOffset));
-							}
+                            // LoD and Mesh Group 0
+                            if (l == 0 && i == 0)
+                            {
+                                // Part Zero
+                                if (j == 0)
+                                {
+                                    mp.IndexOffset = br.ReadInt32();
+                                    modelDataBlock.AddRange(BitConverter.GetBytes(mp.IndexOffset));
+                                }
+                                // Part Non-Zero
+                                else
+                                {
+                                    // If we're still in the original Mesh Part listing, advance the seek cursor.
+                                    if (i < OriginalLodList[l].MeshList.Count() && j < OriginalLodList[l].MeshList[i].MeshInfo.MeshPartCount)
+                                    {
+                                        br.ReadBytes(4);
+                                    }
 
-							//Index Count (int)
+                                    mp.IndexOffset = meshPart[meshPart.Count - 1].IndexOffset + meshPart[meshPart.Count - 1].IndexCount;
+                                    modelDataBlock.AddRange(BitConverter.GetBytes(mp.IndexOffset));
+                                }
+                            }
+                            // LoD 0 and Mesh Group 1
+                            else if (l == 0 && i == 1)
+                            {
+                                // If we're still in the original Mesh Part listing, advance the seek cursor.
+                                if (i < OriginalLodList[l].MeshList.Count() && j < OriginalLodList[l].MeshList[i].MeshInfo.MeshPartCount)
+                                {
+                                    br.ReadBytes(4);
+                                }
+
+                                // Part Zero
+                                if (j == 0)
+                                {
+                                    mp.IndexOffset = meshPart[meshPart.Count - 1].IndexOffset + meshPart[meshPart.Count - 1].IndexCount + meshPadd;
+                                }
+                                // Part Non-Zero
+                                else
+                                {
+                                    mp.IndexOffset = meshPart[meshPart.Count - 1].IndexOffset + meshPart[meshPart.Count - 1].IndexCount;
+                                }
+
+                                modelDataBlock.AddRange(BitConverter.GetBytes(mp.IndexOffset));
+                            }
+                            // LoD 0 and Mesh Group 2
+                            else if (l == 0 && i == 2)
+                            {
+                                // If we're still in the original Mesh Part listing, advance the seek cursor.
+                                if (i < OriginalLodList[l].MeshList.Count() && j < OriginalLodList[l].MeshList[i].MeshInfo.MeshPartCount)
+                                {
+                                    br.ReadBytes(4);
+                                }
+
+                                // Part Zero
+                                if (j == 0)
+                                {
+                                    mp.IndexOffset = meshPart[meshPart.Count - 1].IndexOffset + meshPart[meshPart.Count - 1].IndexCount + meshPadd;
+                                }
+                                // Part Non-Zero
+                                else
+                                {
+                                    mp.IndexOffset = meshPart[meshPart.Count - 1].IndexOffset + meshPart[meshPart.Count - 1].IndexCount;
+                                }
+
+                                modelDataBlock.AddRange(BitConverter.GetBytes(mp.IndexOffset));
+                            }
+                            // LoD is Non-Zero
+                            else
+                            {
+                                int oldIndexOffset = 0;
+
+                                // If we're still in the original Mesh Part listing, advance the seek cursor.
+                                if (i < OriginalLodList[l].MeshList.Count() && j < OriginalLodList[l].MeshList[i].MeshInfo.MeshPartCount)
+                                {
+                                    oldIndexOffset = br.ReadInt32();
+                                }
+                                 mp.IndexOffset = 0;
+
+
+                                modelDataBlock.AddRange(BitConverter.GetBytes(mp.IndexOffset));
+                            }
+
+							// == Index Counts (int) ==
+
+                            // LoD 0, Mesh is in the imported DAE
 							if (l == 0 && i < cmdList.Count)
 							{
 								var partsDict = cmdList[i].partsDict;
 
-								var indexCount = br.ReadInt32();
+                                // If we're still in the original Mesh Part listing, advance the seek cursor.
+                                if (i < OriginalLodList[l].MeshList.Count() && j < OriginalLodList[l].MeshList[i].MeshInfo.MeshPartCount)
+                                { 
+                                    var indexCount = br.ReadInt32();
+                                }
+
+
 								if (partsDict.ContainsKey(j))
 								{
 									mp.IndexCount = partsDict[j];
@@ -2036,22 +2293,40 @@ namespace FFXIV_TexTools2.IO
 
 								modelDataBlock.AddRange(BitConverter.GetBytes(mp.IndexCount));
 							}
+
+                            // LoD 0, Mesh was omitted.
 							else if (l == 0 && i >= cmdList.Count)
-							{
-								var indexCount = br.ReadInt32();
-								mp.IndexCount = 0;
-								modelDataBlock.AddRange(BitConverter.GetBytes(mp.IndexCount));
-							}
-							else
-							{
-								mp.IndexCount = br.ReadInt32();
+                            {
+                                // If we're still in the original Mesh Part listing, advance the seek cursor.
+                                if (i < OriginalLodList[l].MeshList.Count() && j < OriginalLodList[l].MeshList[i].MeshInfo.MeshPartCount)
+                                {
+                                    var indexCount = br.ReadInt32();
+                                }
+
+                                mp.IndexCount = 0;
 								modelDataBlock.AddRange(BitConverter.GetBytes(mp.IndexCount));
 							}
 
+                            // LoD Non-Zero
+							else
+                            {
+                                // If we're still in the original Mesh Part listing, advance the seek cursor.
+                                if (i < OriginalLodList[l].MeshList.Count() && j < OriginalLodList[l].MeshList[i].MeshInfo.MeshPartCount)
+                                {
+                                    var indexCount = br.ReadInt32();
+                                }
+
+                                modelDataBlock.AddRange(BitConverter.GetBytes(0));
+							}
+
+
+                            // LoD & Mesh 0
 							if (l == 0 && i == 0)
 							{
+                                // If we're at the last part in the first group of the first LoD Level.
 								if (j == mPartCount - 1)
 								{
+                                    // Pad stuff
 									var pad = ((mp.IndexOffset + mp.IndexCount) % 8);
 
 									if(pad != 0)
@@ -2066,35 +2341,94 @@ namespace FFXIV_TexTools2.IO
 								}
 							}
 
-						    //Attributes (int)
-                            mp.Attributes = br.ReadInt32();
-
-                            if (importSettings != null && importSettings.ContainsKey(i.ToString()) && l == 0)
+                            //Attributes (int)
+                            // If we're still in the original Mesh Part listing, advance the seek cursor.
+                            if (i < OriginalLodList[l].MeshList.Count() && j < OriginalLodList[l].MeshList[i].MeshInfo.MeshPartCount)
                             {
-                                if (importSettings[i.ToString()].PartDictionary != null)
+                                mp.Attributes = br.ReadInt32();
+                            } else
+                            {
+                                mp.Attributes = 0;
+                            }
+                            
+                            // LoD Non-Zero
+                            if( l == 0 )
+                            {
+                                mp.Attributes = 0;
+                            }
+
+                            // Make sure we can't be referencing attributes beyond the end of our attributes list.
+                            //  It's a bitmask, where each bit references the attributes in order from the attribute strings
+                            Int32 maxValue = 0;
+                            if (newAtrStringCount > 0)
+                            {
+                                maxValue = (int) Math.Pow(2, newAtrStringCount);
+                            }
+
+                            if (maxValue == 0)
+                            {
+                                // If we have no attribute strings, we can't have attributes.
+                                mp.Attributes = 0;
+                                modelDataBlock.AddRange(BitConverter.GetBytes(mp.Attributes));
+                            } else
+                            {
+                                mp.Attributes = mp.Attributes % maxValue;
+
+                                if (importSettings != null && importSettings.ContainsKey(i.ToString()) && l == 0)
                                 {
-                                    var attr = importSettings[i.ToString()].PartDictionary[j];
-                                    modelDataBlock.AddRange(BitConverter.GetBytes(attr));
+                                    if (importSettings[i.ToString()].PartDictionary != null)
+                                    {
+                                        var attr = (importSettings[i.ToString()].PartDictionary[j]) % maxValue;
+                                        modelDataBlock.AddRange(BitConverter.GetBytes(attr));
+                                    }
+                                    else
+                                    {
+                                        modelDataBlock.AddRange(BitConverter.GetBytes(mp.Attributes));
+                                    }
                                 }
                                 else
                                 {
                                     modelDataBlock.AddRange(BitConverter.GetBytes(mp.Attributes));
                                 }
                             }
-                            else
-						    {
-						        modelDataBlock.AddRange(BitConverter.GetBytes(mp.Attributes));
+                            
+
+
+                            // == Bone reference offset (short) ==
+
+                            short oldOffset = 0;
+
+                            // If we're still in the original Mesh Part listing, advance the seek cursor.
+                            if (i < OriginalLodList[l].MeshList.Count() && j < OriginalLodList[l].MeshList[i].MeshInfo.MeshPartCount)
+                            {
+                                oldOffset = br.ReadInt16();
                             }
 
-                            //Bone reference offset (short)
-                            mp.BoneOffset = br.ReadInt16();
+
+                            mp.BoneOffset = lastBoneOffset + lastBoneCount;
 							modelDataBlock.AddRange(BitConverter.GetBytes((short)mp.BoneOffset));
 
-							//Bone reference count (short)
-							mp.BoneCount = br.ReadInt16();
-							modelDataBlock.AddRange(BitConverter.GetBytes((short)mp.BoneCount));
+                            lastBoneOffset = (short)mp.BoneOffset;
 
-							meshPart.Add(mp);
+
+                            // == Bone reference count (short) ==
+
+                            short oldCount = 0;
+
+                            // If we're still in the original Mesh Part listing, advance the seek cursor.
+                            if (i < OriginalLodList[l].MeshList.Count() && j < OriginalLodList[l].MeshList[i].MeshInfo.MeshPartCount)
+                            {
+                                oldCount = br.ReadInt16();
+                            }
+                            
+                            // Only allow bones in LoD 0
+                            mp.BoneCount = l == 0 ? 100 : 0;
+                            modelDataBlock.AddRange(BitConverter.GetBytes((short)mp.BoneCount));
+                            
+                            lastBoneCount = (short) mp.BoneCount;
+
+
+                            meshPart.Add(mp);
 						}
 					}
 				}
@@ -2104,18 +2438,116 @@ namespace FFXIV_TexTools2.IO
 					modelDataBlock.AddRange(br.ReadBytes(unk12 * 12));
 				}
 
-				modelDataBlock.AddRange(br.ReadBytes(matStringCount * 4));
 
-				modelDataBlock.AddRange(br.ReadBytes(boneStringCount * 4));
+                // One int per material; unknown what they do.
+                // They seem to increase in value starting from around
+                //~118-120 by an unknown amount.
+                List<int> UnknownMaterialInts = new List<int>();
+                for(int i = 0; i < oldMatStringCount; i++)
+                {
+                    UnknownMaterialInts.Add(br.ReadInt32());
+                }
 
+                int lastMaterialInt = 0;
+                for (int i = 0; i < newMatStringCount; i++)
+                {
+                    if (i < UnknownMaterialInts.Count())
+                    {
+                        modelDataBlock.AddRange(BitConverter.GetBytes(UnknownMaterialInts[i]));
+                        lastMaterialInt = UnknownMaterialInts[i];
+                    } else
+                    {
+                        int toWrite = lastMaterialInt += 20;
+                        modelDataBlock.AddRange(BitConverter.GetBytes(toWrite));
+                        lastMaterialInt = toWrite;
+                    }
+                }
+
+
+
+
+                //modelDataBlock.AddRange(br.ReadBytes(oldBoneStringCount * 4));
+
+                // Weird Bone Increment data goes here.
+                BoneDataList JsonBoneData;
+                using (StreamReader sr = new StreamReader(Properties.Settings.Default.BoneData_Directory))
+                {
+                    string boneDataTemp = sr.ReadToEnd();
+                    JsonBoneData = JsonConvert.DeserializeObject<BoneDataList>(boneDataTemp);
+                }
+
+                int lastValue = 0;
+                int lastValueOld = 0;
+                for (int y = 0; y < newBoneStringCount; y++)
+                {
+                    int oldValue = 0;
+                    if (y < oldBoneStringCount)
+                    {
+                        oldValue = br.ReadInt32();
+                    }
+                    int newValue = oldValue;
+
+                    if(y == 0)
+                    {
+                        // Use the old value on the first entry.
+                    } else
+                    {
+                        string previousBone = bones[y - 1];
+
+                        // If we have valid saved increment Data, use that.
+                        if(JsonBoneData != null && JsonBoneData.Bones.ContainsKey(previousBone) && JsonBoneData.Bones[previousBone].Increment != 0)
+                        {
+                            newValue = lastValue + JsonBoneData.Bones[previousBone].Increment;
+                        } else {
+
+                            // Use our original Delta if we don't have saved data for this bone.
+                            // May create some odd situations if the bone order has changed, but it's a semi graceful failure.
+                            int delta = oldValue - lastValueOld;
+                            newValue = lastValue + delta;
+                        }
+                    }
+                    modelDataBlock.AddRange(BitConverter.GetBytes(newValue));
+
+                    lastValueOld = oldValue;
+                    lastValue = newValue;
+                }
+
+                // Need to finish reading off the old data so our pointer is in the right place.
+                if(newBoneStringCount < oldBoneStringCount)
+                {
+                    int delta = oldBoneStringCount - newBoneStringCount;
+                    for(int i = 0; i < delta; i++)
+                    {
+                        br.ReadInt32();
+                    }
+                }
+                
+                // Bone Sets - List of shorts which reference bones
+                // Parts then reference the bone set list.
 				for (int i = 0; i < boneListCount; i++)
 				{
-					//bone list
-					modelDataBlock.AddRange(br.ReadBytes(128));
+                    //bone list
+                    List<short> boneSet = new List<short>();
+                    for(int y = 0; y < 64; y++)
+                    {
+                        short boneNumber = br.ReadInt16();
+                        
+                        // Don't let us reference removed bones
+                        //if (boneNumber < newBoneStringCount)
+                        //{
+                            boneSet.Add(boneNumber);
+                        //}
+                    }
 
-					//bone count (int)
-					modelDataBlock.AddRange(br.ReadBytes(4));
-				}
+                    for(int y = 0; y < 64; y++)
+                    {
+                        modelDataBlock.AddRange(BitConverter.GetBytes(boneSet[y]));
+                    }
+
+                    //bone count (int)
+                    int boneCount = br.ReadInt32();
+                    modelDataBlock.AddRange(BitConverter.GetBytes(boneCount));
+                }
 
 				Dictionary<int, int> nMax = new Dictionary<int, int>();
 				Dictionary<int, int> nOffsets = new Dictionary<int, int>();
@@ -2178,10 +2610,7 @@ namespace FFXIV_TexTools2.IO
 						pCount2 += p3n;
 
 					}
-				}
 
-				if (unk1 > 0)
-				{
 					for (int i = 0; i < modelData.LoD[0].MeshCount; i++)
 					{
 						var ido = OriginalLodList[0].MeshList[i].MeshInfo.IndexDataOffset;
@@ -2341,8 +2770,9 @@ namespace FFXIV_TexTools2.IO
 				int boneIndexCount = br.ReadInt32();
 				modelDataBlock.AddRange(BitConverter.GetBytes(boneIndexCount));
 
-				//Bone indices
-				modelDataBlock.AddRange(br.ReadBytes(boneIndexCount));
+                //Bone indices
+                byte[] boneIndices = br.ReadBytes(boneIndexCount);
+                modelDataBlock.AddRange(boneIndices);
 
 				//Padding count
 				byte paddingCount = br.ReadByte();
@@ -2353,8 +2783,31 @@ namespace FFXIV_TexTools2.IO
 				//Bounding Boxes
 				modelDataBlock.AddRange(br.ReadBytes(128));
 
-				//Bones
-				modelDataBlock.AddRange(br.ReadBytes(boneStringCount * 32));
+                //Bone transforms - these seem to be unused by FFXIV.
+                //Possibly file data that's just carried through in the engine for creators?
+                for(int i = 0; i < newBoneStringCount * 2; i++)
+                {
+
+                    modelDataBlock.Add(0);
+                    modelDataBlock.Add(0);
+                    modelDataBlock.Add(0);
+                    modelDataBlock.Add(0);
+
+                    modelDataBlock.Add(0);
+                    modelDataBlock.Add(0);
+                    modelDataBlock.Add(0);
+                    modelDataBlock.Add(0);
+
+                    modelDataBlock.Add(0);
+                    modelDataBlock.Add(0);
+                    modelDataBlock.Add(0);
+                    modelDataBlock.Add(0);
+
+                    modelDataBlock.Add(0);
+                    modelDataBlock.Add(0);
+                    modelDataBlock.Add(0);
+                    modelDataBlock.Add(0);
+                }
 
 				List<int> compModelSizes = new List<int>();
 
@@ -2838,9 +3291,9 @@ namespace FFXIV_TexTools2.IO
 				datHeader.AddRange(BitConverter.GetBytes((short)1));
 
 				//Mesh Count
-				datHeader.AddRange(BitConverter.GetBytes((short)meshCount));
+				datHeader.AddRange(BitConverter.GetBytes((short)newMeshCount));
 				//Material Count
-				datHeader.AddRange(BitConverter.GetBytes((short)matStringCount));
+				datHeader.AddRange(BitConverter.GetBytes((short)newMatStringCount));
 				//Unknown 1
 				datHeader.AddRange(BitConverter.GetBytes((short)259));
 				//Unknown 2

@@ -107,7 +107,13 @@ namespace FFXIV_TexTools2.Views
                     }
                     else
                     {
-                        attrNameDict.Add(Info.AttributeDict[attr], a);
+                        if (Info.AttributeDict.ContainsKey(attr))
+                        {
+                            attrNameDict.Add(Info.AttributeDict[attr], a);
+                        } else
+                        {
+                            attrNameDict.Add(attr, a);
+                        }
                     }
                 }
                 attributeDictionary.Add(a, attr);
@@ -312,8 +318,13 @@ namespace FFXIV_TexTools2.Views
                                     }
 
 
-
-                                    OrigAttrText.Text += "[ " + Info.AttributeDict[attr] + attrNum;
+                                    if (Info.AttributeDict.ContainsKey(attr))
+                                    {
+                                        OrigAttrText.Text += "[ " + Info.AttributeDict[attr] + attrNum;
+                                    } else
+                                    {
+                                        OrigAttrText.Text += "[ " + attr + attrNum;
+                                    }
                                 }
                             }
                         }
