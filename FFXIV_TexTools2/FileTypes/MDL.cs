@@ -19,6 +19,7 @@ using FFXIV_TexTools2.Helpers;
 using FFXIV_TexTools2.Material.ModelMaterial;
 using FFXIV_TexTools2.Model;
 using FFXIV_TexTools2.Resources;
+using Newtonsoft.Json;
 using HelixToolkit.Wpf.SharpDX.Core;
 using SharpDX;
 using System;
@@ -60,7 +61,7 @@ namespace FFXIV_TexTools2.Material
             string itemType = Helper.GetCategoryType(selectedCategory);
             string MDLFolder = "";
 
-            if(itemType.Equals("weapon") || itemType.Equals("food"))
+            if (itemType.Equals("weapon") || itemType.Equals("food"))
             {
                 if (selectedPart.Equals("Secondary"))
                 {
@@ -152,7 +153,7 @@ namespace FFXIV_TexTools2.Material
             }
 
             int datNum = ((offset / 8) & 0x000f) / 2;
-     
+
             var MDLDatData = Helper.GetType3DecompressedData(offset, datNum, Strings.ItemsDat);
 
             using (BinaryReader br = new BinaryReader(new MemoryStream(MDLDatData.Item1)))
@@ -173,10 +174,20 @@ namespace FFXIV_TexTools2.Material
                 var boneStringCount = br.ReadInt16();
                 var boneListCount = br.ReadInt16();
 
+
+                //Has something to do with amount of extra vertex data.
                 var unknown1 = br.ReadInt16();
+
+                //Has something to do with amount of extra vertex data.
                 var unknown2 = br.ReadInt16();
+
+
                 var unknown3 = br.ReadInt16();
+                
+                // Seems to always be 1027
                 var unknown4 = br.ReadInt16();
+
+
                 var unknown5 = br.ReadInt16();
                 var unknown6 = br.ReadInt16();
 
@@ -190,7 +201,7 @@ namespace FFXIV_TexTools2.Material
                 {
                     br1.BaseStream.Seek(0, SeekOrigin.Begin);
 
-                    for(int i= 0; i < attributeStringCount; i++)
+                    for (int i = 0; i < attributeStringCount; i++)
                     {
                         byte a;
                         List<byte> atrName = new List<byte>();
@@ -204,7 +215,7 @@ namespace FFXIV_TexTools2.Material
                         atrStrings.Add(atr);
                     }
 
-                    for(int i = 0; i < boneStringCount; i++)
+                    for (int i = 0; i < boneStringCount; i++)
                     {
                         byte b;
                         List<byte> boneName = new List<byte>();
@@ -233,7 +244,7 @@ namespace FFXIV_TexTools2.Material
                     }
                 }
 
-                br.ReadBytes(32 * unknown5);
+                byte[] unknown5Bytes = br.ReadBytes(32 * unknown5);
 
                 for (int i = 0; i < 3; i++)
                 {
@@ -248,7 +259,7 @@ namespace FFXIV_TexTools2.Material
                     LoD.VertexOffset = br.ReadInt32();
                     LoD.IndexOffset = br.ReadInt32();
 
-                    modelData.LoD.Add(LoD);    
+                    modelData.LoD.Add(LoD);
                 }
 
                 var savePos = br.BaseStream.Position;
@@ -329,11 +340,11 @@ namespace FFXIV_TexTools2.Material
                 br.ReadBytes(attributeStringCount * 4);
                 br.ReadBytes(unknown6 * 20);
 
-                for(int i = 0; i < modelData.LoD.Count; i++)
+                for (int i = 0; i < modelData.LoD.Count; i++)
                 {
                     foreach (var mesh in modelData.LoD[i].MeshList)
                     {
-                        for(int j = 0; j < mesh.MeshInfo.MeshPartCount; j++)
+                        for (int j = 0; j < mesh.MeshInfo.MeshPartCount; j++)
                         {
                             MeshPart meshPart = new MeshPart()
                             {
@@ -351,7 +362,60 @@ namespace FFXIV_TexTools2.Material
 
                 br.ReadBytes(unknown7 * 12);
                 br.ReadBytes(materialStringCount * 4);
-                br.ReadBytes(boneStringCount * 4);
+
+                BoneDataList JsonBoneData;
+                using (StreamReader sr = new StreamReader(Properties.Settings.Default.BoneData_Directory))
+                {
+                    string boneDataTemp = sr.ReadToEnd();
+                    JsonBoneData = JsonConvert.DeserializeObject<BoneDataList>(boneDataTemp);
+                    if(JsonBoneData == null)
+                    {
+                        JsonBoneData = new BoneDataList();
+                        JsonBoneData.Bones = new Dictionary<string, BoneDataEntry>();
+                        JsonBoneData.StartingIncrements = new HashSet<int>();
+                    }
+                }
+
+                List<int> boneIncrements = new List<int>();
+                int lastIncrement = 0;
+
+                // Loop through the increments and save their data.
+                for (int i = 0; i < boneStringCount; i++)
+                {
+                    int increment = br.ReadInt32();
+                    boneIncrements.Add(increment);
+
+                    // Make sure we have a valid entry.
+                    if (!JsonBoneData.Bones.ContainsKey(boneStrings[i]))
+                    {
+                        BoneDataEntry temp = new BoneDataEntry();
+                        temp.Name = boneStrings[i];
+                        JsonBoneData.Bones.Add(boneStrings[i], temp);
+                    }
+
+                    // First one is a mystery.
+                    if(i == 0)
+                    {
+                        JsonBoneData.StartingIncrements.Add(increment);
+                    }
+                    else
+                    {
+                        int delta = increment - lastIncrement;
+                        string boneName = boneStrings[i - 1];
+
+                        if (JsonBoneData.Bones[boneName].Increment != 0 && JsonBoneData.Bones[boneName].Increment != delta)
+                        {
+                            // ERROR!
+                            MessageBox.Show(String.Format("Bone Increment Mismatch: {0} : OLD - {1} : NEW {2}"
+                                , boneName, JsonBoneData.Bones[boneName].Increment, delta));
+                        }
+
+                        JsonBoneData.Bones[boneName].Increment = delta;
+                    }
+
+                    lastIncrement = increment;
+                }
+
 
                 for (int i = 0; i < boneListCount; i++)
                 {
@@ -412,13 +476,16 @@ namespace FFXIV_TexTools2.Material
 
                 Dictionary<int, int> indexLoc = new Dictionary<int, int>();
 
-                if(unknown1 > 0)
+                if (unknown1 > 0)
                 {
                     for (int i = 0; i < modelData.LoD[0].MeshCount; i++)
                     {
                         var ido = modelData.LoD[0].MeshList[i].MeshInfo.IndexDataOffset;
 
-                        indexLoc.Add(ido, i);
+                        if (!indexLoc.ContainsKey(ido))
+                        {
+                            indexLoc.Add(ido, i);
+                        }
                     }
                 }
 
@@ -452,7 +519,7 @@ namespace FFXIV_TexTools2.Material
 
                 int totalLoD0MaskCount = 0;
 
-                if(unknown2 > 0)
+                if (unknown2 > 0)
                 {
                     for (int i = 0; i < pCount; i++)
                     {
@@ -505,7 +572,7 @@ namespace FFXIV_TexTools2.Material
 
 
 
-                if(unknown3 > 0)
+                if (unknown3 > 0)
                 {
                     foreach (var ei in extraIndices)
                     {
@@ -549,17 +616,85 @@ namespace FFXIV_TexTools2.Material
                 }
 
                 //float4x4
-                for(int i = 0; i < boneStringCount; i++)
+                for (int i = 0; i < boneStringCount; i++)
                 {
-                    boneTransforms.Add(br.ReadSingle());
-                    boneTransforms.Add(br.ReadSingle());
-                    boneTransforms.Add(br.ReadSingle());
-                    boneTransforms.Add(br.ReadSingle());
+                    string boneName = boneStrings[i];
 
-                    boneTransforms.Add(br.ReadSingle());
-                    boneTransforms.Add(br.ReadSingle());
-                    boneTransforms.Add(br.ReadSingle());
-                    boneTransforms.Add(br.ReadSingle());
+                    Vector4 transform1 = new Vector4();
+                    Vector4 transform2 = new Vector4();
+
+                    transform1.X = br.ReadSingle();
+                    transform1.Y = br.ReadSingle();
+                    transform1.Z = br.ReadSingle();
+                    transform1.W = br.ReadSingle();
+
+                    transform2.X = br.ReadSingle();
+                    transform2.Y = br.ReadSingle();
+                    transform2.Z = br.ReadSingle();
+                    transform2.W = br.ReadSingle();
+
+                    /*
+                    Vector4 oldTransform1 = new Vector4(
+                        JsonBoneData.Bones[boneName].Transform1X,
+                        JsonBoneData.Bones[boneName].Transform1Y,
+                        JsonBoneData.Bones[boneName].Transform1Z,
+                        JsonBoneData.Bones[boneName].Transform1W);
+
+                    Vector4 oldTransform2 = new Vector4(
+                        JsonBoneData.Bones[boneName].Transform2X,
+                        JsonBoneData.Bones[boneName].Transform2Y,
+                        JsonBoneData.Bones[boneName].Transform2Z,
+                        JsonBoneData.Bones[boneName].Transform2W);
+
+                    if(JsonBoneData.Bones[boneName].Transform1X != 0)
+                    {
+                        //If we already have a bone transform, compare.
+                        if(oldTransform1.X != transform1.X
+                            || oldTransform1.Y != transform1.Y
+                            || oldTransform1.Z != transform1.Z
+                            || oldTransform1.W != transform1.W)
+                        {
+                            //MessageBox.Show(String.Format("Bone Transform Mismatch: in {0} - Transform1", boneName));
+                        }
+
+                        //If we already have a bone transform, compare.
+                        if (oldTransform2.X != transform2.X
+                            || oldTransform2.Y != transform2.Y
+                            || oldTransform2.Z != transform2.Z
+                            || oldTransform2.W != transform2.W)
+                        {
+                            //MessageBox.Show(String.Format("Bone Transform Mismatch: in {0} - Transform2", boneName));
+                        }
+
+                    }
+
+                    // Save the transform data.
+                    JsonBoneData.Bones[boneName].Transform1X = transform1.X;
+                    JsonBoneData.Bones[boneName].Transform1Y = transform1.Y;
+                    JsonBoneData.Bones[boneName].Transform1Z = transform1.Z;
+                    JsonBoneData.Bones[boneName].Transform1W = transform1.W;
+
+                    JsonBoneData.Bones[boneName].Transform2X = transform2.X;
+                    JsonBoneData.Bones[boneName].Transform2Y = transform2.Y;
+                    JsonBoneData.Bones[boneName].Transform2Z = transform2.Z;
+                    JsonBoneData.Bones[boneName].Transform2W = transform2.W;
+                    */
+
+                    boneTransforms.Add(transform1.X);
+                    boneTransforms.Add(transform1.Y);
+                    boneTransforms.Add(transform1.Z);
+                    boneTransforms.Add(transform1.W);
+
+                    boneTransforms.Add(transform2.X);
+                    boneTransforms.Add(transform2.Y);
+                    boneTransforms.Add(transform2.Z);
+                    boneTransforms.Add(transform2.W);
+                }
+
+                using (StreamWriter sr = new StreamWriter(Properties.Settings.Default.BoneData_Directory))
+                {
+                    string result = JsonConvert.SerializeObject(JsonBoneData);
+                    sr.Write(result);
                 }
 
                 for (int i = 0; i < 3; i++)
@@ -630,7 +765,7 @@ namespace FFXIV_TexTools2.Material
                         {
                             coordinates = c;
                         }
-                        else if(meshDataInfo.UseType == 6)
+                        else if (meshDataInfo.UseType == 6)
                         {
                             tangents = c;
                         }
@@ -646,7 +781,7 @@ namespace FFXIV_TexTools2.Material
                      * -----------------
                      * Vertex
                      * -----------------
-                     */ 
+                     */
                     using (BinaryReader br1 = new BinaryReader(new MemoryStream(mesh.MeshVertexData[meshDataInfoList[vertex].VertexDataBlock])))
                     {
                         for (int j = 0; j < mesh.MeshInfo.VertexCount; j++)
@@ -656,7 +791,7 @@ namespace FFXIV_TexTools2.Material
                             Vector3 vVector = new Vector3();
                             if (meshDataInfoList[vertex].DataType == 13 || meshDataInfoList[vertex].DataType == 14)
                             {
-                                
+
                                 System.Half h1 = System.Half.ToHalf(br1.ReadUInt16());
                                 System.Half h2 = System.Half.ToHalf(br1.ReadUInt16());
                                 System.Half h3 = System.Half.ToHalf(br1.ReadUInt16());
@@ -701,22 +836,22 @@ namespace FFXIV_TexTools2.Material
                             float w = br1.ReadByte() / 255.0f;
 
                             int count = 0;
-                            if(x != 0)
+                            if (x != 0)
                             {
                                 blendWeightList.Add(x);
                                 count++;
 
-                                if(y != 0)
+                                if (y != 0)
                                 {
                                     blendWeightList.Add(y);
                                     count++;
 
-                                    if(z != 0)
+                                    if (z != 0)
                                     {
                                         blendWeightList.Add(z);
                                         count++;
 
-                                        if(w != 0)
+                                        if (w != 0)
                                         {
                                             blendWeightList.Add(w);
                                             count++;
@@ -725,11 +860,11 @@ namespace FFXIV_TexTools2.Material
                                 }
                             }
 
-                            if(count == 1)
+                            if (count == 1)
                             {
                                 blendWeightList2.Add(new float[] { x });
                             }
-                            else if(count == 2)
+                            else if (count == 2)
                             {
                                 blendWeightList2.Add(new float[] { x, y });
                             }
@@ -763,7 +898,7 @@ namespace FFXIV_TexTools2.Material
                             int z = br1.ReadByte();
                             int w = br1.ReadByte();
 
-                            if(weightCounts[j] == 1)
+                            if (weightCounts[j] == 1)
                             {
                                 blendIndicesList.Add(x);
                                 blendIndicesList2.Add(new int[] { x });
@@ -810,7 +945,7 @@ namespace FFXIV_TexTools2.Material
                             float x = 0;
                             float y = 0;
                             float z = 0;
-                            float w = 0; 
+                            float w = 0;
                             if (meshDataInfoList[coordinates].DataType == 13 || meshDataInfoList[coordinates].DataType == 14)
                             {
                                 var sx = br1.ReadUInt16();
@@ -831,7 +966,7 @@ namespace FFXIV_TexTools2.Material
                             else if (meshDataInfoList[coordinates].DataType == 1)
                             {
                                 x = br1.ReadSingle();
-                                y = br1.ReadSingle();   
+                                y = br1.ReadSingle();
                             }
                             else
                             {
@@ -913,10 +1048,10 @@ namespace FFXIV_TexTools2.Material
                             int z = br1.ReadByte();
                             int w = br1.ReadByte();
 
-                            var x1  = x * 2 / 255f - 1f;
-                            var y1  = y * 2 / 255f - 1f;
-                            var z1  = z * 2 / 255f - 1f;
-                            var w1  = w * 2 / 255f - 1f;
+                            var x1 = x * 2 / 255f - 1f;
+                            var y1 = y * 2 / 255f - 1f;
+                            var z1 = z * 2 / 255f - 1f;
+                            var w1 = w * 2 / 255f - 1f;
 
 
                             var nv = new Vector3(x1, y1, z1);
@@ -994,7 +1129,7 @@ namespace FFXIV_TexTools2.Material
                         MeshPartOffset = mesh.MeshInfo.MeshPartOffset
                     };
 
-                    if(extraIndices2.ContainsKey(i))
+                    if (extraIndices2.ContainsKey(i))
                     {
                         foreach (var id in extraIndices2[i])
                         {

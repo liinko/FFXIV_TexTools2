@@ -94,7 +94,21 @@ namespace FFXIV_TexTools2.Properties {
                 this["Modlist_Directory"] = value;
             }
         }
-        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string BoneData_Directory
+        {
+            get
+            {
+                return ((string)(this["BoneData_Directory"]));
+            }
+            set
+            {
+                this["BoneData_Directory"] = value;
+            }
+        }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]

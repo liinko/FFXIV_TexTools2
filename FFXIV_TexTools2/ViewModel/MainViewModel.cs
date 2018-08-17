@@ -150,10 +150,28 @@ namespace FFXIV_TexTools2.ViewModel
                      "The following default will be used:\n" + indexBackupDir, "Settings Read Error " + applicationVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
+            var boneDataDir = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/TexTools/BoneData.json";
+            try
+            {
+                boneDataDir = Properties.Settings.Default.BoneData_Directory;
+            }
+            catch
+            {
+                FlexibleMessageBox.Show("TexTools was unable to read Bone Data Directory setting\n\n" +
+                     "The following default will be used:\n" + boneDataDir, "Settings Read Error " + applicationVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
             if (indexBackupDir.Equals(""))
             {
                 indexBackupDir = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/TexTools/Index_Backups";
                 Properties.Settings.Default.IndexBackups_Directory = indexBackupDir;
+                Properties.Settings.Default.Save();
+            }
+
+            if (boneDataDir.Equals(""))
+            {
+                boneDataDir = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/TexTools/BoneData.json";
+                Properties.Settings.Default.BoneData_Directory = boneDataDir;
                 Properties.Settings.Default.Save();
             }
 

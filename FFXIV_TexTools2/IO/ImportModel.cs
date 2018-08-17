@@ -577,10 +577,10 @@ namespace FFXIV_TexTools2.IO
                     {
                         MeshPart newPart = new MeshPart();
                         modelData.LoD[0].MeshList[i].MeshPartList.Add(newPart);
-                        //MeshPart newPart2 = new MeshPart();
-                        //modelData.LoD[1].MeshList[i].MeshPartList.Add(newPart2);
-                        //MeshPart newPart3 = new MeshPart();
-                        //modelData.LoD[2].MeshList[i].MeshPartList.Add(newPart3);
+                        MeshPart newPart2 = new MeshPart();
+                        modelData.LoD[1].MeshList[i].MeshPartList.Add(newPart2);
+                        MeshPart newPart3 = new MeshPart();
+                        modelData.LoD[2].MeshList[i].MeshPartList.Add(newPart3);
                     }
                     
 
@@ -822,7 +822,7 @@ namespace FFXIV_TexTools2.IO
 							for (int j = 0; j < bCount * 2; j += 2)
 							{
 								var b = cd.bIndex[vTrack * 2 + j];
-								var bi = (byte)blDict[b];
+								var bi = (byte)b;
 								var bw = (byte)Math.Round(cd.weights[cd.bIndex[vTrack * 2 + j + 1]] * 255f);
 
 								if (bw != 0)
@@ -924,7 +924,7 @@ namespace FFXIV_TexTools2.IO
 						            var b = cd.bIndex[vTrack * 2 + j];
                                     try
 						            {
-						                var bi = (byte) blDict[b];
+						                var bi = (byte) b;
 						                var bw = (byte) Math.Round(cd.weights[cd.bIndex[vTrack * 2 + j + 1]] * 255f);
 
 						                if (bw != 0)
@@ -2209,39 +2209,19 @@ namespace FFXIV_TexTools2.IO
                                 }
                             }
                             // LoD 0 and Mesh Group 1
-                            else if (l == 0 && i == 1)
+                            else if (l == 0 && i > 0)
                             {
+                                int originalOffset = 0;
                                 // If we're still in the original Mesh Part listing, advance the seek cursor.
                                 if (i < OriginalLodList[l].MeshList.Count() && j < OriginalLodList[l].MeshList[i].MeshInfo.MeshPartCount)
                                 {
-                                    br.ReadBytes(4);
+                                    originalOffset = br.ReadInt32();
                                 }
 
                                 // Part Zero
                                 if (j == 0)
                                 {
-                                    mp.IndexOffset = meshPart[meshPart.Count - 1].IndexOffset + meshPart[meshPart.Count - 1].IndexCount + meshPadd;
-                                }
-                                // Part Non-Zero
-                                else
-                                {
-                                    mp.IndexOffset = meshPart[meshPart.Count - 1].IndexOffset + meshPart[meshPart.Count - 1].IndexCount;
-                                }
-
-                                modelDataBlock.AddRange(BitConverter.GetBytes(mp.IndexOffset));
-                            }
-                            // LoD 0 and Mesh Group 2
-                            else if (l == 0 && i == 2)
-                            {
-                                // If we're still in the original Mesh Part listing, advance the seek cursor.
-                                if (i < OriginalLodList[l].MeshList.Count() && j < OriginalLodList[l].MeshList[i].MeshInfo.MeshPartCount)
-                                {
-                                    br.ReadBytes(4);
-                                }
-
-                                // Part Zero
-                                if (j == 0)
-                                {
+                                    int pad = i == 1 ? meshPadd : 0;
                                     mp.IndexOffset = meshPart[meshPart.Count - 1].IndexOffset + meshPart[meshPart.Count - 1].IndexCount + meshPadd;
                                 }
                                 // Part Non-Zero
@@ -2320,10 +2300,10 @@ namespace FFXIV_TexTools2.IO
 							}
 
 
-                            // LoD & Mesh 0
-							if (l == 0 && i == 0)
+                            // LoD 0
+							if (l == 0)
 							{
-                                // If we're at the last part in the first group of the first LoD Level.
+                                // If we're at the last part in a group, math out the padding.
 								if (j == mPartCount - 1)
 								{
                                     // Pad stuff
