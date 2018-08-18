@@ -174,6 +174,8 @@ namespace FFXIV_TexTools2.IO
 				int indStride = 4;
 				bool blender = false;
 
+                Dictionary<string, int> CustomBoneSet = new Dictionary<string, int>();
+
 				using (XmlReader reader = XmlReader.Create(savePath))
 				{
 					while (reader.Read())
@@ -221,14 +223,12 @@ namespace FFXIV_TexTools2.IO
 					FlexibleMessageBox.Show("No bones were found in the .dae file.", "ImportModel Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
 					return;
 				}
-
-				Dictionary<string, int> boneDict = new Dictionary<string, int>();
+                
 				Dictionary<string, string> meshNameDict = new Dictionary<string, string>();
 				List<string> extraBones = new List<string>();
-
 				for (int i = 0; i < boneStrings.Count; i++)
 				{
-					boneDict.Add(boneStrings[i], i);
+                    CustomBoneSet.Add(boneStrings[i], i);
 				}
 
 				try
@@ -469,77 +469,72 @@ namespace FFXIV_TexTools2.IO
 												cData.bones = (string[])reader.ReadElementContentAs(typeof(string[]), null);
 											}
 
-											if (reader.Name.Contains("float_array"))
-											{
-												//Blend Weight
-												if (reader["id"].ToLower().Contains("weights-array"))
-												{
-													cData.weights.AddRange((float[])reader.ReadElementContentAs(typeof(float[]), null));
-												}
-											}
-											//Blend counts
-											else if (reader.Name.Equals("vcount"))
-											{
-												cData.vCount.AddRange((int[])reader.ReadElementContentAs(typeof(int[]), null));
-											}
-											//Blend Indices
-											else if (reader.Name.Equals("v"))
-											{
-												var tempbIndex = (int[])reader.ReadElementContentAs(typeof(int[]), null);
+                                            if (reader.Name.Contains("float_array"))
+                                            {
+                                                //Blend Weight
+                                                if (reader["id"].ToLower().Contains("weights-array"))
+                                                {
+                                                    cData.weights.AddRange((float[])reader.ReadElementContentAs(typeof(float[]), null));
+                                                }
+                                            }
+                                            //Blend counts
+                                            else if (reader.Name.Equals("vcount"))
+                                            {
+                                                cData.vCount.AddRange((int[])reader.ReadElementContentAs(typeof(int[]), null));
+                                            }
+                                            //Blend Indices
+                                            else if (reader.Name.Equals("v"))
+                                            {
+                                                var tempbIndex = (int[])reader.ReadElementContentAs(typeof(int[]), null);
 
-												for (int a = 0; a < tempbIndex.Length; a += 2)
-												{
-													var blend = tempbIndex[a];
-													var blendName = cData.bones[blend];
-												    string blendBoneName;
+                                                for (int a = 0; a < tempbIndex.Length; a += 2)
+                                                {
+                                                    var blend = tempbIndex[a];
+                                                    var blendName = cData.bones[blend];
+                                                    string blendBoneName;
 
-												    try
-												    {
-												        blendBoneName = boneJointDict[blendName];
-												    }
-												    catch (Exception e)
-												    {
+                                                    try
+                                                    {
+                                                        blendBoneName = boneJointDict[blendName];
+                                                    }
+                                                    catch (Exception e)
+                                                    {
                                                         FlexibleMessageBox.Show("Error reading bone data.\n\nBone: " + blendName +
                                                                                 "\n\n" + e.Message, "ImportModel Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
-												        return;
-												    }
+                                                        return;
+                                                    }
 
 
                                                     var bString = blendBoneName;
-													if (!blendBoneName.Contains("h0"))
-													{
-														bString = Regex.Replace(blendBoneName, @"[\d]", string.Empty);
-													}
+                                                    if (!blendBoneName.Contains("h0"))
+                                                    {
+                                                        bString = Regex.Replace(blendBoneName, @"[\d]", string.Empty);
+                                                    }
 
-													if (!boneDict.ContainsKey(bString))
-													{
-														if (!extraBones.Contains(bString))
-														{
-															extraBones.Add(bString);
-														}
-													}
-													else
-													{
-													    try
-													    {
-													        cData.bIndex.Add(boneDict[bString]);
-													    }
-													    catch (Exception e)
-													    {
-													        FlexibleMessageBox.Show("Error reading bone data.\n\nBone: " + bString +
-													                                "\n\n" + e.Message, "ImportModel Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
-													        return;
+                                                    if (!CustomBoneSet.ContainsKey(bString))
+                                                    {
+                                                        // Add the bone into our bone dictionary.
+                                                        CustomBoneSet.Add(bString, CustomBoneSet.Count);
+                                                        if (!extraBones.Contains(bString))
+                                                        {
+                                                            extraBones.Add(bString);
                                                         }
+                                                    }
 
-                                                        cData.bIndex.Add(tempbIndex[a + 1]);
-													}
-												}
+                                                    try
+                                                    {
+                                                        cData.bIndex.Add(CustomBoneSet[bString]);
+                                                    }
+                                                    catch (Exception e)
+                                                    {
+                                                        FlexibleMessageBox.Show("Error reading bone data.\n\nBone: " + bString +
+                                                                                "\n\n" + e.Message, "ImportModel Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                                        return;
+                                                    }
 
-												if(extraBones.Count > 0)
-												{
-													throw new KeyNotFoundException();
-												}
-												break;
+                                                    cData.bIndex.Add(tempbIndex[a + 1]);
+                                                }
+                                                break;
 											}
 										}
 									}
@@ -550,26 +545,34 @@ namespace FFXIV_TexTools2.IO
 				}
 				catch(Exception e)
 				{
-					Debug.WriteLine(e.StackTrace);
-					if(extraBones.Count > 0)
-					{
-						string bones = "";
-						foreach(var b in extraBones)
-						{
-							bones += "* " + b + "\n";
-						}
-
-					   FlexibleMessageBox.Show("TexTools detected bones that are not part of the original model.\n" +
-							"Importing extra bones is not supported, delete the extra bones and try importing again.\n\nExtra Bone(s):\n" + bones, "ImportModel Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
-
-					}
-					else
-					{
-						FlexibleMessageBox.Show("Error reading .dae file.\n" + e.Message, "ImportModel Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
-					}
+					FlexibleMessageBox.Show("Error reading .dae file.\n" + e.Message, "ImportModel Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
 					return;
 				}
-				for(int i = 0; i < pDict.Count; i++)
+
+                if(extraBones.Count > 0)
+                {
+                    string boneString = "";
+                    foreach( string bone in extraBones )
+                    {
+                        boneString += bone + " ";
+                    }
+                    MessageBox.Show("Bones not originally in this item were detected; TexTools will attempt to add them to the item.\n Bone(s): " + boneString);
+                }
+
+                // Rebuild BoneSet 0 with our custom bone listing.
+                modelData.BoneSet[0].BoneCount = CustomBoneSet.Count;
+                for (int i = 0; i < CustomBoneSet.Count; i++)
+                {
+                    // Add the extra bones into the bonestrings list.
+                    if(i >= boneStrings.Count)
+                    {
+                        boneStrings.Add(extraBones[i - boneStrings.Count]);
+                    }
+
+                    modelData.BoneSet[0].BoneData[i] = i;
+                }
+
+                    for (int i = 0; i < pDict.Count; i++)
                 {
                     // If the file has more mesh parts than the original model data did, create them.
                     var mDict = pDict[i];
@@ -797,16 +800,6 @@ namespace FFXIV_TexTools2.IO
 
 					int vTrack = 0;
 
-					Dictionary<int, int> blDict = new Dictionary<int, int>();
-					var bli = modelData.LoD[0].MeshList[m].MeshInfo.BoneListIndex;
-					var bld = modelData.BoneSet[m];
-
-
-					for (int i = 0; i < bld.BoneCount; i++)
-					{
-						blDict.Add(bld.BoneData[i], i);
-					}
-
 					try
 					{
 						for (int i = 0; i < Vertex.Count; i++)
@@ -889,120 +882,8 @@ namespace FFXIV_TexTools2.IO
 					}
 					catch
 					{
-					   FlexibleMessageBox.Show("TexTools detected that mesh " + m + " refrences bones that were not originally part of that mesh.\n\n" +
-							"This may cause things to not look correct in-game, but will most likely be fine.\n\n" +
-							"TexTools will now continue importing.", "Mesh Import Warning",MessageBoxButtons.OK,MessageBoxIcon.Warning);
-
-						vTrack = 0;
-						blDict.Clear();
-						errorDict.Clear();
-						blendIndices.Clear();
-						blendWeights.Clear();
-
-						//use the boneset for mesh 0 
-						bld = modelData.BoneSet[0];
-
-						for (int i = 0; i < bld.BoneCount; i++)
-						{
-							blDict.Add(bld.BoneData[i], i);
-						}
-
-						for (int i = 0; i < Vertex.Count; i++)
-						{
-						    try
-						    {
-						        int bCount = cd.vCount[i];
-
-						        int boneSum = 0;
-
-						        List<byte> biList = new List<byte>();
-						        List<byte> bwList = new List<byte>();
-
-						        int newbCount = 0;
-						        for (int j = 0; j < bCount * 2; j += 2)
-						        {
-						            var b = cd.bIndex[vTrack * 2 + j];
-                                    try
-						            {
-						                var bi = (byte) b;
-						                var bw = (byte) Math.Round(cd.weights[cd.bIndex[vTrack * 2 + j + 1]] * 255f);
-
-						                if (bw != 0)
-						                {
-						                    biList.Add(bi);
-						                    bwList.Add(bw);
-						                    boneSum += bw;
-						                    newbCount++;
-						                }
-						            }
-						            catch (Exception ex)
-						            {
-						                FlexibleMessageBox.Show("There was an error reading imported bone data at:" +
-						                                        "\n\nVertex: " + i + " Bone: " + b + "\n\n" + ex.Message, "Bone Read Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                        return;
-                                    }
-						        }
-
-						        int originalbCount = bCount;
-						        bCount = newbCount;
-
-						        if (bCount < 4)
-						        {
-						            int remainder = 4 - bCount;
-
-						            for (int k = 0; k < remainder; k++)
-						            {
-						                biList.Add(0);
-						                bwList.Add(0);
-						            }
-						        }
-						        else if (bCount > 4)
-						        {
-						            int extras = bCount - 4;
-
-						            for (int k = 0; k < extras; k++)
-						            {
-						                var min = bwList.Min();
-						                var minIndex = bwList.IndexOf(min);
-						                int count = (bwList.Count(x => x == min));
-						                bwList.Remove(min);
-						                biList.RemoveAt(minIndex);
-						                boneSum -= min;
-						            }
-						        }
-
-						        if (boneSum != 255)
-						        {
-						            int diff = boneSum - 255;
-						            var max = bwList.Max();
-						            var maxIndex = bwList.IndexOf(max);
-						            errorDict.Add(i, diff);
-						            if (diff < 0)
-						            {
-						                bwList[maxIndex] += (byte) Math.Abs(diff);
-						            }
-						            else
-						            {
-						                // Subtract difference when over-weight.
-						                bwList[maxIndex] -= (byte) Math.Abs(diff);
-						            }
-						        }
-
-						        boneSum = 0;
-						        bwList.ForEach(x => boneSum += x);
-
-						        blendIndices.Add(biList.ToArray());
-						        blendWeights.Add(bwList.ToArray());
-						        vTrack += originalbCount;
-						    }
-						    catch (Exception e)
-						    {
-						        FlexibleMessageBox.Show("There was an error reading imported bone data at:" +
-						                                "\n\nVertex: " + i + "\n\n" + e.Message, "Bone Read Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                return;
-						    }
-
-						}
+					   FlexibleMessageBox.Show("An error occured while trying to read the .DAE file's weight data. The import has been canceled.", "Mesh Import Warning",MessageBoxButtons.OK,MessageBoxIcon.Warning);
+                        return;
 					}
 
 					if (errorDict.Count > 0)
@@ -1247,11 +1128,11 @@ namespace FFXIV_TexTools2.IO
 					m++;
 				}
 
-				Create(cmdList, internalPath, selectedMesh, category, itemName, modelData);
+				Create(cmdList, internalPath, selectedMesh, category, itemName, modelData, boneStrings);
 			}
 		}
 
-		public static void Create(List<ColladaMeshData> cmdList, string internalPath, string selectedMesh, string category, string itemName, ModelData modelData)
+		public static void Create(List<ColladaMeshData> cmdList, string internalPath, string selectedMesh, string category, string itemName, ModelData modelData, List<string> newBoneStrings)
 		{
 			var type = Helper.GetCategoryType(category);
 
@@ -1548,9 +1429,11 @@ namespace FFXIV_TexTools2.IO
 
                 // Parse the string block out.
                 List<string> materials = new List<string>();
+                List<string> oldBones = new List<string>();
                 List<string> bones = new List<string>();
                 List<string> attributes = new List<string>();
                 List<byte> extraStringBlockData = new List<byte>();
+
                 using (BinaryReader br1 = new BinaryReader(new MemoryStream(originalStringBlock)))
                 {
                     br1.BaseStream.Seek(0, SeekOrigin.Begin);
@@ -1618,6 +1501,9 @@ namespace FFXIV_TexTools2.IO
                     }
 
                 }
+
+                oldBones = bones;
+                bones = newBoneStrings;
 
                 // Make sure we're using new counts
                 short newBoneStringCount = (short)bones.Count;
@@ -2134,11 +2020,13 @@ namespace FFXIV_TexTools2.IO
                 //modelDataBlock.AddRange(br.ReadBytes(oldAtrStringCount * 4));
                 byte[] oldAttrBytes = br.ReadBytes(oldAtrStringCount * 4);
 
+                int runningStringBlockOffset = 0;
+
                 List<int> newAttrBytes = new List<int>();
                 for(byte i = 0; i < newAtrStringCount; i++)
                 {
                     int oldValue = 0;
-                    int newValue = (i * 8);
+                    int newValue = runningStringBlockOffset;
                     if (i < oldAtrStringCount)
                     {
                         byte[] bytes = new byte[4];
@@ -2153,9 +2041,12 @@ namespace FFXIV_TexTools2.IO
                     {
                         MessageBox.Show(String.Format("Attribute Data mismatch: {0} : Old-{1} : New-Calculated-{2}", attributes[i], oldValue, newValue));
                     }
-
+                    
                     modelDataBlock.AddRange(BitConverter.GetBytes(newValue));
                     newAttrBytes.Add(newValue);
+
+                    // # of characters + a space at the end.
+                    runningStringBlockOffset += attributes[i].Length + 1;
                 }
                 
                 
@@ -2332,7 +2223,7 @@ namespace FFXIV_TexTools2.IO
                             }
                             
                             // LoD Non-Zero
-                            if( l == 0 )
+                            if( l != 0 )
                             {
                                 mp.Attributes = 0;
                             }
@@ -2419,104 +2310,72 @@ namespace FFXIV_TexTools2.IO
 				}
 
 
-                // One int per material; unknown what they do.
-                // They seem to increase in value starting from around
-                //~118-120 by an unknown amount.
-                List<int> UnknownMaterialInts = new List<int>();
-                for(int i = 0; i < oldMatStringCount; i++)
+                
+                // == Bone & Material String Block Offsets == 
+
+
+                // Move the read cursor up into the right place for later.
+
+                for (int i = 0; i < oldMatStringCount; i++)
                 {
-                    UnknownMaterialInts.Add(br.ReadInt32());
+                    br.ReadInt32();
                 }
 
-                int lastMaterialInt = 0;
+                for ( int i = 0; i < oldBoneStringCount; i++)
+                {
+                    br.ReadInt32();
+                }
+
+                // Build the new offset lists.
+
+                List<int> boneStringBlockOffsets = new List<int>();
+                for (int i = 0; i < newBoneStringCount; i++)
+                {
+                    int newValue = runningStringBlockOffset;
+                    boneStringBlockOffsets.Add(newValue);
+
+                    // # of characters + a space.
+                    runningStringBlockOffset += bones[i].Length + 1;
+                }
+
+                List<int> materialStringBlockOffsets = new List<int>();
                 for (int i = 0; i < newMatStringCount; i++)
                 {
-                    if (i < UnknownMaterialInts.Count())
-                    {
-                        modelDataBlock.AddRange(BitConverter.GetBytes(UnknownMaterialInts[i]));
-                        lastMaterialInt = UnknownMaterialInts[i];
-                    } else
-                    {
-                        int toWrite = lastMaterialInt += 20;
-                        modelDataBlock.AddRange(BitConverter.GetBytes(toWrite));
-                        lastMaterialInt = toWrite;
-                    }
+                    int newValue = runningStringBlockOffset;
+                    materialStringBlockOffsets.Add(newValue);
+
+                    // # of characters + a space.
+                    runningStringBlockOffset += materials[i].Length + 1;
                 }
 
+                // Write the new offset lists.
 
-
-
-                //modelDataBlock.AddRange(br.ReadBytes(oldBoneStringCount * 4));
-
-                // Weird Bone Increment data goes here.
-                BoneDataList JsonBoneData;
-                using (StreamReader sr = new StreamReader(Properties.Settings.Default.BoneData_Directory))
+                for (int i = 0; i < materialStringBlockOffsets.Count; i++)
                 {
-                    string boneDataTemp = sr.ReadToEnd();
-                    JsonBoneData = JsonConvert.DeserializeObject<BoneDataList>(boneDataTemp);
+                    modelDataBlock.AddRange(BitConverter.GetBytes(materialStringBlockOffsets[i]));
                 }
 
-                int lastValue = 0;
-                int lastValueOld = 0;
-                for (int y = 0; y < newBoneStringCount; y++)
+                for (int i = 0; i < boneStringBlockOffsets.Count; i++)
                 {
-                    int oldValue = 0;
-                    if (y < oldBoneStringCount)
-                    {
-                        oldValue = br.ReadInt32();
-                    }
-                    int newValue = oldValue;
-
-                    if(y == 0)
-                    {
-                        // Use the old value on the first entry.
-                    } else
-                    {
-                        string previousBone = bones[y - 1];
-
-                        // If we have valid saved increment Data, use that.
-                        if(JsonBoneData != null && JsonBoneData.Bones.ContainsKey(previousBone) && JsonBoneData.Bones[previousBone].Increment != 0)
-                        {
-                            newValue = lastValue + JsonBoneData.Bones[previousBone].Increment;
-                        } else {
-
-                            // Use our original Delta if we don't have saved data for this bone.
-                            // May create some odd situations if the bone order has changed, but it's a semi graceful failure.
-                            int delta = oldValue - lastValueOld;
-                            newValue = lastValue + delta;
-                        }
-                    }
-                    modelDataBlock.AddRange(BitConverter.GetBytes(newValue));
-
-                    lastValueOld = oldValue;
-                    lastValue = newValue;
+                    modelDataBlock.AddRange(BitConverter.GetBytes(boneStringBlockOffsets[i]));
                 }
 
-                // Need to finish reading off the old data so our pointer is in the right place.
-                if(newBoneStringCount < oldBoneStringCount)
-                {
-                    int delta = oldBoneStringCount - newBoneStringCount;
-                    for(int i = 0; i < delta; i++)
-                    {
-                        br.ReadInt32();
-                    }
-                }
-                
+
                 // Bone Sets - List of shorts which reference bones
                 // Parts then reference the bone set list.
-				for (int i = 0; i < boneListCount; i++)
+                for (int i = 0; i < boneListCount; i++)
 				{
                     //bone list
                     List<short> boneSet = new List<short>();
                     for(int y = 0; y < 64; y++)
                     {
                         short boneNumber = br.ReadInt16();
-                        
-                        // Don't let us reference removed bones
-                        //if (boneNumber < newBoneStringCount)
-                        //{
-                            boneSet.Add(boneNumber);
-                        //}
+
+                        // Just make all bone sets use all bones by default.
+                        if(boneNumber < bones.Count)
+                        {
+                            boneSet.Add((short) y);
+                        }
                     }
 
                     for(int y = 0; y < 64; y++)
@@ -2525,8 +2384,8 @@ namespace FFXIV_TexTools2.IO
                     }
 
                     //bone count (int)
-                    int boneCount = br.ReadInt32();
-                    modelDataBlock.AddRange(BitConverter.GetBytes(boneCount));
+                    int oldBoneCount = br.ReadInt32();
+                    modelDataBlock.AddRange(BitConverter.GetBytes(bones.Count));
                 }
 
 				Dictionary<int, int> nMax = new Dictionary<int, int>();

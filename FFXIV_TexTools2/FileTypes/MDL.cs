@@ -362,58 +362,14 @@ namespace FFXIV_TexTools2.Material
 
                 br.ReadBytes(unknown7 * 12);
                 br.ReadBytes(materialStringCount * 4);
-
-                BoneDataList JsonBoneData;
-                using (StreamReader sr = new StreamReader(Properties.Settings.Default.BoneData_Directory))
-                {
-                    string boneDataTemp = sr.ReadToEnd();
-                    JsonBoneData = JsonConvert.DeserializeObject<BoneDataList>(boneDataTemp);
-                    if(JsonBoneData == null)
-                    {
-                        JsonBoneData = new BoneDataList();
-                        JsonBoneData.Bones = new Dictionary<string, BoneDataEntry>();
-                        JsonBoneData.StartingIncrements = new HashSet<int>();
-                    }
-                }
-
+                
                 List<int> boneIncrements = new List<int>();
-                int lastIncrement = 0;
 
                 // Loop through the increments and save their data.
                 for (int i = 0; i < boneStringCount; i++)
                 {
                     int increment = br.ReadInt32();
                     boneIncrements.Add(increment);
-
-                    // Make sure we have a valid entry.
-                    if (!JsonBoneData.Bones.ContainsKey(boneStrings[i]))
-                    {
-                        BoneDataEntry temp = new BoneDataEntry();
-                        temp.Name = boneStrings[i];
-                        JsonBoneData.Bones.Add(boneStrings[i], temp);
-                    }
-
-                    // First one is a mystery.
-                    if(i == 0)
-                    {
-                        JsonBoneData.StartingIncrements.Add(increment);
-                    }
-                    else
-                    {
-                        int delta = increment - lastIncrement;
-                        string boneName = boneStrings[i - 1];
-
-                        if (JsonBoneData.Bones[boneName].Increment != 0 && JsonBoneData.Bones[boneName].Increment != delta)
-                        {
-                            // ERROR!
-                            MessageBox.Show(String.Format("Bone Increment Mismatch: {0} : OLD - {1} : NEW {2}"
-                                , boneName, JsonBoneData.Bones[boneName].Increment, delta));
-                        }
-
-                        JsonBoneData.Bones[boneName].Increment = delta;
-                    }
-
-                    lastIncrement = increment;
                 }
 
 
@@ -632,54 +588,7 @@ namespace FFXIV_TexTools2.Material
                     transform2.Y = br.ReadSingle();
                     transform2.Z = br.ReadSingle();
                     transform2.W = br.ReadSingle();
-
-                    /*
-                    Vector4 oldTransform1 = new Vector4(
-                        JsonBoneData.Bones[boneName].Transform1X,
-                        JsonBoneData.Bones[boneName].Transform1Y,
-                        JsonBoneData.Bones[boneName].Transform1Z,
-                        JsonBoneData.Bones[boneName].Transform1W);
-
-                    Vector4 oldTransform2 = new Vector4(
-                        JsonBoneData.Bones[boneName].Transform2X,
-                        JsonBoneData.Bones[boneName].Transform2Y,
-                        JsonBoneData.Bones[boneName].Transform2Z,
-                        JsonBoneData.Bones[boneName].Transform2W);
-
-                    if(JsonBoneData.Bones[boneName].Transform1X != 0)
-                    {
-                        //If we already have a bone transform, compare.
-                        if(oldTransform1.X != transform1.X
-                            || oldTransform1.Y != transform1.Y
-                            || oldTransform1.Z != transform1.Z
-                            || oldTransform1.W != transform1.W)
-                        {
-                            //MessageBox.Show(String.Format("Bone Transform Mismatch: in {0} - Transform1", boneName));
-                        }
-
-                        //If we already have a bone transform, compare.
-                        if (oldTransform2.X != transform2.X
-                            || oldTransform2.Y != transform2.Y
-                            || oldTransform2.Z != transform2.Z
-                            || oldTransform2.W != transform2.W)
-                        {
-                            //MessageBox.Show(String.Format("Bone Transform Mismatch: in {0} - Transform2", boneName));
-                        }
-
-                    }
-
-                    // Save the transform data.
-                    JsonBoneData.Bones[boneName].Transform1X = transform1.X;
-                    JsonBoneData.Bones[boneName].Transform1Y = transform1.Y;
-                    JsonBoneData.Bones[boneName].Transform1Z = transform1.Z;
-                    JsonBoneData.Bones[boneName].Transform1W = transform1.W;
-
-                    JsonBoneData.Bones[boneName].Transform2X = transform2.X;
-                    JsonBoneData.Bones[boneName].Transform2Y = transform2.Y;
-                    JsonBoneData.Bones[boneName].Transform2Z = transform2.Z;
-                    JsonBoneData.Bones[boneName].Transform2W = transform2.W;
-                    */
-
+                    
                     boneTransforms.Add(transform1.X);
                     boneTransforms.Add(transform1.Y);
                     boneTransforms.Add(transform1.Z);
@@ -690,13 +599,7 @@ namespace FFXIV_TexTools2.Material
                     boneTransforms.Add(transform2.Z);
                     boneTransforms.Add(transform2.W);
                 }
-
-                using (StreamWriter sr = new StreamWriter(Properties.Settings.Default.BoneData_Directory))
-                {
-                    string result = JsonConvert.SerializeObject(JsonBoneData);
-                    sr.Write(result);
-                }
-
+                
                 for (int i = 0; i < 3; i++)
                 {
                     for (int j = 0; j < modelData.LoD[i].MeshCount; j++)
