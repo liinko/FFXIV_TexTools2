@@ -561,12 +561,13 @@ namespace FFXIV_TexTools2.IO
 
                 // Rebuild BoneSet 0 with our custom bone listing.
                 modelData.BoneSet[0].BoneCount = CustomBoneSet.Count;
+                int originalBonesLength = boneStrings.Count;
                 for (int i = 0; i < CustomBoneSet.Count; i++)
                 {
                     // Add the extra bones into the bonestrings list.
                     if(i >= boneStrings.Count)
                     {
-                        boneStrings.Add(extraBones[i - boneStrings.Count]);
+                        boneStrings.Add(extraBones[i - originalBonesLength]);
                     }
 
                     modelData.BoneSet[0].BoneData[i] = i;
@@ -576,8 +577,9 @@ namespace FFXIV_TexTools2.IO
                 {
                     // If the file has more mesh parts than the original model data did, create them.
                     var mDict = pDict[i];
-                    if(modelData.LoD[0].MeshList[i].MeshPartList.Count() < mDict.Count())
+                    while(modelData.LoD[0].MeshList[i].MeshPartList.Count() < mDict.Count())
                     {
+                        
                         MeshPart newPart = new MeshPart();
                         modelData.LoD[0].MeshList[i].MeshPartList.Add(newPart);
                         MeshPart newPart2 = new MeshPart();
@@ -2372,9 +2374,12 @@ namespace FFXIV_TexTools2.IO
                         short boneNumber = br.ReadInt16();
 
                         // Just make all bone sets use all bones by default.
-                        if(boneNumber < bones.Count)
+                        if(y < bones.Count)
                         {
                             boneSet.Add((short) y);
+                        } else
+                        {
+                            boneSet.Add((short)0);
                         }
                     }
 
