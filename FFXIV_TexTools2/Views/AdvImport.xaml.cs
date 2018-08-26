@@ -358,11 +358,7 @@ namespace FFXIV_TexTools2.Views
                 PartComboBox_SelectionChanged(null, null);
             }
         }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
+        
 
         private void MeshAddPartButton_Click(object sender, RoutedEventArgs e)
         {
@@ -387,7 +383,13 @@ namespace FFXIV_TexTools2.Views
 
         private void AttributeList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            AttributeAdditionText.Text = (string)AttributesList.SelectedItem;
+            if (AttributesList.SelectedItem != null)
+            {
+                AttributeAdditionText.Text = ((string)AttributesList.SelectedItem).Split(' ')[0];
+            } else
+            {
+                AttributeAdditionText.Text = "";
+            }
         }
 
         private void MeshMaterialComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -471,10 +473,10 @@ namespace FFXIV_TexTools2.Views
             int removeAtIndex = -1;
             for (int i = 0; i < items.Count; i++)
             {
-                var item = items[i];
+                var item = ((string)items[i]).Split(' ')[0]; ;
 
                 // Found one to remove.
-                if (items[i].ToString() == AttributeAdditionText.Text)
+                if (item == AttributeAdditionText.Text)
                 {
                     removeAtIndex = i;
                     break;
@@ -534,6 +536,32 @@ namespace FFXIV_TexTools2.Views
 
             // Refresh the attributes listing.
             RebuildAttributesDictionary();
+        }
+
+        private void AddMeshButton_Click(object sender, RoutedEventArgs e)
+        {
+
+            for (int l = 0; l < modelData.LoD.Count; l++)
+            {
+                var mesh = new Mesh();
+                var newPart = new MeshPart();
+                mesh.MeshPartList = new List<MeshPart>();
+                mesh.MeshPartList.Add(newPart);
+                modelData.LoD[l].MeshList.Add(mesh);
+                modelData.LoD[l].MeshCount += 1;
+            }
+
+            importDict.Add((modelData.LoD[0].MeshCount - 1).ToString(), new ImportSettings());
+
+
+            List<string> meshCounts = new List<string>();
+            meshCounts.Add("ALL");
+            for(int i = 0; i < modelData.LoD[0].MeshCount; i++)
+            {
+                meshCounts.Add(i.ToString());
+            }
+            MeshComboBox.ItemsSource = meshCounts;
+            MeshComboBox.SelectedIndex = 0;
         }
 
         private void DisableCheckbox_Unchecked(object sender, RoutedEventArgs e)

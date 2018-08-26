@@ -43,7 +43,7 @@
                             <ColumnDefinition/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-                        <Button x:Name="AddMeshButton" Content="Add Mesh" HorizontalAlignment="Left" Margin="238,0,0,0" VerticalAlignment="Top" Width="75" Grid.Column="1" Click="Button_Click" Height="26"/>
+                        <Button x:Name="AddMeshButton" Content="Add Mesh" HorizontalAlignment="Left" Margin="238,0,0,0" VerticalAlignment="Top" Width="75" Grid.Column="1" Height="26" Click="AddMeshButton_Click"/>
                     </Grid>
 
                 </Grid>
@@ -76,10 +76,10 @@
                 <Label Content="Mesh:" HorizontalAlignment="Left" Margin="10,18,0,0" Width="68" Height="31" VerticalAlignment="Top"/>
                 <ComboBox x:Name="MeshMaterialComboBox" HorizontalAlignment="Left" Margin="85,59,0,0" Width="174" Height="21" VerticalAlignment="Top" IsEnabled="False" SelectionChanged="MeshMaterialComboBox_SelectionChanged"/>
                 <Label Content="Material:" Margin="10,54,0,0" RenderTransformOrigin="0.25,0.423" Height="31" VerticalAlignment="Top" HorizontalAlignment="Left" Width="56"/>
-                <Button x:Name="CreateXMLButton" Content="Make XML" Margin="442,0,0,0" Click="CreateXMLButton_Click" Grid.Row="1" Height="30" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="62" IsEnabled="False" />
-                <Button x:Name="CancelButton" Content="Cancel" Margin="0,0,67,0" Click="CancelButton_Click" Grid.Row="1" Height="30" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="41" />
-                <Button x:Name="ImportButton" Content="Import" Margin="0,0,10,0" Click="ImportButton_Click" Grid.Row="1" Height="30" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="42" />
-                <Label Content="*Note: These options are still in development and may not work properly." Margin="0,0,0,1" Grid.Row="1" HorizontalAlignment="Left" Width="398" Height="26" VerticalAlignment="Bottom" />
+                <Button x:Name="CreateXMLButton" Content="Make XML" Margin="442,0,0,7" Click="CreateXMLButton_Click" Grid.Row="1" Height="30" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="62" IsEnabled="False" />
+                <Button x:Name="CancelButton" Content="Cancel" Margin="0,0,67,7" Click="CancelButton_Click" Grid.Row="1" Height="30" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="41" />
+                <Button x:Name="ImportButton" Content="Import" Margin="0,0,10,7" Click="ImportButton_Click" Grid.Row="1" Height="30" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="42" />
+                <Label Content="*Note: These options are still in development and may not work properly." Margin="0,0,0,8" Grid.Row="1" HorizontalAlignment="Left" Width="398" Height="26" VerticalAlignment="Bottom" />
                 <CheckBox x:Name="FixCheckbox" Grid.Row="0" Content="Attempt Fix" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="493,40,0,118" Checked="FixCheckbox_Checked" Unchecked="FixCheckbox_Unchecked" Height="26" Width="124" IsEnabled="False"/>
                 <CheckBox x:Name="DisableCheckbox" Content="Disable Extra Data" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="493,66,0,92" Checked="DisableCheckbox_Checked" Unchecked="DisableCheckbox_Unchecked" Height="26" Width="124" IsEnabled="False"/>
                 <Label x:Name="ExtraMeshDataLabel" Content="Extra Mesh Data:" HorizontalAlignment="Left" Margin="472,10,0,0" VerticalAlignment="Top" Height="26" Width="99"/>
