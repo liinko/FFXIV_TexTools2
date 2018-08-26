@@ -39,6 +39,21 @@ namespace FFXIV_TexTools2.Model
         public List<Bones> BoneSet = new List<Bones>();
 
         /// <summary>
+        /// List of Materials used in the item.
+        /// </summary>
+        public List<string> Materials = new List<string>();
+
+        /// <summary>
+        /// List of Bones used in the item.
+        /// </summary>
+        public List<string> Bones = new List<string>();
+
+        /// <summary>
+        /// List of attributes used in the item.
+        /// </summary>
+        public List<string> Attributes = new List<string>();
+
+        /// <summary>
         /// The models bone indices
         /// </summary>
         public List<int> BoneIndicies = new List<int>();

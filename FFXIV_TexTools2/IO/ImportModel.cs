@@ -99,9 +99,7 @@ namespace FFXIV_TexTools2.IO
 			return 0;
 		}
 
-        static List<string> staticBones;
-
-		public static void ImportDAE(string category, string itemName, string modelName, string selectedMesh, string internalPath, List<string> boneStrings, ModelData modelData, Dictionary<string, ImportSettings> settings)
+		public static void ImportDAE(string category, string itemName, string modelName, string selectedMesh, string internalPath, ModelData modelData, Dictionary<string, ImportSettings> settings)
 		{
 
 			importSettings = settings;
@@ -228,9 +226,9 @@ namespace FFXIV_TexTools2.IO
                 
 				Dictionary<string, string> meshNameDict = new Dictionary<string, string>();
 				List<string> extraBones = new List<string>();
-				for (int i = 0; i < boneStrings.Count; i++)
+				for (int i = 0; i < modelData.Bones.Count; i++)
 				{
-                    CustomBoneSet.Add(boneStrings[i], i);
+                    CustomBoneSet.Add(modelData.Bones[i], i);
 				}
 
 				try
@@ -563,31 +561,26 @@ namespace FFXIV_TexTools2.IO
 
                 // Rebuild BoneSet 0 with our custom bone listing.
                 modelData.BoneSet[0].BoneCount = CustomBoneSet.Count;
-                int originalBonesLength = boneStrings.Count;
+                int originalBonesLength = modelData.Bones.Count;
                 for (int i = 0; i < CustomBoneSet.Count; i++)
                 {
                     // Add the extra bones into the bonestrings list.
-                    if(i >= boneStrings.Count)
+                    if(i >= modelData.Bones.Count)
                     {
-                        boneStrings.Add(extraBones[i - originalBonesLength]);
+                        modelData.Bones.Add(extraBones[i - originalBonesLength]);
                     }
 
                     modelData.BoneSet[0].BoneData[i] = i;
                 }
 
-                    for (int i = 0; i < pDict.Count; i++)
-                {
+                 for (int i = 0; i < pDict.Count; i++)
+                 {
                     // If the file has more mesh parts than the original model data did, create them.
                     var mDict = pDict[i];
                     while(modelData.LoD[0].MeshList[i].MeshPartList.Count() < mDict.Count())
                     {
-                        
                         MeshPart newPart = new MeshPart();
                         modelData.LoD[0].MeshList[i].MeshPartList.Add(newPart);
-                        MeshPart newPart2 = new MeshPart();
-                        modelData.LoD[1].MeshList[i].MeshPartList.Add(newPart2);
-                        MeshPart newPart3 = new MeshPart();
-                        modelData.LoD[2].MeshList[i].MeshPartList.Add(newPart3);
                     }
                     
 
@@ -1132,11 +1125,11 @@ namespace FFXIV_TexTools2.IO
 					m++;
 				}
 
-				Create(cmdList, internalPath, selectedMesh, category, itemName, modelData, boneStrings);
+				Create(cmdList, internalPath, selectedMesh, category, itemName, modelData);
 			}
 		}
 
-		public static void Create(List<ColladaMeshData> cmdList, string internalPath, string selectedMesh, string category, string itemName, ModelData modelData, List<string> newBoneStrings)
+		public static void Create(List<ColladaMeshData> cmdList, string internalPath, string selectedMesh, string category, string itemName, ModelData modelData)
 		{
 			var type = Helper.GetCategoryType(category);
 
@@ -1446,9 +1439,11 @@ namespace FFXIV_TexTools2.IO
 
                 // Parse the string block out.
                 List<string> materials = new List<string>();
+                List<string> oldMaterials = new List<string>();
                 List<string> oldBones = new List<string>();
                 List<string> bones = new List<string>();
                 List<string> attributes = new List<string>();
+                List<string> oldAttributes = new List<string>();
                 List<string> extraStringBlockData = new List<string>();
 
                 using (BinaryReader br1 = new BinaryReader(new MemoryStream(originalStringBlock)))
@@ -1539,9 +1534,17 @@ namespace FFXIV_TexTools2.IO
                 
                 short newUnk2 = newMeshHidingDataCount == (short) 0 ? (short) 0 : unk2;
                 short newUnk3 = newMeshHidingDataCount == (short) 0 ? (short) 0 : unk3;
+                
 
+                // Pull in the model data options.
                 oldBones = bones;
-                bones = newBoneStrings;
+                bones = modelData.Bones;
+
+                oldMaterials = materials;
+                materials = modelData.Materials;
+
+                oldAttributes = attributes;
+                attributes = modelData.Attributes;
 
                 // Make sure we're using new counts
                 short newBoneStringCount = (short)bones.Count;
@@ -2310,23 +2313,7 @@ namespace FFXIV_TexTools2.IO
                             } else
                             {
                                 mp.Attributes = mp.Attributes % maxValue;
-
-                                if (importSettings != null && importSettings.ContainsKey(i.ToString()) && l == 0)
-                                {
-                                    if (importSettings[i.ToString()].PartDictionary != null)
-                                    {
-                                        var attr = (importSettings[i.ToString()].PartDictionary[j]) % maxValue;
-                                        modelDataBlock.AddRange(BitConverter.GetBytes(attr));
-                                    }
-                                    else
-                                    {
-                                        modelDataBlock.AddRange(BitConverter.GetBytes(mp.Attributes));
-                                    }
-                                }
-                                else
-                                {
-                                    modelDataBlock.AddRange(BitConverter.GetBytes(mp.Attributes));
-                                }
+                                modelDataBlock.AddRange(BitConverter.GetBytes(mp.Attributes));
                             }
                             
 

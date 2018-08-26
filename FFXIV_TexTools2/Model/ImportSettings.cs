@@ -11,6 +11,5 @@ namespace FFXIV_TexTools2.Model
         public string path;
         public bool Fix;
         public bool Disable;
-        public Dictionary<int, int> PartDictionary;
     }
 }

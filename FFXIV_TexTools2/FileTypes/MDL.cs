@@ -212,6 +212,7 @@ namespace FFXIV_TexTools2.Material
                         string atr = Encoding.ASCII.GetString(atrName.ToArray());
                         atr = atr.Replace("\0", "");
 
+                        modelData.Attributes.Add(atr);
                         atrStrings.Add(atr);
                     }
 
@@ -226,6 +227,7 @@ namespace FFXIV_TexTools2.Material
                         string bone = Encoding.ASCII.GetString(boneName.ToArray());
                         bone = bone.Replace("\0", "");
 
+                        modelData.Bones.Add(bone);
                         boneStrings.Add(bone);
                     }
 
@@ -240,6 +242,7 @@ namespace FFXIV_TexTools2.Material
                         string material = Encoding.ASCII.GetString(name.ToArray());
                         material = material.Replace("\0", "");
 
+                        modelData.Materials.Add(material);
                         materialStrings.Add(material);
                     }
                 }
@@ -314,6 +317,7 @@ namespace FFXIV_TexTools2.Material
                             IndexDataOffset = br.ReadInt32()
                         };
 
+                        modelData.LoD[x].MeshList[i].MaterialId = meshInfo.MaterialNum;
                         var typeChar = materialStrings[meshInfo.MaterialNum][4].ToString() + materialStrings[meshInfo.MaterialNum][9].ToString();
 
                         if (typeChar.Equals("cb"))
@@ -337,7 +341,7 @@ namespace FFXIV_TexTools2.Material
                     }
                 }
 
-                br.ReadBytes(attributeStringCount * 4);
+                byte[] attributeOffsetBytes = br.ReadBytes(attributeStringCount * 4);
                 br.ReadBytes(unknown6 * 20);
 
                 for (int i = 0; i < modelData.LoD.Count; i++)
