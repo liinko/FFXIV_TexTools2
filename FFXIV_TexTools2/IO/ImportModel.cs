@@ -388,6 +388,7 @@ namespace FFXIV_TexTools2.IO
 										var num = atr.Substring(atr.LastIndexOf(".") + 1);
 									    try
 									    {
+
 									        pDict[meshNum].Add(int.Parse(num), cData);
 									    }
 									    catch (Exception e)
@@ -402,13 +403,29 @@ namespace FFXIV_TexTools2.IO
 									else
 									{
 									    try
-									    {
-									        pDict[meshNum].Add(0, cData);
+                                        {
+                                            // We have a new mesh; create a new mesh entry for it.
+                                            if (meshNum > 0 && !pDict.ContainsKey(meshNum))
+                                            {
+                                                cdDict.Add(meshNum, new ColladaData());
+                                                pDict.Add(meshNum, new Dictionary<int, ColladaData>());
+
+                                                var mesh = new Mesh();
+                                                var newPart = new MeshPart();
+                                                mesh.MeshPartList = new List<MeshPart>();
+                                                mesh.MeshPartList.Add(newPart);
+                                                modelData.LoD[0].MeshList.Add(mesh);
+                                                modelData.LoD[0].MeshCount += 1;
+
+                                                numMeshes++;
+                                            }
+
+                                            pDict[meshNum].Add(0, cData);
 
 									    }
 									    catch (Exception e)
 									    {
-									        FlexibleMessageBox.Show("Duplicate mesh part found.\n" +
+									        FlexibleMessageBox.Show("Duplicate mesh found.\n" +
 									                                "Mesh: " + meshNum + "\tPart: 0" + "\n" +
 									                                "Full Name: " + atr + "\n\n" +
                                                                     "Delete or Rename the duplicate mesh part and try again.\n\n" +
@@ -732,8 +749,14 @@ namespace FFXIV_TexTools2.IO
 				List<ColladaMeshData> cmdList = new List<ColladaMeshData>();
 
 				int m = 0;
-				foreach (var cd in cdDict.Values)
+
+                Dictionary<int, Dictionary<int, int>> majorCorrections = new Dictionary<int, Dictionary<int, int>>();
+
+                int minorCorrections = 0;
+                foreach (var cd in cdDict.Values)
 				{
+                    majorCorrections.Add(m, new Dictionary<int, int>());
+
 					ColladaMeshData cmd = new ColladaMeshData();
 
 					Vector3Collection Vertex = new Vector3Collection();
@@ -792,8 +815,6 @@ namespace FFXIV_TexTools2.IO
 					{
 						TexCoord2.Add(new SharpDX.Vector2(cd.texCoord2[i], cd.texCoord2[i + 1]));
 					}
-
-					Dictionary<int, int> errorDict = new Dictionary<int, int>();
 
 					int vTrack = 0;
 
@@ -857,7 +878,15 @@ namespace FFXIV_TexTools2.IO
 								int diff = boneSum - 255;
 								var max = bwList.Max();
 								var maxIndex = bwList.IndexOf(max);
-								errorDict.Add(i, diff);
+
+                                if(Math.Abs(diff) == 1)
+                                {
+                                    minorCorrections++;
+                                } else
+                                {
+                                    majorCorrections[m].Add(i, diff);
+                                }
+
 								if (diff < 0)
 								{
 									bwList[maxIndex] += (byte)Math.Abs(diff);
@@ -883,19 +912,6 @@ namespace FFXIV_TexTools2.IO
                         return;
 					}
 
-					if (errorDict.Count > 0)
-					{
-						string errorString = "";
-						foreach(var er in errorDict)
-						{
-							errorString += "Vertex: " + er.Key + "\t Correction Amount: " + er.Value + "\n";
-						}
-
-
-						FlexibleMessageBox.Show("Corrected bone weights on the following vertices :\n\n" + errorString, "Weight Correction", MessageBoxButtons.OK, MessageBoxIcon.Information);
-						//FlexibleMessageBox.Show("TexTools detected an affected bone count greater than 4.\n\n" +
-						//	"TexTools removed the smallest weight counts from the following: \n\n" + errorString, "Over Weight Count",MessageBoxButtons.OK,MessageBoxIcon.Information);
-					}
 
 
 					var extraVertDict = modelData.LoD[0].MeshList[m].extraVertDict;
@@ -1125,7 +1141,40 @@ namespace FFXIV_TexTools2.IO
 					m++;
 				}
 
-				Create(cmdList, internalPath, selectedMesh, category, itemName, modelData);
+                int totalCorrections = minorCorrections;
+                foreach(var dict in majorCorrections)
+                {
+                    totalCorrections += dict.Value.Count;
+                }
+
+
+                if (totalCorrections > 0)
+                {
+                    string errorString = "Textools automatically adjusted bone weights on the following vertices.";
+
+                    if (minorCorrections > 0)
+                    {
+                        errorString += "\n\n\t" + minorCorrections + " Vertices - Minor Weight Corrections(+/- 1)";
+                    }
+                    
+                    for(int i = 0; i < majorCorrections.Count; i++)
+                    {
+                        if(majorCorrections[i].Count > 0)
+                        {
+                            errorString += "\n\nMesh #" + i + " Major Weight Corrections:\n";
+                            foreach (var er in majorCorrections[i])
+                            {
+                                errorString += "\n\tVertex: " + er.Key + "\tCorrection: " + er.Value;
+                            }
+
+                        }
+                    }
+
+
+                    FlexibleMessageBox.Show(errorString, "Weight Corrections", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+
+                Create(cmdList, internalPath, selectedMesh, category, itemName, modelData);
 			}
 		}
 
@@ -1617,14 +1666,12 @@ namespace FFXIV_TexTools2.IO
                 if (newMeshCount != oldMeshCount)
                 {
                     meshDelta = newMeshCount - oldMeshCount;
-                    MessageBox.Show(String.Format("Mesh Count differs from original: Old-{0} : New-{1}", oldMeshCount, newMeshCount));
                 }
 
 
                 if (newMeshPartCount != oldMeshPartCount)
                 {
                     meshPartDelta = newMeshPartCount - oldMeshPartCount;
-                    MessageBox.Show(String.Format("Mesh Part Count differs from original: Old-{0} : New-{1}", oldMeshPartCount, newMeshPartCount));
                 }
 
                 int newStringCount = newAtrStringCount + newBoneStringCount + newMatStringCount + extraStringBlockData.Count;
