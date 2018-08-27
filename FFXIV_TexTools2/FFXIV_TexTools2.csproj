@@ -154,7 +154,6 @@
     <Compile Include="FileTypes\ModelContainers\Skeleton.cs" />
     <Compile Include="Helpers\FlexibleMessageBox.cs" />
     <Compile Include="IO\ChangeMTRL.cs" />
-    <Compile Include="Model\BoneJsonEntry.cs" />
     <Compile Include="Model\JsonEntry.cs" />
     <Compile Include="Commands\RelayCommand.cs" />
     <Compile Include="Helpers\TexHelper.cs" />
