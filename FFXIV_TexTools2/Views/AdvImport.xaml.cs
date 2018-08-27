@@ -463,7 +463,7 @@ namespace FFXIV_TexTools2.Views
                 Materials_List.Items.Add(material);
                 MeshMaterialComboBox.Items.Add(material);
             }
-
+            MaterialAdditionText.Text = "";
         }
 
         private void AddAttributeButton_Click(object sender, RoutedEventArgs e)
@@ -536,20 +536,22 @@ namespace FFXIV_TexTools2.Views
 
             // Refresh the attributes listing.
             RebuildAttributesDictionary();
+            AttributeAdditionText.Text = "";
         }
 
         private void AddMeshButton_Click(object sender, RoutedEventArgs e)
         {
-
-            for (int l = 0; l < modelData.LoD.Count; l++)
-            {
+            // Only need to actually add a new mesh to LoD 0
+            // Since LoD 1+ is dummy data.
+            //for (int l = 0; l < modelData.LoD.Count; l++)
+            //{
                 var mesh = new Mesh();
                 var newPart = new MeshPart();
                 mesh.MeshPartList = new List<MeshPart>();
                 mesh.MeshPartList.Add(newPart);
-                modelData.LoD[l].MeshList.Add(mesh);
-                modelData.LoD[l].MeshCount += 1;
-            }
+                modelData.LoD[0].MeshList.Add(mesh);
+                modelData.LoD[0].MeshCount += 1;
+           // }
 
             importDict.Add((modelData.LoD[0].MeshCount - 1).ToString(), new ImportSettings());
 
@@ -562,6 +564,8 @@ namespace FFXIV_TexTools2.Views
             }
             MeshComboBox.ItemsSource = meshCounts;
             MeshComboBox.SelectedIndex = 0;
+
+            MeshCountLabel.Content = "Meshes: " + modelData.LoD[0].MeshCount;
         }
 
         private void DisableCheckbox_Unchecked(object sender, RoutedEventArgs e)
