@@ -43,5 +43,10 @@ namespace FFXIV_TexTools2.Views
             System.Diagnostics.Process.Start("https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=Z9LCGGDLJ6SUC&lc=US&item_name=FFXIV%20TexTools%20Donation&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted");
 
         }
+
+        private void TextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+
+        }
     }
 }

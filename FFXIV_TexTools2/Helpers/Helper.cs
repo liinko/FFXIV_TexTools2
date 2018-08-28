@@ -371,12 +371,13 @@ namespace FFXIV_TexTools2.Helpers
                 {
                     br.BaseStream.Seek(offset, SeekOrigin.Begin);
 
+                    // Header
                     int headerLength = br.ReadInt32();
                     int fileType = br.ReadInt32();
                     int decompressedSize = br.ReadInt32();
                     int buffer1 = br.ReadInt32();
                     int buffer2 = br.ReadInt32();
-                    int parts = br.ReadInt16();
+                    int parts = br.ReadInt16(); // Block Count
 
                     int endOfHeader = offset + headerLength;
 
@@ -426,6 +427,8 @@ namespace FFXIV_TexTools2.Helpers
                         blockSizes[i] = br.ReadInt16();
                     }
 
+                    // Seek to start of the first block (Vertex Info Block)
+                    // And concatenate all the decompressed data together.
                     br.BaseStream.Seek(offset + headerLength + chunkOffsets[0], SeekOrigin.Begin);
 
                     for (int i = 0; i < totalBlocks; i++)

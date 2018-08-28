@@ -19,6 +19,7 @@ using FFXIV_TexTools2.Helpers;
 using FFXIV_TexTools2.Material.ModelMaterial;
 using FFXIV_TexTools2.Model;
 using FFXIV_TexTools2.Resources;
+using Newtonsoft.Json;
 using HelixToolkit.Wpf.SharpDX.Core;
 using SharpDX;
 using System;
@@ -60,7 +61,7 @@ namespace FFXIV_TexTools2.Material
             string itemType = Helper.GetCategoryType(selectedCategory);
             string MDLFolder = "";
 
-            if(itemType.Equals("weapon") || itemType.Equals("food"))
+            if (itemType.Equals("weapon") || itemType.Equals("food"))
             {
                 if (selectedPart.Equals("Secondary"))
                 {
@@ -152,7 +153,7 @@ namespace FFXIV_TexTools2.Material
             }
 
             int datNum = ((offset / 8) & 0x000f) / 2;
-     
+
             var MDLDatData = Helper.GetType3DecompressedData(offset, datNum, Strings.ItemsDat);
 
             using (BinaryReader br = new BinaryReader(new MemoryStream(MDLDatData.Item1)))
@@ -173,10 +174,20 @@ namespace FFXIV_TexTools2.Material
                 var boneStringCount = br.ReadInt16();
                 var boneListCount = br.ReadInt16();
 
+
+                //Has something to do with amount of extra vertex data.
                 var unknown1 = br.ReadInt16();
+
+                //Has something to do with amount of extra vertex data.
                 var unknown2 = br.ReadInt16();
+
+
                 var unknown3 = br.ReadInt16();
+                
+                // Seems to always be 1027
                 var unknown4 = br.ReadInt16();
+
+
                 var unknown5 = br.ReadInt16();
                 var unknown6 = br.ReadInt16();
 
@@ -190,7 +201,7 @@ namespace FFXIV_TexTools2.Material
                 {
                     br1.BaseStream.Seek(0, SeekOrigin.Begin);
 
-                    for(int i= 0; i < attributeStringCount; i++)
+                    for (int i = 0; i < attributeStringCount; i++)
                     {
                         byte a;
                         List<byte> atrName = new List<byte>();
@@ -201,10 +212,11 @@ namespace FFXIV_TexTools2.Material
                         string atr = Encoding.ASCII.GetString(atrName.ToArray());
                         atr = atr.Replace("\0", "");
 
+                        modelData.Attributes.Add(atr);
                         atrStrings.Add(atr);
                     }
 
-                    for(int i = 0; i < boneStringCount; i++)
+                    for (int i = 0; i < boneStringCount; i++)
                     {
                         byte b;
                         List<byte> boneName = new List<byte>();
@@ -215,6 +227,7 @@ namespace FFXIV_TexTools2.Material
                         string bone = Encoding.ASCII.GetString(boneName.ToArray());
                         bone = bone.Replace("\0", "");
 
+                        modelData.Bones.Add(bone);
                         boneStrings.Add(bone);
                     }
 
@@ -229,11 +242,12 @@ namespace FFXIV_TexTools2.Material
                         string material = Encoding.ASCII.GetString(name.ToArray());
                         material = material.Replace("\0", "");
 
+                        modelData.Materials.Add(material);
                         materialStrings.Add(material);
                     }
                 }
 
-                br.ReadBytes(32 * unknown5);
+                byte[] unknown5Bytes = br.ReadBytes(32 * unknown5);
 
                 for (int i = 0; i < 3; i++)
                 {
@@ -248,7 +262,7 @@ namespace FFXIV_TexTools2.Material
                     LoD.VertexOffset = br.ReadInt32();
                     LoD.IndexOffset = br.ReadInt32();
 
-                    modelData.LoD.Add(LoD);    
+                    modelData.LoD.Add(LoD);
                 }
 
                 var savePos = br.BaseStream.Position;
@@ -303,6 +317,7 @@ namespace FFXIV_TexTools2.Material
                             IndexDataOffset = br.ReadInt32()
                         };
 
+                        modelData.LoD[x].MeshList[i].MaterialId = meshInfo.MaterialNum;
                         var typeChar = materialStrings[meshInfo.MaterialNum][4].ToString() + materialStrings[meshInfo.MaterialNum][9].ToString();
 
                         if (typeChar.Equals("cb"))
@@ -326,14 +341,14 @@ namespace FFXIV_TexTools2.Material
                     }
                 }
 
-                br.ReadBytes(attributeStringCount * 4);
+                byte[] attributeOffsetBytes = br.ReadBytes(attributeStringCount * 4);
                 br.ReadBytes(unknown6 * 20);
 
-                for(int i = 0; i < modelData.LoD.Count; i++)
+                for (int i = 0; i < modelData.LoD.Count; i++)
                 {
                     foreach (var mesh in modelData.LoD[i].MeshList)
                     {
-                        for(int j = 0; j < mesh.MeshInfo.MeshPartCount; j++)
+                        for (int j = 0; j < mesh.MeshInfo.MeshPartCount; j++)
                         {
                             MeshPart meshPart = new MeshPart()
                             {
@@ -351,7 +366,16 @@ namespace FFXIV_TexTools2.Material
 
                 br.ReadBytes(unknown7 * 12);
                 br.ReadBytes(materialStringCount * 4);
-                br.ReadBytes(boneStringCount * 4);
+                
+                List<int> boneIncrements = new List<int>();
+
+                // Loop through the increments and save their data.
+                for (int i = 0; i < boneStringCount; i++)
+                {
+                    int increment = br.ReadInt32();
+                    boneIncrements.Add(increment);
+                }
+
 
                 for (int i = 0; i < boneListCount; i++)
                 {
@@ -412,13 +436,16 @@ namespace FFXIV_TexTools2.Material
 
                 Dictionary<int, int> indexLoc = new Dictionary<int, int>();
 
-                if(unknown1 > 0)
+                if (unknown1 > 0)
                 {
                     for (int i = 0; i < modelData.LoD[0].MeshCount; i++)
                     {
                         var ido = modelData.LoD[0].MeshList[i].MeshInfo.IndexDataOffset;
 
-                        indexLoc.Add(ido, i);
+                        if (!indexLoc.ContainsKey(ido))
+                        {
+                            indexLoc.Add(ido, i);
+                        }
                     }
                 }
 
@@ -452,7 +479,7 @@ namespace FFXIV_TexTools2.Material
 
                 int totalLoD0MaskCount = 0;
 
-                if(unknown2 > 0)
+                if (unknown2 > 0)
                 {
                     for (int i = 0; i < pCount; i++)
                     {
@@ -505,7 +532,7 @@ namespace FFXIV_TexTools2.Material
 
 
 
-                if(unknown3 > 0)
+                if (unknown3 > 0)
                 {
                     foreach (var ei in extraIndices)
                     {
@@ -549,19 +576,34 @@ namespace FFXIV_TexTools2.Material
                 }
 
                 //float4x4
-                for(int i = 0; i < boneStringCount; i++)
+                for (int i = 0; i < boneStringCount; i++)
                 {
-                    boneTransforms.Add(br.ReadSingle());
-                    boneTransforms.Add(br.ReadSingle());
-                    boneTransforms.Add(br.ReadSingle());
-                    boneTransforms.Add(br.ReadSingle());
+                    string boneName = boneStrings[i];
 
-                    boneTransforms.Add(br.ReadSingle());
-                    boneTransforms.Add(br.ReadSingle());
-                    boneTransforms.Add(br.ReadSingle());
-                    boneTransforms.Add(br.ReadSingle());
+                    Vector4 transform1 = new Vector4();
+                    Vector4 transform2 = new Vector4();
+
+                    transform1.X = br.ReadSingle();
+                    transform1.Y = br.ReadSingle();
+                    transform1.Z = br.ReadSingle();
+                    transform1.W = br.ReadSingle();
+
+                    transform2.X = br.ReadSingle();
+                    transform2.Y = br.ReadSingle();
+                    transform2.Z = br.ReadSingle();
+                    transform2.W = br.ReadSingle();
+                    
+                    boneTransforms.Add(transform1.X);
+                    boneTransforms.Add(transform1.Y);
+                    boneTransforms.Add(transform1.Z);
+                    boneTransforms.Add(transform1.W);
+
+                    boneTransforms.Add(transform2.X);
+                    boneTransforms.Add(transform2.Y);
+                    boneTransforms.Add(transform2.Z);
+                    boneTransforms.Add(transform2.W);
                 }
-
+                
                 for (int i = 0; i < 3; i++)
                 {
                     for (int j = 0; j < modelData.LoD[i].MeshCount; j++)
@@ -630,7 +672,7 @@ namespace FFXIV_TexTools2.Material
                         {
                             coordinates = c;
                         }
-                        else if(meshDataInfo.UseType == 6)
+                        else if (meshDataInfo.UseType == 6)
                         {
                             tangents = c;
                         }
@@ -646,303 +688,308 @@ namespace FFXIV_TexTools2.Material
                      * -----------------
                      * Vertex
                      * -----------------
-                     */ 
-                    using (BinaryReader br1 = new BinaryReader(new MemoryStream(mesh.MeshVertexData[meshDataInfoList[vertex].VertexDataBlock])))
-                    {
-                        for (int j = 0; j < mesh.MeshInfo.VertexCount; j++)
-                        {
-                            br1.BaseStream.Seek(j * mesh.MeshInfo.VertexSizes[meshDataInfoList[vertex].VertexDataBlock] + meshDataInfoList[vertex].Offset, SeekOrigin.Begin);
-
-                            Vector3 vVector = new Vector3();
-                            if (meshDataInfoList[vertex].DataType == 13 || meshDataInfoList[vertex].DataType == 14)
-                            {
-                                
-                                System.Half h1 = System.Half.ToHalf(br1.ReadUInt16());
-                                System.Half h2 = System.Half.ToHalf(br1.ReadUInt16());
-                                System.Half h3 = System.Half.ToHalf(br1.ReadUInt16());
-
-                                float x = HalfHelper.HalfToSingle(h1);
-                                float y = HalfHelper.HalfToSingle(h2);
-                                float z = HalfHelper.HalfToSingle(h3);
-
-                                vVector = new Vector3(x, y, z);
-                                objBytes.Add("v " + x.ToString("N5") + " " + y.ToString("N5") + " " + z.ToString("N5") + " ");
-                            }
-                            else if (meshDataInfoList[vertex].DataType == 2)
-                            {
-                                var x = BitConverter.ToSingle(br1.ReadBytes(4), 0);
-                                var y = BitConverter.ToSingle(br1.ReadBytes(4), 0);
-                                var z = BitConverter.ToSingle(br1.ReadBytes(4), 0);
-
-                                vVector = new Vector3(x, y, z);
-                                objBytes.Add("v " + x.ToString("N5") + " " + y.ToString("N5") + " " + z.ToString("N5") + " ");
-
-                            }
-
-                            vertexList.Add(vVector);
-                        }
-                    }
-
-
-                    /* 
-                     * -----------------
-                     * Blend Weight
-                     * -----------------
                      */
-                    using (BinaryReader br1 = new BinaryReader(new MemoryStream(mesh.MeshVertexData[meshDataInfoList[blendWeights].VertexDataBlock])))
+                    
+                    // Only actually read the buffers if they have data in them.
+                    if (mesh.MeshVertexData.Count > 0)
                     {
-                        for (int j = 0; j < mesh.MeshInfo.VertexCount; j++)
+                        using (BinaryReader br1 = new BinaryReader(new MemoryStream(mesh.MeshVertexData[meshDataInfoList[vertex].VertexDataBlock])))
                         {
-                            br1.BaseStream.Seek(j * mesh.MeshInfo.VertexSizes[meshDataInfoList[blendWeights].VertexDataBlock] + meshDataInfoList[blendWeights].Offset, SeekOrigin.Begin);
-
-                            float x = br1.ReadByte() / 255.0f;
-                            float y = br1.ReadByte() / 255.0f;
-                            float z = br1.ReadByte() / 255.0f;
-                            float w = br1.ReadByte() / 255.0f;
-
-                            int count = 0;
-                            if(x != 0)
+                            for (int j = 0; j < mesh.MeshInfo.VertexCount; j++)
                             {
-                                blendWeightList.Add(x);
-                                count++;
+                                br1.BaseStream.Seek(j * mesh.MeshInfo.VertexSizes[meshDataInfoList[vertex].VertexDataBlock] + meshDataInfoList[vertex].Offset, SeekOrigin.Begin);
 
-                                if(y != 0)
+                                Vector3 vVector = new Vector3();
+                                if (meshDataInfoList[vertex].DataType == 13 || meshDataInfoList[vertex].DataType == 14)
                                 {
-                                    blendWeightList.Add(y);
+
+                                    System.Half h1 = System.Half.ToHalf(br1.ReadUInt16());
+                                    System.Half h2 = System.Half.ToHalf(br1.ReadUInt16());
+                                    System.Half h3 = System.Half.ToHalf(br1.ReadUInt16());
+
+                                    float x = HalfHelper.HalfToSingle(h1);
+                                    float y = HalfHelper.HalfToSingle(h2);
+                                    float z = HalfHelper.HalfToSingle(h3);
+
+                                    vVector = new Vector3(x, y, z);
+                                    objBytes.Add("v " + x.ToString("N5") + " " + y.ToString("N5") + " " + z.ToString("N5") + " ");
+                                }
+                                else if (meshDataInfoList[vertex].DataType == 2)
+                                {
+                                    var x = BitConverter.ToSingle(br1.ReadBytes(4), 0);
+                                    var y = BitConverter.ToSingle(br1.ReadBytes(4), 0);
+                                    var z = BitConverter.ToSingle(br1.ReadBytes(4), 0);
+
+                                    vVector = new Vector3(x, y, z);
+                                    objBytes.Add("v " + x.ToString("N5") + " " + y.ToString("N5") + " " + z.ToString("N5") + " ");
+
+                                }
+
+                                vertexList.Add(vVector);
+                            }
+                        }
+
+
+                        /* 
+                         * -----------------
+                         * Blend Weight
+                         * -----------------
+                         */
+                        using (BinaryReader br1 = new BinaryReader(new MemoryStream(mesh.MeshVertexData[meshDataInfoList[blendWeights].VertexDataBlock])))
+                        {
+                            for (int j = 0; j < mesh.MeshInfo.VertexCount; j++)
+                            {
+                                br1.BaseStream.Seek(j * mesh.MeshInfo.VertexSizes[meshDataInfoList[blendWeights].VertexDataBlock] + meshDataInfoList[blendWeights].Offset, SeekOrigin.Begin);
+
+                                float x = br1.ReadByte() / 255.0f;
+                                float y = br1.ReadByte() / 255.0f;
+                                float z = br1.ReadByte() / 255.0f;
+                                float w = br1.ReadByte() / 255.0f;
+
+                                int count = 0;
+                                if (x != 0)
+                                {
+                                    blendWeightList.Add(x);
                                     count++;
 
-                                    if(z != 0)
+                                    if (y != 0)
                                     {
-                                        blendWeightList.Add(z);
+                                        blendWeightList.Add(y);
                                         count++;
 
-                                        if(w != 0)
+                                        if (z != 0)
                                         {
-                                            blendWeightList.Add(w);
+                                            blendWeightList.Add(z);
                                             count++;
+
+                                            if (w != 0)
+                                            {
+                                                blendWeightList.Add(w);
+                                                count++;
+                                            }
                                         }
                                     }
                                 }
-                            }
 
-                            if(count == 1)
-                            {
-                                blendWeightList2.Add(new float[] { x });
-                            }
-                            else if(count == 2)
-                            {
-                                blendWeightList2.Add(new float[] { x, y });
-                            }
-                            else if (count == 3)
-                            {
-                                blendWeightList2.Add(new float[] { x, y, z });
-                            }
-                            else if (count == 4)
-                            {
-                                blendWeightList2.Add(new float[] { x, y, z, w });
-                            }
+                                if (count == 1)
+                                {
+                                    blendWeightList2.Add(new float[] { x });
+                                }
+                                else if (count == 2)
+                                {
+                                    blendWeightList2.Add(new float[] { x, y });
+                                }
+                                else if (count == 3)
+                                {
+                                    blendWeightList2.Add(new float[] { x, y, z });
+                                }
+                                else if (count == 4)
+                                {
+                                    blendWeightList2.Add(new float[] { x, y, z, w });
+                                }
 
-                            weightCounts.Add(count);
-                        }
-                    }
-
-
-                    /* 
-                     * -----------------
-                     * Blend Index
-                     * -----------------
-                     */
-                    using (BinaryReader br1 = new BinaryReader(new MemoryStream(mesh.MeshVertexData[meshDataInfoList[blendIndices].VertexDataBlock])))
-                    {
-                        for (int j = 0; j < mesh.MeshInfo.VertexCount; j++)
-                        {
-                            br1.BaseStream.Seek(j * mesh.MeshInfo.VertexSizes[meshDataInfoList[blendIndices].VertexDataBlock] + meshDataInfoList[blendIndices].Offset, SeekOrigin.Begin);
-
-                            int x = br1.ReadByte();
-                            int y = br1.ReadByte();
-                            int z = br1.ReadByte();
-                            int w = br1.ReadByte();
-
-                            if(weightCounts[j] == 1)
-                            {
-                                blendIndicesList.Add(x);
-                                blendIndicesList2.Add(new int[] { x });
-                            }
-                            else if (weightCounts[j] == 2)
-                            {
-                                blendIndicesList.Add(x);
-                                blendIndicesList.Add(y);
-                                blendIndicesList2.Add(new int[] { x, y });
-
-                            }
-                            else if (weightCounts[j] == 3)
-                            {
-                                blendIndicesList.Add(x);
-                                blendIndicesList.Add(y);
-                                blendIndicesList.Add(z);
-                                blendIndicesList2.Add(new int[] { x, y, z });
-
-                            }
-                            else if (weightCounts[j] == 4)
-                            {
-                                blendIndicesList.Add(x);
-                                blendIndicesList.Add(y);
-                                blendIndicesList.Add(z);
-                                blendIndicesList.Add(w);
-                                blendIndicesList2.Add(new int[] { x, y, z, w });
-
+                                weightCounts.Add(count);
                             }
                         }
-                    }
 
 
-                    /* 
-                     * -----------------
-                     * Texture Coordinates
-                     * -----------------
-                     */
-                    using (BinaryReader br1 = new BinaryReader(new MemoryStream(mesh.MeshVertexData[meshDataInfoList[coordinates].VertexDataBlock])))
-                    {
-                        for (int j = 0; j < mesh.MeshInfo.VertexCount; j++)
+                        /* 
+                         * -----------------
+                         * Blend Index
+                         * -----------------
+                         */
+                        using (BinaryReader br1 = new BinaryReader(new MemoryStream(mesh.MeshVertexData[meshDataInfoList[blendIndices].VertexDataBlock])))
                         {
-                            br1.BaseStream.Seek(j * mesh.MeshInfo.VertexSizes[meshDataInfoList[coordinates].VertexDataBlock] + meshDataInfoList[coordinates].Offset, SeekOrigin.Begin);
-
-                            float x = 0;
-                            float y = 0;
-                            float z = 0;
-                            float w = 0; 
-                            if (meshDataInfoList[coordinates].DataType == 13 || meshDataInfoList[coordinates].DataType == 14)
+                            for (int j = 0; j < mesh.MeshInfo.VertexCount; j++)
                             {
-                                var sx = br1.ReadUInt16();
-                                var sy = br1.ReadUInt16();
-                                var sz = br1.ReadUInt16();
-                                var sw = br1.ReadUInt16();
+                                br1.BaseStream.Seek(j * mesh.MeshInfo.VertexSizes[meshDataInfoList[blendIndices].VertexDataBlock] + meshDataInfoList[blendIndices].Offset, SeekOrigin.Begin);
 
-                                var h1 = new SharpDX.Half(sx);
-                                var h2 = new SharpDX.Half(sy);
-                                var h3 = new SharpDX.Half(sz);
-                                var h4 = new SharpDX.Half(sw);
+                                int x = br1.ReadByte();
+                                int y = br1.ReadByte();
+                                int z = br1.ReadByte();
+                                int w = br1.ReadByte();
 
-                                x = h1;
-                                y = h2;
-                                z = h3;
-                                w = h4;
+                                if (weightCounts[j] == 1)
+                                {
+                                    blendIndicesList.Add(x);
+                                    blendIndicesList2.Add(new int[] { x });
+                                }
+                                else if (weightCounts[j] == 2)
+                                {
+                                    blendIndicesList.Add(x);
+                                    blendIndicesList.Add(y);
+                                    blendIndicesList2.Add(new int[] { x, y });
+
+                                }
+                                else if (weightCounts[j] == 3)
+                                {
+                                    blendIndicesList.Add(x);
+                                    blendIndicesList.Add(y);
+                                    blendIndicesList.Add(z);
+                                    blendIndicesList2.Add(new int[] { x, y, z });
+
+                                }
+                                else if (weightCounts[j] == 4)
+                                {
+                                    blendIndicesList.Add(x);
+                                    blendIndicesList.Add(y);
+                                    blendIndicesList.Add(z);
+                                    blendIndicesList.Add(w);
+                                    blendIndicesList2.Add(new int[] { x, y, z, w });
+
+                                }
                             }
-                            else if (meshDataInfoList[coordinates].DataType == 1)
-                            {
-                                x = br1.ReadSingle();
-                                y = br1.ReadSingle();   
-                            }
-                            else
-                            {
-                                x = br1.ReadSingle();
-                                y = br1.ReadSingle();
-                                z = br1.ReadSingle();
-                                w = br1.ReadSingle();
-                            }
-
-
-                            var ox = x - Math.Truncate(x);
-                            var oy = y - Math.Truncate(y);
-
-                            objBytes.Add("vt " + ox.ToString("N5") + " " + (1 - y).ToString("N5") + " ");
-                            texCoordList.Add(new Vector2(x, y));
-                            texCoordList2.Add(new Vector2(z, w));
                         }
-                    }
 
 
-
-                    /* 
-                     * -----------------
-                     * Normals
-                     * -----------------
-                     */
-                    using (BinaryReader br1 = new BinaryReader(new MemoryStream(mesh.MeshVertexData[meshDataInfoList[normals].VertexDataBlock])))
-                    {
-                        for (int j = 0; j < mesh.MeshInfo.VertexCount; j++)
+                        /* 
+                         * -----------------
+                         * Texture Coordinates
+                         * -----------------
+                         */
+                        using (BinaryReader br1 = new BinaryReader(new MemoryStream(mesh.MeshVertexData[meshDataInfoList[coordinates].VertexDataBlock])))
                         {
-                            br1.BaseStream.Seek(j * mesh.MeshInfo.VertexSizes[meshDataInfoList[normals].VertexDataBlock] + meshDataInfoList[normals].Offset, SeekOrigin.Begin);
-
-                            float x = 0;
-                            float y = 0;
-                            float z = 0;
-                            float w = 0;
-
-                            if (meshDataInfoList[normals].DataType == 13 || meshDataInfoList[normals].DataType == 14)
+                            for (int j = 0; j < mesh.MeshInfo.VertexCount; j++)
                             {
-                                System.Half h1 = System.Half.ToHalf(br1.ReadUInt16());
-                                System.Half h2 = System.Half.ToHalf(br1.ReadUInt16());
-                                System.Half h3 = System.Half.ToHalf(br1.ReadUInt16());
-                                System.Half h4 = System.Half.ToHalf(br1.ReadUInt16());
+                                br1.BaseStream.Seek(j * mesh.MeshInfo.VertexSizes[meshDataInfoList[coordinates].VertexDataBlock] + meshDataInfoList[coordinates].Offset, SeekOrigin.Begin);
 
-                                x = HalfHelper.HalfToSingle(h1);
-                                y = HalfHelper.HalfToSingle(h2);
-                                z = HalfHelper.HalfToSingle(h3);
-                                w = HalfHelper.HalfToSingle(h4);
+                                float x = 0;
+                                float y = 0;
+                                float z = 0;
+                                float w = 0;
+                                if (meshDataInfoList[coordinates].DataType == 13 || meshDataInfoList[coordinates].DataType == 14)
+                                {
+                                    var sx = br1.ReadUInt16();
+                                    var sy = br1.ReadUInt16();
+                                    var sz = br1.ReadUInt16();
+                                    var sw = br1.ReadUInt16();
 
+                                    var h1 = new SharpDX.Half(sx);
+                                    var h2 = new SharpDX.Half(sy);
+                                    var h3 = new SharpDX.Half(sz);
+                                    var h4 = new SharpDX.Half(sw);
+
+                                    x = h1;
+                                    y = h2;
+                                    z = h3;
+                                    w = h4;
+                                }
+                                else if (meshDataInfoList[coordinates].DataType == 1)
+                                {
+                                    x = br1.ReadSingle();
+                                    y = br1.ReadSingle();
+                                }
+                                else
+                                {
+                                    x = br1.ReadSingle();
+                                    y = br1.ReadSingle();
+                                    z = br1.ReadSingle();
+                                    w = br1.ReadSingle();
+                                }
+
+
+                                var ox = x - Math.Truncate(x);
+                                var oy = y - Math.Truncate(y);
+
+                                objBytes.Add("vt " + ox.ToString("N5") + " " + (1 - y).ToString("N5") + " ");
+                                texCoordList.Add(new Vector2(x, y));
+                                texCoordList2.Add(new Vector2(z, w));
                             }
-                            else
+                        }
+
+
+
+                        /* 
+                         * -----------------
+                         * Normals
+                         * -----------------
+                         */
+                        using (BinaryReader br1 = new BinaryReader(new MemoryStream(mesh.MeshVertexData[meshDataInfoList[normals].VertexDataBlock])))
+                        {
+                            for (int j = 0; j < mesh.MeshInfo.VertexCount; j++)
                             {
-                                x = br1.ReadSingle();
-                                y = br1.ReadSingle();
-                                z = br1.ReadSingle();
+                                br1.BaseStream.Seek(j * mesh.MeshInfo.VertexSizes[meshDataInfoList[normals].VertexDataBlock] + meshDataInfoList[normals].Offset, SeekOrigin.Begin);
+
+                                float x = 0;
+                                float y = 0;
+                                float z = 0;
+                                float w = 0;
+
+                                if (meshDataInfoList[normals].DataType == 13 || meshDataInfoList[normals].DataType == 14)
+                                {
+                                    System.Half h1 = System.Half.ToHalf(br1.ReadUInt16());
+                                    System.Half h2 = System.Half.ToHalf(br1.ReadUInt16());
+                                    System.Half h3 = System.Half.ToHalf(br1.ReadUInt16());
+                                    System.Half h4 = System.Half.ToHalf(br1.ReadUInt16());
+
+                                    x = HalfHelper.HalfToSingle(h1);
+                                    y = HalfHelper.HalfToSingle(h2);
+                                    z = HalfHelper.HalfToSingle(h3);
+                                    w = HalfHelper.HalfToSingle(h4);
+
+                                }
+                                else
+                                {
+                                    x = br1.ReadSingle();
+                                    y = br1.ReadSingle();
+                                    z = br1.ReadSingle();
+                                }
+
+                                var nv = new Vector3(x, y, z);
+
+                                objBytes.Add("vn " + x.ToString("N5") + " " + y.ToString("N5") + " " + z.ToString("N5") + " ");
+                                normalList.Add(nv);
                             }
-
-                            var nv = new Vector3(x, y, z);
-
-                            objBytes.Add("vn " + x.ToString("N5") + " " + y.ToString("N5") + " " + z.ToString("N5") + " ");
-                            normalList.Add(nv);
                         }
-                    }
 
 
-                    /* 
-                     * -----------------
-                     * Tangents
-                     * -----------------
-                     */
-                    using (BinaryReader br1 = new BinaryReader(new MemoryStream(mesh.MeshVertexData[meshDataInfoList[tangents].VertexDataBlock])))
-                    {
-                        for (int j = 0; j < mesh.MeshInfo.VertexCount; j++)
+                        /* 
+                         * -----------------
+                         * Tangents
+                         * -----------------
+                         */
+                        using (BinaryReader br1 = new BinaryReader(new MemoryStream(mesh.MeshVertexData[meshDataInfoList[tangents].VertexDataBlock])))
                         {
-                            br1.BaseStream.Seek(j * mesh.MeshInfo.VertexSizes[meshDataInfoList[tangents].VertexDataBlock] + meshDataInfoList[tangents].Offset, SeekOrigin.Begin);
+                            for (int j = 0; j < mesh.MeshInfo.VertexCount; j++)
+                            {
+                                br1.BaseStream.Seek(j * mesh.MeshInfo.VertexSizes[meshDataInfoList[tangents].VertexDataBlock] + meshDataInfoList[tangents].Offset, SeekOrigin.Begin);
 
-                            int x = br1.ReadByte();
-                            int y = br1.ReadByte();
-                            int z = br1.ReadByte();
-                            int w = br1.ReadByte();
+                                int x = br1.ReadByte();
+                                int y = br1.ReadByte();
+                                int z = br1.ReadByte();
+                                int w = br1.ReadByte();
 
-                            var x1  = x * 2 / 255f - 1f;
-                            var y1  = y * 2 / 255f - 1f;
-                            var z1  = z * 2 / 255f - 1f;
-                            var w1  = w * 2 / 255f - 1f;
+                                var x1 = x * 2 / 255f - 1f;
+                                var y1 = y * 2 / 255f - 1f;
+                                var z1 = z * 2 / 255f - 1f;
+                                var w1 = w * 2 / 255f - 1f;
 
 
-                            var nv = new Vector3(x1, y1, z1);
+                                var nv = new Vector3(x1, y1, z1);
 
-                            tangentList.Add(nv);
+                                tangentList.Add(nv);
+                            }
                         }
-                    }
 
 
-                    /* 
-                     * -----------------
-                     * Vertex Color
-                     * -----------------
-                     */
-                    using (BinaryReader br1 = new BinaryReader(new MemoryStream(mesh.MeshVertexData[meshDataInfoList[colors].VertexDataBlock])))
-                    {
-                        for (int j = 0; j < mesh.MeshInfo.VertexCount; j++)
+                        /* 
+                         * -----------------
+                         * Vertex Color
+                         * -----------------
+                         */
+                        using (BinaryReader br1 = new BinaryReader(new MemoryStream(mesh.MeshVertexData[meshDataInfoList[colors].VertexDataBlock])))
                         {
-                            br1.BaseStream.Seek(j * mesh.MeshInfo.VertexSizes[meshDataInfoList[colors].VertexDataBlock] + meshDataInfoList[colors].Offset, SeekOrigin.Begin);
+                            for (int j = 0; j < mesh.MeshInfo.VertexCount; j++)
+                            {
+                                br1.BaseStream.Seek(j * mesh.MeshInfo.VertexSizes[meshDataInfoList[colors].VertexDataBlock] + meshDataInfoList[colors].Offset, SeekOrigin.Begin);
 
-                            int a = br1.ReadByte();
-                            int r = br1.ReadByte();
-                            int g = br1.ReadByte();
-                            int b = br1.ReadByte();
+                                int a = br1.ReadByte();
+                                int r = br1.ReadByte();
+                                int g = br1.ReadByte();
+                                int b = br1.ReadByte();
 
-                            colorsList.Add(new Color4(r, g, b, a));
+                                colorsList.Add(new Color4(r, g, b, a));
+                            }
                         }
                     }
 
@@ -994,7 +1041,7 @@ namespace FFXIV_TexTools2.Material
                         MeshPartOffset = mesh.MeshInfo.MeshPartOffset
                     };
 
-                    if(extraIndices2.ContainsKey(i))
+                    if (extraIndices2.ContainsKey(i))
                     {
                         foreach (var id in extraIndices2[i])
                         {

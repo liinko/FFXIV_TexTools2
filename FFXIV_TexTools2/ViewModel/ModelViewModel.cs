@@ -373,7 +373,7 @@ namespace FFXIV_TexTools2.ViewModel
         {
             if (!Helper.IsIndexLocked(true))
             {
-                ImportModel.ImportDAE(selectedCategory, selectedItem.ItemName, modelName, SelectedMesh.ID, fullPath, meshList[0].BoneStrings, modelData, null);
+                ImportModel.ImportDAE(selectedCategory, selectedItem.ItemName, modelName, SelectedMesh.ID, fullPath, modelData, null);
                 UpdateModel(selectedItem, selectedCategory);
             }
         }
@@ -387,7 +387,7 @@ namespace FFXIV_TexTools2.ViewModel
             if (!Helper.IsIndexLocked(true))
             {
                 var savePath = Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selectedItem.ItemName + "/3D/" + modelName + ".DAE";
-                AdvImport advImport = new AdvImport(this, savePath, selectedCategory, selectedItem, modelName, SelectedMesh.ID, fullPath, meshList[0].BoneStrings, meshList[0].AttributeStrings, modelData);
+                AdvImport advImport = new AdvImport(this, savePath, selectedCategory, selectedItem, modelName, SelectedMesh.ID, fullPath, modelData);
                 advImport.Owner = App.Current.MainWindow;
                 advImport.Show();
             }

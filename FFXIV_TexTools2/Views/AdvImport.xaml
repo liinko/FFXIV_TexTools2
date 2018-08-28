@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FFXIV_TexTools2.Views"
         mc:Ignorable="d"
-        Title="3D Import Options" Width="600" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner" Height="300">
+        Title="3D Import Options" Width="655" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner" Height="728" ResizeMode="NoResize">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -26,7 +26,7 @@
                 <Button x:Name="AdvImportButton" Content="..." Grid.Column="1" Grid.Row="1" Width="20" Height="20" HorizontalAlignment="Right" Click="AdvImportButton_Click"/>
             </Grid>
         </Border>
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="1" Height="577" VerticalAlignment="Top">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition/>
@@ -37,62 +37,66 @@
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
-                    <Label x:Name="MeshCountLabel" Grid.Column="0" Content="Mesh Count:"/>
+                    <Label x:Name="MeshCountLabel" Grid.Column="0" Content="Meshes:"/>
                     <Grid Grid.ColumnSpan="2">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-                        <Label Content="Mesh: " Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                        <ComboBox x:Name="MeshComboBox" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" MinWidth="100" SelectionChanged="MeshComboBox_SelectionChanged" Height="22" Width="100"/>
+                        <Button x:Name="AddMeshButton" Content="Add Mesh" HorizontalAlignment="Left" Margin="238,0,0,0" VerticalAlignment="Top" Width="75" Grid.Column="1" Height="26" Click="AddMeshButton_Click"/>
                     </Grid>
 
                 </Grid>
             </Border>
-            <Grid Grid.Row="1">
+            <Grid x:Name="ItemStatusGrid" HorizontalAlignment="Left" Height="189" Margin="10,10,0,0" Grid.Row="1" VerticalAlignment="Top" Width="627">
+                <ListBox x:Name="Materials_List" HorizontalAlignment="Left" Height="100" Margin="11,43,0,0" VerticalAlignment="Top" Width="189" SelectionChanged="MaterialsList_SelectionChanged"/>
+                <ListBox x:Name="AttributesList" HorizontalAlignment="Left" Height="100" Margin="210,43,0,0" VerticalAlignment="Top" Width="189" SelectionChanged="AttributeList_SelectionChanged"/>
+                <TextBox x:Name="MaterialAdditionText" HorizontalAlignment="Left" Height="23" Margin="11,148,0,0" VerticalAlignment="Top" Width="109"/>
+                <Button x:Name="AddMaterialButton" Content="Add/Remove" HorizontalAlignment="Left" Margin="125,149,0,0" VerticalAlignment="Top" Width="75" Click="AddMaterialButton_Click"/>
+                <TextBox x:Name="AttributeAdditionText" HorizontalAlignment="Left" Height="23" Margin="210,148,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="109"/>
+                <Button x:Name="AddAttributeButton" Content="Add/Remove" HorizontalAlignment="Left" Margin="324,149,0,0" VerticalAlignment="Top" Width="75" Click="AddAttributeButton_Click"/>
+                <Label Content="Materials:" HorizontalAlignment="Left" Margin="11,12,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.658,1.192"/>
+                <Label Content="Attributes:" HorizontalAlignment="Left" Margin="210,12,0,0" VerticalAlignment="Top" Width="86"/>
+                <ListBox x:Name="BoneList" HorizontalAlignment="Left" Height="100" Margin="411,43,0,0" VerticalAlignment="Top" Width="189"/>
+                <Label Content="Bones:" HorizontalAlignment="Left" Margin="411,12,0,0" VerticalAlignment="Top" Width="86"/>
+                <Label Content="Bone addition is automatic" HorizontalAlignment="Left" Margin="432,147,0,0" VerticalAlignment="Top"/>
+            </Grid>
+            <Grid x:Name="MeshStatusGrid" Margin="0,204,12,-62" Grid.Row="1" Panel.ZIndex="10" HorizontalAlignment="Right" Width="627" Height="407" VerticalAlignment="Top">
                 <Grid.RowDefinitions>
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="184*"/>
+                    <RowDefinition Height="221*"/>
+                    <RowDefinition Height="2*"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
-                <CheckBox x:Name="FixCheckbox" Grid.Row="0" Content="Attempt Fix" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0,0,0" Checked="FixCheckbox_Checked" Unchecked="FixCheckbox_Unchecked"/>
-                <CheckBox x:Name="DisableCheckbox" Grid.Row="1" Content="Disable Hiding" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0,0,0" Checked="DisableCheckbox_Checked" Unchecked="DisableCheckbox_Unchecked"/>
-                <StackPanel Grid.Row="2" Orientation="Horizontal">
-                    <Label Content="Part: " VerticalAlignment="Center"/>
-                    <ComboBox x:Name="PartComboBox" IsReadOnly="True" HorizontalAlignment="Left" VerticalAlignment="Center" SelectionChanged="PartComboBox_SelectionChanged"  />
-                </StackPanel>
-                
-                <TextBlock x:Name="AttemptFixText" Grid.Column="1" TextWrapping="Wrap" Text="Use this option if mesh appears to have holes, when another item is equipped. 
-                           *It is recommended to try this option before disabling." VerticalAlignment="Center" Padding="0" Margin="20,0,10,0"/>
-                <TextBlock x:Name="DisableHidingText" Grid.Column="1" Grid.Row="1" TextWrapping="Wrap" Text="Use this option to disable the mesh from hiding when another item is equipped." VerticalAlignment="Center" Margin="20,0,10,0"/>
-                <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
-                    <Label Content="Attribute(s):" VerticalAlignment="Center"/>
-                    <TextBlock x:Name="OrigAttrText" Text="[ Attribute ]" VerticalAlignment="Center" TextWrapping="Wrap" MaxWidth="200"/>
-                    <Label Content="| Add/Remove: " VerticalAlignment="Center" Margin="15,0,0,0"/>
-                    <ComboBox x:Name="NewAttrComobBox" IsReadOnly="True" HorizontalAlignment="Left" VerticalAlignment="Center" SelectionChanged="NewAttrComobBox_SelectionChanged"/>
-                </StackPanel>
-                <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Orientation="Horizontal">
-                    <Label Content="*Note: These options are still in development and may not work properly." VerticalAlignment="Bottom" />
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <Button x:Name="CreateXMLButton" Grid.Column="0" Content="Make XML" Margin="5" Click="CreateXMLButton_Click" />
-                        <Button x:Name="CancelButton" Grid.Column="1" Content="Cancel" Margin="5" Click="CancelButton_Click" />
-                        <Button x:Name="ImportButton" Grid.Column="2" Content="Import" Margin="5" Click="ImportButton_Click" />
-                    </Grid>
-                </StackPanel>
-
-
+                <Label Content="Part: " Margin="10,10,0,0" Grid.Row="1" Height="29" VerticalAlignment="Top" HorizontalAlignment="Left" Width="98"/>
+                <ComboBox x:Name="PartComboBox" IsReadOnly="True" SelectionChanged="PartComboBox_SelectionChanged"  Margin="106,10,0,0" RenderTransformOrigin="9.48,-5.864" Width="50" Grid.Row="1" MinWidth="50" HorizontalAlignment="Left" Height="25" VerticalAlignment="Top" IsEnabled="False"  />
+                <ComboBox x:Name="MeshComboBox" HorizontalAlignment="Left" MinWidth="50" SelectionChanged="MeshComboBox_SelectionChanged" Width="50" Margin="85,21,0,0" Height="22" VerticalAlignment="Top"/>
+                <Label Content="Mesh:" HorizontalAlignment="Left" Margin="10,18,0,0" Width="68" Height="31" VerticalAlignment="Top"/>
+                <ComboBox x:Name="MeshMaterialComboBox" HorizontalAlignment="Left" Margin="85,59,0,0" Width="174" Height="21" VerticalAlignment="Top" IsEnabled="False" SelectionChanged="MeshMaterialComboBox_SelectionChanged"/>
+                <Label Content="Material:" Margin="10,54,0,0" RenderTransformOrigin="0.25,0.423" Height="31" VerticalAlignment="Top" HorizontalAlignment="Left" Width="56"/>
+                <Button x:Name="CreateXMLButton" Content="Make XML" Margin="442,0,0,7" Click="CreateXMLButton_Click" Grid.Row="1" Height="30" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="62" IsEnabled="False" />
+                <Button x:Name="CancelButton" Content="Cancel" Margin="0,0,67,7" Click="CancelButton_Click" Grid.Row="1" Height="30" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="41" />
+                <Button x:Name="ImportButton" Content="Import" Margin="0,0,10,7" Click="ImportButton_Click" Grid.Row="1" Height="30" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="42" />
+                <Label Content="*Note: These options are still in development and may not work properly." Margin="0,0,0,8" Grid.Row="1" HorizontalAlignment="Left" Width="398" Height="26" VerticalAlignment="Bottom" />
+                <CheckBox x:Name="FixCheckbox" Grid.Row="0" Content="Attempt Fix" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="493,40,0,118" Checked="FixCheckbox_Checked" Unchecked="FixCheckbox_Unchecked" Height="26" Width="124" IsEnabled="False"/>
+                <CheckBox x:Name="DisableCheckbox" Content="Disable Extra Data" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="493,66,0,92" Checked="DisableCheckbox_Checked" Unchecked="DisableCheckbox_Unchecked" Height="26" Width="124" IsEnabled="False"/>
+                <Label x:Name="ExtraMeshDataLabel" Content="Extra Mesh Data:" HorizontalAlignment="Left" Margin="472,10,0,0" VerticalAlignment="Top" Height="26" Width="99"/>
+                <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="80" Margin="465,10,0,0" VerticalAlignment="Top" Width="152"/>
+                <Border BorderBrush="Black" BorderThickness="1" Grid.RowSpan="2" Panel.ZIndex="-10" Margin="0,0,0,47">
+                    <ListBox x:Name="MeshPartAttributesList" Height="125" VerticalAlignment="Top" Margin="0,222,9,0" HorizontalAlignment="Right" Width="335" IsEnabled="False"/>
+                </Border>
+                <TextBlock x:Name="AttemptFixText" TextWrapping="Wrap" Text="Use these options if the item has holes appear when combined with other items." VerticalAlignment="Top" Padding="0" Margin="0,95,10,0" Height="68" HorizontalAlignment="Right" Width="152"/>
+                <Label Content="Add/Remove:" Margin="10,51,0,0" Grid.Row="1" HorizontalAlignment="Left" Width="91" Height="26" VerticalAlignment="Top"/>
+                <ComboBox x:Name="NewAttrComobBox" IsReadOnly="True" VerticalAlignment="Top" SelectionChanged="NewAttrComobBox_SelectionChanged" Margin="106,51,0,0" Grid.Row="1" HorizontalAlignment="Left" Width="153" Height="22" RenderTransformOrigin="0.4,-1.864" IsEnabled="False"/>
+                <Label Content="Parts:" HorizontalAlignment="Left" Margin="10,90,0,0" VerticalAlignment="Top" Height="26" Width="56" RenderTransformOrigin="0.25,0.423"/>
+                <Button x:Name="MeshAddPartButton" Content="Add Part" HorizontalAlignment="Left" Margin="10,130,0,0" VerticalAlignment="Top" Width="68" Click="MeshAddPartButton_Click" Height="26" IsEnabled="False"/>
+                <Label x:Name="MeshPartCount" Content="##" HorizontalAlignment="Left" Margin="85,90,0,0" VerticalAlignment="Top" Height="26" Width="56" RenderTransformOrigin="0.25,0"/>
+                <Label Content="Part Attributes:" Margin="0,9,247,0" Grid.Row="1" HorizontalAlignment="Right" Width="98" Height="26" VerticalAlignment="Top" RenderTransformOrigin="-0.622,0.385"/>
             </Grid>
         </Grid>
+        <Border BorderBrush="Black" BorderThickness="1" Margin="10,415,12,0" Grid.Row="1" Height="1" VerticalAlignment="Top"/>
 
 
     </Grid>

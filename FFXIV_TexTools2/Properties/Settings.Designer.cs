@@ -93,8 +93,8 @@ namespace FFXIV_TexTools2.Properties {
             set {
                 this["Modlist_Directory"] = value;
             }
-        }
-        
+        }   
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]

@@ -105,7 +105,11 @@ namespace FFXIV_TexTools2.ViewModel
 
             for (int i = 0; i < meshData.Count; i++)
             {
-                ModelCollection.Add(setModel(i));
+                var mdl = setModel(i);
+                if(mdl != null)
+                {
+                    ModelCollection.Add(mdl);
+                }
             }
 
             Vector3 center = ((CustomGM3D)ModelCollection[0]).Geometry.BoundingSphere.Center;
@@ -124,7 +128,13 @@ namespace FFXIV_TexTools2.ViewModel
             mg.Colors = mData[m].Mesh.VertexColors;
             mg.Tangents = new HelixToolkit.Wpf.SharpDX.Core.Vector3Collection();
 
-            MeshBuilder.ComputeTangents(mg);
+            try
+            {
+                MeshBuilder.ComputeTangents(mg);
+            } catch
+            {
+                return null;
+            }
 
             mg.BiTangents = mData[m].Mesh.BiTangents;
             mData[m].Mesh.Tangents = mg.Tangents;

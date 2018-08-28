@@ -37,6 +37,11 @@ namespace FFXIV_TexTools2.Material.ModelMaterial
         public List<MeshPart> MeshPartList = new List<MeshPart>();
 
         /// <summary>
+        /// Material used in this mesh.
+        /// </summary>
+        public int MaterialId;
+
+        /// <summary>
         /// The meshes index data
         /// </summary>
         public byte[] IndexData { get; set; }
