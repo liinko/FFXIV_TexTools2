@@ -55,6 +55,10 @@ namespace FFXIV_TexTools2.ViewModel
 
         public int CurrentSS { get { return currentSS; } set { currentSS = value; NotifyPropertyChanged("CurrentSS"); } }
 
+        public bool IsDead()
+        {
+            return disposed || disposing;
+        }
 
         bool second = false;
         bool disposed = false;

@@ -63,14 +63,16 @@
             <TextBox x:Name="EtcB" TextWrapping="Wrap" VerticalAlignment="Center" MinWidth="30" TextChanged="EtcB_TextChanged" />
             <Rectangle x:Name="EtcColor"  Width="20" Height="20" HorizontalAlignment="Left" Margin="20,0,0,0" Stroke="Black"/>
         </StackPanel>
+        <StackPanel Grid.Row="5" Orientation="Horizontal" Height="46" VerticalAlignment="Top">
+            <Label Content="BG Color " HorizontalAlignment="Left" VerticalAlignment="Center" />
+            <Label Content="R" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0"  />
+            <TextBox x:Name="BGR" TextWrapping="Wrap" VerticalAlignment="Center" MinWidth="30" TextChanged="BGR_TextChanged" />
+            <Label Content="G" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0"  />
+            <TextBox x:Name="BGG" TextWrapping="Wrap" VerticalAlignment="Center" MinWidth="30" TextChanged="BGG_TextChanged" />
+            <Label Content="B" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0"  />
+            <TextBox x:Name="BGB" TextWrapping="Wrap" VerticalAlignment="Center" MinWidth="30" TextChanged="BGB_TextChanged" />
+            <Rectangle x:Name="BGColor"  Width="20" Height="20" HorizontalAlignment="Left" Margin="20,0,0,0" Stroke="Black"/>
+        </StackPanel>
         <Button x:Name="SetButton" Content="Set" HorizontalAlignment="Right" Grid.Row="6" Width="75" VerticalAlignment="Top" Margin="0,19,10,0" Click="SetButton_Click"/>
-        <Label Content="BG Color" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,7,0,17" Grid.Row="5" />
-        <TextBox x:Name="BGR" TextWrapping="Wrap" VerticalAlignment="Center" MinWidth="30" Margin="90,9,272,19" Grid.Row="5" TextChanged="BGR_TextChanged" />
-        <TextBox x:Name="BGG" TextWrapping="Wrap" VerticalAlignment="Center" MinWidth="30" TextChanged="BGG_TextChanged" Margin="148,9,214,19" Grid.Row="5" />
-        <TextBox x:Name="BGB" TextWrapping="Wrap" VerticalAlignment="Center" MinWidth="30" TextChanged="BGB_TextChanged" Margin="205,9,157,19" Grid.Row="5" />
-        <Rectangle x:Name="BGColor"  Width="20" Height="20" HorizontalAlignment="Left" Margin="255,10,0,20" Stroke="Black" Grid.Row="5"/>
-        <Label Content="R" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="73,7,0,17" Grid.Row="5"  />
-        <Label Content="G" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="130,7,0,17" Grid.Row="5"  />
-        <Label Content="B" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="188,7,0,17" Grid.Row="5"  />
     </Grid>
 </Window>
