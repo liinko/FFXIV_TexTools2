@@ -1346,7 +1346,8 @@ namespace FFXIV_TexTools2.IO
 
                     int statusIconNum = BitConverter.ToUInt16(br.ReadBytes(2).Reverse().ToArray(), 0);
 
-                    br.ReadBytes(3);
+                    byte[] unknown = br.ReadBytes(2);
+                    byte iconCount = br.ReadByte();
 
                     int statusType = br.ReadByte();
 
@@ -1383,7 +1384,6 @@ namespace FFXIV_TexTools2.IO
                             item.ItemCategory = Strings.Status;
 
                             TreeNode itemNode = new TreeNode() { Name = item.ItemName, ItemData = item };
-
                             if (statusDict.ContainsKey(item.ItemSubCategory))
                             {
                                 statusDict[item.ItemSubCategory]._subNode.Add(itemNode);
@@ -1392,6 +1392,22 @@ namespace FFXIV_TexTools2.IO
                             {
                                 statusDict.Add(item.ItemSubCategory, new TreeNode() { Name = item.ItemSubCategory, _subNode = { itemNode } });
                             }
+
+                            if (iconCount > 1)
+                            {
+                                for(int c = 1; c < iconCount; c++)
+                                {
+                                    ItemData alternate = new ItemData();
+                                    alternate.Icon = (statusIconNum + c).ToString();
+                                    alternate.ItemSubCategory = item.ItemSubCategory;
+                                    alternate.ItemName = item.ItemName + "-" + (c+1).ToString();
+                                    alternate.ItemCategory = Strings.Status;
+
+                                    TreeNode alternateNode = new TreeNode() { Name = alternate.ItemName, ItemData = alternate };
+                                    statusDict[alternate.ItemSubCategory]._subNode.Add(alternateNode);
+                                }
+                            }
+
                         }
                     }
                 }

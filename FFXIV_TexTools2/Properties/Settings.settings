@@ -41,5 +41,8 @@
     <Setting Name="Etc_Color" Type="System.String" Scope="User">
       <Value Profile="(Default)">#FF603913</Value>
     </Setting>
+    <Setting Name="BG_Color" Type="System.String" Scope="User">
+      <Value Profile="(Default)">#FF777777</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

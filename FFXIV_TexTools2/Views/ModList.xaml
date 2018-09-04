@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:src="clr-namespace:FFXIV_TexTools2.Model"
         mc:Ignorable="d"
-        Title="ModList" Height="500" Width="800" WindowStartupLocation="CenterOwner">
+        Title="ModList" Height="500" Width="800" WindowStartupLocation="CenterOwner" Closed="Window_Closed">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>

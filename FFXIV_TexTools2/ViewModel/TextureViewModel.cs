@@ -136,6 +136,11 @@ namespace FFXIV_TexTools2.ViewModel
             RaceIndex = 0;
         }
 
+        public void ReloadTexture()
+        {
+            UpdateTexture(selectedItem, selectedCategory);
+        }
+
         public TextureViewModel()
         {
 

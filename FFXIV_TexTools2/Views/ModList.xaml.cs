@@ -32,9 +32,15 @@ namespace FFXIV_TexTools2.Views
     /// </summary>
     public partial class ModList : Window
     {
-        public ModList()
+        ModelViewModel mvm;
+        TextureViewModel tvm;
+
+        public ModList(ModelViewModel mvm, TextureViewModel tvm)
         {
             InitializeComponent();
+
+            this.mvm = mvm;
+            this.tvm = tvm;
 
             ModListViewModel vm = new ModListViewModel();
             modListTreeView.DataContext = vm;
@@ -172,6 +178,18 @@ namespace FFXIV_TexTools2.Views
             {
                 ModListViewModel vm = new ModListViewModel();
                 modListTreeView.DataContext = vm;
+            }
+        }
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            if (tvm != null)
+            {
+                tvm.ReloadTexture();
+            }
+            if (mvm != null)
+            {
+                mvm.ReloadModel();
             }
         }
     }

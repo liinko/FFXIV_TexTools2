@@ -90,6 +90,11 @@ namespace FFXIV_TexTools2.ViewModel
             CompositeVM = new Composite3DViewModel();
         }
 
+        public void ReloadModel()
+        {
+            UpdateModel(selectedItem, selectedCategory);
+        }
+
         public void UpdateModel(ItemData item, string category)
         {
             CompositeVM.Dispose();
@@ -294,6 +299,7 @@ namespace FFXIV_TexTools2.ViewModel
         private void SetLighting(object obj)
         {
             CompositeVM.Lighting();
+
         }
 
         /// <summary>
@@ -579,7 +585,7 @@ namespace FFXIV_TexTools2.ViewModel
 
                         if (selectedItem.ItemName.Equals(Strings.Body))
                         {
-                            break;
+                            //break;
                         }
                     }
                 }

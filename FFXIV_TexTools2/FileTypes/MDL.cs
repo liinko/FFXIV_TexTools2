@@ -37,6 +37,7 @@ namespace FFXIV_TexTools2.Material
     /// </summary>
     public class MDL
     {
+        const int LoDViewLevel = 0;
         string MDLFile = "";
         string fullPath = "";
         List<ModelMeshData> meshList = new List<ModelMeshData>();
@@ -266,6 +267,7 @@ namespace FFXIV_TexTools2.Material
                 }
 
                 var savePos = br.BaseStream.Position;
+                var lodStructPos = 68;
 
                 for (int i = 0; i < modelData.LoD.Count; i++)
                 {
@@ -276,7 +278,7 @@ namespace FFXIV_TexTools2.Material
                         modelData.LoD[i].MeshList.Add(new Mesh());
                         meshInfoList.Clear();
 
-                        br.BaseStream.Seek((i * 136) + 68, SeekOrigin.Begin);
+                        br.BaseStream.Seek((j * 136) + lodStructPos, SeekOrigin.Begin);
                         var dataBlockNum = br.ReadByte();
 
                         while (dataBlockNum != 255)
@@ -298,6 +300,7 @@ namespace FFXIV_TexTools2.Material
 
                         modelData.LoD[i].MeshList[j].MeshDataInfoList = meshInfoList.ToArray();
                     }
+                    lodStructPos += 136 * modelData.LoD[i].MeshCount;
                 }
 
                 br.BaseStream.Seek(savePos, SeekOrigin.Begin);
@@ -320,6 +323,7 @@ namespace FFXIV_TexTools2.Material
                         modelData.LoD[x].MeshList[i].MaterialId = meshInfo.MaterialNum;
                         var typeChar = materialStrings[meshInfo.MaterialNum][4].ToString() + materialStrings[meshInfo.MaterialNum][9].ToString();
 
+                        modelData.LoD[x].MeshList[i].BoneListIndex = meshInfo.BoneListIndex;
                         if (typeChar.Equals("cb"))
                         {
                             modelData.LoD[x].MeshList[i].IsBody = true;
@@ -396,16 +400,20 @@ namespace FFXIV_TexTools2.Material
                 Dictionary<int, int> indexMin = new Dictionary<int, int>();
                 Dictionary<int, List<int>> extraIndices = new Dictionary<int, List<int>>();
                 Dictionary<int, List<int>> extraIndices2 = new Dictionary<int, List<int>>();
-                List<ExtraIndex> indexCounts = new List<ExtraIndex>();
+                var indexCounts = new List<List<ExtraIndex>>();
 
-                var pCount = 0;
-                var pCount1 = 0;
-                var pCount2 = 0;
+                // One for each LoD level.
+                indexCounts.Add(new List<ExtraIndex>());
+                indexCounts.Add(new List<ExtraIndex>());
+                indexCounts.Add(new List<ExtraIndex>());
+
+                var pCounts = new int[3];
 
                 if (unknown1 > 0)
                 {
                     for (int i = 0; i < unknown1; i++)
                     {
+
                         //not sure
                         br.ReadBytes(4);
 
@@ -421,15 +429,15 @@ namespace FFXIV_TexTools2.Material
 
                         //LoD[0] Extra Data Part Count
                         var p1n = br.ReadUInt16();
-                        pCount += p1n;
+                        pCounts[0] += p1n;
 
                         //LoD[1] Extra Data Part Count
                         var p2n = br.ReadUInt16();
-                        pCount1 += p2n;
+                        pCounts[1] += p2n;
 
                         //LoD[2] Extra Data Part Count
                         var p3n = br.ReadUInt16();
-                        pCount2 += p3n;
+                        pCounts[2] += p3n;
 
                     }
                 }
@@ -438,9 +446,9 @@ namespace FFXIV_TexTools2.Material
 
                 if (unknown1 > 0)
                 {
-                    for (int i = 0; i < modelData.LoD[0].MeshCount; i++)
+                    for (int i = 0; i < modelData.LoD[LoDViewLevel].MeshCount; i++)
                     {
-                        var ido = modelData.LoD[0].MeshList[i].MeshInfo.IndexDataOffset;
+                        var ido = modelData.LoD[LoDViewLevel].MeshList[i].MeshInfo.IndexDataOffset;
 
                         if (!indexLoc.ContainsKey(ido))
                         {
@@ -450,96 +458,96 @@ namespace FFXIV_TexTools2.Material
                 }
 
 
-                List<int> maskCounts = new List<int>();
+                var totalMaskCounts = new int[3];
                 Dictionary<int, int> totalExtraCounts = new Dictionary<int, int>();
                 if (unknown2 > 0)
                 {
-                    for (int i = 0; i < pCount; i++)
+                    for (int x = 0; x < pCounts.Length; x++)
                     {
-                        //Index Offset Start
-                        var m1 = br.ReadInt32();
-                        var iLoc = 0;
-                        if (indexLoc.ContainsKey(m1))
+                        for (int i = 0; i < pCounts[x]; i++)
                         {
-                            iLoc = indexLoc[m1];
+                            //Index Offset Start
+                            var m1 = br.ReadInt32();
+
+                            //index count
+                            var mCount = br.ReadInt32();
+
+                            //index offset in unk3
+                            var mOffset = br.ReadInt32();
+                            
+                            var iLoc = 0;
+                            if (indexLoc.ContainsKey(m1))
+                            {
+                                iLoc = indexLoc[m1];
+                            }
+
+                            indexCounts[x].Add(new ExtraIndex() { IndexLocation = iLoc, IndexCount = mCount });
+                            totalMaskCounts[x] += mCount;
                         }
-
-                        //index count
-                        var mCount = br.ReadInt32();
-
-                        //index offset in unk3
-                        var mOffset = br.ReadInt32();
-
-                        indexCounts.Add(new ExtraIndex() { IndexLocation = iLoc, IndexCount = mCount });
-                        maskCounts.Add(mCount);
                     }
 
-                    br.ReadBytes((pCount1 + pCount2) * 12);
                 }
 
-                int totalLoD0MaskCount = 0;
-
-                if (unknown2 > 0)
-                {
-                    for (int i = 0; i < pCount; i++)
-                    {
-                        totalLoD0MaskCount += maskCounts[i];
-                    }
-                }
 
                 if (unknown3 > 0)
                 {
-                    var unk3Remainder = (unknown3 * 4) - (totalLoD0MaskCount * 4);
+                    //var unk3Remainder = (unknown3 * 4) - (totalLoD0MaskCount * 4);
                     var c = 0;
-                    foreach (var ic in indexCounts)
+                    for (int l = 0; l < indexCounts.Count; l++)
                     {
-                        HashSet<int> mIndexList = new HashSet<int>();
-
-                        for (int i = 0; i < ic.IndexCount; i++)
+                        foreach (var ic in indexCounts[l])
                         {
-                            //index its replacing? attatched to?
-                            var oIndex = br.ReadUInt16();
-                            //extra index following last equipment index
-                            var mIndex = br.ReadUInt16();
+                            HashSet<int> mIndexList = new HashSet<int>();
 
-                            mIndexList.Add(mIndex);
-
-                            if (extraIndices.ContainsKey(ic.IndexLocation))
+                            for (int i = 0; i < ic.IndexCount; i++)
                             {
-                                extraIndices[ic.IndexLocation].Add(mIndex);
-                                extraIndices2[ic.IndexLocation].Add(oIndex);
-                            }
-                            else
-                            {
-                                extraIndices.Add(ic.IndexLocation, new List<int>() { mIndex });
-                                extraIndices2.Add(ic.IndexLocation, new List<int>() { oIndex });
-                            }
-                        }
+                                //index its replacing? attatched to?
+                                var oIndex = br.ReadUInt16();
 
-                        if (totalExtraCounts.ContainsKey(ic.IndexLocation))
-                        {
-                            totalExtraCounts[ic.IndexLocation] += mIndexList.Count;
+                                //extra index following last equipment index
+                                var mIndex = br.ReadUInt16();
+
+                                if (l == LoDViewLevel)
+                                {
+                                    mIndexList.Add(mIndex);
+
+                                    if (extraIndices.ContainsKey(ic.IndexLocation))
+                                    {
+                                        extraIndices[ic.IndexLocation].Add(mIndex);
+                                        extraIndices2[ic.IndexLocation].Add(oIndex);
+                                    }
+                                    else
+                                    {
+                                        extraIndices.Add(ic.IndexLocation, new List<int>() { mIndex });
+                                        extraIndices2.Add(ic.IndexLocation, new List<int>() { oIndex });
+                                    }
+                                }
+                            }
+
+                            if (l == LoDViewLevel)
+                            {
+                                if (totalExtraCounts.ContainsKey(ic.IndexLocation))
+                                {
+                                    totalExtraCounts[ic.IndexLocation] += mIndexList.Count;
+                                }
+                                else
+                                {
+                                    totalExtraCounts.Add(ic.IndexLocation, mIndexList.Count);
+                                }
+                            }
+                            c++;
                         }
-                        else
-                        {
-                            totalExtraCounts.Add(ic.IndexLocation, mIndexList.Count);
-                        }
-                        c++;
                     }
+
                     //the rest of unk3
-                    br.ReadBytes(unk3Remainder);
-                }
+                    //br.ReadBytes(unk3Remainder);
 
-
-
-                if (unknown3 > 0)
-                {
                     foreach (var ei in extraIndices)
                     {
                         indexMin.Add(ei.Key, ei.Value.Min());
                     }
 
-                    extraIndexData.indexCounts = indexCounts;
+                    extraIndexData.indexCounts = indexCounts[LoDViewLevel];
                     extraIndexData.indexMin = indexMin;
                     extraIndexData.totalExtraCounts = totalExtraCounts;
                     extraIndexData.extraIndices = extraIndices;
@@ -623,9 +631,25 @@ namespace FFXIV_TexTools2.Material
                     }
                 }
 
+
+                for (int i = 0; i < 3; i++)
+                {
+                    for (int j = 0; j < modelData.LoD[i].MeshCount; j++)
+                    {
+                        Mesh mesh = modelData.LoD[i].MeshList[j];
+                        for(int x = 0; x < mesh.IndexData.Count(); x++)
+                        {
+                            if (mesh.IndexData[x] != modelData.LoD[0].MeshList[j].IndexData[x])
+                            {
+                                //MessageBox.Show("asdf");
+                            }
+                        }
+                    }
+                }
+
                 int vertex = 0, coordinates = 0, normals = 0, tangents = 0, colors = 0, blendWeights = 0, blendIndices = 0;
 
-                for (int i = 0; i < modelData.LoD[0].MeshCount; i++)
+                for (int i = 0; i < modelData.LoD[LoDViewLevel].MeshCount; i++)
                 {
                     objBytes.Clear();
 
@@ -645,7 +669,7 @@ namespace FFXIV_TexTools2.Material
                     Dictionary<int, Vector3> extraVertDict = new Dictionary<int, Vector3>();
 
 
-                    Mesh mesh = modelData.LoD[0].MeshList[i];
+                    Mesh mesh = modelData.LoD[LoDViewLevel].MeshList[i];
 
                     MeshDataInfo[] meshDataInfoList = mesh.MeshDataInfoList;
 
@@ -840,7 +864,6 @@ namespace FFXIV_TexTools2.Material
                                 }
                             }
                         }
-
 
                         /* 
                          * -----------------
