@@ -159,7 +159,7 @@ namespace FFXIV_TexTools2.Material
 
             using (BinaryReader br = new BinaryReader(new MemoryStream(MDLDatData.Item1)))
             {
-                // The size of the header + (size of the mesh information block (136 bytes) * the number of meshes) + padding
+                // The size of the header + (size of the mesh information block (136 bytes) * the meshes) + padding
                 br.BaseStream.Seek(64 + 136 * MDLDatData.Item2 + 4, SeekOrigin.Begin);
 
                 var modelStringCount = br.ReadInt32();
@@ -632,20 +632,6 @@ namespace FFXIV_TexTools2.Material
                 }
 
 
-                for (int i = 0; i < 3; i++)
-                {
-                    for (int j = 0; j < modelData.LoD[i].MeshCount; j++)
-                    {
-                        Mesh mesh = modelData.LoD[i].MeshList[j];
-                        for(int x = 0; x < mesh.IndexData.Count(); x++)
-                        {
-                            if (mesh.IndexData[x] != modelData.LoD[0].MeshList[j].IndexData[x])
-                            {
-                                //MessageBox.Show("asdf");
-                            }
-                        }
-                    }
-                }
 
                 int vertex = 0, coordinates = 0, normals = 0, tangents = 0, colors = 0, blendWeights = 0, blendIndices = 0;
 
