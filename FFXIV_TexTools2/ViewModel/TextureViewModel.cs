@@ -108,6 +108,10 @@ namespace FFXIV_TexTools2.ViewModel
         {
             selectedItem = item;
             selectedCategory = category;
+            if(selectedItem == null || selectedCategory == null)
+            {
+                return;
+            }
 
             if (!category.Equals("UI"))
             {

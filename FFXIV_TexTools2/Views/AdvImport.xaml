@@ -21,7 +21,7 @@
                     <ColumnDefinition/>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
-                <TextBox x:Name="ImportDir" Grid.Row="1" Grid.ColumnSpan="2" TextWrapping="Wrap" IsReadOnly="True" Margin="5,0,25,0"/>
+                <TextBox x:Name="ImportDir" Grid.Row="1" Grid.ColumnSpan="2" IsReadOnly="True" Margin="5,0,25,0"/>
                 <Label Grid.Row="0" Content="Importing File" VerticalAlignment="Top" Height="15" Padding="0" Margin="5,0,0,0"/>
                 <Button x:Name="AdvImportButton" Content="..." Grid.Column="1" Grid.Row="1" Width="20" Height="20" HorizontalAlignment="Right" Click="AdvImportButton_Click"/>
             </Grid>

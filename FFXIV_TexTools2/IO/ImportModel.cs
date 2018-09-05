@@ -742,29 +742,28 @@ namespace FFXIV_TexTools2.IO
 						        {
 						            cdDict[i].partsDict.Add(c, 0);
 						            c++;
-						        }
+                                }
+
+                                if (mDict[c].texCoord2.Count < 1 && indStride == 6)
+                                {
+                                    indStride = 4;
+                                }
 
                                 /* Error Checking */
                                 int numVerts = mDict[c].vertex.Count / 3;
                                 int numNormals = mDict[c].normal.Count / 3;
-                                int numTexCoord = mDict[c].texCoord.Count / 2;
-                                int numTexCoord2 = mDict[c].texCoord2.Count / 2;
-                                if (numVerts != numNormals || numVerts != numTexCoord || (numVerts != numTexCoord2 && numTexCoord != 0))
+
+                                int numTexCoord = mDict[c].texCoord.Count / tcStride;
+                                int numTexCoord2 = mDict[c].texCoord2.Count / tcStride;
+
+                                if (numVerts != numNormals // Normals are simple.
+                                    || (numVerts != numTexCoord ) // Check if our coordinate count matches
+                                    || (numVerts != numTexCoord2 && numTexCoord != 0)) // Check if our coordinate2 count matches
                                 {
                                     FlexibleMessageBox.Show("Number of Vertices/Normals/Texture Coordinates do not match for \nMesh: " + i + " Part: " + j
                                         + "\n\nThis has a strong chance of either crashing TexTools or causing other errors in the import\n\nVertexCount: "
                                         + numVerts + "\nNormal Count:" + numNormals + "\n UV1 Coordinates: " + numTexCoord + "\nUV2 Coordinates: " + numTexCoord2 + "\n\nThe import will now attempt to continue.", "ImportModel Warning " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                                 }
-
-
-
-
-
-
-                                if (mDict[c].texCoord2.Count < 1 && indStride == 6)
-						        {
-						            indStride = 4;
-						        }
 
 						        cdDict[i].vertex.AddRange(mDict[c].vertex);
 						        cdDict[i].normal.AddRange(mDict[c].normal);
@@ -3142,10 +3141,15 @@ namespace FFXIV_TexTools2.IO
                 #region Header Generation
                 int headerLength = 256;
 
-				if ((compMeshSizes.Count + modelDataParts + 3 + compIndexSizes.Count) > 24)
-				{
-					headerLength = 384;
-				}
+                if ((compMeshSizes.Count + modelDataParts + 3 + compIndexSizes.Count) > 24)
+                {
+                    headerLength = 384;
+                }
+
+                if ((compMeshSizes.Count + modelDataParts + 3 + compIndexSizes.Count) > 48)
+                {
+                    headerLength = 512;
+                }
 
 				//Header Length
 				datHeader.AddRange(BitConverter.GetBytes(headerLength));
@@ -3375,7 +3379,7 @@ namespace FFXIV_TexTools2.IO
                 }
 
                 //Rest of header
-                if (datHeader.Count != 256 && datHeader.Count != 384)
+                if (datHeader.Count != headerLength)
 				{
 					var headerEnd = headerLength - (datHeader.Count % headerLength);
 					datHeader.AddRange(new byte[headerEnd]);
