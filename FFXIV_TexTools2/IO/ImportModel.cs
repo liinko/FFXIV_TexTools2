@@ -3151,8 +3151,15 @@ namespace FFXIV_TexTools2.IO
                     headerLength = 512;
                 }
 
-				//Header Length
-				datHeader.AddRange(BitConverter.GetBytes(headerLength));
+                // Sanity check - Not sure exactly when this runs past the header length,
+                // But somewhere in here it happens.
+                if ((compMeshSizes.Count + modelDataParts + 3 + compIndexSizes.Count) > 96)
+                {
+                    headerLength = 1024;
+                }
+
+                    //Header Length
+                    datHeader.AddRange(BitConverter.GetBytes(headerLength));
 				//Data Type
 				datHeader.AddRange(BitConverter.GetBytes(3));
 				//Uncompressed Size
