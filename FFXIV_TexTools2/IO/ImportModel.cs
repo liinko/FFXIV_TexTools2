@@ -3141,21 +3141,16 @@ namespace FFXIV_TexTools2.IO
                 #region Header Generation
                 int headerLength = 256;
 
-                if ((compMeshSizes.Count + modelDataParts + 3 + compIndexSizes.Count) > 24)
-                {
-                    headerLength = 384;
-                }
+                int blockCount = (compMeshSizes.Count + modelDataParts + 3 + compIndexSizes.Count);
 
-                if ((compMeshSizes.Count + modelDataParts + 3 + compIndexSizes.Count) > 48)
+                if (blockCount > 24)
                 {
-                    headerLength = 512;
-                }
-
-                // Sanity check - Not sure exactly when this runs past the header length,
-                // But somewhere in here it happens.
-                if ((compMeshSizes.Count + modelDataParts + 3 + compIndexSizes.Count) > 96)
-                {
-                    headerLength = 1024;
+                    // Base size at count * 24 is 256
+                    int remainingBlocks = blockCount - 24;
+                    int bytesUsed = remainingBlocks * 2;
+                    int extensionsNeeded = (bytesUsed / 128) + 1;
+                    int newSize = 256 + (extensionsNeeded * 128);
+                    headerLength = newSize;
                 }
 
                     //Header Length
@@ -3386,6 +3381,12 @@ namespace FFXIV_TexTools2.IO
                 }
 
                 //Rest of header
+                if(datHeader.Count > headerLength)
+                {
+                    FlexibleMessageBox.Show("Model Size/Header exceeded allowed size/length.\n\n" +
+                         "Please reduce model complexity and try again.\n\nThe import has been cancelled.", "ImportModel Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
                 if (datHeader.Count != headerLength)
 				{
 					var headerEnd = headerLength - (datHeader.Count % headerLength);
