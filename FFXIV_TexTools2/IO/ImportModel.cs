@@ -453,8 +453,11 @@ namespace FFXIV_TexTools2.IO
                                             if (meshNum > 0 && !pDict.ContainsKey(meshNum))
                                             {
                                                 for (int l = 0; l < 3; l++) {
-                                                    cdDict.Add(meshNum, new ColladaData());
-                                                    pDict.Add(meshNum, new Dictionary<int, ColladaData>());
+                                                    if (l == 0)
+                                                    {
+                                                        cdDict.Add(meshNum, new ColladaData());
+                                                        pDict.Add(meshNum, new Dictionary<int, ColladaData>());
+                                                    }
 
                                                     var mesh = new Mesh();
                                                     var newPart = new MeshPart();
