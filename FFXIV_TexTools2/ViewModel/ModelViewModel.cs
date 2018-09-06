@@ -952,8 +952,14 @@ namespace FFXIV_TexTools2.ViewModel
 
                         bool isBody = false;
                         bool isFace = false;
-
-                        MTRLData mtrlData = MTRL3D(i);
+                        MTRLData mtrlData;
+                        try
+                        {
+                            mtrlData = MTRL3D(i);
+                        } catch(Exception e)
+                        {
+                            continue;
+                        }
 
                         if (selectedCategory.Equals(Strings.Character))
                         {
