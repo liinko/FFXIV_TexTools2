@@ -764,7 +764,7 @@ namespace FFXIV_TexTools2.IO
                                     || (numVerts != numTexCoord2 && numTexCoord2 != 0)) // Check if our coordinate2 count matches
                                 {
                                     FlexibleMessageBox.Show("Number of Vertices/Normals/Texture Coordinates do not match for \nMesh: " + i + " Part: " + j
-                                        + "\n\nThis has a strong chance of either crashing TexTools or causing other errors in the import\n\nVertexCount: "
+                                        + "\n\nThis has a chance of either crashing TexTools or causing other errors in the import\n\nVertexCount: "
                                         + numVerts + "\nNormal Count:" + numNormals + "\nUV1 Coordinates: " + numTexCoord + "\nUV2 Coordinates: " + numTexCoord2 + "\n\nThe import will now attempt to continue.", "ImportModel Warning " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                                 }
 
