@@ -758,7 +758,7 @@ namespace FFXIV_TexTools2.IO
 
                                 if (numVerts != numNormals // Normals are simple.
                                     || (numVerts != numTexCoord ) // Check if our coordinate count matches
-                                    || (numVerts != numTexCoord2 && numTexCoord != 0)) // Check if our coordinate2 count matches
+                                    || (numVerts != numTexCoord2 && numTexCoord2 != 0)) // Check if our coordinate2 count matches
                                 {
                                     FlexibleMessageBox.Show("Number of Vertices/Normals/Texture Coordinates do not match for \nMesh: " + i + " Part: " + j
                                         + "\n\nThis has a strong chance of either crashing TexTools or causing other errors in the import\n\nVertexCount: "
@@ -3145,7 +3145,8 @@ namespace FFXIV_TexTools2.IO
 
                 if (blockCount > 24)
                 {
-                    // Base size at count * 24 is 256
+                    // Base size at count * 24 is technically only 252
+                    // but having a 4 byte safety buffer is good.
                     int remainingBlocks = blockCount - 24;
                     int bytesUsed = remainingBlocks * 2;
                     int extensionsNeeded = (bytesUsed / 128) + 1;
@@ -3153,8 +3154,8 @@ namespace FFXIV_TexTools2.IO
                     headerLength = newSize;
                 }
 
-                    //Header Length
-                    datHeader.AddRange(BitConverter.GetBytes(headerLength));
+                //Header Length
+                datHeader.AddRange(BitConverter.GetBytes(headerLength));
 				//Data Type
 				datHeader.AddRange(BitConverter.GetBytes(3));
 				//Uncompressed Size
