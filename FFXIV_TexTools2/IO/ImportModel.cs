@@ -765,7 +765,7 @@ namespace FFXIV_TexTools2.IO
                                 {
                                     FlexibleMessageBox.Show("Number of Vertices/Normals/Texture Coordinates do not match for \nMesh: " + i + " Part: " + j
                                         + "\n\nThis has a strong chance of either crashing TexTools or causing other errors in the import\n\nVertexCount: "
-                                        + numVerts + "\nNormal Count:" + numNormals + "\n UV1 Coordinates: " + numTexCoord + "\nUV2 Coordinates: " + numTexCoord2 + "\n\nThe import will now attempt to continue.", "ImportModel Warning " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                        + numVerts + "\nNormal Count:" + numNormals + "\nUV1 Coordinates: " + numTexCoord + "\nUV2 Coordinates: " + numTexCoord2 + "\n\nThe import will now attempt to continue.", "ImportModel Warning " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                                 }
 
 						        cdDict[i].vertex.AddRange(mDict[c].vertex);
@@ -1280,6 +1280,21 @@ namespace FFXIV_TexTools2.IO
                     FlexibleMessageBox.Show(errorString, "Weight Corrections", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
 
+
+                // This is a fix for correcting for SE meshes where higher LoDs have fewer mesh groups.
+                for (int l = 1; l < modelData.LoD.Count; l++)
+                {
+                    while (modelData.LoD[l].MeshList.Count < modelData.LoD[0].MeshList.Count)
+                    {
+                        var mesh = new Mesh();
+                        var newPart = new MeshPart();
+                        mesh.MeshPartList = new List<MeshPart>();
+                        mesh.MeshPartList.Add(newPart);
+                        modelData.LoD[l].MeshList.Add(mesh);
+                    }
+                }
+                modelData.LoD[0].MeshCount = modelData.LoD[1].MeshCount = modelData.LoD[2].MeshCount = modelData.LoD[0].MeshList.Count;
+
                 Create(cmdList, internalPath, selectedMesh, category, itemName, modelData);
 			}
 		}
@@ -1515,7 +1530,8 @@ namespace FFXIV_TexTools2.IO
                 int meshCount = 0;
                 for(int i = 0; i < modelData.LoD.Count; i++)
                 {
-                    meshCount += modelData.LoD[i].MeshList.Count;
+                    // Use LoD 0 values since we're cloning that data.
+                    meshCount += modelData.LoD[0].MeshList.Count;
                 }
 
                 for (int i = 0; i < meshCount; i++)
@@ -1751,11 +1767,7 @@ namespace FFXIV_TexTools2.IO
 
                 stringBlockBytes.Add(0);
 
-                short newMeshCount = 0;
-                for (int lodIndex = 0; lodIndex < modelData.LoD.Count; lodIndex++)
-                {
-                    newMeshCount += (short)(modelData.LoD[lodIndex].MeshList.Count());
-                }
+                short newMeshCount = (short)(modelData.LoD[0].MeshList.Count() * 3);
 
                 short newMeshPartCount = 0;
                 for (int lodIndex = 0; lodIndex < modelData.LoD.Count; lodIndex++ )
@@ -1845,9 +1857,9 @@ namespace FFXIV_TexTools2.IO
 						MeshOffset = lod.MeshOffset,
 						MeshCount = lod.MeshCount
 					});
-                    
+
                     // Recalculate mesh counts and offsets.
-                    lod.MeshCount = modelData.LoD[i].MeshList.Count;
+                    lod.MeshCount = modelData.LoD[0].MeshList.Count; // Use LoD 0 since we're cloning LoD 0's data.
                     lod.MeshOffset = meshOffset;
                     meshOffset += lod.MeshCount;
                     

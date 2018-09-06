@@ -572,6 +572,19 @@ namespace FFXIV_TexTools2.Views
                 modelData.LoD[l].MeshCount += 1;
             }
 
+            for (int l = 1; l < modelData.LoD.Count; l++)
+            {
+                while (modelData.LoD[l].MeshCount < modelData.LoD[0].MeshCount)
+                {
+                    var mesh = new Mesh();
+                    var newPart = new MeshPart();
+                    mesh.MeshPartList = new List<MeshPart>();
+                    mesh.MeshPartList.Add(newPart);
+                    modelData.LoD[l].MeshList.Add(mesh);
+                    modelData.LoD[l].MeshCount += 1;
+                }
+            }
+
             importDict.Add((modelData.LoD[0].MeshCount - 1).ToString(), new ImportSettings());
 
 

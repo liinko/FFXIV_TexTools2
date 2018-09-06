@@ -1011,7 +1011,8 @@ namespace FFXIV_TexTools2.ViewModel
                             {
                                 normalData = TEX.GetTex(mtrlData.NormalOffset, Strings.ItemsDat);
 
-                                if (materialStrings[i].Contains("_fac_"))
+                                
+                                if (mtrlData.MTRLPath.Contains("_fac_"))
                                 {
                                     specularData = TEX.GetTex(mtrlData.SpecularOffset, Strings.ItemsDat);
                                     diffuseData = TEX.GetTex(mtrlData.DiffuseOffset, Strings.ItemsDat);
