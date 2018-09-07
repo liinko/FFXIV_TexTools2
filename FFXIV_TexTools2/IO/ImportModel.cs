@@ -481,6 +481,7 @@ namespace FFXIV_TexTools2.IO
 									                                "Full Name: " + atr + "\n\n" +
                                                                     "Delete or Rename the duplicate mesh part and try again.\n\n" +
 									                                "Error: " + e.Message, "ImportModel Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                            return;
                                         }
 
                                     }
@@ -753,17 +754,17 @@ namespace FFXIV_TexTools2.IO
                                 }
 
                                 /* Error Checking */
-                                int numVerts = mDict[c].vertex.Count / 3;
-                                int numNormals = mDict[c].normal.Count / 3;
+                                int numVerts = mDict[c].vIndexList.Count / 3;
+                                int numNormals = mDict[c].nIndexList.Count / 3;
 
-                                int numTexCoord = mDict[c].texCoord.Count / tcStride;
-                                int numTexCoord2 = mDict[c].texCoord2.Count / tcStride;
+                                int numTexCoord = mDict[c].tcIndexList.Count / tcStride;
+                                int numTexCoord2 = mDict[c].tc2IndexList.Count / tcStride;
 
                                 if (numVerts != numNormals // Normals are simple.
                                     || (numVerts != numTexCoord ) // Check if our coordinate count matches
                                     || (numVerts != numTexCoord2 && numTexCoord2 != 0)) // Check if our coordinate2 count matches
                                 {
-                                    FlexibleMessageBox.Show("Number of Vertices/Normals/Texture Coordinates do not match for \nMesh: " + i + " Part: " + j
+                                    FlexibleMessageBox.Show("Number of Vertices/Normals/Texture Coordinate entries do not match for \nMesh: " + i + " Part: " + j
                                         + "\n\nThis has a chance of either crashing TexTools or causing other errors in the import\n\nVertexCount: "
                                         + numVerts + "\nNormal Count:" + numNormals + "\nUV1 Coordinates: " + numTexCoord + "\nUV2 Coordinates: " + numTexCoord2 + "\n\nThe import will now attempt to continue.", "ImportModel Warning " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                                 }
