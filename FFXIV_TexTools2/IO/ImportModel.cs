@@ -755,19 +755,19 @@ namespace FFXIV_TexTools2.IO
 
                                 /* Error Checking */
                                 int numVerts = mDict[c].vIndexList.Count / 3;
-                                int maxVert = mDict[c].vIndexList.Max();
+                                int maxVert = numVerts == 0 ? 0 : mDict[c].vIndexList.Count();
 
                                 int numNormals = mDict[c].nIndexList.Count / 3;
-                                int maxNormal = mDict[c].nIndexList.Max();
+                                int maxNormal = numNormals == 0 ? 0 : mDict[c].nIndexList.Count();
 
                                 int numTexCoord = mDict[c].tcIndexList.Count / 3;
-                                int maxTexCoord = mDict[c].tcIndexList.Max();
+                                int maxTexCoord = numTexCoord == 0 ? 0 : mDict[c].tcIndexList.Count();
 
                                 int numTexCoord2 = mDict[c].tc2IndexList.Count / 3;
-                                int maxTexCoord2 = mDict[c].tc2IndexList.Max();
+                                int maxTexCoord2 = numTexCoord2 == 0 ? 0 : mDict[c].tc2IndexList.Count();
 
                                 int numBinormals = mDict[c].bnIndexList.Count / 3;
-                                float maxBinormal = mDict[c].bnIndexList.Max();
+                                int maxBinormal = numBinormals == 0 ? 0 : mDict[c].bnIndexList.Count();
 
                                 if (numVerts != numNormals // Normals are simple.
                                     || (numVerts != numTexCoord ) // Check if our coordinate count matches
@@ -806,6 +806,7 @@ namespace FFXIV_TexTools2.IO
                                         + "\n\nThis has a chance of either crashing TexTools or causing other errors in the import."
                                         + "\n\nThe import will now attempt to continue.", "ImportModel Warning " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                                 }
+
 
                                 if (maxTexCoord2 > mDict[c].texCoord2.Count())
                                 {
