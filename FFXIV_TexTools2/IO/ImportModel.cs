@@ -755,21 +755,67 @@ namespace FFXIV_TexTools2.IO
 
                                 /* Error Checking */
                                 int numVerts = mDict[c].vIndexList.Count / 3;
+                                int maxVert = mDict[c].vIndexList.Max();
+
                                 int numNormals = mDict[c].nIndexList.Count / 3;
+                                int maxNormal = mDict[c].nIndexList.Max();
 
                                 int numTexCoord = mDict[c].tcIndexList.Count / 3;
+                                int maxTexCoord = mDict[c].tcIndexList.Max();
+
                                 int numTexCoord2 = mDict[c].tc2IndexList.Count / 3;
+                                int maxTexCoord2 = mDict[c].tc2IndexList.Max();
+
+                                int numBinormals = mDict[c].bnIndexList.Count / 3;
+                                float maxBinormal = mDict[c].bnIndexList.Max();
 
                                 if (numVerts != numNormals // Normals are simple.
                                     || (numVerts != numTexCoord ) // Check if our coordinate count matches
                                     || (numVerts != numTexCoord2 && numTexCoord2 != 0)) // Check if our coordinate2 count matches
                                 {
-                                    FlexibleMessageBox.Show("Number of Vertices/Normals/Texture Coordinate entries do not match for \nMesh: " + i + " Part: " + j
+                                    FlexibleMessageBox.Show("Number of Vertices/Normals/Texture Coordinate entries do not match for:\nMesh: " + i + " Part: " + j
                                         + "\n\nThis has a chance of either crashing TexTools or causing other errors in the import\n\nVertexCount: "
                                         + numVerts + "\nNormal Count:" + numNormals + "\nUV1 Coordinates: " + numTexCoord + "\nUV2 Coordinates: " + numTexCoord2 + "\n\nThe import will now attempt to continue.", "ImportModel Warning " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                                 }
 
-						        cdDict[i].vertex.AddRange(mDict[c].vertex);
+                                if(numBinormals == 0)
+                                {
+                                    FlexibleMessageBox.Show("There were no Binormals in:\nMesh: " + i + " Part: " + j
+                                        + "\n\nThis has a chance of either crashing TexTools or causing other errors in the import."
+                                        + "\nPlease make sure your OpenCollada Export settings are correct."
+                                        + "\n\nThe import will now attempt to continue.", "ImportModel Warning " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                }
+
+                                if(maxVert > mDict[c].vertex.Count())
+                                {
+                                    FlexibleMessageBox.Show("The following mesh part references Vertices which do not exist in the file:\nMesh: " + i + " Part: " + j
+                                        + "\n\nThis has a chance of either crashing TexTools or causing other errors in the import."
+                                        + "\n\nThe import will now attempt to continue.", "ImportModel Warning " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                }
+
+                                if (maxNormal > mDict[c].normal.Count())
+                                {
+                                    FlexibleMessageBox.Show("The following mesh part references Normals which do not exist in the file:\nMesh: " + i + " Part: " + j
+                                        + "\n\nThis has a chance of either crashing TexTools or causing other errors in the import."
+                                        + "\n\nThe import will now attempt to continue.", "ImportModel Warning " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                }
+
+                                if (maxTexCoord > mDict[c].texCoord.Count())
+                                {
+                                    FlexibleMessageBox.Show("The following mesh part references UV1 Data which does not exist in the file:\nMesh: " + i + " Part: " + j
+                                        + "\n\nThis has a chance of either crashing TexTools or causing other errors in the import."
+                                        + "\n\nThe import will now attempt to continue.", "ImportModel Warning " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                }
+
+                                if (maxTexCoord2 > mDict[c].texCoord2.Count())
+                                {
+                                    FlexibleMessageBox.Show("The following mesh part references UV2 Data which does not exist in the file:\nMesh: " + i + " Part: " + j
+                                        + "\n\nThis has a chance of either crashing TexTools or causing other errors in the import."
+                                        + "\n\nThe import will now attempt to continue.", "ImportModel Warning " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                }
+
+
+                                cdDict[i].vertex.AddRange(mDict[c].vertex);
 						        cdDict[i].normal.AddRange(mDict[c].normal);
 						        cdDict[i].texCoord.AddRange(mDict[c].texCoord);
 						        cdDict[i].texCoord2.AddRange(mDict[c].texCoord2);
