@@ -757,8 +757,8 @@ namespace FFXIV_TexTools2.IO
                                 int numVerts = mDict[c].vIndexList.Count / 3;
                                 int numNormals = mDict[c].nIndexList.Count / 3;
 
-                                int numTexCoord = mDict[c].tcIndexList.Count / tcStride;
-                                int numTexCoord2 = mDict[c].tc2IndexList.Count / tcStride;
+                                int numTexCoord = mDict[c].tcIndexList.Count / 3;
+                                int numTexCoord2 = mDict[c].tc2IndexList.Count / 3;
 
                                 if (numVerts != numNormals // Normals are simple.
                                     || (numVerts != numTexCoord ) // Check if our coordinate count matches
