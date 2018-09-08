@@ -755,19 +755,19 @@ namespace FFXIV_TexTools2.IO
 
                                 /* Error Checking */
                                 int numVerts = mDict[c].vIndexList.Count / 3;
-                                int maxVert = numVerts == 0 ? 0 : mDict[c].vIndexList.Count();
+                                int maxVert = numVerts == 0 ? 0 : mDict[c].vIndexList.Max();
 
                                 int numNormals = mDict[c].nIndexList.Count / 3;
-                                int maxNormal = numNormals == 0 ? 0 : mDict[c].nIndexList.Count();
+                                int maxNormal = numNormals == 0 ? 0 : mDict[c].nIndexList.Max();
 
                                 int numTexCoord = mDict[c].tcIndexList.Count / 3;
-                                int maxTexCoord = numTexCoord == 0 ? 0 : mDict[c].tcIndexList.Count();
+                                int maxTexCoord = numTexCoord == 0 ? 0 : mDict[c].tcIndexList.Max();
 
                                 int numTexCoord2 = mDict[c].tc2IndexList.Count / 3;
-                                int maxTexCoord2 = numTexCoord2 == 0 ? 0 : mDict[c].tc2IndexList.Count();
+                                int maxTexCoord2 = numTexCoord2 == 0 ? 0 : mDict[c].tc2IndexList.Max();
 
                                 int numBinormals = mDict[c].bnIndexList.Count / 3;
-                                int maxBinormal = numBinormals == 0 ? 0 : mDict[c].bnIndexList.Count();
+                                int maxBinormal = numBinormals == 0 ? 0 : mDict[c].bnIndexList.Max();
 
                                 if (numVerts != numNormals // Normals are simple.
                                     || (numVerts != numTexCoord ) // Check if our coordinate count matches
