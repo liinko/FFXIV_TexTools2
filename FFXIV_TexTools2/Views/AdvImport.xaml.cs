@@ -188,6 +188,18 @@ namespace FFXIV_TexTools2.Views
             CreateXMLButton.IsEnabled = false;
         }
 
+        private void UseOriginalBones_Checked(object sender, RoutedEventArgs e)
+        {
+            importDict[MeshComboBox.SelectedItem.ToString()].UseOriginalBones = true;
+
+        }
+
+        private void UseOriginalBones_Unchecked(object sender, RoutedEventArgs e)
+        {
+            importDict[MeshComboBox.SelectedItem.ToString()].UseOriginalBones = false;
+
+        }
+
         private void MakeXML()
         {
             XmlWriterSettings xmlWriterSettings = new XmlWriterSettings()
@@ -368,7 +380,16 @@ namespace FFXIV_TexTools2.Views
             MeshPart newPart = new MeshPart();
             modelData.LoD[0].MeshList[meshNum].MeshPartList.Add(newPart);
 
+            newPart = new MeshPart();
+            modelData.LoD[1].MeshList[meshNum].MeshPartList.Add(newPart);
+
+            newPart = new MeshPart();
+            modelData.LoD[2].MeshList[meshNum].MeshPartList.Add(newPart);
+
             MeshPartCount.Content = modelData.LoD[0].MeshList[meshNum].MeshPartList.Count;
+            MeshPartCount.Content = modelData.LoD[1].MeshList[meshNum].MeshPartList.Count;
+            MeshPartCount.Content = modelData.LoD[2].MeshList[meshNum].MeshPartList.Count;
+
             List<int> parts = (List<int>) PartComboBox.ItemsSource;
             parts.Add(modelData.LoD[0].MeshList[meshNum].MeshPartList.Count - 1);
             PartComboBox.ItemsSource = null;
@@ -541,17 +562,28 @@ namespace FFXIV_TexTools2.Views
 
         private void AddMeshButton_Click(object sender, RoutedEventArgs e)
         {
-            // Only need to actually add a new mesh to LoD 0
-            // Since LoD 1+ is dummy data.
-            //for (int l = 0; l < modelData.LoD.Count; l++)
-            //{
+            for (int l = 0; l < modelData.LoD.Count; l++)
+            {
                 var mesh = new Mesh();
                 var newPart = new MeshPart();
                 mesh.MeshPartList = new List<MeshPart>();
                 mesh.MeshPartList.Add(newPart);
-                modelData.LoD[0].MeshList.Add(mesh);
-                modelData.LoD[0].MeshCount += 1;
-           // }
+                modelData.LoD[l].MeshList.Add(mesh);
+                modelData.LoD[l].MeshCount += 1;
+            }
+
+            for (int l = 1; l < modelData.LoD.Count; l++)
+            {
+                while (modelData.LoD[l].MeshCount < modelData.LoD[0].MeshCount)
+                {
+                    var mesh = new Mesh();
+                    var newPart = new MeshPart();
+                    mesh.MeshPartList = new List<MeshPart>();
+                    mesh.MeshPartList.Add(newPart);
+                    modelData.LoD[l].MeshList.Add(mesh);
+                    modelData.LoD[l].MeshCount += 1;
+                }
+            }
 
             importDict.Add((modelData.LoD[0].MeshCount - 1).ToString(), new ImportSettings());
 
@@ -580,6 +612,7 @@ namespace FFXIV_TexTools2.Views
 
             if (!MeshComboBox.SelectedItem.ToString().Equals(Strings.All))
             {
+                UseOrignalBones.IsEnabled = false;
                 selectedItem = int.Parse(MeshComboBox.SelectedItem.ToString());
 
 
@@ -603,9 +636,11 @@ namespace FFXIV_TexTools2.Views
                 selectedItem = -1;
                 DisableCheckbox.IsEnabled = true;
                 FixCheckbox.IsEnabled = true;
+                UseOrignalBones.IsEnabled = true;
             }
             else
             {
+                UseOrignalBones.IsEnabled = true;
                 selectedItem = -1;
             }
 

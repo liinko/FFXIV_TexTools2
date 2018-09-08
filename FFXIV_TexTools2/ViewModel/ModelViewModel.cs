@@ -90,6 +90,12 @@ namespace FFXIV_TexTools2.ViewModel
             CompositeVM = new Composite3DViewModel();
         }
 
+        public void ReloadModel()
+        {
+            UpdateModel(selectedItem, selectedCategory);
+        }
+
+
         public void UpdateModel(ItemData item, string category)
         {
             CompositeVM.Dispose();
@@ -294,6 +300,7 @@ namespace FFXIV_TexTools2.ViewModel
         private void SetLighting(object obj)
         {
             CompositeVM.Lighting();
+
         }
 
         /// <summary>
@@ -514,87 +521,93 @@ namespace FFXIV_TexTools2.ViewModel
         /// </summary>
         private void RaceComboBoxChanged()
         {
-            is3DLoaded = false;
+            try
+            {
+                is3DLoaded = false;
 
-            if (CompositeVM != null && !disposing)
-            {
-                disposing = true;
-                CompositeVM.Dispose();
-            }
-
-            List<ComboBoxInfo> cbi = new List<ComboBoxInfo>();
-            string categoryType = Helper.GetCategoryType(selectedCategory);
-            string MDLFolder = "";
-
-            if (categoryType.Equals("weapon"))
-            {
-                cbi.Add(new ComboBoxInfo() { Name = selectedItem.PrimaryModelBody, ID = selectedItem.PrimaryModelBody, IsNum = false });
-            }
-            else if (categoryType.Equals("food"))
-            {
-                cbi.Add(new ComboBoxInfo() { Name = selectedItem.PrimaryModelBody, ID = selectedItem.PrimaryModelBody, IsNum = false });
-            }
-            else if (categoryType.Equals("accessory"))
-            {
-                cbi.Add(new ComboBoxInfo() { Name = "-", ID = "-", IsNum = false });
-            }
-            else if (categoryType.Equals("character"))
-            {
-                if (selectedItem.ItemName.Equals(Strings.Body))
+                if (CompositeVM != null && !disposing)
                 {
-                    MDLFolder = string.Format(Strings.BodyMDLFolder, SelectedRace.ID, "{0}");
+                    disposing = true;
+                    CompositeVM.Dispose();
                 }
-                else if (selectedItem.ItemName.Equals(Strings.Face))
-                {
-                    MDLFolder = string.Format(Strings.FaceMDLFolder, SelectedRace.ID, "{0}");
-                }
-                else if (selectedItem.ItemName.Equals(Strings.Hair))
-                {
-                    MDLFolder = string.Format(Strings.HairMDLFolder, SelectedRace.ID, "{0}");
-                }
-                else if (selectedItem.ItemName.Equals(Strings.Tail))
-                {
-                    MDLFolder = string.Format(Strings.TailMDLFolder, SelectedRace.ID, "{0}");
-                }
-            }
-            else if (categoryType.Equals("monster"))
-            {
-                cbi.Add(new ComboBoxInfo() { Name = selectedItem.PrimaryModelBody, ID = selectedItem.PrimaryModelBody, IsNum = false });
-            }
-            else
-            {
-                cbi.Add(new ComboBoxInfo() { Name = "-", ID = "-", IsNum = false });
-            }
 
+                List<ComboBoxInfo> cbi = new List<ComboBoxInfo>();
+                string categoryType = Helper.GetCategoryType(selectedCategory);
+                string MDLFolder = "";
 
-            if (categoryType.Equals("character"))
-            {
-                for (int i = 0; i < 250; i++)
+                if (categoryType.Equals("weapon"))
                 {
-                    string folder = String.Format(MDLFolder, i.ToString().PadLeft(4, '0'));
-
-                    if (Helper.FolderExists(FFCRC.GetHash(folder), Strings.ItemsDat))
+                    cbi.Add(new ComboBoxInfo() { Name = selectedItem.PrimaryModelBody, ID = selectedItem.PrimaryModelBody, IsNum = false });
+                }
+                else if (categoryType.Equals("food"))
+                {
+                    cbi.Add(new ComboBoxInfo() { Name = selectedItem.PrimaryModelBody, ID = selectedItem.PrimaryModelBody, IsNum = false });
+                }
+                else if (categoryType.Equals("accessory"))
+                {
+                    cbi.Add(new ComboBoxInfo() { Name = "-", ID = "-", IsNum = false });
+                }
+                else if (categoryType.Equals("character"))
+                {
+                    if (selectedItem.ItemName.Equals(Strings.Body))
                     {
-                        cbi.Add(new ComboBoxInfo() { Name = i.ToString(), ID = i.ToString(), IsNum = true });
+                        MDLFolder = string.Format(Strings.BodyMDLFolder, SelectedRace.ID, "{0}");
+                    }
+                    else if (selectedItem.ItemName.Equals(Strings.Face))
+                    {
+                        MDLFolder = string.Format(Strings.FaceMDLFolder, SelectedRace.ID, "{0}");
+                    }
+                    else if (selectedItem.ItemName.Equals(Strings.Hair))
+                    {
+                        MDLFolder = string.Format(Strings.HairMDLFolder, SelectedRace.ID, "{0}");
+                    }
+                    else if (selectedItem.ItemName.Equals(Strings.Tail))
+                    {
+                        MDLFolder = string.Format(Strings.TailMDLFolder, SelectedRace.ID, "{0}");
+                    }
+                }
+                else if (categoryType.Equals("monster"))
+                {
+                    cbi.Add(new ComboBoxInfo() { Name = selectedItem.PrimaryModelBody, ID = selectedItem.PrimaryModelBody, IsNum = false });
+                }
+                else
+                {
+                    cbi.Add(new ComboBoxInfo() { Name = "-", ID = "-", IsNum = false });
+                }
 
-                        if (selectedItem.ItemName.Equals(Strings.Body))
+
+                if (categoryType.Equals("character"))
+                {
+                    for (int i = 0; i < 250; i++)
+                    {
+                        string folder = String.Format(MDLFolder, i.ToString().PadLeft(4, '0'));
+
+                        if (Helper.FolderExists(FFCRC.GetHash(folder), Strings.ItemsDat))
                         {
-                            break;
+                            cbi.Add(new ComboBoxInfo() { Name = i.ToString(), ID = i.ToString(), IsNum = true });
+
+                            if (selectedItem.ItemName.Equals(Strings.Body))
+                            {
+                                //break;
+                            }
                         }
                     }
                 }
-            }
 
-            BodyComboBox = new ObservableCollection<ComboBoxInfo>(cbi);
-            BodyIndex = 0;
+                BodyComboBox = new ObservableCollection<ComboBoxInfo>(cbi);
+                BodyIndex = 0;
 
-            if (cbi.Count <= 1)
+                if (cbi.Count <= 1)
+                {
+                    BodyEnabled = false;
+                }
+                else
+                {
+                    BodyEnabled = true;
+                }
+            } catch (Exception e)
             {
-                BodyEnabled = false;
-            }
-            else
-            {
-                BodyEnabled = true;
+                ResetBadCompositeState();
             }
         }
 
@@ -629,163 +642,169 @@ namespace FFXIV_TexTools2.ViewModel
         /// </summary>
         private void BodyComboBoxChanged()
         {
-            is3DLoaded = false;
-            bool isDemiHuman = false;
-
-            if (CompositeVM != null && !disposing)
+            try
             {
-                disposing = true;
-                CompositeVM.Dispose();
-            }
+                is3DLoaded = false;
+                bool isDemiHuman = false;
 
-            if (selectedItem.PrimaryMTRLFolder != null && selectedItem.PrimaryMTRLFolder.Contains("demihuman"))
-            {
-                isDemiHuman = true;
-            }
-
-            List<ComboBoxInfo> cbi = new List<ComboBoxInfo>();
-            string type = Helper.GetCategoryType(selectedCategory);
-
-            string MDLFolder = "";
-            string MDLFile = "";
-            string[] abrParts = null;
-
-            if (type.Equals("character"))
-            {
-                if (selectedItem.ItemName.Equals(Strings.Body))
+                if (CompositeVM != null && !disposing)
                 {
-                    MDLFolder = string.Format(Strings.BodyMDLFolder, SelectedRace.ID, SelectedBody.ID.PadLeft(4, '0'));
-                    MDLFile = string.Format(Strings.BodyMDLFile, SelectedRace.ID, SelectedBody.ID.PadLeft(4, '0'), "{0}");
+                    disposing = true;
+                    CompositeVM.Dispose();
+                }
+
+                if (selectedItem.PrimaryMTRLFolder != null && selectedItem.PrimaryMTRLFolder.Contains("demihuman"))
+                {
+                    isDemiHuman = true;
+                }
+
+                List<ComboBoxInfo> cbi = new List<ComboBoxInfo>();
+                string type = Helper.GetCategoryType(selectedCategory);
+
+                string MDLFolder = "";
+                string MDLFile = "";
+                string[] abrParts = null;
+
+                if (type.Equals("character"))
+                {
+                    if (selectedItem.ItemName.Equals(Strings.Body))
+                    {
+                        MDLFolder = string.Format(Strings.BodyMDLFolder, SelectedRace.ID, SelectedBody.ID.PadLeft(4, '0'));
+                        MDLFile = string.Format(Strings.BodyMDLFile, SelectedRace.ID, SelectedBody.ID.PadLeft(4, '0'), "{0}");
+
+                        abrParts = new string[5] { "met", "glv", "dwn", "sho", "top" };
+                    }
+                    else if (selectedItem.ItemName.Equals(Strings.Face))
+                    {
+                        MDLFolder = string.Format(Strings.FaceMDLFolder, SelectedRace.ID, SelectedBody.ID.PadLeft(4, '0'));
+                        MDLFile = string.Format(Strings.FaceMDLFile, SelectedRace.ID, SelectedBody.ID.PadLeft(4, '0'), "{0}");
+
+                        abrParts = new string[3] { "fac", "iri", "etc" };
+                    }
+                    else if (selectedItem.ItemName.Equals(Strings.Hair))
+                    {
+                        MDLFolder = string.Format(Strings.HairMDLFolder, SelectedRace.ID, SelectedBody.ID.PadLeft(4, '0'));
+                        MDLFile = string.Format(Strings.HairMDLFile, SelectedRace.ID, SelectedBody.ID.PadLeft(4, '0'), "{0}");
+
+                        abrParts = new string[2] { "hir", "acc" };
+                    }
+                    else if (selectedItem.ItemName.Equals(Strings.Tail))
+                    {
+                        MDLFolder = string.Format(Strings.TailMDLFolder, SelectedRace.ID, SelectedBody.ID.PadLeft(4, '0'));
+                        MDLFile = string.Format(Strings.TailMDLFile, SelectedRace.ID, SelectedBody.ID.PadLeft(4, '0'), "{0}");
+
+                        abrParts = new string[1] { "til" };
+                    }
+
+                    var fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(MDLFolder), Strings.ItemsDat);
+
+                    foreach (string abrPart in abrParts)
+                    {
+                        var file = String.Format(MDLFile, abrPart);
+
+                        if (fileHashList.Contains(FFCRC.GetHash(file)))
+                        {
+                            if (selectedItem.ItemName.Equals(Strings.Body))
+                            {
+                                cbi.Add(new ComboBoxInfo() { Name = Info.slotAbr.FirstOrDefault(x => x.Value == abrPart).Key, ID = abrPart, IsNum = false });
+                            }
+                            else if (selectedItem.ItemName.Equals(Strings.Face))
+                            {
+                                cbi.Add(new ComboBoxInfo() { Name = Info.FaceTypes.FirstOrDefault(x => x.Value == abrPart).Key, ID = abrPart, IsNum = false });
+                            }
+                            else if (selectedItem.ItemName.Equals(Strings.Hair))
+                            {
+                                cbi.Add(new ComboBoxInfo() { Name = Info.HairTypes.FirstOrDefault(x => x.Value == abrPart).Key, ID = abrPart, IsNum = false });
+                            }
+                            else if (selectedItem.ItemName.Equals(Strings.Tail))
+                            {
+                                cbi.Add(new ComboBoxInfo() { Name = Strings.Tail, ID = abrPart, IsNum = false });
+                            }
+                        }
+                    }
+                }
+                else if (isDemiHuman)
+                {
+                    MDLFolder = string.Format(Strings.DemiMDLFolder, selectedItem.PrimaryModelID, selectedItem.PrimaryModelBody);
+                    MDLFile = string.Format(Strings.DemiMDLFile, selectedItem.PrimaryModelID, selectedItem.PrimaryModelBody, "{0}");
 
                     abrParts = new string[5] { "met", "glv", "dwn", "sho", "top" };
-                }
-                else if (selectedItem.ItemName.Equals(Strings.Face))
-                {
-                    MDLFolder = string.Format(Strings.FaceMDLFolder, SelectedRace.ID, SelectedBody.ID.PadLeft(4, '0'));
-                    MDLFile = string.Format(Strings.FaceMDLFile, SelectedRace.ID, SelectedBody.ID.PadLeft(4, '0'), "{0}");
 
-                    abrParts = new string[3] { "fac", "iri", "etc" };
-                }
-                else if (selectedItem.ItemName.Equals(Strings.Hair))
-                {
-                    MDLFolder = string.Format(Strings.HairMDLFolder, SelectedRace.ID, SelectedBody.ID.PadLeft(4, '0'));
-                    MDLFile = string.Format(Strings.HairMDLFile, SelectedRace.ID, SelectedBody.ID.PadLeft(4, '0'), "{0}");
+                    var fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(MDLFolder), Strings.ItemsDat);
 
-                    abrParts = new string[2] { "hir", "acc" };
-                }
-                else if (selectedItem.ItemName.Equals(Strings.Tail))
-                {
-                    MDLFolder = string.Format(Strings.TailMDLFolder, SelectedRace.ID, SelectedBody.ID.PadLeft(4, '0'));
-                    MDLFile = string.Format(Strings.TailMDLFile, SelectedRace.ID, SelectedBody.ID.PadLeft(4, '0'), "{0}");
-
-                    abrParts = new string[1] { "til" };
-                }
-
-                var fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(MDLFolder), Strings.ItemsDat);
-
-                foreach (string abrPart in abrParts)
-                {
-                    var file = String.Format(MDLFile, abrPart);
-
-                    if (fileHashList.Contains(FFCRC.GetHash(file)))
+                    foreach (string abrPart in abrParts)
                     {
-                        if (selectedItem.ItemName.Equals(Strings.Body))
+                        var file = String.Format(MDLFile, abrPart);
+
+                        if (fileHashList.Contains(FFCRC.GetHash(file)))
                         {
                             cbi.Add(new ComboBoxInfo() { Name = Info.slotAbr.FirstOrDefault(x => x.Value == abrPart).Key, ID = abrPart, IsNum = false });
                         }
-                        else if (selectedItem.ItemName.Equals(Strings.Face))
-                        {
-                            cbi.Add(new ComboBoxInfo() { Name = Info.FaceTypes.FirstOrDefault(x => x.Value == abrPart).Key, ID = abrPart, IsNum = false });
-                        }
-                        else if (selectedItem.ItemName.Equals(Strings.Hair))
-                        {
-                            cbi.Add(new ComboBoxInfo() { Name = Info.HairTypes.FirstOrDefault(x => x.Value == abrPart).Key, ID = abrPart, IsNum = false });
-                        }
-                        else if (selectedItem.ItemName.Equals(Strings.Tail))
-                        {
-                            cbi.Add(new ComboBoxInfo() { Name = Strings.Tail, ID = abrPart, IsNum = false });
-                        }
                     }
                 }
-            }
-            else if(isDemiHuman)
-            {
-                MDLFolder = string.Format(Strings.DemiMDLFolder, selectedItem.PrimaryModelID, selectedItem.PrimaryModelBody);
-                MDLFile = string.Format(Strings.DemiMDLFile, selectedItem.PrimaryModelID, selectedItem.PrimaryModelBody, "{0}");
-
-                abrParts = new string[5] { "met", "glv", "dwn", "sho", "top" };
-
-                var fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(MDLFolder), Strings.ItemsDat);
-
-                foreach (string abrPart in abrParts)
+                else if (type.Equals("weapon"))
                 {
-                    var file = String.Format(MDLFile, abrPart);
-
-                    if (fileHashList.Contains(FFCRC.GetHash(file)))
+                    if (selectedItem.SecondaryModelID != null)
                     {
-                        cbi.Add(new ComboBoxInfo() { Name = Info.slotAbr.FirstOrDefault(x => x.Value == abrPart).Key, ID = abrPart, IsNum = false });
+                        cbi.Add(new ComboBoxInfo() { Name = "Primary", ID = "Primary", IsNum = false });
+                        cbi.Add(new ComboBoxInfo() { Name = "Secondary", ID = "Secondary", IsNum = false });
+
+                    }
+                    else
+                    {
+                        cbi.Add(new ComboBoxInfo() { Name = "Primary", ID = "Primary", IsNum = false });
+
                     }
                 }
-            }
-            else if (type.Equals("weapon"))
-            {
-                if(selectedItem.SecondaryModelID != null)
+                else if (type.Equals("monster"))
                 {
-                    cbi.Add(new ComboBoxInfo() { Name = "Primary", ID = "Primary", IsNum = false });
-                    cbi.Add(new ComboBoxInfo() { Name = "Secondary", ID = "Secondary", IsNum = false });
+                    if (selectedCategory.Equals(Strings.Pets))
+                    {
+                        cbi.AddRange(MTRL.GetMTRLParts(selectedItem, SelectedRace.ID, "", selectedCategory));
+                    }
+                    else
+                    {
+                        cbi.Add(new ComboBoxInfo() { Name = "1", ID = "1", IsNum = false });
+                    }
+                }
+                else if (selectedItem.PrimaryModelID.Equals("9900"))
+                {
+                    MDLFolder = string.Format(Strings.EquipMDLFolder, selectedItem.PrimaryModelID);
+                    MDLFile = string.Format(Strings.EquipMDLFile, SelectedRace.ID, selectedItem.PrimaryModelID, "{0}");
 
+                    abrParts = new string[5] { "met", "glv", "dwn", "sho", "top" };
+
+                    var fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(MDLFolder), Strings.ItemsDat);
+
+                    foreach (string abrPart in abrParts)
+                    {
+                        var file = String.Format(MDLFile, abrPart);
+
+                        if (fileHashList.Contains(FFCRC.GetHash(file)))
+                        {
+                            cbi.Add(new ComboBoxInfo() { Name = Info.slotAbr.FirstOrDefault(x => x.Value == abrPart).Key, ID = abrPart, IsNum = false });
+                        }
+                    }
                 }
                 else
                 {
-                    cbi.Add(new ComboBoxInfo() { Name = "Primary", ID = "Primary", IsNum = false });
-
+                    cbi.Add(new ComboBoxInfo() { Name = "-", ID = "-", IsNum = false });
                 }
-            }
-            else if(type.Equals("monster"))
-            {
-                if (selectedCategory.Equals(Strings.Pets))
+
+                PartComboBox = new ObservableCollection<ComboBoxInfo>(cbi);
+                PartIndex = 0;
+
+                if (cbi.Count <= 1)
                 {
-                    cbi.AddRange(MTRL.GetMTRLParts(selectedItem, SelectedRace.ID, "", selectedCategory));
+                    PartEnabled = false;
                 }
                 else
                 {
-                    cbi.Add(new ComboBoxInfo() { Name = "1", ID = "1", IsNum = false });
+                    PartEnabled = true;
                 }
-            }
-            else if (selectedItem.PrimaryModelID.Equals("9900"))
+            } catch (Exception e)
             {
-                MDLFolder = string.Format(Strings.EquipMDLFolder, selectedItem.PrimaryModelID);
-                MDLFile = string.Format(Strings.EquipMDLFile, SelectedRace.ID, selectedItem.PrimaryModelID, "{0}");
-
-                abrParts = new string[5] { "met", "glv", "dwn", "sho", "top" };
-
-                var fileHashList = Helper.GetAllFilesInFolder(FFCRC.GetHash(MDLFolder), Strings.ItemsDat);
-
-                foreach (string abrPart in abrParts)
-                {
-                    var file = String.Format(MDLFile, abrPart);
-
-                    if (fileHashList.Contains(FFCRC.GetHash(file)))
-                    {
-                        cbi.Add(new ComboBoxInfo() { Name = Info.slotAbr.FirstOrDefault(x => x.Value == abrPart).Key, ID = abrPart, IsNum = false });
-                    }
-                }
-            }
-            else
-            {
-                cbi.Add(new ComboBoxInfo() { Name = "-", ID = "-", IsNum = false });
-            }
-
-            PartComboBox = new ObservableCollection<ComboBoxInfo>(cbi);
-            PartIndex = 0;
-
-            if (cbi.Count <= 1)
-            {
-                PartEnabled = false;
-            }
-            else
-            {
-                PartEnabled = true;
+                ResetBadCompositeState();
             }
         }
 
@@ -820,54 +839,61 @@ namespace FFXIV_TexTools2.ViewModel
         /// </summary>
         private void PartComboBoxChanged()
         {
-            is3DLoaded = false;
-
-            if (CompositeVM != null && !disposing)
-            {
-                disposing = true;
-                CompositeVM.Dispose();
-            }
-
-
-            List<ComboBoxInfo> cbi = new List<ComboBoxInfo>();
-
-            MDL mdl = new MDL(selectedItem, selectedCategory, Info.raceID[SelectedRace.Name], SelectedBody.ID, SelectedPart.ID);
-            meshList = mdl.GetMeshList();
-            modelName = mdl.GetModelName();
-            materialStrings = mdl.GetMaterialStrings();
-            fullPath = mdl.GetInternalPath();
-            modelData = mdl.GetModelData();
-
-            cbi.Add(new ComboBoxInfo() { Name = Strings.All, ID = Strings.All, IsNum = false });
-
-            if (meshList.Count > 1)
-            {
-                for (int i = 0; i < meshList.Count; i++)
-                {
-                    cbi.Add(new ComboBoxInfo() { Name = i.ToString(), ID = i.ToString(), IsNum = true });
-                }
-            }
-
-            MeshComboBox = new ObservableCollection<ComboBoxInfo>(cbi);
-            MeshIndex = 0;
-
-            if (cbi.Count > 1)
-            {
-                MeshEnabled = true;
-            }
-            else
-            {
-                MeshEnabled = false;
-            }
-
             try
             {
+                is3DLoaded = false;
 
-            }
-            catch (Exception ex)
+                if (CompositeVM != null && !disposing)
+                {
+                    disposing = true;
+                    CompositeVM.Dispose();
+                }
+
+
+                List<ComboBoxInfo> cbi = new List<ComboBoxInfo>();
+
+                MDL mdl = new MDL(selectedItem, selectedCategory, Info.raceID[SelectedRace.Name], SelectedBody.ID, SelectedPart.ID);
+                meshList = mdl.GetMeshList();
+                modelName = mdl.GetModelName();
+                materialStrings = mdl.GetMaterialStrings();
+                fullPath = mdl.GetInternalPath();
+                modelData = mdl.GetModelData();
+
+                cbi.Add(new ComboBoxInfo() { Name = Strings.All, ID = Strings.All, IsNum = false });
+
+                if (meshList.Count > 1)
+                {
+                    for (int i = 0; i < meshList.Count; i++)
+                    {
+                        cbi.Add(new ComboBoxInfo() { Name = i.ToString(), ID = i.ToString(), IsNum = true });
+                    }
+                }
+
+                MeshComboBox = new ObservableCollection<ComboBoxInfo>(cbi);
+                MeshIndex = 0;
+
+                if (cbi.Count > 1)
+                {
+                    MeshEnabled = true;
+                }
+                else
+                {
+                    MeshEnabled = false;
+                }
+
+                try
+                {
+
+                }
+                catch (Exception ex)
+                {
+                    FlexibleMessageBox.Show("part 3D Error \n" + ex.Message, "ModelViewModel Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Debug.WriteLine(ex.StackTrace);
+                    ResetBadCompositeState();
+                }
+            } catch(Exception e)
             {
-                FlexibleMessageBox.Show("part 3D Error \n" + ex.Message, "ModelViewModel Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Debug.WriteLine(ex.StackTrace);
+                ResetBadCompositeState();
             }
         }
 
@@ -902,106 +928,49 @@ namespace FFXIV_TexTools2.ViewModel
         /// </summary>
         private void MeshComboBoxChanged()
         {
-            if (!is3DLoaded)
+            try
             {
-                disposing = false;
-
-                meshData = new List<MDLTEXData>();
-
-                for (int i = 0; i < meshList.Count; i++)
+                if (!is3DLoaded)
                 {
-                    BitmapSource specularBMP = null;
-                    BitmapSource diffuseBMP = null;
-                    BitmapSource normalBMP = null;
-                    BitmapSource alphaBMP = null;
-                    BitmapSource maskBMP = null;
-                    BitmapSource emissiveBMP = null;
+                    disposing = false;
 
-                    TEXData specularData = null;
-                    TEXData diffuseData = null;
-                    TEXData normalData = null;
-                    TEXData maskData = null;
+                    meshData = new List<MDLTEXData>();
 
-                    bool isBody = false;
-                    bool isFace = false;
-
-                    MTRLData mtrlData = MTRL3D(i);
-
-                    if (selectedCategory.Equals(Strings.Character))
+                    for (int i = 0; i < meshList.Count; i++)
                     {
-                        if (selectedItem.ItemName.Equals(Strings.Tail) || selectedItem.ItemName.Equals(Strings.Hair))
+                        BitmapSource specularBMP = null;
+                        BitmapSource diffuseBMP = null;
+                        BitmapSource normalBMP = null;
+                        BitmapSource alphaBMP = null;
+                        BitmapSource maskBMP = null;
+                        BitmapSource emissiveBMP = null;
+
+                        TEXData specularData = null;
+                        TEXData diffuseData = null;
+                        TEXData normalData = null;
+                        TEXData maskData = null;
+
+                        bool isBody = false;
+                        bool isFace = false;
+                        MTRLData mtrlData;
+                        try
                         {
-                            if(mtrlData.MaskPath != null)
-                            {
-                                normalData = TEX.GetTex(mtrlData.NormalOffset, Strings.ItemsDat);
-                                maskData = TEX.GetTex(mtrlData.MaskOffset, Strings.ItemsDat);
-
-                                var maps = TexHelper.MakeModelTextureMaps(normalData, null, maskData, null, mtrlData);
-
-                                diffuseBMP = maps[0];
-                                specularBMP = maps[1];
-                                normalBMP = maps[2];
-                                alphaBMP = maps[3];
-                                emissiveBMP = maps[4];
-                            }
-                            else
-                            {
-                                normalData = TEX.GetTex(mtrlData.NormalOffset, Strings.ItemsDat);
-                                specularData = TEX.GetTex(mtrlData.SpecularOffset, Strings.ItemsDat);
-
-                                if (mtrlData.DiffusePath != null)
-                                {
-                                    diffuseData = TEX.GetTex(mtrlData.DiffuseOffset, Strings.ItemsDat);
-                                }
-
-                                var maps = TexHelper.MakeCharacterMaps(normalData, diffuseData, null, specularData, selectedItem.ItemName, mtrlData.MTRLPath);
-
-                                diffuseBMP = maps[0];
-                                specularBMP = maps[1];
-                                normalBMP = maps[2];
-                                alphaBMP = maps[3];
-                            }
+                            mtrlData = MTRL3D(i);
+                        } catch(Exception e)
+                        {
+                            continue;
                         }
 
-                        if (selectedItem.ItemName.Equals(Strings.Body))
+                        if (selectedCategory.Equals(Strings.Character))
                         {
-                            normalData = TEX.GetTex(mtrlData.NormalOffset, Strings.ItemsDat);
-                            specularData = TEX.GetTex(mtrlData.SpecularOffset, Strings.ItemsDat);
-                            diffuseData = TEX.GetTex(mtrlData.DiffuseOffset, Strings.ItemsDat);
-
-                            isBody = true;
-
-                            var maps = TexHelper.MakeCharacterMaps(normalData, diffuseData, null, specularData, selectedItem.ItemName, mtrlData.MTRLPath);
-
-                            diffuseBMP = maps[0];
-                            specularBMP = maps[1];
-                            normalBMP = maps[2];
-                            alphaBMP = maps[3];
-                        }
-
-                        if (selectedItem.ItemName.Equals(Strings.Face))
-                        {
-                            normalData = TEX.GetTex(mtrlData.NormalOffset, Strings.ItemsDat);
-
-                            if (materialStrings[i].Contains("_fac_"))
+                            if (selectedItem.ItemName.Equals(Strings.Tail) || selectedItem.ItemName.Equals(Strings.Hair))
                             {
-                                specularData = TEX.GetTex(mtrlData.SpecularOffset, Strings.ItemsDat);
-                                diffuseData = TEX.GetTex(mtrlData.DiffuseOffset, Strings.ItemsDat);
-
-                                var maps = TexHelper.MakeCharacterMaps(normalData, diffuseData, null, specularData, selectedItem.ItemName, mtrlData.MTRLPath);
-
-                                diffuseBMP = maps[0];
-                                specularBMP = maps[1];
-                                normalBMP = maps[2];
-                                alphaBMP = maps[3];
-                                isFace = true;
-                            }
-                            else
-                            {
-                                if (mtrlData.ColorData != null)
+                                if (mtrlData.MaskPath != null)
                                 {
-                                    specularData = TEX.GetTex(mtrlData.SpecularOffset, Strings.ItemsDat);
-                                    var maps = TexHelper.MakeModelTextureMaps(normalData, null, null, specularData, mtrlData);
+                                    normalData = TEX.GetTex(mtrlData.NormalOffset, Strings.ItemsDat);
+                                    maskData = TEX.GetTex(mtrlData.MaskOffset, Strings.ItemsDat);
+
+                                    var maps = TexHelper.MakeModelTextureMaps(normalData, null, maskData, null, mtrlData);
 
                                     diffuseBMP = maps[0];
                                     specularBMP = maps[1];
@@ -1011,7 +980,14 @@ namespace FFXIV_TexTools2.ViewModel
                                 }
                                 else
                                 {
+                                    normalData = TEX.GetTex(mtrlData.NormalOffset, Strings.ItemsDat);
                                     specularData = TEX.GetTex(mtrlData.SpecularOffset, Strings.ItemsDat);
+
+                                    if (mtrlData.DiffusePath != null)
+                                    {
+                                        diffuseData = TEX.GetTex(mtrlData.DiffuseOffset, Strings.ItemsDat);
+                                    }
+
                                     var maps = TexHelper.MakeCharacterMaps(normalData, diffuseData, null, specularData, selectedItem.ItemName, mtrlData.MTRLPath);
 
                                     diffuseBMP = maps[0];
@@ -1020,28 +996,13 @@ namespace FFXIV_TexTools2.ViewModel
                                     alphaBMP = maps[3];
                                 }
                             }
-                        }
-                    }
-                    else
-                    {
 
-                        if (mtrlData.NormalOffset != 0)
-                        {
-                            normalData = TEX.GetTex(mtrlData.NormalOffset, Strings.ItemsDat);
-                        }
-
-                        //if (mtrlData.MaskOffset != 0)
-                        //{
-                        //    maskData = TEX.GetTex(mtrlData.MaskOffset, Strings.ItemsDat);
-                        //    maskBMP = Imaging.CreateBitmapSourceFromHBitmap(maskData.BMP.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-                        //}
-
-                        if (mtrlData.DiffuseOffset != 0)
-                        {
-                            diffuseData = TEX.GetTex(mtrlData.DiffuseOffset, Strings.ItemsDat);
-                            specularData = TEX.GetTex(mtrlData.SpecularOffset, Strings.ItemsDat);
-                            if (mtrlData.DiffusePath.Contains("human") && !mtrlData.DiffusePath.Contains("demi"))
+                            if (selectedItem.ItemName.Equals(Strings.Body))
                             {
+                                normalData = TEX.GetTex(mtrlData.NormalOffset, Strings.ItemsDat);
+                                specularData = TEX.GetTex(mtrlData.SpecularOffset, Strings.ItemsDat);
+                                diffuseData = TEX.GetTex(mtrlData.DiffuseOffset, Strings.ItemsDat);
+
                                 isBody = true;
 
                                 var maps = TexHelper.MakeCharacterMaps(normalData, diffuseData, null, specularData, selectedItem.ItemName, mtrlData.MTRLPath);
@@ -1051,156 +1012,234 @@ namespace FFXIV_TexTools2.ViewModel
                                 normalBMP = maps[2];
                                 alphaBMP = maps[3];
                             }
-                        }
 
-                        if (!isBody && mtrlData.SpecularOffset != 0)
-                        {
-                            specularData = TEX.GetTex(mtrlData.SpecularOffset, Strings.ItemsDat);
-
-                            specularBMP = specularData.BMPSouceAlpha;
-                        }
-
-                        if (!isBody && specularData == null)
-                        {
-                            var maps = TexHelper.MakeModelTextureMaps(normalData, diffuseData, maskData, null, mtrlData);
-                            diffuseBMP = maps[0];
-                            specularBMP = maps[1];
-                            normalBMP = maps[2];
-                            alphaBMP = maps[3];
-                            emissiveBMP = maps[4];
-                        }
-                        else if (!isBody && specularData != null)
-                        {
-                            var maps = TexHelper.MakeModelTextureMaps(normalData, diffuseData, null, specularData, mtrlData);
-                            diffuseBMP = maps[0];
-                            specularBMP = maps[1];
-                            normalBMP = maps[2];
-                            alphaBMP = maps[3];
-                            emissiveBMP = maps[4];
-                        }
-                    }
-
-                    specularBMP?.Freeze();
-                    diffuseBMP?.Freeze();
-                    normalBMP?.Freeze();
-                    alphaBMP?.Freeze();
-                    emissiveBMP?.Freeze();
-
-                    var mData = new MDLTEXData()
-                    {
-                        Specular = specularBMP,
-                        Diffuse = diffuseBMP,
-                        Normal = normalBMP,
-                        Alpha = alphaBMP,
-                        Emissive = emissiveBMP,
-
-                        IsBody = isBody,
-                        IsFace = isFace,
-
-                        Mesh = meshList[i]
-                    };
-
-                    meshData.Add(mData);
-                }
-
-                
-                // Preserve Camera settings before reset
-                var lookDir = CompositeVM.Camera.LookDirection;
-                var upDir = CompositeVM.Camera.UpDirection;
-                var pos = CompositeVM.Camera.Position;
-
-
-                // Reset 3d View for loading new model
-                CompositeVM = new Composite3DViewModel();
-                CompositeVM.UpdateModel(meshData, selectedItem);
-
-                // Re-apply original camera settings 
-                // Applies when camera is not in the default position 
-                // and when within the same item category
-                if (lookDir.Z != -5 && !newCat)
-                {
-                    CompositeVM.Camera.LookDirection = lookDir;
-                    CompositeVM.Camera.UpDirection = upDir;
-                    CompositeVM.Camera.Position = pos;
-                }
-
-                is3DLoaded = true;
-                newCat = false;
-
-                if (File.Exists(Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selectedItem.ItemName + "/3D/" + modelName + ".DAE"))
-                {
-                    Import3DEnabled = true;
-                    AdvImport3DEnabled = true;
-                }
-                else
-                {
-                    Import3DEnabled = false;
-                    AdvImport3DEnabled = false;
-                }
-
-                if (Directory.Exists(Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selectedItem.ItemName + "/3D/"))
-                {
-                    Open3DEnabled = true;
-                }
-                else
-                {
-                    openEnabled = false;
-                }
-
-                string line;
-                JsonEntry modEntry = null;
-                bool inModList = false;
-                try
-                {
-                    using (StreamReader sr = new StreamReader(Properties.Settings.Default.Modlist_Directory))
-                    {
-                        while ((line = sr.ReadLine()) != null)
-                        {
-                            modEntry = JsonConvert.DeserializeObject<JsonEntry>(line);
-                            if (modEntry.fullPath.Equals(fullPath))
+                            if (selectedItem.ItemName.Equals(Strings.Face))
                             {
-                                inModList = true;
-                                break;
+                                normalData = TEX.GetTex(mtrlData.NormalOffset, Strings.ItemsDat);
+
+                                
+                                if (mtrlData.MTRLPath.Contains("_fac_"))
+                                {
+                                    specularData = TEX.GetTex(mtrlData.SpecularOffset, Strings.ItemsDat);
+                                    diffuseData = TEX.GetTex(mtrlData.DiffuseOffset, Strings.ItemsDat);
+
+                                    var maps = TexHelper.MakeCharacterMaps(normalData, diffuseData, null, specularData, selectedItem.ItemName, mtrlData.MTRLPath);
+
+                                    diffuseBMP = maps[0];
+                                    specularBMP = maps[1];
+                                    normalBMP = maps[2];
+                                    alphaBMP = maps[3];
+                                    isFace = true;
+                                }
+                                else
+                                {
+                                    if (mtrlData.ColorData != null)
+                                    {
+                                        specularData = TEX.GetTex(mtrlData.SpecularOffset, Strings.ItemsDat);
+                                        var maps = TexHelper.MakeModelTextureMaps(normalData, null, null, specularData, mtrlData);
+
+                                        diffuseBMP = maps[0];
+                                        specularBMP = maps[1];
+                                        normalBMP = maps[2];
+                                        alphaBMP = maps[3];
+                                        emissiveBMP = maps[4];
+                                    }
+                                    else
+                                    {
+                                        specularData = TEX.GetTex(mtrlData.SpecularOffset, Strings.ItemsDat);
+                                        var maps = TexHelper.MakeCharacterMaps(normalData, diffuseData, null, specularData, selectedItem.ItemName, mtrlData.MTRLPath);
+
+                                        diffuseBMP = maps[0];
+                                        specularBMP = maps[1];
+                                        normalBMP = maps[2];
+                                        alphaBMP = maps[3];
+                                    }
+                                }
                             }
                         }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    FlexibleMessageBox.Show("Error Accessing .modlist File \n" + ex.Message, "ModelViewModel Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                        else
+                        {
 
-                if (inModList)
-                {
-                    var currOffset = Helper.GetDataOffset(FFCRC.GetHash(modEntry.fullPath.Substring(0, modEntry.fullPath.LastIndexOf("/"))), FFCRC.GetHash(Path.GetFileName(modEntry.fullPath)), Strings.ItemsDat);
+                            if (mtrlData.NormalOffset != 0)
+                            {
+                                normalData = TEX.GetTex(mtrlData.NormalOffset, Strings.ItemsDat);
+                            }
 
-                    if (currOffset == modEntry.modOffset)
-                    {
-                        ActiveToggle = "Disable";
+                            //if (mtrlData.MaskOffset != 0)
+                            //{
+                            //    maskData = TEX.GetTex(mtrlData.MaskOffset, Strings.ItemsDat);
+                            //    maskBMP = Imaging.CreateBitmapSourceFromHBitmap(maskData.BMP.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                            //}
+
+                            if (mtrlData.DiffuseOffset != 0)
+                            {
+                                diffuseData = TEX.GetTex(mtrlData.DiffuseOffset, Strings.ItemsDat);
+                                specularData = TEX.GetTex(mtrlData.SpecularOffset, Strings.ItemsDat);
+                                if (mtrlData.DiffusePath.Contains("human") && !mtrlData.DiffusePath.Contains("demi"))
+                                {
+                                    isBody = true;
+
+                                    var maps = TexHelper.MakeCharacterMaps(normalData, diffuseData, null, specularData, selectedItem.ItemName, mtrlData.MTRLPath);
+
+                                    diffuseBMP = maps[0];
+                                    specularBMP = maps[1];
+                                    normalBMP = maps[2];
+                                    alphaBMP = maps[3];
+                                }
+                            }
+
+                            if (!isBody && mtrlData.SpecularOffset != 0)
+                            {
+                                specularData = TEX.GetTex(mtrlData.SpecularOffset, Strings.ItemsDat);
+
+                                specularBMP = specularData.BMPSouceAlpha;
+                            }
+
+                            if (!isBody && specularData == null)
+                            {
+                                var maps = TexHelper.MakeModelTextureMaps(normalData, diffuseData, maskData, null, mtrlData);
+                                diffuseBMP = maps[0];
+                                specularBMP = maps[1];
+                                normalBMP = maps[2];
+                                alphaBMP = maps[3];
+                                emissiveBMP = maps[4];
+                            }
+                            else if (!isBody && specularData != null)
+                            {
+                                var maps = TexHelper.MakeModelTextureMaps(normalData, diffuseData, null, specularData, mtrlData);
+                                diffuseBMP = maps[0];
+                                specularBMP = maps[1];
+                                normalBMP = maps[2];
+                                alphaBMP = maps[3];
+                                emissiveBMP = maps[4];
+                            }
+                        }
+
+                        specularBMP?.Freeze();
+                        diffuseBMP?.Freeze();
+                        normalBMP?.Freeze();
+                        alphaBMP?.Freeze();
+                        emissiveBMP?.Freeze();
+
+                        var mData = new MDLTEXData()
+                        {
+                            Specular = specularBMP,
+                            Diffuse = diffuseBMP,
+                            Normal = normalBMP,
+                            Alpha = alphaBMP,
+                            Emissive = emissiveBMP,
+
+                            IsBody = isBody,
+                            IsFace = isFace,
+
+                            Mesh = meshList[i]
+                        };
+
+                        meshData.Add(mData);
                     }
-                    else if (currOffset == modEntry.originalOffset)
+
+
+                    // Preserve Camera settings before reset
+                    var lookDir = CompositeVM.Camera.LookDirection;
+                    var upDir = CompositeVM.Camera.UpDirection;
+                    var pos = CompositeVM.Camera.Position;
+
+
+                    // Reset 3d View for loading new model
+                    CompositeVM = new Composite3DViewModel();
+                    CompositeVM.UpdateModel(meshData, selectedItem);
+
+                    // Re-apply original camera settings 
+                    // Applies when camera is not in the default position 
+                    // and when within the same item category
+                    if (lookDir.Z != -5 && !newCat)
                     {
-                        ActiveToggle = "Enable";
+                        CompositeVM.Camera.LookDirection = lookDir;
+                        CompositeVM.Camera.UpDirection = upDir;
+                        CompositeVM.Camera.Position = pos;
+                    }
+
+                    is3DLoaded = true;
+                    newCat = false;
+
+                    if (File.Exists(Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selectedItem.ItemName + "/3D/" + modelName + ".DAE"))
+                    {
+                        Import3DEnabled = true;
+                        AdvImport3DEnabled = true;
                     }
                     else
                     {
-                        ActiveToggle = "Error";
+                        Import3DEnabled = false;
+                        AdvImport3DEnabled = false;
                     }
 
-                    ActiveEnabled = true;
+                    if (Directory.Exists(Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selectedItem.ItemName + "/3D/"))
+                    {
+                        Open3DEnabled = true;
+                    }
+                    else
+                    {
+                        openEnabled = false;
+                    }
+
+                    string line;
+                    JsonEntry modEntry = null;
+                    bool inModList = false;
+                    try
+                    {
+                        using (StreamReader sr = new StreamReader(Properties.Settings.Default.Modlist_Directory))
+                        {
+                            while ((line = sr.ReadLine()) != null)
+                            {
+                                modEntry = JsonConvert.DeserializeObject<JsonEntry>(line);
+                                if (modEntry.fullPath.Equals(fullPath))
+                                {
+                                    inModList = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        FlexibleMessageBox.Show("Error Accessing .modlist File \n" + ex.Message, "ModelViewModel Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+
+                    if (inModList)
+                    {
+                        var currOffset = Helper.GetDataOffset(FFCRC.GetHash(modEntry.fullPath.Substring(0, modEntry.fullPath.LastIndexOf("/"))), FFCRC.GetHash(Path.GetFileName(modEntry.fullPath)), Strings.ItemsDat);
+
+                        if (currOffset == modEntry.modOffset)
+                        {
+                            ActiveToggle = "Disable";
+                        }
+                        else if (currOffset == modEntry.originalOffset)
+                        {
+                            ActiveToggle = "Enable";
+                        }
+                        else
+                        {
+                            ActiveToggle = "Error";
+                        }
+
+                        ActiveEnabled = true;
+                    }
+                    else
+                    {
+                        ActiveEnabled = false;
+                        ActiveToggle = "Enable/Disable";
+                    }
+
+                    ReflectionContent = "Reflection " + string.Format("{0:0.##}", CompositeVM.CurrentSS);
+
                 }
                 else
                 {
-                    ActiveEnabled = false;
-                    ActiveToggle = "Enable/Disable";
+                    CompositeVM.Rendering(SelectedMesh.Name);
                 }
-
-                ReflectionContent = "Reflection " + string.Format("{0:0.##}", CompositeVM.CurrentSS);
-
-            }
-            else
+            } catch(Exception e)
             {
-                CompositeVM.Rendering(SelectedMesh.Name);
+                ResetBadCompositeState();
             }
         }
 
@@ -1375,6 +1414,17 @@ namespace FFXIV_TexTools2.ViewModel
         {
             if (this.PropertyChanged != null)
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        protected void ResetBadCompositeState()
+        {
+            if(CompositeVM != null && !CompositeVM.IsDead())
+            {
+                CompositeVM.Dispose();
+            }
+
+            CompositeVM = new Composite3DViewModel();
+            FlexibleMessageBox.Show("The 3D Model Viewer was unable to display the item.", "Model Viewer Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
     }
 }

@@ -22,7 +22,7 @@ namespace FFXIV_TexTools2.Views
     /// </summary>
     public partial class Customize : Window
     {
-        private Color skinColor, hairColor, eyeColor, etcColor;
+        private Color skinColor, hairColor, eyeColor, etcColor, bgColor;
 
         public Customize()
         {
@@ -40,6 +40,7 @@ namespace FFXIV_TexTools2.Views
             hairColor = (Color)ColorConverter.ConvertFromString(Properties.Settings.Default.Hair_Color);
             eyeColor = (Color)ColorConverter.ConvertFromString(Properties.Settings.Default.Iris_Color);
             etcColor = (Color)ColorConverter.ConvertFromString(Properties.Settings.Default.Etc_Color);
+            bgColor = (Color)ColorConverter.ConvertFromString(Properties.Settings.Default.BG_Color);
 
             RaceComboBox.ItemsSource = baseRace;
             RaceComboBox.SelectedIndex = baseRace.IndexOf(Properties.Settings.Default.Default_Race);
@@ -60,10 +61,15 @@ namespace FFXIV_TexTools2.Views
             EtcG.Text = etcColor.G.ToString();
             EtcB.Text = etcColor.B.ToString();
 
+            BGR.Text = bgColor.R.ToString();
+            BGG.Text = bgColor.G.ToString();
+            BGB.Text = bgColor.B.ToString();
+
             SkinColor.Fill = new SolidColorBrush(skinColor);
             HairColor.Fill = new SolidColorBrush(hairColor);
             EyeColor.Fill = new SolidColorBrush(eyeColor);
             EtcColor.Fill = new SolidColorBrush(etcColor);
+            BGColor.Fill = new SolidColorBrush(bgColor);
 
         }
 
@@ -279,6 +285,75 @@ namespace FFXIV_TexTools2.Views
             }
         }
 
+        private void BGR_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            var s = sender as TextBox;
+
+            try
+            {
+                var num = int.Parse(s.Text);
+                if (num < 0 || num > 255)
+                {
+                    s.Text = "";
+                }
+                else
+                {
+                    bgColor = Color.FromArgb(255, (byte)num, bgColor.G, bgColor.B);
+                    BGColor.Fill = new SolidColorBrush(bgColor);
+                }
+            }
+            catch
+            {
+                s.Text = "";
+            }
+        }
+
+        private void BGG_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            var s = sender as TextBox;
+
+            try
+            {
+                var num = int.Parse(s.Text);
+                if (num < 0 || num > 255)
+                {
+                    s.Text = "";
+                }
+                else
+                {
+                    bgColor = Color.FromArgb(255, bgColor.R, (byte)num, bgColor.B);
+                    BGColor.Fill = new SolidColorBrush(bgColor);
+                }
+            }
+            catch
+            {
+                s.Text = "";
+            }
+        }
+
+        private void BGB_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            var s = sender as TextBox;
+
+            try
+            {
+                var num = int.Parse(s.Text);
+                if (num < 0 || num > 255)
+                {
+                    s.Text = "";
+                }
+                else
+                {
+                    bgColor = Color.FromArgb(255, bgColor.R, bgColor.G, (byte)num);
+                    BGColor.Fill = new SolidColorBrush(bgColor);
+                }
+            }
+            catch
+            {
+                s.Text = "";
+            }
+        }
+
         private void EtcR_TextChanged(object sender, TextChangedEventArgs e)
         {
             var s = sender as TextBox;
@@ -355,6 +430,7 @@ namespace FFXIV_TexTools2.Views
             Properties.Settings.Default.Hair_Color = hairColor.ToString();
             Properties.Settings.Default.Iris_Color = eyeColor.ToString();
             Properties.Settings.Default.Etc_Color = etcColor.ToString();
+            Properties.Settings.Default.BG_Color = bgColor.ToString();
 
             Properties.Settings.Default.Save();
 

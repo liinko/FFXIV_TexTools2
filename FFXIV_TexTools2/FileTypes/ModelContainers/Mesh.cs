@@ -60,5 +60,10 @@ namespace FFXIV_TexTools2.Material.ModelMaterial
         /// True if mesh has a body texture, false otherwise.
         /// </summary>
         public bool IsBody { get; set; }
+
+        /// <summary>
+        /// Bone Set Index use by this mesh.
+        /// </summary>
+        public int BoneListIndex;
     }
 }

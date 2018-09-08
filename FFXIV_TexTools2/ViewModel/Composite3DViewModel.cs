@@ -55,6 +55,10 @@ namespace FFXIV_TexTools2.ViewModel
 
         public int CurrentSS { get { return currentSS; } set { currentSS = value; NotifyPropertyChanged("CurrentSS"); } }
 
+        public bool IsDead()
+        {
+            return disposed || disposing;
+        }
 
         bool second = false;
         bool disposed = false;
@@ -74,8 +78,16 @@ namespace FFXIV_TexTools2.ViewModel
             EffectsManager = new CustomEffectsManager(RenderTechniquesManager);
 
             this.Camera = new PerspectiveCamera();
+            string substr = Properties.Settings.Default.BG_Color.Substring(3, 2);
+            int red = int.Parse(substr, System.Globalization.NumberStyles.HexNumber);
 
-            BackgroundColor = Color.Gray;
+            substr = Properties.Settings.Default.BG_Color.Substring(5, 2);
+            int green = int.Parse(substr, System.Globalization.NumberStyles.HexNumber);
+
+            substr = Properties.Settings.Default.BG_Color.Substring(7, 2);
+            int blue = int.Parse(substr, System.Globalization.NumberStyles.HexNumber);
+
+            BackgroundColor = new Color4(red / 255f, green / 255f, blue / 255f, 1.0f);
             this.AmbientLightColor = new Color4(0.1f, 0.1f, 0.1f, 1.0f);
 
             this.Light1Direction = new Vector3(0, 0, -1f);
@@ -128,10 +140,17 @@ namespace FFXIV_TexTools2.ViewModel
             mg.Colors = mData[m].Mesh.VertexColors;
             mg.Tangents = new HelixToolkit.Wpf.SharpDX.Core.Vector3Collection();
 
+
+            var indexMax = 0;
+            for (int i = 0; i < mg.Indices.Count; i++)
+            {
+                if (mg.Indices.Count > indexMax)
+                    indexMax = mg.Indices[i];
+            }
             try
             {
                 MeshBuilder.ComputeTangents(mg);
-            } catch
+            } catch (Exception e)
             {
                 return null;
             }

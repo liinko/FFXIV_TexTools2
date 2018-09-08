@@ -149,7 +149,8 @@ namespace FFXIV_TexTools2
 
         private void Menu_ModList_Click(object sender, RoutedEventArgs e)
         {
-            ModList ml = new ModList();
+            
+            ModList ml = new ModList(this.mViewModel.ModelVM, this.mViewModel.TextureVM);
             ml.Owner = this;
             ml.Show();
         }
