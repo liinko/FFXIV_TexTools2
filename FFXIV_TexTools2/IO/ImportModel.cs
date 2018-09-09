@@ -435,7 +435,14 @@ namespace FFXIV_TexTools2.IO
                                             }
                                             else
                                             {
-                                                pDict[meshNum].Add(int.Parse(num), cData);
+                                                int partNum = int.Parse(num);
+                                                pDict[meshNum].Add(partNum, cData);
+
+                                                while( partNum + 1 > modelData.LoD[0].MeshList[meshNum].MeshPartList.Count )
+                                                {
+                                                    var newPart = new MeshPart();
+                                                    modelData.LoD[0].MeshList[meshNum].MeshPartList.Add(newPart);
+                                                }
                                             }
 									    }
 									    catch (Exception e)
@@ -674,22 +681,10 @@ namespace FFXIV_TexTools2.IO
                     }
                 }
 
+                // For all imported meshes
                  for (int i = 0; i < pDict.Count; i++)
                  {
-                    // If the file has more meshes or mesh parts than the original model data did, create them.
                     var mDict = pDict[i];
-                    for (int l = 0; l < modelData.LoD.Count; l++)
-                    {
-                        for (int x = 0; x < modelData.LoD[l].MeshList.Count; x++)
-                        {
-                            while (modelData.LoD[l].MeshList[x].MeshPartList.Count() < mDict.Count())
-                            {
-                                MeshPart newPart = new MeshPart();
-                                modelData.LoD[l].MeshList[x].MeshPartList.Add(newPart);
-                            }
-                        }
-                    }
-                    
 
 
                     for (int j = 0; j < mDict.Count; j++)
