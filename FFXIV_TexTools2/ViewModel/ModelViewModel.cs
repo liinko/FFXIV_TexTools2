@@ -98,6 +98,11 @@ namespace FFXIV_TexTools2.ViewModel
 
         public void UpdateModel(ItemData item, string category)
         {
+            if(item == null || category == null)
+            {
+                return;
+            }
+
             CompositeVM.Dispose();
             disposing = true;
             cbi.Clear();
