@@ -409,7 +409,7 @@ namespace FFXIV_TexTools2.ViewModel
                     }
                     else
                     {
-                        if (selectedCategory.Equals("UI"))
+                        if (selectedCategory.Equals("UI") || m.Name.Contains("Icon"))
                         {
                             texData = TEX.GetTex(offset, Strings.UIDat);
                         }
