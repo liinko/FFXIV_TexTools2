@@ -2442,13 +2442,20 @@ namespace FFXIV_TexTools2.IO
                             //Attributes (int)
                             // If we're still in the original Mesh Part listing, advance the seek cursor.
                             int originalAttributes = 0;
-                            if (i < OriginalLodList[l].MeshList.Count() && j < OriginalLodList[l].MeshList[i].MeshInfo.MeshPartCount)
+                            try
                             {
-                                 originalAttributes = br.ReadInt32();
-                            }
+                                if (i < OriginalLodList[l].MeshList.Count() && j < OriginalLodList[l].MeshList[i].MeshInfo.MeshPartCount)
+                                {
+                                     originalAttributes = br.ReadInt32();
+                                }
 
-                            // Pull attributes from our import data.
-                            mp.Attributes = modelData.LoD[0].MeshList[i].MeshPartList[j].Attributes;
+                                // Pull attributes from our import data.
+                                mp.Attributes = modelData.LoD[0].MeshList[i].MeshPartList[j].Attributes;
+                            } catch(Exception e)
+                            {
+                                originalAttributes = 0;
+                                mp.Attributes = 0;
+                            }
 
                             // Make sure we can't be referencing attributes beyond the end of our attributes list.
                             //  It's a bitmask, where each bit references the attributes in order from the attribute strings
