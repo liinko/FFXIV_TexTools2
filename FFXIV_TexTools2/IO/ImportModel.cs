@@ -2116,7 +2116,8 @@ namespace FFXIV_TexTools2.IO
                             }
                         } else
                         {
-                            if (importSettings[Strings.All].UseOriginalBones)
+                            // Don't allow mesh addition in LoD 0 with 'Use Original Bones'
+                            if (importSettings[Strings.All].UseOriginalBones && i == 0)
                             {
                                 MessageBox.Show("Mesh Addition is not allowed when using Original Bones.\n\nThe import has been canceled.");
                                 return;
