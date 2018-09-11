@@ -101,6 +101,9 @@ namespace FFXIV_TexTools2.IO
 
 		public static void ImportDAE(string category, string itemName, string modelName, string selectedMesh, string internalPath, ModelData modelData, Dictionary<string, ImportSettings> settings)
 		{
+            // Tracks to see if we have any UV2 data all.
+            // Only used for warning handling.
+            bool anyTexCoord2Data = false;
 
             importSettings = settings;
             var numMeshes = modelData.LoD[0].MeshCount;
@@ -370,7 +373,8 @@ namespace FFXIV_TexTools2.IO
 												else if (reader["id"].ToLower().Contains(texc2) && cData.vertex.Count > 0)
 												{
 													cData.texCoord2.AddRange((float[])reader.ReadElementContentAs(typeof(float[]), null));
-												}
+                                                    anyTexCoord2Data = true;
+                                                }
 												//Tangents
 												else if (reader["id"].ToLower().Contains(tang) && cData.vertex.Count > 0)
 												{
@@ -768,16 +772,24 @@ namespace FFXIV_TexTools2.IO
                                     || (numVerts != numTexCoord ) // Check if our coordinate count matches
                                     || (numVerts != numTexCoord2 && numTexCoord2 != 0)) // Check if our coordinate2 count matches
                                 {
-                                    FlexibleMessageBox.Show("Number of Vertices/Normals/Texture Coordinate entries do not match for:\nMesh: " + i + " Part: " + j
+                                    FlexibleMessageBox.Show("Number of Vertices/Normals/Texture Coordinate entries do not match for the following mesh part:\nMesh: " + i + " Part: " + j
                                         + "\n\nThis has a chance of either crashing TexTools or causing other errors in the import\n\nVertexCount: "
                                         + numVerts + "\nNormal Count:" + numNormals + "\nUV1 Coordinates: " + numTexCoord + "\nUV2 Coordinates: " + numTexCoord2 + "\n\nThe import will now attempt to continue.", "ImportModel Warning " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                                 }
 
+                                if (numTexCoord2 == 0 && anyTexCoord2Data)
+                                {
+                                    FlexibleMessageBox.Show("The following mesh part has no UV2 Data:\nMesh: " + i + " Part: " + j
+                                        + "\n\nThis has a chance of either crashing TexTools or causing other errors in the import."
+                                        + "\n\nPlease make sure all mesh parts have valid UV2 data."
+                                        + "\n\nThe import will now attempt to continue.", "ImportModel Warning " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                }
+
                                 if(numBinormals == 0)
                                 {
-                                    FlexibleMessageBox.Show("There were no Binormals in:\nMesh: " + i + " Part: " + j
+                                    FlexibleMessageBox.Show("The following mesh has no Binormal Data:\nMesh: " + i + " Part: " + j
                                         + "\n\nThis has a chance of either crashing TexTools or causing other errors in the import."
-                                        + "\nPlease make sure your OpenCollada Export settings are correct."
+                                        + "\n\nPlease make sure your OpenCollada Export settings are correct."
                                         + "\n\nThe import will now attempt to continue.", "ImportModel Warning " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                                 }
 
@@ -2107,6 +2119,7 @@ namespace FFXIV_TexTools2.IO
                             if (importSettings[Strings.All].UseOriginalBones)
                             {
                                 MessageBox.Show("Mesh Addition is not allowed when using Original Bones.\n\nThe import has been canceled.");
+                                return;
                             }
 
                             // New Mesh, just create a default one.
