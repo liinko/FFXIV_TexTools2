@@ -94,38 +94,40 @@
             <GroupBox x:Name="TexturesGroup" Header="Item List" Margin="5">
                 <Grid>
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="30"/>
                         <RowDefinition Height="257*"/>
-                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <TreeView x:Name="textureTreeView" ItemsSource="{Binding Category}"  Grid.Row="0" Margin="0,0,2,0" SelectedItemChanged="textureTreeView_SelectedItemChanged">
-                        <TreeView.ItemContainerStyle>
-                            <Style TargetType="{x:Type TreeViewItem}">
-                                <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
-                                <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
-                                <Setter Property="FontWeight" Value="Normal"/>
-                                <Style.Triggers>
-                                    <Trigger Property="IsSelected" Value="True">
-                                        <Setter Property="FontWeight" Value="Bold"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TreeView.ItemContainerStyle>
-
-                        <TreeView.Resources>
-                            <HierarchicalDataTemplate DataType="{x:Type local1:CategoryViewModel}" ItemsSource="{Binding Children}">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="{Binding Name}" />
-                                </StackPanel>
-                            </HierarchicalDataTemplate>
-
-                        </TreeView.Resources>
-                    </TreeView>
-                    <Grid Grid.Row="1" Margin="0,0,2,0">
-                        <TextBox x:Name="searchBox" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" TextWrapping="NoWrap"  VerticalAlignment="Bottom" TextChanged="TextBox_TextChanged">
+                    <Grid Grid.Row="0" Margin="0,0,2,0">
+                        <TextBox x:Name="searchBox" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" TextWrapping="NoWrap" TextChanged="TextBox_TextChanged" Padding="5" Margin="0,0,-2,0" >
                             <TextBox.Background>
-                                <ImageBrush ImageSource="/FFXIV TexTools 2;component/Resources/search.png" AlignmentX="Left" Stretch="Uniform" />
+                                <ImageBrush ImageSource="/FFXIV TexTools 2;component/Resources/search.png" Stretch="UniformToFill" AlignmentX="Left" />
                             </TextBox.Background>
                         </TextBox>
+                    </Grid>
+                    <Grid Grid.Row="1" Margin="0,0,2,0">
+                        <TreeView x:Name="textureTreeView" ItemsSource="{Binding Category}"  Grid.Row="0" SelectedItemChanged="textureTreeView_SelectedItemChanged" Margin="0,0,-2,0">
+                            <TreeView.ItemContainerStyle>
+                                <Style TargetType="{x:Type TreeViewItem}">
+                                    <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
+                                    <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
+                                    <Setter Property="FontWeight" Value="Normal"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter Property="FontWeight" Value="Bold"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TreeView.ItemContainerStyle>
+
+                            <TreeView.Resources>
+                                <HierarchicalDataTemplate DataType="{x:Type local1:CategoryViewModel}" ItemsSource="{Binding Children}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Name}" />
+                                    </StackPanel>
+                                </HierarchicalDataTemplate>
+
+                            </TreeView.Resources>
+                        </TreeView>
                     </Grid>
                 </Grid>
             </GroupBox>
