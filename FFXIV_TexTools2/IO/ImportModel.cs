@@ -101,6 +101,9 @@ namespace FFXIV_TexTools2.IO
 
 		public static void ImportDAE(string category, string itemName, string modelName, string selectedMesh, string internalPath, ModelData modelData, Dictionary<string, ImportSettings> settings)
 		{
+            // Tracks to see if we have any UV2 data all.
+            // Only used for warning handling.
+            bool anyTexCoord2Data = false;
 
             importSettings = settings;
             var numMeshes = modelData.LoD[0].MeshCount;
@@ -370,7 +373,8 @@ namespace FFXIV_TexTools2.IO
 												else if (reader["id"].ToLower().Contains(texc2) && cData.vertex.Count > 0)
 												{
 													cData.texCoord2.AddRange((float[])reader.ReadElementContentAs(typeof(float[]), null));
-												}
+                                                    anyTexCoord2Data = true;
+                                                }
 												//Tangents
 												else if (reader["id"].ToLower().Contains(tang) && cData.vertex.Count > 0)
 												{
@@ -435,7 +439,14 @@ namespace FFXIV_TexTools2.IO
                                             }
                                             else
                                             {
-                                                pDict[meshNum].Add(int.Parse(num), cData);
+                                                int partNum = int.Parse(num);
+                                                pDict[meshNum].Add(partNum, cData);
+
+                                                while( partNum + 1 > modelData.LoD[0].MeshList[meshNum].MeshPartList.Count )
+                                                {
+                                                    var newPart = new MeshPart();
+                                                    modelData.LoD[0].MeshList[meshNum].MeshPartList.Add(newPart);
+                                                }
                                             }
 									    }
 									    catch (Exception e)
@@ -674,22 +685,10 @@ namespace FFXIV_TexTools2.IO
                     }
                 }
 
+                // For all imported meshes
                  for (int i = 0; i < pDict.Count; i++)
                  {
-                    // If the file has more meshes or mesh parts than the original model data did, create them.
                     var mDict = pDict[i];
-                    for (int l = 0; l < modelData.LoD.Count; l++)
-                    {
-                        for (int x = 0; x < modelData.LoD[l].MeshList.Count; x++)
-                        {
-                            while (modelData.LoD[l].MeshList[x].MeshPartList.Count() < mDict.Count())
-                            {
-                                MeshPart newPart = new MeshPart();
-                                modelData.LoD[l].MeshList[x].MeshPartList.Add(newPart);
-                            }
-                        }
-                    }
-                    
 
 
                     for (int j = 0; j < mDict.Count; j++)
@@ -773,16 +772,24 @@ namespace FFXIV_TexTools2.IO
                                     || (numVerts != numTexCoord ) // Check if our coordinate count matches
                                     || (numVerts != numTexCoord2 && numTexCoord2 != 0)) // Check if our coordinate2 count matches
                                 {
-                                    FlexibleMessageBox.Show("Number of Vertices/Normals/Texture Coordinate entries do not match for:\nMesh: " + i + " Part: " + j
+                                    FlexibleMessageBox.Show("Number of Vertices/Normals/Texture Coordinate entries do not match for the following mesh part:\nMesh: " + i + " Part: " + j
                                         + "\n\nThis has a chance of either crashing TexTools or causing other errors in the import\n\nVertexCount: "
                                         + numVerts + "\nNormal Count:" + numNormals + "\nUV1 Coordinates: " + numTexCoord + "\nUV2 Coordinates: " + numTexCoord2 + "\n\nThe import will now attempt to continue.", "ImportModel Warning " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                                 }
 
+                                if (numTexCoord2 == 0 && anyTexCoord2Data)
+                                {
+                                    FlexibleMessageBox.Show("The following mesh part has no UV2 Data:\nMesh: " + i + " Part: " + j
+                                        + "\n\nThis has a chance of either crashing TexTools or causing other errors in the import."
+                                        + "\n\nPlease make sure all mesh parts have valid UV2 data."
+                                        + "\n\nThe import will now attempt to continue.", "ImportModel Warning " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                }
+
                                 if(numBinormals == 0)
                                 {
-                                    FlexibleMessageBox.Show("There were no Binormals in:\nMesh: " + i + " Part: " + j
+                                    FlexibleMessageBox.Show("The following mesh has no Binormal Data:\nMesh: " + i + " Part: " + j
                                         + "\n\nThis has a chance of either crashing TexTools or causing other errors in the import."
-                                        + "\nPlease make sure your OpenCollada Export settings are correct."
+                                        + "\n\nPlease make sure your OpenCollada Export settings are correct."
                                         + "\n\nThe import will now attempt to continue.", "ImportModel Warning " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                                 }
 
@@ -2109,9 +2116,11 @@ namespace FFXIV_TexTools2.IO
                             }
                         } else
                         {
-                            if (importSettings[Strings.All].UseOriginalBones)
+                            // Don't allow mesh addition in LoD 0 with 'Use Original Bones'
+                            if (importSettings[Strings.All].UseOriginalBones && i == 0)
                             {
                                 MessageBox.Show("Mesh Addition is not allowed when using Original Bones.\n\nThe import has been canceled.");
+                                return;
                             }
 
                             // New Mesh, just create a default one.
@@ -2447,13 +2456,20 @@ namespace FFXIV_TexTools2.IO
                             //Attributes (int)
                             // If we're still in the original Mesh Part listing, advance the seek cursor.
                             int originalAttributes = 0;
-                            if (i < OriginalLodList[l].MeshList.Count() && j < OriginalLodList[l].MeshList[i].MeshInfo.MeshPartCount)
+                            try
                             {
-                                 originalAttributes = br.ReadInt32();
-                            }
+                                if (i < OriginalLodList[l].MeshList.Count() && j < OriginalLodList[l].MeshList[i].MeshInfo.MeshPartCount)
+                                {
+                                     originalAttributes = br.ReadInt32();
+                                }
 
-                            // Pull attributes from our import data.
-                            mp.Attributes = modelData.LoD[0].MeshList[i].MeshPartList[j].Attributes;
+                                // Pull attributes from our import data.
+                                mp.Attributes = modelData.LoD[0].MeshList[i].MeshPartList[j].Attributes;
+                            } catch(Exception e)
+                            {
+                                originalAttributes = 0;
+                                mp.Attributes = 0;
+                            }
 
                             // Make sure we can't be referencing attributes beyond the end of our attributes list.
                             //  It's a bitmask, where each bit references the attributes in order from the attribute strings
