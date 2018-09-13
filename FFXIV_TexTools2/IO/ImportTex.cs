@@ -236,53 +236,61 @@ namespace FFXIV_TexTools2.IO
                     mtrlBytes.AddRange(br.ReadBytes(textureNameSize + 4));
                     br.ReadBytes(colorDataSize);
 
-                    if (colorDataSize == 544)
+                    try
                     {
-                        using (BinaryReader br1 = new BinaryReader(File.OpenRead(savePath)))
+                        if (colorDataSize == 544)
                         {
-                            br1.BaseStream.Seek(128, SeekOrigin.Begin);
-                            colorData = br1.ReadBytes(colorDataSize - 32);
+                            using (BinaryReader br1 = new BinaryReader(File.OpenRead(savePath)))
+                            {
+                                br1.BaseStream.Seek(128, SeekOrigin.Begin);
+                                colorData = br1.ReadBytes(colorDataSize - 32);
 
-                            mtrlBytes.AddRange(colorData);
+                                mtrlBytes.AddRange(colorData);
+                            }
+
+                            string flagsPath = Path.Combine(Path.GetDirectoryName(savePath), (Path.GetFileNameWithoutExtension(savePath) + ".dat"));
+
+                            using (BinaryReader br1 = new BinaryReader(File.OpenRead(flagsPath)))
+                            {
+                                br1.BaseStream.Seek(0, SeekOrigin.Begin);
+
+                                mtrlBytes.AddRange(br1.ReadBytes(32));
+                            }
+                        }
+                        else
+                        {
+                            using (BinaryReader br1 = new BinaryReader(File.OpenRead(savePath)))
+                            {
+                                br1.BaseStream.Seek(128, SeekOrigin.Begin);
+                                colorData = br1.ReadBytes(colorDataSize);
+
+                                mtrlBytes.AddRange(colorData);
+                            }
                         }
 
-                        string flagsPath = Path.Combine(Path.GetDirectoryName(savePath), (Path.GetFileNameWithoutExtension(savePath) + ".dat"));
+                        mtrlBytes.AddRange(br.ReadBytes(fileSize - (int)br.BaseStream.Position));
 
-                        using (BinaryReader br1 = new BinaryReader(File.OpenRead(flagsPath)))
-                        {
-                            br1.BaseStream.Seek(0, SeekOrigin.Begin);
+                        var compressed = Compressor(mtrlBytes.ToArray());
+                        int padding = 128 - (compressed.Length % 128);
 
-                            mtrlBytes.AddRange(br1.ReadBytes(32));
-                        }
+                        newMTRL.AddRange(MakeMTRLHeader(fileSize, compressed.Length + padding));
+                        newMTRL.AddRange(BitConverter.GetBytes(16));
+                        newMTRL.AddRange(BitConverter.GetBytes(0));
+                        newMTRL.AddRange(BitConverter.GetBytes(compressed.Length));
+                        newMTRL.AddRange(BitConverter.GetBytes((int)fileSize));
+                        newMTRL.AddRange(compressed);
+                        newMTRL.AddRange(new byte[padding]);
+
+                        newOffset = WriteToDat(newMTRL, modEntry, inModList, mtrlData.MTRLPath, category, itemName, lineNum, Strings.ItemsDat);
+
+                        return new Tuple<int, byte[]>(newOffset, colorData);
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        using (BinaryReader br1 = new BinaryReader(File.OpenRead(savePath)))
-                        {
-                            br1.BaseStream.Seek(128, SeekOrigin.Begin);
-                            colorData = br1.ReadBytes(colorDataSize);
-
-                            mtrlBytes.AddRange(colorData);
-                        }
+                        FlexibleMessageBox.Show("Error opening " + Path.GetFileNameWithoutExtension(savePath) + ".dat \n" + ex.Message, "ImportTex Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return new Tuple<int, byte[]>(0, null);
                     }
-
-                    mtrlBytes.AddRange(br.ReadBytes(fileSize - (int)br.BaseStream.Position));
                 }
-
-                var compressed = Compressor(mtrlBytes.ToArray());
-                int padding = 128 - (compressed.Length % 128);
-
-                newMTRL.AddRange(MakeMTRLHeader(fileSize, compressed.Length + padding));
-                newMTRL.AddRange(BitConverter.GetBytes(16));
-                newMTRL.AddRange(BitConverter.GetBytes(0));
-                newMTRL.AddRange(BitConverter.GetBytes(compressed.Length));
-                newMTRL.AddRange(BitConverter.GetBytes((int)fileSize));
-                newMTRL.AddRange(compressed);
-                newMTRL.AddRange(new byte[padding]);
-
-                newOffset = WriteToDat(newMTRL, modEntry, inModList, mtrlData.MTRLPath, category, itemName, lineNum, Strings.ItemsDat);
-
-                return new Tuple<int, byte[]>(newOffset, colorData);
             }
             else
             {

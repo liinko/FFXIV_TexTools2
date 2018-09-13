@@ -288,7 +288,14 @@ namespace FFXIV_TexTools2.ViewModel
                 savePath = Properties.Settings.Default.Save_Directory + "/" + selectedCategory + "/" + selectedItem.ItemCategory;
             }
 
-            Process.Start(savePath);
+            try
+            {
+                Process.Start(savePath);
+            }
+            catch (Exception ex)
+            {
+                FlexibleMessageBox.Show("Error opening the folder " + selectedItem.ItemName + " \n" + ex.Message, "ModelViewModel Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         public void SaveAllDDS()
@@ -409,7 +416,7 @@ namespace FFXIV_TexTools2.ViewModel
                     }
                     else
                     {
-                        if (selectedCategory.Equals("UI"))
+                        if (selectedCategory.Equals("UI") || m.Name.Contains("Icon"))
                         {
                             texData = TEX.GetTex(offset, Strings.UIDat);
                         }
