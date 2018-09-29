@@ -105,7 +105,7 @@
                         </TextBox>
                     </Grid>
                     <Grid Grid.Row="1" Margin="0,0,2,0">
-                        <TreeView x:Name="textureTreeView" ItemsSource="{Binding Category}"  Grid.Row="0" SelectedItemChanged="textureTreeView_SelectedItemChanged" Margin="0,0,-2,0">
+                        <TreeView x:Name="textureTreeView" ItemsSource="{Binding Category}"  Grid.Row="0" SelectedItemChanged="textureTreeView_SelectedItemChanged" Margin="0,0,-2,0" VirtualizingStackPanel.IsVirtualizing="True">
                             <TreeView.ItemContainerStyle>
                                 <Style TargetType="{x:Type TreeViewItem}">
                                     <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
