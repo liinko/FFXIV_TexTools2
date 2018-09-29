@@ -28,6 +28,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Xml;
@@ -628,6 +629,8 @@ namespace FFXIV_TexTools2.ViewModel
                     catDict.Add(c.Name, new TreeNode() { Name = c.Name });
                     Dictionary<string, TreeNode> subCatDict = new Dictionary<string, TreeNode>();
 
+                    var lowerSearchText = searchText.ToLower();
+
                     foreach (var ch in c.Children)
                     {
                         foreach (var ch1 in ch.Children)
@@ -638,7 +641,7 @@ namespace FFXIV_TexTools2.ViewModel
 
                                 foreach (var ch2 in ch1.Children)
                                 {
-                                    if (ch2.Name.ToLower().Contains(searchText.ToLower()))
+                                    if (ch2.Name.ToLower().Contains(lowerSearchText))
                                     {
                                         var itemNode = new TreeNode() { Name = ch2.Name, ItemData = ch2.ItemData };
 
@@ -669,7 +672,7 @@ namespace FFXIV_TexTools2.ViewModel
                             }
                             else
                             {
-                                if (ch1.Name.ToLower().Contains(searchText.ToLower()))
+                                if (ch1.Name.ToLower().Contains(lowerSearchText))
                                 {
                                     var itemNode = new TreeNode() { Name = ch1.Name, ItemData = ch1.ItemData };
                                     if (subCatDict.ContainsKey(ch.Name))
@@ -695,18 +698,20 @@ namespace FFXIV_TexTools2.ViewModel
                     }
                 }
 
-                Category = new ObservableCollection<CategoryViewModel>();
+                var newCategory = new ObservableCollection<CategoryViewModel>();
 
                 foreach (var c in catDict.Values)
                 {
                     if(c.SubNode.Count > 0)
                     {
                         var cvm = new CategoryViewModel(c);
-                        Category.Add(cvm);
+                        newCategory.Add(cvm);
                         cvm.ExpandAll();
                     }
 
                 }
+
+                Category = newCategory;
             }
             else
             {
