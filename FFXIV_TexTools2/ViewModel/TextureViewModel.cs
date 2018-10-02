@@ -1097,8 +1097,7 @@ namespace FFXIV_TexTools2.ViewModel
 
                 try
                 {
-                    alphaBitmap = Imaging.CreateBitmapSourceFromHBitmap(colorBmp.GetHbitmap(), IntPtr.Zero,
-                        Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                    alphaBitmap = TexHelper.CreateBitmapSource(colorBmp);
                     alphaBitmap.Freeze();
                 }
                 catch (Exception e)
@@ -1111,8 +1110,7 @@ namespace FFXIV_TexTools2.ViewModel
 
                 try
                 {
-                    noAlphaBitmap = Imaging.CreateBitmapSourceFromHBitmap(removeAlphaBitmap.GetHbitmap(), IntPtr.Zero,
-                        Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                    noAlphaBitmap = TexHelper.CreateBitmapSource(removeAlphaBitmap);
                     noAlphaBitmap.Freeze();
                 }
                 catch (Exception e)
@@ -1306,8 +1304,7 @@ namespace FFXIV_TexTools2.ViewModel
 
                     try
                     {
-                        alphaBitmap = Imaging.CreateBitmapSourceFromHBitmap(colorBMP.Item1.GetHbitmap(), IntPtr.Zero,
-                            Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                        alphaBitmap = TexHelper.CreateBitmapSource(colorBMP.Item1);
                         alphaBitmap.Freeze();
                     }
                     catch (Exception e)
@@ -1321,8 +1318,7 @@ namespace FFXIV_TexTools2.ViewModel
 
                     try
                     {
-                        noAlphaBitmap = Imaging.CreateBitmapSourceFromHBitmap(removeAlphaBitmap.GetHbitmap(),
-                            IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                        noAlphaBitmap = TexHelper.CreateBitmapSource(removeAlphaBitmap);
                         noAlphaBitmap.Freeze();
                     }
                     catch (Exception e)

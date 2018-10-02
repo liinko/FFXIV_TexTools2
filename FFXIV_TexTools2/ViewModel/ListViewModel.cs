@@ -222,11 +222,9 @@ namespace FFXIV_TexTools2.ViewModel
             {
                 var info = MTRL.GetMTRLInfo(entry.modOffset, false);
 
-                var bitmap = TEX.ColorSetToBitmap(info.ColorData);
-
-                mlm.BMP = Imaging.CreateBitmapSourceFromHBitmap(bitmap.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                using (var bitmap = TEX.ColorSetToBitmap(info.ColorData))
+                    mlm.BMP = TexHelper.CreateBitmapSource(bitmap);
                 mlm.BMP.Freeze();
-                bitmap.Dispose();
             }
             else if (entry.fullPath.Contains("model"))
             {
