@@ -36,7 +36,7 @@ namespace FFXIV_TexTools2.Helpers
 
         public static string modDatDir = Properties.Settings.Default.FFXIV_Directory + "/{0}.win32.dat{1}";
 
-        public static bool otherClientSupport = false;
+        public static bool otherClientSupport = true;
 
         public static Dictionary<string, string> ModDatDict = new Dictionary<string, string>
         {
