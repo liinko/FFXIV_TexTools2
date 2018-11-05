@@ -1364,7 +1364,7 @@ namespace FFXIV_TexTools2.Material
             {
                 if (fileName.Contains("skin"))
                 {
-                    return Strings.Skin;
+                    return Strings.Specular;
                 }
                 else
                 {
