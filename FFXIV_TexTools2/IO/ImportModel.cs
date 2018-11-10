@@ -107,6 +107,7 @@ namespace FFXIV_TexTools2.IO
 
             importSettings = settings;
             var numMeshes = modelData.LoD[0].MeshCount;
+            modelData.Bones.Clear();
 
             var savePath = Properties.Settings.Default.Save_Directory + "/" + category + "/" + itemName + "/3D/" + modelName + ".DAE";
 
@@ -254,10 +255,10 @@ namespace FFXIV_TexTools2.IO
                 }
                 else
                 {
-                    for (int i = 0; i < modelData.Bones.Count; i++)
-                    {
-                        CustomBoneSet.Add(modelData.Bones[i], i);
-                    }
+                    //for (int i = 0; i < modelData.Bones.Count; i++)
+                    //{
+                        //CustomBoneSet.Add(modelData.Bones[i], i);
+                    //}
                 }
 
 				try
@@ -655,12 +656,12 @@ namespace FFXIV_TexTools2.IO
                         return;
                     }
 
-                    string boneString = "";
-                    foreach( string bone in extraBones )
-                    {
-                        boneString += bone + " ";
-                    }
-                    FlexibleMessageBox.Show("Bones not originally in this item were detected; TexTools will attempt to add them to the item.\n Bone(s): " + boneString, "ImportModel Notification " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    //boneString = "";
+                    //foreach( string bone in extraBones )
+                    //{
+                    //    boneString += bone + " ";
+                    //}
+                    //FlexibleMessageBox.Show("Bones not originally in this item were detected; TexTools will attempt to add them to the item.\n Bone(s): " + boneString, "ImportModel Notification " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
 
                 if (!importSettings[Strings.All].UseOriginalBones)
@@ -672,15 +673,11 @@ namespace FFXIV_TexTools2.IO
                         FlexibleMessageBox.Show("Item exceeds 64 Bone Limit.\nImport with 'Use Original Bones', or reduce bone count below 64.\n\nThe import has been cancelled.", "ImportModel Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         return;
                     }
-                    int originalBonesLength = modelData.Bones.Count;
+                    //int originalBonesLength = modelData.Bones.Count;
                     for (int i = 0; i < CustomBoneSet.Count; i++)
                     {
                         // Add the extra bones into the bonestrings list.
-                        if (i >= modelData.Bones.Count)
-                        {
-                            modelData.Bones.Add(extraBones[i - originalBonesLength]);
-                        }
-
+                        modelData.Bones.Add(extraBones[i]);
                         modelData.BoneSet[0].BoneData[i] = i;
                     }
                 }
