@@ -177,11 +177,18 @@ namespace FFXIV_TexTools2.IO
 
 				Dictionary<string, string> boneJointDict = new Dictionary<string, string>();
 
-                string vertc = "-map0-array";
 				string texc = "-map0-array";
                 string texc2 = "-map1-array";
+
+                string vcol = "-col0-array";
+                string valpha = "-map2-array";
+
                 string texcBase = "map0";
                 string texc2Base = "map1";
+                string vcolBase = "col0";
+                string valphaBase = "map2";
+
+
                 string pos = "-positions-array";
 				string norm = "-normals-array";
 				string biNorm = "-texbinormals";
@@ -279,7 +286,10 @@ namespace FFXIV_TexTools2.IO
                                     {
                                         texc = "-map1-array";
 										texc2 = "-map2-array";
-										biNorm = "-map1-texbinormals";
+                                        vcol = "-map0-array";
+                                        valpha = "-map3-array";
+
+                                        biNorm = "-map1-texbinormals";
 										tang = "-map1-textangents";
 
                                         texcBase = "map1";
@@ -289,6 +299,8 @@ namespace FFXIV_TexTools2.IO
 									}
 									else if (tool.Contains("FBX"))
 									{
+                                        //TODO: ? Set up vertex color importing for blender/FBX?
+                                        // Do we even actually support blender/FBX at this point?
 										pos = "-position-array";
 										norm = "-normal0-array";
 										texc = "-uv0-array";
@@ -347,6 +359,7 @@ namespace FFXIV_TexTools2.IO
                                     var texCoord1Offset = -1;
                                     var texCoord2Offset = -1;
                                     var vColorOffset = -1;
+                                    var vAlphaOffset = -1;
                                     var binormalOffset = -1;
                                     var totalStride = -1;
 
@@ -404,6 +417,16 @@ namespace FFXIV_TexTools2.IO
                                                 {
                                                     cData.biNormal.AddRange((float[])reader.ReadElementContentAs(typeof(float[]), null));
                                                 }
+                                                //Vertex Color
+                                                else if (reader["id"].ToLower().Contains(vcol) && cData.vertex.Count > 0)
+                                                {
+                                                    cData.vertexColors.AddRange((float[])reader.ReadElementContentAs(typeof(float[]), null));
+                                                }
+                                                //Vertex Alpha
+                                                else if (reader["id"].ToLower().Contains(valpha) && cData.vertex.Count > 0)
+                                                {
+                                                    cData.vertexAlphas.AddRange((float[])reader.ReadElementContentAs(typeof(float[]), null));
+                                                }
                                             }
 
                                             // Triangle Header precedes Index block,
@@ -412,13 +435,35 @@ namespace FFXIV_TexTools2.IO
 
                                                 // At this point we've read all of our original basic data, 
                                                 // so time to massage the data if the data sucks.
+
+                                                if(cData.biNormal.Count == 0)
+                                                {
+                                                    // If we have no binormal data...
+                                                    // I guess just error?  Not sure what an appropriate dummy value would be.
+
+                                                    FlexibleMessageBox.Show("Mesh " + meshNum + " had no BiNormal Data.\nPlease check your DAE Exporter Settings.", "ImportModel Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                                    return;
+                                                }
+
                                                 if(cData.texCoord2.Count == 0)
                                                 {
                                                     // If we have no TexCoord2 data, just clone the TexCoord 1 data.
                                                     cData.texCoord2.AddRange(cData.texCoord);
                                                 }
 
-                                                while(reader.Read())
+                                                if (cData.vertexColors.Count == 0)
+                                                {
+                                                    // If we have no VertexColor data, just add a single 1.0 value for everything.
+                                                    cData.vertexColors.Add(1.0f);
+                                                }
+
+                                                if (cData.vertexAlphas.Count == 0)
+                                                {
+                                                    // If we have no VertexColor data, just add a single 1.0 value for everything.
+                                                    cData.vertexAlphas.Add(1.0f);
+                                                }
+
+                                                while (reader.Read())
                                                 {
                                                     if(reader.Name.Equals("input"))
                                                     {
@@ -433,7 +478,8 @@ namespace FFXIV_TexTools2.IO
                                                             totalStride = val + 1;
                                                         }
 
-                                                        // Now, match names.
+                                                        // Now, match semantic names.
+
                                                         switch(name)
                                                         {
                                                             case "vertex":
@@ -450,6 +496,11 @@ namespace FFXIV_TexTools2.IO
                                                                     texCoord1Offset = val;
                                                                 } else if(source.Contains(texc2Base)) {
                                                                     texCoord2Offset = val;
+                                                                } else if(source.Contains(valphaBase))
+                                                                {
+                                                                    // Vertex Alpha is stored in UV3 S coordinate, due to inconsistency
+                                                                    // issues with .DAE vertex alpha support.
+                                                                    vAlphaOffset = val;
                                                                 }
                                                                 break;
                                                             case "texbinormal":
@@ -492,12 +543,42 @@ namespace FFXIV_TexTools2.IO
 														cData.bnIndexList.Add(cData.index[i + binormalOffset]);
 													}
 
-												}
+                                                    if(vColorOffset != -1)
+                                                    {
+                                                        cData.vcIndexList.Add(cData.index[i + vColorOffset]);
+                                                    }
+
+                                                    if (vAlphaOffset != -1)
+                                                    {
+                                                        cData.vaIndexList.Add(cData.index[i + vAlphaOffset]);
+                                                    }
+
+                                                }
 
                                                 if (cData.tc2IndexList.Count == 0)
                                                 {
                                                     // If we have no Tex2 Indices, clone the Tex1 Indexes (Code above copied in the Tex1 data).
                                                     cData.tc2IndexList.AddRange(cData.tcIndexList);
+                                                }
+                                                if (cData.vcIndexList.Count == 0)
+                                                {
+                                                    // If we have no Vertex Color Indices, initialize and set them to 0.
+                                                    var arr = new List<int>(cData.tcIndexList.Count);
+                                                    foreach(var idx in cData.tcIndexList)
+                                                    {
+                                                        arr.Add(0);
+                                                    }
+                                                    cData.vcIndexList.AddRange(arr);
+                                                }
+                                                if (cData.vaIndexList.Count == 0)
+                                                {
+                                                    // If we have no Vertex Alpha Indices, initialize and set them to 0.
+                                                    var arr = new List<int>(cData.tcIndexList.Count);
+                                                    foreach (var idx in cData.tcIndexList)
+                                                    {
+                                                        arr.Add(0);
+                                                    }
+                                                    cData.vaIndexList.AddRange(arr);
                                                 }
 
                                                 break;
@@ -811,8 +892,10 @@ namespace FFXIV_TexTools2.IO
 					int tcMax = 0;
 					int tc2Max = 0;
 					int bnMax = 0;
+                    int vcMax = 0;
+                    int vaMax = 0;
 
-					if (mDict.Count > 0)
+                    if (mDict.Count > 0)
 					{
 						for (int j = 0; j < mDict.Count; j++)
 						{
@@ -826,44 +909,42 @@ namespace FFXIV_TexTools2.IO
                                 }
 
                                 /* Error Checking */
-                                int numVerts = mDict[c].vIndexList.Count / 3;
+                                int numVerts = mDict[c].vIndexList.Count;
                                 int maxVert = numVerts == 0 ? 0 : mDict[c].vIndexList.Max();
 
-                                int numNormals = mDict[c].nIndexList.Count / 3;
+                                int numNormals = mDict[c].nIndexList.Count;
                                 int maxNormal = numNormals == 0 ? 0 : mDict[c].nIndexList.Max();
 
-                                int numTexCoord = mDict[c].tcIndexList.Count / 3;
+                                int numTexCoord = mDict[c].tcIndexList.Count;
                                 int maxTexCoord = numTexCoord == 0 ? 0 : mDict[c].tcIndexList.Max();
 
-                                int numTexCoord2 = mDict[c].tc2IndexList.Count / 3;
+                                int numTexCoord2 = mDict[c].tc2IndexList.Count;
                                 int maxTexCoord2 = numTexCoord2 == 0 ? 0 : mDict[c].tc2IndexList.Max();
 
-                                int numBinormals = mDict[c].bnIndexList.Count / 3;
+                                int numBinormals = mDict[c].bnIndexList.Count;
                                 int maxBinormal = numBinormals == 0 ? 0 : mDict[c].bnIndexList.Max();
+
+                                int numVertColors = mDict[c].vcIndexList.Count;
+                                int maxVertColor = numVertColors == 0 ? 0 : mDict[c].vcIndexList.Max();
+
+                                int numVertAlphas = mDict[c].vaIndexList.Count;
+                                int maxVertAlpha = numVertAlphas == 0 ? 0 : mDict[c].vaIndexList.Max();
 
                                 if (numVerts != numNormals // Normals are simple.
                                     || (numVerts != numTexCoord ) // Check if our coordinate count matches
-                                    || (numVerts != numTexCoord2 && numTexCoord2 != 0)) // Check if our coordinate2 count matches
+                                    || (numVerts != numTexCoord2 ) // Check if our coordinate2 count matches
+                                    || (numVerts != numVertColors)
+                                    || (numVerts != numVertAlphas))
                                 {
-                                    FlexibleMessageBox.Show("Number of Vertices/Normals/Texture Coordinate entries do not match for the following mesh part:\nMesh: " + i + " Part: " + j
-                                        + "\n\nThis has a chance of either crashing TexTools or causing other errors in the import\n\nVertexCount: "
-                                        + numVerts + "\nNormal Count:" + numNormals + "\nUV1 Coordinates: " + numTexCoord + "\nUV2 Coordinates: " + numTexCoord2 + "\n\nThe import will now attempt to continue.", "ImportModel Warning " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                                }
-
-                                if (numTexCoord2 == 0 && anyTexCoord2Data)
-                                {
-                                    FlexibleMessageBox.Show("The following mesh part has no UV2 Data:\nMesh: " + i + " Part: " + j
-                                        + "\n\nThis has a chance of either crashing TexTools or causing other errors in the import."
-                                        + "\n\nPlease make sure all mesh parts have valid UV2 data."
-                                        + "\n\nThe import will now attempt to continue.", "ImportModel Warning " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                                }
-
-                                if(numBinormals == 0)
-                                {
-                                    FlexibleMessageBox.Show("The following mesh has no Binormal Data:\nMesh: " + i + " Part: " + j
-                                        + "\n\nThis has a chance of either crashing TexTools or causing other errors in the import."
-                                        + "\n\nPlease make sure your OpenCollada Export settings are correct."
-                                        + "\n\nThe import will now attempt to continue.", "ImportModel Warning " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                    FlexibleMessageBox.Show("Number of data elements did not match for the following mesh part:\nMesh: " + i + " Part: " + j
+                                        + "\n\nThis has a chance of either crashing TexTools or causing other errors in the import\n" +
+                                        "\nVertexCount: " + numVerts + 
+                                        "\nNormal Count:" + numNormals + 
+                                        "\nUV1 Coordinates: " + numTexCoord + 
+                                        "\nUV2 Coordinates: " + numTexCoord2 +
+                                        "\nVertex Colors: " + numVertColors +
+                                        "\nUV3 Coordinates (Vertex Alphas): " + numVertAlphas +
+                                        "\n\nThe import will now attempt to continue.", "ImportModel Warning " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                                 }
 
                                 if(maxVert > mDict[c].vertex.Count())
@@ -896,46 +977,52 @@ namespace FFXIV_TexTools2.IO
                                 }
 
 
+                                // Calculate # of indices before altering index stride.
+                                cdDict[i].partsDict.Add(c, mDict[c].index.Count / mDict[c].indexStride);
+
+                                // All meshes should have data for all fields at this point.
+                                // Either the DAE had valid data, or we dummied it up.
+                                
+                                // If the data lengths were mismatched, we at least threw a warning.
+
                                 cdDict[i].vertex.AddRange(mDict[c].vertex);
 						        cdDict[i].normal.AddRange(mDict[c].normal);
 						        cdDict[i].texCoord.AddRange(mDict[c].texCoord);
 						        cdDict[i].texCoord2.AddRange(mDict[c].texCoord2);
 						        cdDict[i].tangent.AddRange(mDict[c].tangent);
 						        cdDict[i].biNormal.AddRange(mDict[c].biNormal);
+                                cdDict[i].vertexColors.AddRange(mDict[c].vertexColors);
+                                cdDict[i].vertexAlphas.AddRange(mDict[c].vertexAlphas);
 
                                 // Rebuild the index list.
-						        for (int k = 0; k < mDict[c].vIndexList.Count; k++)
+                                for (int k = 0; k < mDict[c].vIndexList.Count; k++)
 						        {
-						            cdDict[i].index.Add(mDict[c].vIndexList[k] + vMax);
-						            cdDict[i].index.Add(mDict[c].nIndexList[k] + nMax);
-						            cdDict[i].index.Add(mDict[c].tcIndexList[k] + tcMax);
+						            cdDict[i].index.Add(mDict[c].vIndexList[k] + vMax);     // 0
+						            cdDict[i].index.Add(mDict[c].nIndexList[k] + nMax);     // 1
+						            cdDict[i].index.Add(mDict[c].tcIndexList[k] + tcMax);   // 2
+						            cdDict[i].index.Add(mDict[c].tc2IndexList[k] + tc2Max); // 3
+						            cdDict[i].index.Add(mDict[c].bnIndexList[k] + bnMax);   // 4
+                                    cdDict[i].index.Add(mDict[c].vcIndexList[k] + vcMax);   // 5
+                                    cdDict[i].index.Add(mDict[c].vaIndexList[k] + vaMax);   // 6
+                                }
 
-						            if (mDict[c].texCoord2.Count > 0)
-						            {
-						                cdDict[i].index.Add(mDict[c].tc2IndexList[k] + tc2Max);
-						            }
 
-						            if (mDict[c].biNormal.Count > 0)
-						            {
-						                cdDict[i].index.Add(mDict[c].bnIndexList[k] + bnMax);
-						            }
-						        }
+                                mDict[c].indexStride = 7;
 
-						        vMax += mDict[c].vIndexList.Max() + 1;
+                                vMax += mDict[c].vIndexList.Max() + 1;
 						        nMax += mDict[c].nIndexList.Max() + 1;
 						        tcMax += mDict[c].tcIndexList.Max() + 1;
+                                tc2Max += mDict[c].tc2IndexList.Max() + 1;
+                                bnMax += mDict[c].bnIndexList.Max() + 1;
+                                vcMax += mDict[c].vcIndexList.Max() + 1;
+                                vaMax += mDict[c].vaIndexList.Max() + 1;
 
-						        if (mDict[c].texCoord2.Count > 0)
-						        {
-						            tc2Max += mDict[c].tc2IndexList.Max() + 1;
-						        }
+                                // If there are varied index strides between parts in a mesh
+                                // You're pretty much fucked.
+                                // But that's why the data is dummied up earlier in the code.
+                                // Theoretically all parts should have a stride of 7(?) here.
+                                cdDict[i].indexStride = mDict[c].indexStride;
 
-						        if (mDict[c].biNormal.Count > 0)
-						        {
-						            bnMax += mDict[c].bnIndexList.Max() + 1;
-						        }
-
-						        cdDict[i].partsDict.Add(c, mDict[c].index.Count / mDict[c].indexStride);
 
 						        cdDict[i].weights.AddRange(mDict[c].weights);
 						        cdDict[i].vCount.AddRange(mDict[c].vCount);
@@ -1000,7 +1087,10 @@ namespace FFXIV_TexTools2.IO
 					Vector3Collection Normals = new Vector3Collection();
 					Vector3Collection Tangents = new Vector3Collection();
 					Vector3Collection BiNormals = new Vector3Collection();
-					IntCollection Indices = new IntCollection();
+                    Vector3Collection VertexColors = new Vector3Collection();
+                    Vector2Collection VertexAlphas= new Vector2Collection();
+
+                    IntCollection Indices = new IntCollection();
 					List<byte[]> blendIndices = new List<byte[]>();
 					List<byte[]> blendWeights = new List<byte[]>();
 					List<string> boneStringList = new List<string>();
@@ -1012,7 +1102,10 @@ namespace FFXIV_TexTools2.IO
 					Vector3Collection nNormals = new Vector3Collection();
 					Vector3Collection nTangents = new Vector3Collection();
 					Vector3Collection nBiNormals = new Vector3Collection();
-					List<byte[]> nBlendIndices = new List<byte[]>();
+                    Vector3Collection nVertexColors = new Vector3Collection();
+                    Vector2Collection nVertexAlphas = new Vector2Collection();
+
+                    List<byte[]> nBlendIndices = new List<byte[]>();
 					List<byte[]> nBlendWeights = new List<byte[]>();
 
 					for (int i = 0; i < cd.vertex.Count; i += 3)
@@ -1039,9 +1132,25 @@ namespace FFXIV_TexTools2.IO
 						{
 							Tangents.Add(new SharpDX.Vector3(cd.tangent[i], cd.tangent[i + 1], cd.tangent[i + 2]));
 						}
-					}
+                    }
 
-					for (int i = 0; i < cd.texCoord.Count; i += tcStride)
+                    if (cd.vertexColors.Count > 0)
+                    {
+                        for (int i = 0; i < cd.vertexColors.Count; i += 3)
+                        {
+                            VertexColors.Add(new SharpDX.Vector3(cd.vertexColors[i], cd.vertexColors[i + 1], cd.vertexColors[i + 2]));
+                        }
+                    }
+
+                    if (cd.vertexAlphas.Count > 0)
+                    {
+                        for (int i = 0; i < cd.vertexAlphas.Count; i += tcStride)
+                        {
+                            VertexAlphas.Add(new SharpDX.Vector2(cd.vertexAlphas[i], cd.vertexAlphas[i + 1]));
+                        }
+                    }
+
+                    for (int i = 0; i < cd.texCoord.Count; i += tcStride)
 					{
 						TexCoord.Add(new SharpDX.Vector2(cd.texCoord[i], cd.texCoord[i + 1]));
 					}
@@ -1158,18 +1267,14 @@ namespace FFXIV_TexTools2.IO
 
 
 					List<int[]> iList = new List<int[]>();
-
-					var stride = 5;
+                    
 					var indexMax = 0;
 
-					if (TexCoord2.Count < 1)
-					{
-						stride = 4;
-					}
 
-					for(int i = 0; i < cd.index.Count; i += stride)
+                    // Slice the rebuilt merged index list into per-triangle-index groupings.
+					for(int i = 0; i < cd.index.Count; i += cd.indexStride)
 					{
-						iList.Add(cd.index.GetRange(i, stride).ToArray());
+						iList.Add(cd.index.GetRange(i, cd.indexStride).ToArray());
 					}
 
 					if(cd.index.Count > 0)
@@ -1183,47 +1288,21 @@ namespace FFXIV_TexTools2.IO
 					    {
 					        if (!indexDict.ContainsKey(iList[i][0]))
 					        {
-					            if (!blender)
-					            {
-					                indexDict.Add(iList[i][0], inCount);
-					                nVertex.Add(Vertex[iList[i][0]]);
-					                nBlendIndices.Add(blendIndices[iList[i][0]]);
-					                nBlendWeights.Add(blendWeights[iList[i][0]]);
-					                nNormals.Add(Normals[iList[i][1]]);
-					                nTexCoord.Add(TexCoord[iList[i][2]]);
-					                if (TexCoord2.Count > 0)
-					                {
-					                    nTexCoord2.Add(TexCoord2[iList[i][3]]);
-					                }
+					            indexDict.Add(iList[i][0], inCount);
 
-					                if (nTangents.Count > 0 && TexCoord2.Count > 0)
-					                {
-					                    nTangents.Add(Tangents[iList[i][4]]);
-					                    nBiNormals.Add(BiNormals[iList[i][4]]);
-					                }
-					                else if (nTangents.Count > 0 && TexCoord2.Count < 1)
-					                {
-					                    nTangents.Add(Tangents[iList[i][3]]);
-					                    nBiNormals.Add(BiNormals[iList[i][3]]);
-					                }
-					            }
-					            else
-					            {
-					                indexDict.Add(iList[i][0], inCount);
-					                nVertex.Add(Vertex[iList[i][0]]);
-					                nBlendIndices.Add(blendIndices[iList[i][0]]);
-					                nBlendWeights.Add(blendWeights[iList[i][0]]);
-					                nNormals.Add(Normals[iList[i][0]]);
-					                nTexCoord.Add(TexCoord[iList[i][0]]);
-					                nTexCoord2.Add(TexCoord2[iList[i][0]]);
+                                // All data should be available at this point,
+                                // regardless of original source.
 
-					                if (nTangents.Count > 0)
-					                {
-					                    nTangents.Add(Tangents[iList[i][0]]);
-					                    nBiNormals.Add(BiNormals[iList[i][0]]);
-					                }
-					            }
-
+					            nVertex.Add(Vertex[iList[i][0]]);
+					            nBlendIndices.Add(blendIndices[iList[i][0]]);
+					            nBlendWeights.Add(blendWeights[iList[i][0]]);
+					            nNormals.Add(Normals[iList[i][1]]);
+					            nTexCoord.Add(TexCoord[iList[i][2]]);
+					            nTexCoord2.Add(TexCoord2[iList[i][3]]);
+					            nTangents.Add(Tangents[iList[i][4]]);
+					            nBiNormals.Add(BiNormals[iList[i][4]]);
+                                nVertexColors.Add(VertexColors[iList[i][5]]);
+                                nVertexAlphas.Add(VertexAlphas[iList[i][6]]);
 
 					            inCount++;
 					        }
@@ -1370,6 +1449,13 @@ namespace FFXIV_TexTools2.IO
 					cmd.blendWeights = nBlendWeights;
 					cmd.partsDict = cd.partsDict;
 					cmd.texCoord2 = nTexCoord2;
+                    cmd.vertexColors = nVertexColors;
+
+                    // Go ahead and distill this down into just the single value we care about.
+                    foreach (var uv3Coordinate in nVertexAlphas)
+                    {
+                        cmd.vertexAlphas.Add(uv3Coordinate.X);
+                    }
 
 					cmdList.Add(cmd);
 
@@ -1558,8 +1644,18 @@ namespace FFXIV_TexTools2.IO
 
 					id.dataSet2.Add(tw);
 
-					//Color
-					id.dataSet2.AddRange(BitConverter.GetBytes(4294967295));
+                    //Color
+                    if (cmd.vertexColors.Count > 0)
+                    {
+                        byte a = Convert.ToByte(Math.Round(cmd.vertexAlphas[i] * 255));
+                        byte r = Convert.ToByte(Math.Round(cmd.vertexColors[i].X * 255));
+                        byte g = Convert.ToByte(Math.Round(cmd.vertexColors[i].Y * 255));
+                        byte b = Convert.ToByte(Math.Round(cmd.vertexColors[i].Z * 255));
+                        id.dataSet2.Add(a);
+                        id.dataSet2.Add(r);
+                        id.dataSet2.Add(g);
+                        id.dataSet2.Add(b);
+                    }
 
 					//TexCoord X
 					float x = mg.TextureCoordinates[i].X;
@@ -3583,7 +3679,9 @@ namespace FFXIV_TexTools2.IO
 			public List<float> weights = new List<float>();
 			public List<float> biNormal = new List<float>();
 			public List<float> tangent = new List<float>();
-			public List<int> index = new List<int>();
+            public List<float> vertexColors = new List<float>();
+            public List<float> vertexAlphas = new List<float>();
+            public List<int> index = new List<int>();
 			public List<int> bIndex = new List<int>();
 			public List<int> vCount = new List<int>();
 
@@ -3592,8 +3690,10 @@ namespace FFXIV_TexTools2.IO
 			public List<int> bnIndexList = new List<int>();
 			public List<int> tcIndexList = new List<int>();
 			public List<int> tc2IndexList = new List<int>();
+            public List<int> vcIndexList = new List<int>();
+            public List<int> vaIndexList = new List<int>();
 
-			public Dictionary<int, int> partsDict = new Dictionary<int, int>();
+            public Dictionary<int, int> partsDict = new Dictionary<int, int>();
 		}
 
 		public class ColladaMeshData
@@ -3604,8 +3704,10 @@ namespace FFXIV_TexTools2.IO
 			public List<byte[]> blendWeights = new List<byte[]>();
 			public List<int> handedness = new List<int>();
 			public Vector2Collection texCoord2 = new Vector2Collection();
+            public Vector3Collection vertexColors = new Vector3Collection();
+            public List<float> vertexAlphas = new List<float>();
 
-			public Dictionary<int, int> partsDict = new Dictionary<int, int>();
+            public Dictionary<int, int> partsDict = new Dictionary<int, int>();
 		}
 
 
