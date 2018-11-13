@@ -176,15 +176,17 @@ namespace FFXIV_TexTools2.IO
 				}
 
 				Dictionary<string, string> boneJointDict = new Dictionary<string, string>();
-		   
+
+                string vertc = "-map0-array";
 				string texc = "-map0-array";
-				string texc2 = "-map1-array";
-				string pos = "-positions-array";
+                string texc2 = "-map1-array";
+                string texcBase = "map0";
+                string texc2Base = "map1";
+                string pos = "-positions-array";
 				string norm = "-normals-array";
 				string biNorm = "-texbinormals";
 				string tang = "-textangents";
 				int tcStride = 2;
-				int indStride = 4;
 				bool blender = false;
 
                 Dictionary<string, int> CustomBoneSet = new Dictionary<string, int>();
@@ -274,13 +276,16 @@ namespace FFXIV_TexTools2.IO
 									var tool = reader.ReadElementContentAsString();
 
 									if (tool.Contains("OpenCOLLADA"))
-									{
-										texc = "-map1-array";
+                                    {
+                                        texc = "-map1-array";
 										texc2 = "-map2-array";
 										biNorm = "-map1-texbinormals";
 										tang = "-map1-textangents";
-										tcStride = 3;
-										indStride = 6;
+
+                                        texcBase = "map1";
+                                        texc2Base = "map2";
+
+                                        tcStride = 3;
 									}
 									else if (tool.Contains("FBX"))
 									{
@@ -288,15 +293,20 @@ namespace FFXIV_TexTools2.IO
 										norm = "-normal0-array";
 										texc = "-uv0-array";
 										texc2 = "-uv1-array";
-									}
+
+                                        texcBase = "uv0";
+                                        texc2Base = "uv1";
+                                    }
 									else if (tool.Contains("Exporter for Blender"))
 									{
 										biNorm = "-bitangents-array";
 										tang = "-tangents-array";
 										texc = "-texcoord-0-array";
 										texc2 = "-texcoord-1-array";
-										indStride = 1;
-										blender = true;
+
+                                        texcBase = "texcoord-0";
+                                        texc2Base = "texcoord-1";
+                                        blender = true;
 									}
 									else if (!tool.Contains("TexTools"))
 									{
@@ -332,6 +342,14 @@ namespace FFXIV_TexTools2.IO
 
 
 
+                                    var vertexOffset = -1;
+                                    var normalOffset = -1;
+                                    var texCoord1Offset = -1;
+                                    var texCoord2Offset = -1;
+                                    var vColorOffset = -1;
+                                    var binormalOffset = -1;
+                                    var totalStride = -1;
+
 
 
                                     var meshNum = int.Parse(atr.Substring(atr.LastIndexOf("_") + 1, 1));
@@ -351,70 +369,118 @@ namespace FFXIV_TexTools2.IO
 
 									while (reader.Read())
 									{
-										if (reader.IsStartElement())
-										{
-											if (reader.Name.Contains("float_array"))
-											{
-												//Vertex 
-												if (reader["id"].ToLower().Contains(pos))
-												{
-													cData.vertex.AddRange((float[])reader.ReadElementContentAs(typeof(float[]), null));
-												}
-												//Normals
-												else if (reader["id"].ToLower().Contains(norm) && cData.vertex.Count > 0)
-												{
-													cData.normal.AddRange((float[])reader.ReadElementContentAs(typeof(float[]), null));
-												}
-												//Texture Coordinates
-												else if (reader["id"].ToLower().Contains(texc) && cData.vertex.Count > 0)
-												{
-													cData.texCoord.AddRange((float[])reader.ReadElementContentAs(typeof(float[]), null));
-												}
-												//Texture Coordinates2
-												else if (reader["id"].ToLower().Contains(texc2) && cData.vertex.Count > 0)
-												{
-													cData.texCoord2.AddRange((float[])reader.ReadElementContentAs(typeof(float[]), null));
+                                        if (reader.IsStartElement())
+                                        {
+                                            if (reader.Name.Contains("float_array"))
+                                            {
+                                                //Vertex 
+                                                if (reader["id"].ToLower().Contains(pos))
+                                                {
+                                                    cData.vertex.AddRange((float[])reader.ReadElementContentAs(typeof(float[]), null));
+                                                }
+                                                //Normals
+                                                else if (reader["id"].ToLower().Contains(norm) && cData.vertex.Count > 0)
+                                                {
+                                                    cData.normal.AddRange((float[])reader.ReadElementContentAs(typeof(float[]), null));
+                                                }
+                                                //Texture Coordinates
+                                                else if (reader["id"].ToLower().Contains(texc) && cData.vertex.Count > 0)
+                                                {
+                                                    cData.texCoord.AddRange((float[])reader.ReadElementContentAs(typeof(float[]), null));
+                                                }
+                                                //Texture Coordinates2
+                                                else if (reader["id"].ToLower().Contains(texc2) && cData.vertex.Count > 0)
+                                                {
+                                                    cData.texCoord2.AddRange((float[])reader.ReadElementContentAs(typeof(float[]), null));
                                                     anyTexCoord2Data = true;
                                                 }
-												//Tangents
-												else if (reader["id"].ToLower().Contains(tang) && cData.vertex.Count > 0)
-												{
-													cData.tangent.AddRange((float[])reader.ReadElementContentAs(typeof(float[]), null));
-												}
-												//BiNormals
-												else if (reader["id"].ToLower().Contains(biNorm) && cData.vertex.Count > 0)
-												{
-													cData.biNormal.AddRange((float[])reader.ReadElementContentAs(typeof(float[]), null));
-												}
-											}
-											//Indices
-											if (reader.Name.Equals("p"))
+                                                //Tangents
+                                                else if (reader["id"].ToLower().Contains(tang) && cData.vertex.Count > 0)
+                                                {
+                                                    cData.tangent.AddRange((float[])reader.ReadElementContentAs(typeof(float[]), null));
+                                                }
+                                                //BiNormals
+                                                else if (reader["id"].ToLower().Contains(biNorm) && cData.vertex.Count > 0)
+                                                {
+                                                    cData.biNormal.AddRange((float[])reader.ReadElementContentAs(typeof(float[]), null));
+                                                }
+                                            }
+
+                                            // Triangle Header precedes Index block,
+                                            // And contains all our stride information.
+                                            if (reader.Name.Equals("triangles")) {
+                                                while(reader.Read())
+                                                {
+                                                    if(reader.Name.Equals("input"))
+                                                    {
+                                                        var name = reader.GetAttribute("semantic").ToLower();
+                                                        var source = reader.GetAttribute("source").ToLower();
+                                                        var val = Int32.Parse(reader.GetAttribute("offset"));
+
+                                                        // Make sure we determine the total number of elements
+                                                        // So that we can set our stride properly.
+                                                        if(val >= totalStride)
+                                                        {
+                                                            totalStride = val + 1;
+                                                        }
+
+                                                        // Now, match names.
+                                                        switch(name)
+                                                        {
+                                                            case "vertex":
+                                                                vertexOffset = val;
+                                                                break;
+                                                            case "normal":
+                                                                normalOffset = val;
+                                                                break;
+                                                            case "color":
+                                                                vColorOffset = val;
+                                                                break;
+                                                            case "texcoord":
+                                                                if(source.Contains(texcBase)) {
+                                                                    texCoord1Offset = val;
+                                                                } else if(source.Contains(texc2Base)) {
+                                                                    texCoord2Offset = val;
+                                                                }
+                                                                break;
+                                                            case "texbinormal":
+                                                                if (source.Contains(texcBase))
+                                                                {
+                                                                    binormalOffset = val;
+                                                                }
+                                                                break;
+                                                            default:
+                                                                break;
+                                                        }
+
+                                                    } else if(reader.Name.Equals("p"))
+                                                    {
+                                                        cData.indexStride = totalStride;
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                            
+                                            //Indices
+                                            if (reader.Name.Equals("p"))
 											{
 												cData.index.AddRange((int[])reader.ReadElementContentAs(typeof(int[]), null));
+												
 
-												if (cData.texCoord2.Count < 1 && indStride == 6)
+												for (int i = 0; i < cData.index.Count; i += cData.indexStride)
 												{
-													indStride = 4;
-												}
+													cData.vIndexList.Add(cData.index[i + vertexOffset]);
+													cData.nIndexList.Add(cData.index[i + normalOffset]);
+													cData.tcIndexList.Add(cData.index[i + texCoord1Offset]);
 
-												for (int i = 0; i < cData.index.Count; i += indStride)
-												{
-													cData.vIndexList.Add(cData.index[i]);
-													cData.nIndexList.Add(cData.index[i + 1]);
-													cData.tcIndexList.Add(cData.index[i + 2]);
-
-													if (cData.texCoord2.Count > 0 && indStride == 6)
+													if (texCoord2Offset != -1)
 													{
-														cData.tc2IndexList.Add(cData.index[i + 4]);
-													}
-													else if (cData.texCoord2.Count > 0 && indStride == 4)
-													{
-														cData.tc2IndexList.Add(cData.index[i + 2]);
+														cData.tc2IndexList.Add(cData.index[i + texCoord2Offset]);
 													}
 
-													if (cData.biNormal.Count > 0)
+													if (binormalOffset != -1)
 													{
-														cData.bnIndexList.Add(cData.index[i + 3]);
+														cData.bnIndexList.Add(cData.index[i + binormalOffset]);
 													}
 
 												}
@@ -744,11 +810,6 @@ namespace FFXIV_TexTools2.IO
 						            c++;
                                 }
 
-                                if (mDict[c].texCoord2.Count < 1 && indStride == 6)
-                                {
-                                    indStride = 4;
-                                }
-
                                 /* Error Checking */
                                 int numVerts = mDict[c].vIndexList.Count / 3;
                                 int maxVert = numVerts == 0 ? 0 : mDict[c].vIndexList.Max();
@@ -858,7 +919,7 @@ namespace FFXIV_TexTools2.IO
 						            bnMax += mDict[c].bnIndexList.Max() + 1;
 						        }
 
-						        cdDict[i].partsDict.Add(c, mDict[c].index.Count / indStride);
+						        cdDict[i].partsDict.Add(c, mDict[c].index.Count / mDict[c].indexStride);
 
 						        cdDict[i].weights.AddRange(mDict[c].weights);
 						        cdDict[i].vCount.AddRange(mDict[c].vCount);
@@ -3497,6 +3558,7 @@ namespace FFXIV_TexTools2.IO
 		public class ColladaData
 		{
 			public string[] bones;
+            public int indexStride;
 
 			public List<float> vertex = new List<float>();
 			public List<float> normal = new List<float>();
