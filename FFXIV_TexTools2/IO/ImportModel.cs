@@ -409,6 +409,15 @@ namespace FFXIV_TexTools2.IO
                                             // Triangle Header precedes Index block,
                                             // And contains all our stride information.
                                             if (reader.Name.Equals("triangles")) {
+
+                                                // At this point we've read all of our original basic data, 
+                                                // so time to massage the data if the data sucks.
+                                                if(cData.texCoord2.Count == 0)
+                                                {
+                                                    // If we have no TexCoord2 data, just clone the TexCoord 1 data.
+                                                    cData.texCoord2.AddRange(cData.texCoord);
+                                                }
+
                                                 while(reader.Read())
                                                 {
                                                     if(reader.Name.Equals("input"))
@@ -485,7 +494,13 @@ namespace FFXIV_TexTools2.IO
 
 												}
 
-												break;
+                                                if (cData.tc2IndexList.Count == 0)
+                                                {
+                                                    // If we have no Tex2 Indices, clone the Tex1 Indexes (Code above copied in the Tex1 data).
+                                                    cData.tc2IndexList.AddRange(cData.tcIndexList);
+                                                }
+
+                                                break;
 											}
 										}
 									}
@@ -888,6 +903,7 @@ namespace FFXIV_TexTools2.IO
 						        cdDict[i].tangent.AddRange(mDict[c].tangent);
 						        cdDict[i].biNormal.AddRange(mDict[c].biNormal);
 
+                                // Rebuild the index list.
 						        for (int k = 0; k < mDict[c].vIndexList.Count; k++)
 						        {
 						            cdDict[i].index.Add(mDict[c].vIndexList[k] + vMax);
