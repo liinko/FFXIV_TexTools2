@@ -81,6 +81,7 @@
             <MenuItem Header="Mod Repos">
                 <MenuItem x:Name="PKEmporium" Header="PrettyKitty Emporium" Click="PKEmporium_Click"/>
                 <MenuItem x:Name="NexusMods" Header="Nexus Mods" Click="NexusMods_Click"/>
+                <MenuItem x:Name="XMArchive" Header="XIV Mod Archive" Click="XMArchive_Click"/>
             </MenuItem>
         </Menu>
         <Button Content="Join us on Discord!" VerticalAlignment="Top" HorizontalAlignment="Right" BorderBrush="{x:Null}" Background="{x:Null}" Click="Menu_Discord_Click">

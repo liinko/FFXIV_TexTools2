@@ -493,6 +493,11 @@ namespace FFXIV_TexTools2
             Process.Start("https://www.nexusmods.com/finalfantasy14");
 
         }
+        private void XMArchive_Click(object sender, RoutedEventArgs e)
+        {
+            Process.Start("https://www.xivmodarchive.com/");
+
+        }
 
         private void Menu_MakeModpack_Click(object sender, RoutedEventArgs e)
         {
