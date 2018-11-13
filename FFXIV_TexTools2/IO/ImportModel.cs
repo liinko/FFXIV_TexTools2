@@ -107,7 +107,6 @@ namespace FFXIV_TexTools2.IO
 
             importSettings = settings;
             var numMeshes = modelData.LoD[0].MeshCount;
-            modelData.Bones.Clear();
 
             var savePath = Properties.Settings.Default.Save_Directory + "/" + category + "/" + itemName + "/3D/" + modelName + ".DAE";
 
@@ -264,10 +263,10 @@ namespace FFXIV_TexTools2.IO
                 }
                 else
                 {
-                    //for (int i = 0; i < modelData.Bones.Count; i++)
-                    //{
-                        //CustomBoneSet.Add(modelData.Bones[i], i);
-                    //}
+                    for (int i = 0; i < modelData.Bones.Count; i++)
+                    {
+                        CustomBoneSet.Add(modelData.Bones[i], i);
+                    }
                 }
 
 				try
@@ -284,16 +283,18 @@ namespace FFXIV_TexTools2.IO
 
 									if (tool.Contains("OpenCOLLADA"))
                                     {
+                                        vcol = "-map0-array";
                                         texc = "-map1-array";
 										texc2 = "-map2-array";
-                                        vcol = "-map0-array";
                                         valpha = "-map3-array";
 
                                         biNorm = "-map1-texbinormals";
 										tang = "-map1-textangents";
 
+                                        vcolBase = "map0";
                                         texcBase = "map1";
                                         texc2Base = "map2";
+                                        valphaBase = "map3";
 
                                         tcStride = 3;
 									}
@@ -818,12 +819,12 @@ namespace FFXIV_TexTools2.IO
                         return;
                     }
 
-                    //boneString = "";
-                    //foreach( string bone in extraBones )
-                    //{
-                    //    boneString += bone + " ";
-                    //}
-                    //FlexibleMessageBox.Show("Bones not originally in this item were detected; TexTools will attempt to add them to the item.\n Bone(s): " + boneString, "ImportModel Notification " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    var boneString = "";
+                    foreach( string bone in extraBones )
+                    {
+                        boneString += bone + " ";
+                    }
+                    FlexibleMessageBox.Show("Bones not originally in this item were detected; TexTools will attempt to add them to the item.\n Bone(s): " + boneString, "ImportModel Notification " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
 
                 if (!importSettings[Strings.All].UseOriginalBones)
@@ -835,11 +836,15 @@ namespace FFXIV_TexTools2.IO
                         FlexibleMessageBox.Show("Item exceeds 64 Bone Limit.\nImport with 'Use Original Bones', or reduce bone count below 64.\n\nThe import has been cancelled.", "ImportModel Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         return;
                     }
-                    //int originalBonesLength = modelData.Bones.Count;
+
+                    int originalBonesLength = modelData.Bones.Count;
                     for (int i = 0; i < CustomBoneSet.Count; i++)
                     {
                         // Add the extra bones into the bonestrings list.
-                        modelData.Bones.Add(extraBones[i]);
+                        if (i >= modelData.Bones.Count)
+                        {
+                            modelData.Bones.Add(extraBones[i - originalBonesLength]);
+                        }
                         modelData.BoneSet[0].BoneData[i] = i;
                     }
                 }
@@ -976,9 +981,7 @@ namespace FFXIV_TexTools2.IO
                                         + "\n\nThe import will now attempt to continue.", "ImportModel Warning " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                                 }
 
-
-                                // Calculate # of indices before altering index stride.
-                                cdDict[i].partsDict.Add(c, mDict[c].index.Count / mDict[c].indexStride);
+                                
 
                                 // All meshes should have data for all fields at this point.
                                 // Either the DAE had valid data, or we dummied it up.
@@ -1007,6 +1010,7 @@ namespace FFXIV_TexTools2.IO
                                 }
 
 
+                                cdDict[i].partsDict.Add(c, mDict[c].vIndexList.Count);
                                 mDict[c].indexStride = 7;
 
                                 vMax += mDict[c].vIndexList.Max() + 1;
@@ -1645,20 +1649,21 @@ namespace FFXIV_TexTools2.IO
 					id.dataSet2.Add(tw);
 
                     //Color
-                    if (cmd.vertexColors.Count > 0)
-                    {
-                        byte a = Convert.ToByte(Math.Round(cmd.vertexAlphas[i] * 255));
-                        byte r = Convert.ToByte(Math.Round(cmd.vertexColors[i].X * 255));
-                        byte g = Convert.ToByte(Math.Round(cmd.vertexColors[i].Y * 255));
-                        byte b = Convert.ToByte(Math.Round(cmd.vertexColors[i].Z * 255));
-                        id.dataSet2.Add(a);
-                        id.dataSet2.Add(r);
-                        id.dataSet2.Add(g);
-                        id.dataSet2.Add(b);
-                    }
+                    byte r = Convert.ToByte(Math.Round(cmd.vertexColors[i].X * 255));
+                    byte g = Convert.ToByte(Math.Round(cmd.vertexColors[i].Y * 255));
+                    byte b = Convert.ToByte(Math.Round(cmd.vertexColors[i].Z * 255));
+                    byte a = Convert.ToByte(Math.Round(cmd.vertexAlphas[i] * 255));
+                    id.dataSet2.Add(r);
+                    id.dataSet2.Add(g);
+                    id.dataSet2.Add(b);
+                    id.dataSet2.Add(a);
+                    //id.dataSet2.Add(255);
+                    //id.dataSet2.Add(255);
+                    //id.dataSet2.Add(255);
+                    //id.dataSet2.Add(255);
 
-					//TexCoord X
-					float x = mg.TextureCoordinates[i].X;
+                    //TexCoord X
+                    float x = mg.TextureCoordinates[i].X;
 					id.dataSet2.AddRange(BitConverter.GetBytes(x));
 
 					//TexCoord Y
@@ -3223,7 +3228,39 @@ namespace FFXIV_TexTools2.IO
 
                         if (newMeshHidingDataCount > 0)
                         {
-                            importDict[extraLoc].dataSet1.AddRange(maskVerts);
+
+                            if (type.Equals("weapon") || type.Equals("monster") || meshInfo.VertexSizes[0] != 20)
+                            {
+                                importDict[extraLoc].dataSet1.AddRange(maskVerts);
+                            } else
+                            {
+                                // This Data is 
+                                // 12 bytes of vertex position ( float x 3 )
+                                // 4 bytes of bone weights ( byte x 4 )
+                                // 4 bytes of bone indices ( byte x 4 )
+
+                                // To *correctly* port this data, we need to identify 
+                                // Which bone we used to reference,
+                                // and then which new bone we should reference after
+                                // altering the bone list.
+                                for(var idx = 0; idx < extraVerts; idx++)
+                                {
+                                    var extraVertOffset = idx * meshInfo.VertexSizes[0];
+                                    
+                                    // The first 16 bytes are the same.
+                                    importDict[extraLoc].dataSet1.AddRange(maskVerts.Skip(20 * idx).Take(16));
+
+                                    // The bone indices may need to be changed...
+                                    // This is probably too complex of a task currently 
+                                    // to do in this update (1.9.8.5)
+                                    for(var i = 0; i < 4; i++)
+                                    {
+                                        var oldBoneIndex = maskVerts[16 + i];
+                                        importDict[extraLoc].dataSet1.Add(oldBoneIndex);
+                                    }
+                                }
+
+                            }
                         }
 
 						br.ReadBytes(baseVertsToRead * meshInfo.VertexSizes[1]);

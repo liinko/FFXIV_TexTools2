@@ -1419,7 +1419,7 @@ namespace FFXIV_TexTools2.IO
                             xmlWriter.WriteStartElement("accessor");
                             xmlWriter.WriteAttributeString("source", "#geom-" + modelName + "_" + i + partString + "-col0-array");
                             xmlWriter.WriteAttributeString("count", totalCount.ToString());
-                            xmlWriter.WriteAttributeString("stride", "4");
+                            xmlWriter.WriteAttributeString("stride", "3");
 
                             //<param>
                             xmlWriter.WriteStartElement("param");
@@ -1568,7 +1568,7 @@ namespace FFXIV_TexTools2.IO
 
                             /*
                              * --------------------
-                             * Vertex Opacity - UV Work-Around
+                             * Vertex Alpha - UV Work-Around
                              * --------------------
                              */
 

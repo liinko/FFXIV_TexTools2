@@ -992,10 +992,10 @@ namespace FFXIV_TexTools2.Material
                             {
                                 br1.BaseStream.Seek(j * mesh.MeshInfo.VertexSizes[meshDataInfoList[colors].VertexDataBlock] + meshDataInfoList[colors].Offset, SeekOrigin.Begin);
 
-                                int a = br1.ReadByte();
                                 int r = br1.ReadByte();
                                 int g = br1.ReadByte();
                                 int b = br1.ReadByte();
+                                int a = br1.ReadByte();
 
                                 colorsList.Add(new Color4(r, g, b, a));
                             }
