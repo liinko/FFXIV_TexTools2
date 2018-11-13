@@ -454,7 +454,9 @@ namespace FFXIV_TexTools2.IO
 
                                                 if (cData.vertexColors.Count == 0)
                                                 {
-                                                    // If we have no VertexColor data, just add a single 1.0 value for everything.
+                                                    // If we have no VertexColor data, just add a 1.0 value for everything.
+                                                    cData.vertexColors.Add(1.0f);
+                                                    cData.vertexColors.Add(1.0f);
                                                     cData.vertexColors.Add(1.0f);
                                                 }
 
@@ -462,6 +464,11 @@ namespace FFXIV_TexTools2.IO
                                                 {
                                                     // If we have no VertexColor data, just add a single 1.0 value for everything.
                                                     cData.vertexAlphas.Add(1.0f);
+                                                    cData.vertexAlphas.Add(0.0f);
+                                                    if (tcStride == 3)
+                                                    {
+                                                        cData.vertexAlphas.Add(0.0f);
+                                                    }
                                                 }
 
                                                 while (reader.Read())
@@ -561,21 +568,23 @@ namespace FFXIV_TexTools2.IO
                                                     // If we have no Tex2 Indices, clone the Tex1 Indexes (Code above copied in the Tex1 data).
                                                     cData.tc2IndexList.AddRange(cData.tcIndexList);
                                                 }
+
                                                 if (cData.vcIndexList.Count == 0)
                                                 {
                                                     // If we have no Vertex Color Indices, initialize and set them to 0.
-                                                    var arr = new List<int>(cData.tcIndexList.Count);
-                                                    foreach(var idx in cData.tcIndexList)
+                                                    var arr = new List<int>(cData.vIndexList.Count);
+                                                    foreach(var idx in cData.vIndexList)
                                                     {
                                                         arr.Add(0);
                                                     }
                                                     cData.vcIndexList.AddRange(arr);
                                                 }
+
                                                 if (cData.vaIndexList.Count == 0)
                                                 {
                                                     // If we have no Vertex Alpha Indices, initialize and set them to 0.
-                                                    var arr = new List<int>(cData.tcIndexList.Count);
-                                                    foreach (var idx in cData.tcIndexList)
+                                                    var arr = new List<int>(cData.vIndexList.Count);
+                                                    foreach (var idx in cData.vIndexList)
                                                     {
                                                         arr.Add(0);
                                                     }
@@ -1122,36 +1131,24 @@ namespace FFXIV_TexTools2.IO
 						Normals.Add(new SharpDX.Vector3(cd.normal[i], cd.normal[i + 1], cd.normal[i + 2]));
 					}
 
-					if(cd.biNormal.Count > 0)
+					for (int i = 0; i < cd.biNormal.Count; i += 3)
 					{
-						for (int i = 0; i < cd.biNormal.Count; i += 3)
-						{
-							BiNormals.Add(new SharpDX.Vector3(cd.biNormal[i], cd.biNormal[i + 1], cd.biNormal[i + 2]));
-						}
+						BiNormals.Add(new SharpDX.Vector3(cd.biNormal[i], cd.biNormal[i + 1], cd.biNormal[i + 2]));
 					}
 
-					if (cd.tangent.Count > 0)
+					for (int i = 0; i < cd.tangent.Count; i += 3)
 					{
-						for (int i = 0; i < cd.tangent.Count; i += 3)
-						{
-							Tangents.Add(new SharpDX.Vector3(cd.tangent[i], cd.tangent[i + 1], cd.tangent[i + 2]));
-						}
+						Tangents.Add(new SharpDX.Vector3(cd.tangent[i], cd.tangent[i + 1], cd.tangent[i + 2]));
+					}
+
+                    for (int i = 0; i < cd.vertexColors.Count; i += 3)
+                    {
+                        VertexColors.Add(new SharpDX.Vector3(cd.vertexColors[i], cd.vertexColors[i + 1], cd.vertexColors[i + 2]));
                     }
 
-                    if (cd.vertexColors.Count > 0)
+                    for (int i = 0; i < cd.vertexAlphas.Count; i += tcStride)
                     {
-                        for (int i = 0; i < cd.vertexColors.Count; i += 3)
-                        {
-                            VertexColors.Add(new SharpDX.Vector3(cd.vertexColors[i], cd.vertexColors[i + 1], cd.vertexColors[i + 2]));
-                        }
-                    }
-
-                    if (cd.vertexAlphas.Count > 0)
-                    {
-                        for (int i = 0; i < cd.vertexAlphas.Count; i += tcStride)
-                        {
-                            VertexAlphas.Add(new SharpDX.Vector2(cd.vertexAlphas[i], cd.vertexAlphas[i + 1]));
-                        }
+                        VertexAlphas.Add(new SharpDX.Vector2(cd.vertexAlphas[i], cd.vertexAlphas[i + 1]));
                     }
 
                     for (int i = 0; i < cd.texCoord.Count; i += tcStride)

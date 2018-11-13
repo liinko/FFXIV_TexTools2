@@ -1784,6 +1784,7 @@ namespace FFXIV_TexTools2.IO
                             xmlWriter.WriteAttributeString("semantic", "COLOR");
                             xmlWriter.WriteAttributeString("source", "#geom-" + modelName + "_" + i + partString + "-col0");
                             xmlWriter.WriteAttributeString("offset", "2");
+                            xmlWriter.WriteAttributeString("set", "0");
                             xmlWriter.WriteEndElement();
                             //</input>
 
@@ -1792,7 +1793,7 @@ namespace FFXIV_TexTools2.IO
                             xmlWriter.WriteAttributeString("semantic", "TEXCOORD");
                             xmlWriter.WriteAttributeString("source", "#geom-" + modelName + "_" + i + partString + "-map0");
                             xmlWriter.WriteAttributeString("offset", "2");
-                            xmlWriter.WriteAttributeString("set", "0");
+                            xmlWriter.WriteAttributeString("set", "1");
                             xmlWriter.WriteEndElement();
                             //</input>
 
@@ -1801,7 +1802,7 @@ namespace FFXIV_TexTools2.IO
                             xmlWriter.WriteAttributeString("semantic", "TEXCOORD");
                             xmlWriter.WriteAttributeString("source", "#geom-" + modelName + "_" + i + partString + "-map1");
                             xmlWriter.WriteAttributeString("offset", "2");
-                            xmlWriter.WriteAttributeString("set", "1");
+                            xmlWriter.WriteAttributeString("set", "2");
                             xmlWriter.WriteEndElement();
                             //</input>
 
@@ -1810,6 +1811,7 @@ namespace FFXIV_TexTools2.IO
                             xmlWriter.WriteAttributeString("semantic", "TEXCOORD");
                             xmlWriter.WriteAttributeString("source", "#geom-" + modelName + "_" + i + partString + "-map2");
                             xmlWriter.WriteAttributeString("offset", "2");
+                            xmlWriter.WriteAttributeString("set", "3");
                             xmlWriter.WriteEndElement();
                             //</input>
 
