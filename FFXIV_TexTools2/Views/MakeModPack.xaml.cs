@@ -217,7 +217,7 @@ namespace FFXIV_TexTools2.Views
         /// <returns>The texture map name</returns>
         private static string GetMapName(string fileName)
         {
-            if (fileName.Contains("_s.tex"))
+            if (fileName.Contains("_s.tex") || fileName.Contains("skin_m"))
             {
                 return Strings.Specular;
             }
@@ -231,14 +231,7 @@ namespace FFXIV_TexTools2.Views
             }
             else if (fileName.Contains("_m.tex"))
             {
-                if (fileName.Contains("skin"))
-                {
-                    return Strings.Skin;
-                }
-                else
-                {
-                    return Strings.Mask;
-                }
+                return Strings.Mask;
             }
             else if (fileName.Contains(".atex"))
             {
