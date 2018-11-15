@@ -603,7 +603,7 @@ namespace FFXIV_TexTools2.Views
                         {
                             foreach (var part in broken)
                             {
-                              if(!x.Name.ToLower().Contains(part))
+                              if(!x.Name.ToLower().Contains(part.ToLower().Trim()))
                                 {
                                     return false;
                                 }
