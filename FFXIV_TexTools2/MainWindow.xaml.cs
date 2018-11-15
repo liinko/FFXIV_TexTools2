@@ -45,6 +45,7 @@ namespace FFXIV_TexTools2
         public MainWindow()
         {
             InitializeComponent();
+            searchBox.Focus();
             mViewModel = new MainViewModel();
             this.DataContext = mViewModel;
 
