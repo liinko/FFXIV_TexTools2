@@ -28,6 +28,7 @@ namespace FFXIV_TexTools2.Views
         {
             InitializeComponent();
             this.DataContext = new ModelSearchViewModel(parent);
+            SearchBox.Focus();
         }
     }
 }
