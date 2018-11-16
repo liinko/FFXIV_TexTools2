@@ -638,7 +638,7 @@ namespace FFXIV_TexTools2.IO
             else
             {
                 var fileLength = new FileInfo(modDatPath).Length;
-                while (fileLength >= 2000000000)
+                while (fileLength + data.Count >= 2000000000)
                 {
                     datNum += 1;
                     modDatPath = string.Format(Info.datDir, datName, datNum);

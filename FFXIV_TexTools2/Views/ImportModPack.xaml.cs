@@ -231,7 +231,7 @@ namespace FFXIV_TexTools2.Views
 
         private ModPackJson deserializeModPackJsonLine(string line) {
             var data = JsonConvert.DeserializeObject<ModPackJson>(line);
-            data.ModOffset = (uint)data.ModOffset;
+            data.ModOffset = data.ModOffset;
             return data;
         }
 
@@ -442,6 +442,7 @@ namespace FFXIV_TexTools2.Views
 
                                         foreach (var mpi in pack)
                                         {
+
                                             currentImport = mpi.Name + "....";
                                             backgroundWorker.ReportProgress((int)((i / packListCount) * 100), currentImport);
 
@@ -470,14 +471,16 @@ namespace FFXIV_TexTools2.Views
                                                     }
                                                     lineNum++;
                                                 }
+                                                
 
+                                                
 
                                                 var datNum = int.Parse(Info.ModDatDict[mpi.mEntry.DatFile]);
 
                                                 var modDatPath = string.Format(Info.datDir, mpi.mEntry.DatFile, datNum);
 
                                                 var fileLength = new FileInfo(modDatPath).Length;
-                                                while (fileLength >= 2000000000)
+                                                while (fileLength + mpi.mEntry.ModSize >= 2000000000)
                                                 {
                                                     datNum += 1;
                                                     modDatPath = string.Format(Info.datDir, mpi.mEntry.DatFile, datNum);
@@ -613,7 +616,6 @@ namespace FFXIV_TexTools2.Views
 
                                 }
                             }
-                    
                             stream.Dispose();
                             stream.Close();
                         }
