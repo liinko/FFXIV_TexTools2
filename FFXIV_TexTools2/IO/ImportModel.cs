@@ -368,7 +368,7 @@ namespace FFXIV_TexTools2.IO
 
                                     var meshNum = int.Parse(atr.Substring(atr.LastIndexOf("_") + 1, 1));
 
-									if (atr.Contains("."))
+                                    if (atr.Contains("."))
 									{
                                         try
                                         {
@@ -377,7 +377,7 @@ namespace FFXIV_TexTools2.IO
                                         {
 
                                         }
-									}
+                                    }
 
 									var cData = new ColladaData();
 
@@ -982,7 +982,6 @@ namespace FFXIV_TexTools2.IO
                                         + "\n\nThe import will now attempt to continue.", "ImportModel Warning " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                                 }
 
-
                                 if (maxTexCoord2 > mDict[c].texCoord2.Count())
                                 {
                                     FlexibleMessageBox.Show("The following mesh part references UV2 Data which does not exist in the file:\nMesh: " + i + " Part: " + j
@@ -990,21 +989,39 @@ namespace FFXIV_TexTools2.IO
                                         + "\n\nThe import will now attempt to continue.", "ImportModel Warning " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                                 }
 
-                                
+                                if (maxVertColor > mDict[c].vertexColors.Count())
+                                {
+                                    FlexibleMessageBox.Show("The following mesh part references Vertex Color Data which does not exist in the file:\nMesh: " + i + " Part: " + j
+                                        + "\n\nThis has a chance of either crashing TexTools or causing other errors in the import."
+                                        + "\n\nThe import will now attempt to continue.", "ImportModel Warning " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                }
+
+                                if (maxVertAlpha > mDict[c].vertexAlphas.Count())
+                                {
+                                    FlexibleMessageBox.Show("The following mesh part references Vertex Alpha(UV3) Data which does not exist in the file:\nMesh: " + i + " Part: " + j
+                                        + "\n\nThis has a chance of either crashing TexTools or causing other errors in the import."
+                                        + "\n\nThe import will now attempt to continue.", "ImportModel Warning " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                }
+
+
+
 
                                 // All meshes should have data for all fields at this point.
                                 // Either the DAE had valid data, or we dummied it up.
-                                
+
                                 // If the data lengths were mismatched, we at least threw a warning.
 
-                                cdDict[i].vertex.AddRange(mDict[c].vertex);
-						        cdDict[i].normal.AddRange(mDict[c].normal);
-						        cdDict[i].texCoord.AddRange(mDict[c].texCoord);
-						        cdDict[i].texCoord2.AddRange(mDict[c].texCoord2);
-						        cdDict[i].tangent.AddRange(mDict[c].tangent);
-						        cdDict[i].biNormal.AddRange(mDict[c].biNormal);
-                                cdDict[i].vertexColors.AddRange(mDict[c].vertexColors);
-                                cdDict[i].vertexAlphas.AddRange(mDict[c].vertexAlphas);
+                                // Appropriate amount of values is 
+                                // ( [ Highest reference from indices ] + 1 )* [ entries per index ] ) + 
+
+                                cdDict[i].vertex.AddRange(mDict[c].vertex.Take((mDict[c].vIndexList.Max() + 1) * 3 ));
+						        cdDict[i].normal.AddRange(mDict[c].normal.Take((mDict[c].nIndexList.Max() + 1) * 3));
+						        cdDict[i].texCoord.AddRange(mDict[c].texCoord.Take((mDict[c].tcIndexList.Max() + 1) * tcStride ));
+						        cdDict[i].texCoord2.AddRange(mDict[c].texCoord2.Take((mDict[c].tc2IndexList.Max() + 1) * tcStride ));
+						        cdDict[i].tangent.AddRange(mDict[c].tangent.Take((mDict[c].bnIndexList.Max() + 1) * 3));
+						        cdDict[i].biNormal.AddRange(mDict[c].biNormal.Take((mDict[c].bnIndexList.Max() + 1) * 3));
+                                cdDict[i].vertexColors.AddRange(mDict[c].vertexColors.Take((mDict[c].vcIndexList.Max() + 1) * 3));
+                                cdDict[i].vertexAlphas.AddRange(mDict[c].vertexAlphas.Take((mDict[c].vaIndexList.Max() + 1) * tcStride ));
 
                                 // Rebuild the index list.
                                 for (int k = 0; k < mDict[c].vIndexList.Count; k++)
