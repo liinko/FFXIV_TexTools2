@@ -1278,8 +1278,6 @@ namespace FFXIV_TexTools2.IO
 
 					var extraVertDict = modelData.LoD[0].MeshList[m].extraVertDict;
 
-					Dictionary<int, int> indexDict = new Dictionary<int, int>();
-					var inCount = 0;
 
 					List<int> handedness = new List<int>();
 
@@ -1304,13 +1302,13 @@ namespace FFXIV_TexTools2.IO
 					{
 					    try
 					    {
-					        if (!indexDict.ContainsKey(iList[i][0]))
-					        {
-					            indexDict.Add(iList[i][0], inCount);
+					        //if (!indexDict.ContainsKey(iList[i][0]))
+					        //{
 
                                 // All data should be available at this point,
                                 // regardless of original source.
 
+                                // Build value-lists in the order we need them?
 					            nVertex.Add(Vertex[iList[i][0]]);
 					            nBlendIndices.Add(blendIndices[iList[i][0]]);
 					            nBlendWeights.Add(blendWeights[iList[i][0]]);
@@ -1322,8 +1320,7 @@ namespace FFXIV_TexTools2.IO
                                 nVertexColors.Add(VertexColors[iList[i][5]]);
                                 nVertexAlphas.Add(VertexAlphas[iList[i][6]]);
 
-					            inCount++;
-					        }
+					        //}
 					    }
 					    catch (Exception e)
 					    {
@@ -1342,8 +1339,8 @@ namespace FFXIV_TexTools2.IO
 					{
 					    try
 					    {
-					        var nIndex = indexDict[iList[i][0]];
-					        Indices.Add(nIndex);
+					        //var nIndex = indexDict[iList[i][0]];
+					        Indices.Add(i);
 					    }
 					    catch (Exception e)
 					    {
@@ -1417,8 +1414,8 @@ namespace FFXIV_TexTools2.IO
 					//    mg.Tangents = Tangents;
 					//}
 
-					SharpDX.Vector3[] tangents = new SharpDX.Vector3[Vertex.Count];
-					SharpDX.Vector3[] bitangents = new SharpDX.Vector3[Vertex.Count];
+					SharpDX.Vector3[] tangents = new SharpDX.Vector3[Indices.Count];
+					SharpDX.Vector3[] bitangents = new SharpDX.Vector3[Indices.Count];
 					for (int a = 0; a < Indices.Count; a += 3)
 					{
 						int idx1 = Indices[a];
@@ -1453,7 +1450,7 @@ namespace FFXIV_TexTools2.IO
 
 					float d;
 					SharpDX.Vector3 tmpt;
-					for (int a = 0; a < nVertex.Count; ++a)
+					for (int a = 0; a < Indices.Count; ++a)
 					{
 						SharpDX.Vector3 n = SharpDX.Vector3.Normalize(nNormals[a]);
 						SharpDX.Vector3 t = SharpDX.Vector3.Normalize(tangents[a]);
