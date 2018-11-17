@@ -1111,14 +1111,12 @@ namespace FFXIV_TexTools2.IO
 
 					ColladaMeshData cmd = new ColladaMeshData();
 
-					Vector3Collection Vertex = new Vector3Collection();
-					Vector2Collection TexCoord = new Vector2Collection();
-					Vector2Collection TexCoord2 = new Vector2Collection();
-					Vector3Collection Normals = new Vector3Collection();
-					Vector3Collection Tangents = new Vector3Collection();
-					Vector3Collection BiNormals = new Vector3Collection();
-                    Vector3Collection VertexColors = new Vector3Collection();
-                    Vector2Collection VertexAlphas= new Vector2Collection();
+					Vector3Collection Vertex = new Vector3Collection(cd.vertex.Count / 3);
+					Vector2Collection TexCoord = new Vector2Collection(cd.texCoord.Count / tcStride);
+					Vector2Collection TexCoord2 = new Vector2Collection(cd.texCoord2.Count / tcStride);
+					Vector3Collection Normals = new Vector3Collection(cd.normal.Count / 3);
+                    Vector3Collection VertexColors = new Vector3Collection(cd.vertexColors.Count / 3);
+                    Vector2Collection VertexAlphas= new Vector2Collection(cd.vertexAlphas.Count / tcStride);
 
                     IntCollection Indices = new IntCollection();
 					List<byte[]> blendIndices = new List<byte[]>();
@@ -1126,14 +1124,12 @@ namespace FFXIV_TexTools2.IO
 					List<string> boneStringList = new List<string>();
 
 
-					Vector3Collection nVertex = new Vector3Collection();
-					Vector2Collection nTexCoord = new Vector2Collection();
-					Vector2Collection nTexCoord2 = new Vector2Collection();
-					Vector3Collection nNormals = new Vector3Collection();
-					Vector3Collection nTangents = new Vector3Collection();
-					Vector3Collection nBiNormals = new Vector3Collection();
-                    Vector3Collection nVertexColors = new Vector3Collection();
-                    Vector2Collection nVertexAlphas = new Vector2Collection();
+					Vector3Collection nVertex = new Vector3Collection(cd.vertex.Count / 3);
+					Vector2Collection nTexCoord = new Vector2Collection(cd.texCoord.Count / tcStride);
+					Vector2Collection nTexCoord2 = new Vector2Collection(cd.texCoord2.Count / tcStride);
+					Vector3Collection nNormals = new Vector3Collection(cd.normal.Count / 3);
+                    Vector3Collection nVertexColors = new Vector3Collection(cd.vertexColors.Count / 3);
+                    Vector2Collection nVertexAlphas = new Vector2Collection(cd.vertexAlphas.Count / tcStride);
 
                     List<byte[]> nBlendIndices = new List<byte[]>();
 					List<byte[]> nBlendWeights = new List<byte[]>();
@@ -1146,16 +1142,6 @@ namespace FFXIV_TexTools2.IO
 					for (int i = 0; i < cd.normal.Count; i += 3)
 					{
 						Normals.Add(new SharpDX.Vector3(cd.normal[i], cd.normal[i + 1], cd.normal[i + 2]));
-					}
-
-					for (int i = 0; i < cd.biNormal.Count; i += 3)
-					{
-						BiNormals.Add(new SharpDX.Vector3(cd.biNormal[i], cd.biNormal[i + 1], cd.biNormal[i + 2]));
-					}
-
-					for (int i = 0; i < cd.tangent.Count; i += 3)
-					{
-						Tangents.Add(new SharpDX.Vector3(cd.tangent[i], cd.tangent[i + 1], cd.tangent[i + 2]));
 					}
 
                     for (int i = 0; i < cd.vertexColors.Count; i += 3)
@@ -1298,29 +1284,56 @@ namespace FFXIV_TexTools2.IO
 						indexMax = cd.index.Max();
 					}
 
+                    // Index Dictionary; This essentially becomes our
+                    // Final index list.  [Index Order, Index Id Pointer]
+                    var indexDict = new Dictionary<int, int>(iList.Count / 2);  // Start these allocated with a reasonable amount of data
+                    var uniquesList = new List<int[]>(iList.Count / 2);         // To avoid constant reallocation.
+                    var uniqueCount = 0;
+
 					for (int i = 0; i < iList.Count; i++)
 					{
 					    try
 					    {
-					        //if (!indexDict.ContainsKey(iList[i][0]))
-					        //{
+                            var targetIndex = uniqueCount;
+                            var listEntry = iList[i];
 
+                            // Scan the entries we've already made to see if any match us.
+                            for(var z = 0; z < uniqueCount; z++)
+                            {
+                                var targetEntry = uniquesList[z];
+
+                                // We only really care about matching on position, normal, and UV1/2
+                                if(listEntry[0] == targetEntry[0]
+                                    && listEntry[1] == targetEntry[1]
+                                    && listEntry[2] == targetEntry[2]
+                                    && listEntry[3] == targetEntry[3])
+                                {
+                                    targetIndex = z;
+                                    break;
+                                }
+                            }
+
+
+                            // We didn't find a suitable index to match with, so we have to add 
+                            // the data in and claim a new index number.
+                            if (targetIndex == uniqueCount)
+                            {
                                 // All data should be available at this point,
                                 // regardless of original source.
+                                
+                                nVertex.Add(Vertex[listEntry[0]]);
+                                nBlendIndices.Add(blendIndices[listEntry[0]]);
+                                nBlendWeights.Add(blendWeights[listEntry[0]]);
+                                nNormals.Add(Normals[listEntry[1]]);
+                                nTexCoord.Add(TexCoord[listEntry[2]]);
+                                nTexCoord2.Add(TexCoord2[listEntry[3]]);
+                                nVertexColors.Add(VertexColors[listEntry[5]]);
+                                nVertexAlphas.Add(VertexAlphas[listEntry[6]]);
+                                uniquesList.Add(listEntry);
+                                uniqueCount++;
+                            }
 
-                                // Build value-lists in the order we need them?
-					            nVertex.Add(Vertex[iList[i][0]]);
-					            nBlendIndices.Add(blendIndices[iList[i][0]]);
-					            nBlendWeights.Add(blendWeights[iList[i][0]]);
-					            nNormals.Add(Normals[iList[i][1]]);
-					            nTexCoord.Add(TexCoord[iList[i][2]]);
-					            nTexCoord2.Add(TexCoord2[iList[i][3]]);
-					            nTangents.Add(Tangents[iList[i][4]]);
-					            nBiNormals.Add(BiNormals[iList[i][4]]);
-                                nVertexColors.Add(VertexColors[iList[i][5]]);
-                                nVertexAlphas.Add(VertexAlphas[iList[i][6]]);
-
-					        //}
+                            indexDict.Add(i, targetIndex);
 					    }
 					    catch (Exception e)
 					    {
@@ -1334,21 +1347,7 @@ namespace FFXIV_TexTools2.IO
 					HashSet<int> nVertList = new HashSet<int>();
 
 					Indices.Clear();
-
-					for (int i = 0; i < iList.Count; i++)
-					{
-					    try
-					    {
-					        //var nIndex = indexDict[iList[i][0]];
-					        Indices.Add(i);
-					    }
-					    catch (Exception e)
-					    {
-					        FlexibleMessageBox.Show("There was an error finding the index data for:" +
-					                                "\n\nIndex: " + i + "\n\n" + e.Message, "Index Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-					        return;
-                        }
-					}
+                    Indices = new IntCollection(indexDict.Values);
 
 					if (importSettings != null && importSettings.ContainsKey(m.ToString()))
 					{
@@ -1404,19 +1403,10 @@ namespace FFXIV_TexTools2.IO
 						return;
 					}
 
-					//if (cd.biNormal.Count > 0)
-					//{
-					//    mg.BiTangents = nBiNormals;
-					//}
 
-					//if (cd.tangent.Count > 0)
-					//{
-					//    mg.Tangents = Tangents;
-					//}
-
-					SharpDX.Vector3[] tangents = new SharpDX.Vector3[Indices.Count];
-					SharpDX.Vector3[] bitangents = new SharpDX.Vector3[Indices.Count];
-					for (int a = 0; a < Indices.Count; a += 3)
+					SharpDX.Vector3[] tangents = new SharpDX.Vector3[nVertex.Count];
+					SharpDX.Vector3[] bitangents = new SharpDX.Vector3[nVertex.Count];
+					for (int a = 0; a < nVertex.Count; a += 3)
 					{
 						int idx1 = Indices[a];
 						int idx2 = Indices[a + 1];
@@ -1450,7 +1440,7 @@ namespace FFXIV_TexTools2.IO
 
 					float d;
 					SharpDX.Vector3 tmpt;
-					for (int a = 0; a < Indices.Count; ++a)
+					for (int a = 0; a < nVertex.Count; ++a)
 					{
 						SharpDX.Vector3 n = SharpDX.Vector3.Normalize(nNormals[a]);
 						SharpDX.Vector3 t = SharpDX.Vector3.Normalize(tangents[a]);
@@ -1668,10 +1658,6 @@ namespace FFXIV_TexTools2.IO
                     id.dataSet2.Add(g);
                     id.dataSet2.Add(b);
                     id.dataSet2.Add(a);
-                    //id.dataSet2.Add(255);
-                    //id.dataSet2.Add(255);
-                    //id.dataSet2.Add(255);
-                    //id.dataSet2.Add(255);
 
                     //TexCoord X
                     float x = mg.TextureCoordinates[i].X;
@@ -1702,7 +1688,18 @@ namespace FFXIV_TexTools2.IO
 
 				foreach (var i in mg.Indices)
 				{
-					id.indexSet.AddRange(BitConverter.GetBytes((short)i));
+                    // Don't allow overflow.
+                    if(i > 65535)
+                    {
+                        FlexibleMessageBox.Show("Mesh group " + importMeshNum +" exceeded maximum allowable complexity.\n" +
+                            "Please split the mesh across multiple mesh groups.\n" +
+                            "\nMaximum unqiue indices: 65,535 " +
+                            "\nUnique indices in mesh: " + mg.Indices.Max() + 
+                            "\n\nThe import has been cancelled.", "ImportModel Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
+					id.indexSet.AddRange(BitConverter.GetBytes((ushort)i));
 				}
 
 				importDict.Add(importMeshNum, id);
