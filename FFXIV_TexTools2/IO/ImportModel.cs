@@ -3218,22 +3218,27 @@ namespace FFXIV_TexTools2.IO
                                 // Which bone we used to reference,
                                 // and then which new bone we should reference after
                                 // altering the bone list.
-                                for(var idx = 0; idx < extraVerts; idx++)
+
+                                importDict[extraLoc].dataSet1.AddRange(maskVerts);
+                                /*
+                                for (var idx = 0; idx < extraVerts; idx++)
                                 {
-                                    var extraVertOffset = idx * meshInfo.VertexSizes[0];
+                                    var vsize = meshInfo.VertexSizes[0];
+                                    var extraVertOffset = idx * vsize;
                                     
                                     // The first 16 bytes are the same.
-                                    importDict[extraLoc].dataSet1.AddRange(maskVerts.Skip(20 * idx).Take(16));
+                                    importDict[extraLoc].dataSet1.AddRange(maskVerts.Skip(vsize * idx).Take(vsize));
 
                                     // The bone indices may need to be changed...
                                     // This is probably too complex of a task currently 
                                     // to do in this update (1.9.8.5)
+                                    
                                     for(var i = 0; i < 4; i++)
                                     {
                                         var oldBoneIndex = maskVerts[16 + i];
                                         importDict[extraLoc].dataSet1.Add(oldBoneIndex);
                                     }
-                                }
+                                }*/
 
                             }
                         }
