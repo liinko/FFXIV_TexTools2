@@ -798,6 +798,11 @@ namespace FFXIV_TexTools2.ViewModel
                         }
                     }
                 }
+                else if (selectedCategory.Equals(Strings.Rings))
+                {
+                    cbi.Add(new ComboBoxInfo() { Name = Strings.Right, ID = Strings.Right, IsNum = false });
+                    cbi.Add(new ComboBoxInfo() { Name = Strings.Left, ID = Strings.Left, IsNum = false });
+                }
                 else
                 {
                     cbi.Add(new ComboBoxInfo() { Name = "-", ID = "-", IsNum = false });

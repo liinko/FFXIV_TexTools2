@@ -261,6 +261,9 @@
   <data name="Language" xml:space="preserve">
     <value>de</value>
   </data>
+  <data name="Left" xml:space="preserve">
+    <value>Links</value>
+  </data>
   <data name="Legs" xml:space="preserve">
     <value>Beine</value>
   </data>
@@ -315,8 +318,14 @@
   <data name="Ramuh_Egi" xml:space="preserve">
     <value>Ramuh Egi</value>
   </data>
+  <data name="Right" xml:space="preserve">
+    <value>Rechts</value>
+  </data>
   <data name="Rings" xml:space="preserve">
     <value>Rings</value>
+  </data>
+  <data name="RingsLeft" xml:space="preserve">
+    <value>Rings Links</value>
   </data>
   <data name="Roegadyn" xml:space="preserve">
     <value>Roegadyn</value>

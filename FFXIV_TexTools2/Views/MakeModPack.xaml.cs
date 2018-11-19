@@ -329,6 +329,7 @@ namespace FFXIV_TexTools2.Views
             {"ear", Strings.Ears},
             {"nek", Strings.Neck},
             {"rir", Strings.Rings},
+            {"ril", Strings.RingsLeft},
             {"wrs", Strings.Wrists},
         };
 

@@ -154,6 +154,7 @@ namespace FFXIV_TexTools2.Helpers
             {Strings.Ears, "ear"},
             {Strings.Neck, "nek"},
             {Strings.Rings, "rir"},
+            {Strings.RingsLeft, "ril"},
             {Strings.Wrists, "wrs"},
             {Strings.Head_Body, "top"},
             {Strings.Body_Hands, "top"},

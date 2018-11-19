@@ -702,4 +702,13 @@
   <data name="DemiIMCFolder" xml:space="preserve">
     <value>chara/demihuman/d{0}/obj/equipment/e{1}</value>
   </data>
+  <data name="RingsLeft" xml:space="preserve">
+    <value>Rings_Left</value>
+  </data>
+  <data name="Left" xml:space="preserve">
+    <value>Left</value>
+  </data>
+  <data name="Right" xml:space="preserve">
+    <value>Right</value>
+  </data>
 </root>

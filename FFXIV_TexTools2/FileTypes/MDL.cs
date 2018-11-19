@@ -77,8 +77,24 @@ namespace FFXIV_TexTools2.Material
             }
             else if (itemType.Equals("accessory"))
             {
-                MDLFolder = string.Format(Strings.AccMDLFolder, selectedItem.PrimaryModelID);
-                MDLFile = string.Format(Strings.AccMDLFile, selectedRace, selectedItem.PrimaryModelID, Info.slotAbr[selectedCategory]);
+                if (selectedCategory == Strings.Rings)
+                {
+                    MDLFolder = string.Format(Strings.AccMDLFolder, selectedItem.PrimaryModelID);
+                    if (selectedPart == Strings.Left)
+                    {
+                        MDLFile = string.Format(Strings.AccMDLFile, selectedRace, selectedItem.PrimaryModelID, Info.slotAbr[Strings.RingsLeft]);
+                    } else
+                    {
+                        MDLFile = string.Format(Strings.AccMDLFile, selectedRace, selectedItem.PrimaryModelID, Info.slotAbr[Strings.Rings]);
+
+                    }
+
+                }
+                else
+                {
+                    MDLFolder = string.Format(Strings.AccMDLFolder, selectedItem.PrimaryModelID);
+                    MDLFile = string.Format(Strings.AccMDLFile, selectedRace, selectedItem.PrimaryModelID, Info.slotAbr[selectedCategory]);
+                }
             }
             else if (itemType.Equals("character"))
             {
