@@ -49,6 +49,7 @@ namespace FFXIV_TexTools2.ViewModel
         bool import3dEnabled, activeEnabled, openEnabled, newCat, advImport3dEnabled;
         string selectedCategory, modelName, fullPath, prevCat, reflectionContent;
         string activeToggle = "Enable/Disable";
+        string statusText = "";
 
         private ObservableCollection<ComboBoxInfo> raceComboInfo = new ObservableCollection<ComboBoxInfo>();
         private ObservableCollection<ComboBoxInfo> meshComboInfo = new ObservableCollection<ComboBoxInfo>();
@@ -60,6 +61,9 @@ namespace FFXIV_TexTools2.ViewModel
         private ComboBoxInfo selectedPart;
         private ComboBoxInfo selectedBody;
 
+        private float StatusTextDuration = 3.0f;
+        private System.Timers.Timer StatusTextTimer;
+
         public int RaceIndex { get { return raceIndex; } set { raceIndex = value; NotifyPropertyChanged("RaceIndex"); } }
         public int MeshIndex { get { return meshIndex; } set { meshIndex = value; NotifyPropertyChanged("MeshIndex"); } }
         public int BodyIndex { get { return bodyIndex; } set { bodyIndex = value; NotifyPropertyChanged("BodyIndex"); } }
@@ -67,6 +71,7 @@ namespace FFXIV_TexTools2.ViewModel
 
         public string ReflectionContent { get { return reflectionContent; } set { reflectionContent = value; NotifyPropertyChanged("ReflectionContent"); } }
         public string ActiveToggle { get { return activeToggle; } set { activeToggle = value; NotifyPropertyChanged("ActiveToggle"); } }
+        public string StatusText { get { return statusText; } set { statusText = value; NotifyPropertyChanged("StatusText"); } }
 
         public bool RaceEnabled { get { return raceEnabled; } set { raceEnabled = value; NotifyPropertyChanged("RaceEnabled"); } }
         public bool MeshEnabled { get { return meshEnabled; } set { meshEnabled = value; NotifyPropertyChanged("MeshEnabled"); } }
@@ -93,6 +98,36 @@ namespace FFXIV_TexTools2.ViewModel
         public void ReloadModel()
         {
             UpdateModel(selectedItem, selectedCategory);
+        }
+
+        // Shows the given status text for the standard duration.
+        private void ShowStatusText(string text, bool error = false)
+        {
+            if(error)
+            {
+                text = "Error: " + text;
+            }
+
+            StatusText = text;
+
+            if(StatusTextTimer != null)
+            {
+                StatusTextTimer.Stop();
+                StatusTextTimer.Dispose();
+            }
+
+
+            StatusTextTimer = new System.Timers.Timer(StatusTextDuration * 1000);
+            // Hook up the Elapsed event for the timer. 
+            StatusTextTimer.AutoReset = false;
+            StatusTextTimer.Enabled = true;
+            StatusTextTimer.Elapsed += new System.Timers.ElapsedEventHandler(ClearStatusText);
+
+        }
+
+        private void ClearStatusText(object Sender, EventArgs e)
+        {
+            StatusText = "";
         }
 
 
@@ -137,7 +172,7 @@ namespace FFXIV_TexTools2.ViewModel
                 {
                     RaceComboBoxChanged();
                 }
-                
+                ShowStatusText("Model Updated Successfully");
             }
             else
             {
