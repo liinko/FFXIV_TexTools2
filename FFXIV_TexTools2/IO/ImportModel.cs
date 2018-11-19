@@ -799,12 +799,12 @@ namespace FFXIV_TexTools2.IO
                         return;
                     }
 
-                    var boneString = "";
+                    /*var boneString = "";
                     foreach( string bone in extraBones )
                     {
-                        boneString += bone + " ";
+                        boneString += bone + "\n";
                     }
-                    FlexibleMessageBox.Show("Bones not originally in this item were detected; TexTools will attempt to add them to the item.\n Bone(s): " + boneString, "ImportModel Notification " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    FlexibleMessageBox.Show("Bones not originally in this item were detected; TexTools will attempt to add them to the item.\n Bone(s):\n " + boneString, "ImportModel Notification " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Information);*/
                 }
 
                 if (!importSettings[Strings.All].UseOriginalBones)

@@ -124,7 +124,19 @@ namespace FFXIV_TexTools2.ViewModel
 
             if(RaceComboBox.Count > 0 && !itemChanged)
             {
-                RaceComboBoxChanged();
+                if(BodyComboBox.Count > 0)
+                {
+                    if(PartComboBox.Count > 0)
+                    {
+                        PartComboBoxChanged();
+                    } else
+                    {
+                        BodyComboBoxChanged();
+                    }
+                } else
+                {
+                    RaceComboBoxChanged();
+                }
                 
             }
             else
