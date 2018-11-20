@@ -11,9 +11,11 @@ Application:
 - Skin Specular maps are now editable again for non-Au Ra races, and are viewable again in the ModList view.
   - The shared skin_m texture is now always referred to as a 'specular', to match the Au Ra version.
 - Added Search Bar to Make Modpack Menu
-  - Search supports Wildcards via Asterisk(*), and 'Or' via Pipes(|)
+  - Search supports Wildcards via Asterisk(\*), and 'Or' via Pipes(|)
 - Search for Model menu is now resize-able.
 - UI now defaults focus to search bars in menus where they are available.
+- Added Human Readable Error Messages for common start-up errors.
+- Broken TexTools config files will now be automatically reset.
 - XIV Mod Archive added to Repos menu.
 - Version Number updated to 1.9.9.0
 
