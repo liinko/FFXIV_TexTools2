@@ -1426,7 +1426,7 @@ namespace FFXIV_TexTools2.IO
                     // Go ahead and distill this down into just the single value we care about.
                     foreach (var uv3Coordinate in nVertexAlphas)
                     {
-                        cmd.vertexAlphas.Add(uv3Coordinate.X);
+                        cmd.vertexAlphas.Add(Helper.Clamp(uv3Coordinate.X, 0, 1));
                     }
 
 					cmdList.Add(cmd);

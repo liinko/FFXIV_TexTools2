@@ -485,6 +485,11 @@ namespace FFXIV_TexTools2.Helpers
             return offset - (16 * datNum);
         }
 
+        public static float Clamp(float value, float min, float max)
+        {
+            return (value < min) ? min : (value > max) ? max : value;
+        }
+
         /// <summary>
         /// Gets the offset of the item data.
         /// </summary>
