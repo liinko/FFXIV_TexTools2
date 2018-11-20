@@ -218,7 +218,10 @@ namespace FFXIV_TexTools2.IO
 
                     if (skel.BoneParent == -1)
                     {
-                        skelDict.Add(skel.BoneName, skel);
+                        if (!skelDict.ContainsKey(skel.BoneName))
+                        {
+                            skelDict.Add(skel.BoneName, skel);
+                        }
                     }
 
                     while (skel.BoneParent != -1)
