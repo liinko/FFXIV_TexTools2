@@ -8,6 +8,7 @@ ChangeLog:
 For previous ChangeLogs visit http://ffxivtextools.dualwield.net/change_log.html
 
 Application: 
+- Guest update by Sel [https://github.com/Lunaretic]
 - Skin Specular maps are now editable again for non-Au Ra races, and are viewable again in the ModList view.
   - The shared skin_m texture is now always referred to as a 'specular', to match the Au Ra version.
 - Added Search Bar to Make Modpack Menu
@@ -24,9 +25,10 @@ Application:
 - Vertex Color is now imported/exported correctly.
 - Vertex Alpha is now imported/exported correctly.
   - As a work-around due to inconsistency with DAE parsers/exporters, Vertex Alpha is stored in the X(U) channel of UV3.
-- UV2, Vertex Color, and Vertex Alpha data are now dummied up with default values, in the event that it does not exist in the incoming DAE file.
+- UV, Vertex Color, and Vertex Alpha data are now dummied up with default values, in the event that it does not exist in the incoming DAE file.
 - 3D Meshes now support multiple UV Coordinates and Normals per-Vertex.
   - As a byproduct to this, the Model Import process may slow down significantly when dealing with extremely large mesh groups (50k+ Faces).  (Ex. 78,000 Face mesh group took 65 seconds to import)
+- For Gear and Character Models, UV1 Data is now automatically moved to the UV[1,-1] quadrant, if it is not already in that quadrant.
 - BiNormal/Tangent data is no longer required in the DAE file, since TT recalculates them anyways.
 - Added error message for mesh groups exceeding maximum size.
 - Added status message display after importing/enabling/disabling a model.
@@ -42,4 +44,3 @@ Bugfixes:
 
 Known Issues:
  - Skeleton files may need updating for some newer items. (Ex. Some Hairstyles and Bonewicca pieces)
- - 3D Meshes with multiple Normals per Vertex may have extra UV Seams when Exported back out from TexTools.
