@@ -50,6 +50,31 @@ namespace FFXIV_TexTools2.Helpers
             {Strings.UIDat, 2 }
         };
 
+        public static List<string> GearCategories = new List<string>
+        {
+            Strings.Main_Hand,
+            Strings.Off_Hand,
+            Strings.Head,
+            Strings.Body,
+            Strings.Hands,
+            Strings.Waist,
+            Strings.Legs,
+            Strings.Feet,
+            Strings.Ears,
+            Strings.Neck,
+            Strings.Wrists,
+            Strings.Rings,
+            Strings.Two_Handed,
+            Strings.Main_Off,
+            Strings.Head_Body,
+            Strings.Body_Hands_Legs_Feet,
+            Strings.Soul_Crystal,
+            Strings.Legs_Feet,
+            Strings.All,
+            Strings.Body_Hands_Legs,
+            Strings.Body_Legs_Feet
+        };
+
         public static ObservableCollection<string> SubCategoryList = new ObservableCollection<string>
         {
             Strings.Items, Strings.Maps, Strings.Actions, "HUD", Strings.Status

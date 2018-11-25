@@ -101,9 +101,7 @@ namespace FFXIV_TexTools2.IO
 
 		public static void ImportDAE(string category, string itemName, string modelName, string selectedMesh, string internalPath, ModelData modelData, Dictionary<string, ImportSettings> settings)
 		{
-            // Tracks to see if we have any UV2 data all.
-            // Only used for warning handling.
-            bool anyTexCoord2Data = false;
+            bool isGearModel = Info.GearCategories.Contains(category);
 
             importSettings = settings;
             var numMeshes = modelData.LoD[0].MeshCount;
@@ -402,7 +400,6 @@ namespace FFXIV_TexTools2.IO
                                                 else if (reader["id"].ToLower().Contains(texc2) && cData.vertex.Count > 0)
                                                 {
                                                     cData.texCoord2.AddRange((float[])reader.ReadElementContentAs(typeof(float[]), null));
-                                                    anyTexCoord2Data = true;
                                                 }
                                                 //Tangents
                                                 else if (reader["id"].ToLower().Contains(tang) && cData.vertex.Count > 0)
@@ -427,13 +424,87 @@ namespace FFXIV_TexTools2.IO
 
                                                 // At this point we've read all of our original basic data, 
                                                 // so time to massage the data if the data sucks.
-
-                                                if(cData.texCoord2.Count == 0)
+                                                
+                                                // Normals
+                                                if (cData.normal.Count == 0 && cData.vertex.Count != 0)
                                                 {
-                                                    // If we have no TexCoord2 data, just clone the TexCoord 1 data.
-                                                    cData.texCoord2.AddRange(cData.texCoord);
+                                                    // Just throw an error here.
+                                                    // There's no sane way to really dummy up Normal data without way too much math.
+                                                    FlexibleMessageBox.Show(
+                                                        "Mesh " + meshNum + " did not have any Vertex Normal data.\nPlease check your DAE exporter settings.\n\nThe Import has been cancelled."
+                                                        , "ImportModel Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                                    return;
                                                 }
 
+                                                // UV1
+                                                if (cData.texCoord.Count == 0)
+                                                {
+                                                    // If we have no UV data, just use 0's.
+                                                    cData.texCoord.Add(0.0f);
+                                                    cData.texCoord.Add(0.0f);
+                                                    if (tcStride == 3)
+                                                    {
+                                                        cData.texCoord.Add(0.0f);
+                                                    }
+
+                                                } else if(isGearModel || category == Strings.Character)
+                                                {
+                                                    // Skipped for monsters/etc. since it's possible some of those may use
+                                                    // unique shaders which use other UV quadrants.
+
+                                                    // Go through and force all the UV1 Coordinates into the [1,-1] quad, if they're not already.
+
+                                                    List<float> newCoords = new List<float>(cData.texCoord.Count);
+                                                    for (int idx = 0; idx < cData.texCoord.Count; idx += tcStride) {
+                                                        var x = cData.texCoord[idx];
+                                                        var y = cData.texCoord[idx + 1];
+                                                        
+                                                        if(x < 0 || x > 1)
+                                                        {
+                                                            int diff = ((int)Math.Floor(x)) / 1;
+                                                            x = x - diff;
+                                                        }
+
+
+                                                        if (y > 0 || y < -1)
+                                                        {
+                                                            int diff = ((int)Math.Ceiling(y)) / 1;
+                                                            y = y - diff;
+                                                        }
+                                                        newCoords.Add(x);
+                                                        newCoords.Add(y);
+
+                                                        if (tcStride == 3)
+                                                        {
+                                                            // Coordinates other than X/Y (U/V) don't matter.
+                                                            newCoords.Add(0f);
+                                                        }
+                                                    }
+
+                                                    cData.texCoord = newCoords;
+                                                }
+
+                                                // UV2
+                                                if (cData.texCoord2.Count == 0)
+                                                {
+                                                    if(isGearModel)
+                                                    {
+                                                        // Just dummy with 0s for gear types.
+                                                        cData.texCoord2.Add(0.0f);
+                                                        cData.texCoord2.Add(0.0f);
+                                                        if (tcStride == 3)
+                                                        {
+                                                            cData.texCoord2.Add(0.0f);
+                                                        }
+
+                                                    } else
+                                                    {
+                                                        // Clone UV1 for non-Gear types.
+                                                        cData.texCoord2.AddRange(cData.texCoord);
+                                                    }
+                                                }
+
+                                                // Vertex Color
                                                 if (cData.vertexColors.Count == 0)
                                                 {
                                                     // If we have no VertexColor data, just add a 1.0 value for everything.
@@ -442,6 +513,7 @@ namespace FFXIV_TexTools2.IO
                                                     cData.vertexColors.Add(1.0f);
                                                 }
 
+                                                // Vertex Alpha
                                                 if (cData.vertexAlphas.Count == 0)
                                                 {
                                                     // If we have no VertexColor data, just add a single 1.0 value for everything.
@@ -514,8 +586,12 @@ namespace FFXIV_TexTools2.IO
 												for (int i = 0; i < cData.index.Count; i += cData.indexStride)
 												{
 													cData.vIndexList.Add(cData.index[i + vertexOffset]);
-													cData.nIndexList.Add(cData.index[i + normalOffset]);
-													cData.tcIndexList.Add(cData.index[i + texCoord1Offset]);
+                                                    cData.nIndexList.Add(cData.index[i + normalOffset]);
+
+                                                    if (texCoord1Offset != -1)
+                                                    {
+                                                        cData.tcIndexList.Add(cData.index[i + texCoord1Offset]);
+                                                    }
 
 													if (texCoord2Offset != -1)
 													{
@@ -534,10 +610,38 @@ namespace FFXIV_TexTools2.IO
 
                                                 }
 
+
+                                                
+                                                // UV1
+                                                if (cData.tcIndexList.Count == 0)
+                                                {
+                                                    // Dummy missing UV1 indices with 0s
+                                                    var arr = new List<int>(cData.vIndexList.Count);
+                                                    foreach (var idx in cData.vIndexList)
+                                                    {
+                                                        arr.Add(0);
+                                                    }
+                                                    cData.tcIndexList.AddRange(arr);
+                                                }
+
+                                                // UV2
                                                 if (cData.tc2IndexList.Count == 0)
                                                 {
-                                                    // If we have no Tex2 Indices, clone the Tex1 Indexes (Code above copied in the Tex1 data).
-                                                    cData.tc2IndexList.AddRange(cData.tcIndexList);
+                                                    if(isGearModel)
+                                                    {
+                                                        // For Gear, just dummy up UV2 with 0's.
+                                                        var arr = new List<int>(cData.vIndexList.Count);
+                                                        foreach (var idx in cData.vIndexList)
+                                                        {
+                                                            arr.Add(0);
+                                                        }
+                                                        cData.tc2IndexList.AddRange(arr);
+
+                                                    } else
+                                                    {
+                                                        // Clone UV1 for other types.
+                                                        cData.tc2IndexList.AddRange(cData.tcIndexList);
+                                                    }
                                                 }
 
                                                 if (cData.vcIndexList.Count == 0)
@@ -561,6 +665,8 @@ namespace FFXIV_TexTools2.IO
                                                     }
                                                     cData.vaIndexList.AddRange(arr);
                                                 }
+
+
 
                                                 break;
 											}
@@ -839,12 +945,6 @@ namespace FFXIV_TexTools2.IO
 					{
 						if (mDict.ContainsKey(j))
 						{
-							if (mDict[j].texCoord.Count < 1)
-							{
-								FlexibleMessageBox.Show("TexTools detected missing Texture Coordinates for:\nMesh: " + i + " Part: " + j
-									+ "\n\nPlease check your model before importing again.", "ImportModel Error " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
-								return;
-							}
 
 							if (mDict[j].weights.Count < 1)
 							{
@@ -893,6 +993,8 @@ namespace FFXIV_TexTools2.IO
                                 }
 
                                 /* Error Checking */
+                                // Most of this error checking is redundant now in 1.9.9.0, but leaving it in to be safe.
+
                                 int numVerts = mDict[c].vIndexList.Count;
                                 int maxVert = numVerts == 0 ? 0 : mDict[c].vIndexList.Max();
 
