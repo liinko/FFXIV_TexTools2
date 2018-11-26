@@ -186,7 +186,7 @@ namespace FFXIV_TexTools2.Helpers
             {Strings.Body_Hands_Legs, "top"},
             {Strings.Body_Legs_Feet, "top"},
             {Strings.Body_Hands_Legs_Feet, "top"},
-            {Strings.Legs_Feet, "top"},
+            {Strings.Legs_Feet, "dwn"},
             {Strings.All, "top"}
         };
 
