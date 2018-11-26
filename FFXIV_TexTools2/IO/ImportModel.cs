@@ -357,6 +357,7 @@ namespace FFXIV_TexTools2.IO
                                     var vColorOffset = -1;
                                     var vAlphaOffset = -1;
                                     var totalStride = -1;
+                                    var scrubVertexAlphas = false;
 
 
 
@@ -523,6 +524,43 @@ namespace FFXIV_TexTools2.IO
                                                     {
                                                         cData.vertexAlphas.Add(0.0f);
                                                     }
+                                                } else
+                                                {
+
+                                                    // Do a bit of scrubbing to make sure the data looks valid.
+                                                    for (int idx = 0; idx < cData.vertexAlphas.Count; idx += tcStride)
+                                                    {
+                                                        var u = cData.vertexAlphas[idx];
+                                                        var v = cData.vertexAlphas[idx + 1];
+                                                        var w = 0f;
+
+                                                        if(tcStride == 3)
+                                                        {
+                                                            w = cData.vertexAlphas[idx + 2];
+                                                        }
+                                                        
+                                                        // If we have any data out of range, assume the entire set
+                                                        // is bad.  People often import meshes with
+                                                        // UV3 data from other sources, which causes errors.
+                                                        if(u > 1 || u < 0 || (v != 0 && v != 1) || (w != 0 && w != 1))
+                                                        {
+                                                            scrubVertexAlphas = true;
+                                                            break;
+                                                        }
+                                                    }
+
+                                                    if(scrubVertexAlphas)
+                                                    {
+                                                        cData.vertexAlphas = new List<float>(tcStride);
+
+                                                        cData.vertexAlphas.Add(1.0f);
+                                                        cData.vertexAlphas.Add(0.0f);
+                                                        if (tcStride == 3)
+                                                        {
+                                                            cData.vertexAlphas.Add(0.0f);
+                                                        }
+
+                                                    }
                                                 }
 
                                                 while (reader.Read())
@@ -603,7 +641,7 @@ namespace FFXIV_TexTools2.IO
                                                         cData.vcIndexList.Add(cData.index[i + vColorOffset]);
                                                     }
 
-                                                    if (vAlphaOffset != -1)
+                                                    if (vAlphaOffset != -1 && !scrubVertexAlphas)
                                                     {
                                                         cData.vaIndexList.Add(cData.index[i + vAlphaOffset]);
                                                     }
