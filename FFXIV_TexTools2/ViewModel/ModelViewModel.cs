@@ -127,6 +127,12 @@ namespace FFXIV_TexTools2.ViewModel
 
         private void ClearStatusText(object Sender, EventArgs e)
         {
+            if (StatusTextTimer != null)
+            {
+                StatusTextTimer.Stop();
+                StatusTextTimer.Dispose();
+            }
+
             StatusText = "";
         }
 
@@ -176,6 +182,7 @@ namespace FFXIV_TexTools2.ViewModel
             }
             else
             {
+                ClearStatusText(null, null);
                 try
                 {
                     string categoryType = Helper.GetCategoryType(selectedCategory);
@@ -703,6 +710,8 @@ namespace FFXIV_TexTools2.ViewModel
         {
             try
             {
+                ClearStatusText(null, null);
+
                 is3DLoaded = false;
                 bool isDemiHuman = false;
 
@@ -905,6 +914,8 @@ namespace FFXIV_TexTools2.ViewModel
         {
             try
             {
+                ClearStatusText(null, null);
+                
                 is3DLoaded = false;
 
                 if (CompositeVM != null && !disposing)
