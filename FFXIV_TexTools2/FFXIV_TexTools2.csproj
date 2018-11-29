@@ -204,6 +204,7 @@
     <Compile Include="ViewModel\Composite3DViewModel.cs" />
     <Compile Include="ViewModel\ListViewModel.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
+    <Compile Include="ViewModel\UISearchViewModel.cs" />
     <Compile Include="ViewModel\ModelSearchViewModel.cs" />
     <Compile Include="ViewModel\ModelViewModel.cs" />
     <Compile Include="ViewModel\ModListTVViewModel.cs" />
@@ -260,6 +261,9 @@
     </Compile>
     <Compile Include="Views\MakeModPack.xaml.cs">
       <DependentUpon>MakeModPack.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\UISearch.xaml.cs">
+      <DependentUpon>UISearch.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\ModelSearch.xaml.cs">
       <DependentUpon>ModelSearch.xaml</DependentUpon>
@@ -319,6 +323,10 @@
     <Page Include="Views\MakeModPack.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UISearch.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\ModelSearch.xaml">
       <SubType>Designer</SubType>

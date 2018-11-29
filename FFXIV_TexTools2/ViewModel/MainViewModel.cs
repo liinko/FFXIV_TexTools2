@@ -100,11 +100,19 @@ namespace FFXIV_TexTools2.ViewModel
         }
 
         /// <summary>
-        /// Command for the ModList Menu
+        /// Command for the Model ID Search
         /// </summary>
         public ICommand IDSearchCommand
         {
             get { return new RelayCommand(IDSearch); }
+        }
+
+        /// <summary>
+        /// Command for UI Search
+        /// </summary>
+        public ICommand UISearchCommand
+        {
+            get { return new RelayCommand(UISearch); }
         }
 
 
@@ -312,6 +320,15 @@ namespace FFXIV_TexTools2.ViewModel
             modelSearch.Owner = App.Current.MainWindow;
             modelSearch.Show();
         }
+
+        private void UISearch(object obj)
+        {
+            UISearch uiSearch = new UISearch(this);
+            uiSearch.Owner = App.Current.MainWindow;
+            uiSearch.Show();
+        }
+
+
 
 
         /// <summary>

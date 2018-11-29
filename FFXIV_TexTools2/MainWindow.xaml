@@ -56,6 +56,7 @@
             </MenuItem>
             <MenuItem Header="Search" StaysOpenOnClick="True">
                 <MenuItem Header="Model ID" Command="{Binding IDSearchCommand}"/>
+                <MenuItem Header="Icon ID" Command="{Binding UISearchCommand}"/>
             </MenuItem>
             <MenuItem Header="Options" StaysOpenOnClick="True" Height="22">
                 <MenuItem x:Name="Menu_Directories" Header="Directories" Click="Menu_Directories_Click"/>
