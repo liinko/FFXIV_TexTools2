@@ -61,6 +61,7 @@ namespace FFXIV_TexTools2.ViewModel
             {"ear", Strings.Ears },
             {"nek", Strings.Neck },
             {"rir", Strings.Rings },
+            {"ril", Strings.RingsLeft },
             {"wrs", Strings.Wrists }
         };
 
@@ -255,7 +256,7 @@ namespace FFXIV_TexTools2.ViewModel
             List<SearchItems> workList = new List<SearchItems>();
 
             string[] eqSlots = new string[] { "met", "glv", "dwn", "sho", "top",  };
-            string[] acSlots = new string[] { "ear", "nek", "rir", "wrs" };
+            string[] acSlots = new string[] { "ear", "nek", "rir", "wrs", "ril" };
             string[] parts = new string[] { "a", "b", "c", "d" };
             List<int> variantList = new List<int>();
             List<int> bodyList = new List<int>();

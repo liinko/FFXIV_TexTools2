@@ -264,6 +264,9 @@
   <data name="Language_Change_Ja" xml:space="preserve">
     <value>言語を変更するには、アプリケーションを再起動する必要があります。 \n今すぐ再起動？</value>
   </data>
+  <data name="Left" xml:space="preserve">
+    <value>左</value>
+  </data>
   <data name="Legs" xml:space="preserve">
     <value>脚</value>
   </data>
@@ -318,8 +321,14 @@
   <data name="Ramuh_Egi" xml:space="preserve">
     <value>ラムウ・エギ</value>
   </data>
+  <data name="Right" xml:space="preserve">
+    <value>右</value>
+  </data>
   <data name="Rings" xml:space="preserve">
     <value>指</value>
+  </data>
+  <data name="RingsLeft" xml:space="preserve">
+    <value>指左</value>
   </data>
   <data name="Roegadyn" xml:space="preserve">
     <value>ルガディン</value>

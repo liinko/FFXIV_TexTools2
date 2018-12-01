@@ -28,6 +28,7 @@ using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Configuration;
 using Application = System.Windows.Application;
 
 namespace FFXIV_TexTools2
@@ -39,13 +40,49 @@ namespace FFXIV_TexTools2
     {
         MainViewModel mViewModel;
         CategoryViewModel selectedItem;
-
-
+        
 
         public MainWindow()
         {
-            InitializeComponent();
-            mViewModel = new MainViewModel();
+            System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
+            FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
+            string version = fvi.FileVersion;
+
+            try
+            {
+                InitializeComponent();
+            } catch(System.Windows.Markup.XamlParseException e)
+            {
+                // This occurs when we failed to find a dependency DLL.
+                System.Windows.MessageBox.Show("TexTools was unable to locate dependency files.\nPlease make sure you are running TexTools in the folder it came in.\n\nIf you continue to receive this error,\nPlease make sure your Anti-Virus is not blocking TexTools.", "Dependencies Error v"+ version);
+                Environment.Exit(-1);
+                return;
+            }
+
+            searchBox.Focus();
+            try
+            {
+                mViewModel = new MainViewModel();
+            } catch(ConfigurationErrorsException ex)
+            {
+                var fname = ex.Filename;
+                if(fname == null && ex.InnerException != null && ex.InnerException.GetType() == typeof(ConfigurationErrorsException))
+                {
+                    fname = ((ConfigurationErrorsException)(ex.InnerException)).Filename;
+                }
+
+                if (File.Exists(fname))
+                {
+                    File.Delete(fname);
+                    System.Windows.MessageBox.Show("TexTools was unable to parse your user config file.\nYour TexTools Configuration has been reset.\n\nPlease restart TexTools.", "Configuration Error v" + version);
+                    Environment.Exit(-1);
+                    return;
+                }
+                else
+                {
+                    throw (ex);   
+                }
+            }
             this.DataContext = mViewModel;
 
             var dxver = Properties.Settings.Default.DX_Ver;
@@ -493,6 +530,11 @@ namespace FFXIV_TexTools2
             Process.Start("https://www.nexusmods.com/finalfantasy14");
 
         }
+        private void XMArchive_Click(object sender, RoutedEventArgs e)
+        {
+            Process.Start("https://www.xivmodarchive.com/");
+
+        }
 
         private void Menu_MakeModpack_Click(object sender, RoutedEventArgs e)
         {
@@ -527,6 +569,13 @@ namespace FFXIV_TexTools2
             Customize customize = new Customize();
             customize.Owner = this;
             customize.Show();
+        }
+
+        private void Menu_ExportSettings_Click(object sender, RoutedEventArgs e)
+        {
+            ExportSettings settings = new ExportSettings();
+            settings.Owner = this;
+            settings.Show();
         }
     }
 }

@@ -113,6 +113,11 @@ namespace FFXIV_TexTools2.ViewModel
                     {
                         race = race.Substring(race.IndexOf('c') + 1, 4);
                     }
+                    if(entry.fullPath.Contains("skin_m.tex"))
+                    {
+                        // Catch for base skin texture.
+                        race = "0101";
+                    }
                     else
                     {
                         race = race.Substring(race.LastIndexOf('c') + 1, 4);

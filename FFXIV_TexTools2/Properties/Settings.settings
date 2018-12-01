@@ -44,5 +44,8 @@
     <Setting Name="BG_Color" Type="System.String" Scope="User">
       <Value Profile="(Default)">#FF777777</Value>
     </Setting>
+    <Setting Name="DAE_Plugin_Target" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Open Collada</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

@@ -13,6 +13,8 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Threading;
 using Forms = System.Windows.Forms;
+using System.Linq;
+using System.Collections.ObjectModel;
 
 namespace FFXIV_TexTools2.Views
 {
@@ -34,14 +36,16 @@ namespace FFXIV_TexTools2.Views
         DispatcherTimer dt = new DispatcherTimer();
         Stopwatch sw = new Stopwatch();
         private string tempMPL, tempMPD;
+        ObservableCollection<ModPackItems> ListItems;
+        List<ModPackItems> FullModList;
 
 
         public MakeModPack()
         {
             InitializeComponent();
 
+            var mpiList = new List<ModPackItems>();
             dt.Tick += new EventHandler(dt_Tick);
-            List<ModPackItems> mpiList = new List<ModPackItems>();
 
             InfoHeader.Content = "This tool will create a zipped TexTools Mod Pack (*.ttmp) file of the selected mods in the following directory:\n" + mpDir;
             try
@@ -185,7 +189,10 @@ namespace FFXIV_TexTools2.Views
                     }
                 }
                 mpiList.Sort();
-                listView.ItemsSource = mpiList;               
+                FullModList = mpiList;
+                ListItems = new ObservableCollection<ModPackItems>(mpiList);
+                listView.ItemsSource = ListItems;
+                SearchBox.Focus();
             }
             catch (Exception ex)
             {
@@ -217,7 +224,7 @@ namespace FFXIV_TexTools2.Views
         /// <returns>The texture map name</returns>
         private static string GetMapName(string fileName)
         {
-            if (fileName.Contains("_s.tex"))
+            if (fileName.Contains("_s.tex") || fileName.Contains("skin_m"))
             {
                 return Strings.Specular;
             }
@@ -231,14 +238,7 @@ namespace FFXIV_TexTools2.Views
             }
             else if (fileName.Contains("_m.tex"))
             {
-                if (fileName.Contains("skin"))
-                {
-                    return Strings.Skin;
-                }
-                else
-                {
-                    return Strings.Mask;
-                }
+                return Strings.Mask;
             }
             else if (fileName.Contains(".atex"))
             {
@@ -329,6 +329,7 @@ namespace FFXIV_TexTools2.Views
             {"ear", Strings.Ears},
             {"nek", Strings.Neck},
             {"rir", Strings.Rings},
+            {"ril", Strings.RingsLeft},
             {"wrs", Strings.Wrists},
         };
 
@@ -577,6 +578,45 @@ namespace FFXIV_TexTools2.Views
         private void ClearSelectedButton_Click(object sender, RoutedEventArgs e)
         {
             listView.UnselectAll();
+        }
+
+        private void SearchBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if(e.Key == System.Windows.Input.Key.Enter)
+            {
+                var searches = SearchBox.Text.Split('|');
+                if (searches.Length == 0 || (searches.Length == 1 && searches[0].Trim() == ""))
+                {
+                    ListItems = new ObservableCollection<ModPackItems>(FullModList);
+                }
+                else
+                {
+                    var tempList = new List<ModPackItems>();
+                    foreach (var search in searches)
+                    {
+                        var trimmed = search.Trim().ToLower();
+
+                        // Simple wildcard support.
+                        // Full Regex is probably too much, but basic wildcard should be useful.
+                        var broken = search.Split('*');
+                        
+                        tempList = tempList.Concat(FullModList.Where(x =>
+                        {
+                            foreach (var part in broken)
+                            {
+                              if(!x.Name.ToLower().Contains(part.ToLower().Trim()))
+                                {
+                                    return false;
+                                }
+                            }
+                            return true;
+                        })).ToList();
+                    }
+                    ListItems = new ObservableCollection<ModPackItems>(tempList);
+                }
+                
+                listView.ItemsSource = ListItems;
+            }
         }
 
         private void Header_Click(object sender, RoutedEventArgs e)

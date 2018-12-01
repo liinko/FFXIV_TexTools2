@@ -16,19 +16,30 @@
 
 using FFXIV_TexTools2.ViewModel;
 using System.Windows;
+using System.Windows.Input;
 
 namespace FFXIV_TexTools2.Views
 {
     /// <summary>
     /// Interaction logic for ModelSearch.xaml
     /// </summary>
-    public partial class ModelSearch : Window
+    public partial class UISearch : Window
     {
-        public ModelSearch(MainViewModel parent)
+        public UISearch(MainViewModel parent)
         {
             InitializeComponent();
-            this.DataContext = new ModelSearchViewModel(parent);
-            SearchBox.Focus();
+            this.DataContext = new UISearchViewModel(parent, this);
+            IdTexBox.Focus();
+        }
+
+        private void IdTexBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                var context = ((UISearchViewModel)DataContext);
+                context.IdText = IdTexBox.Text;
+                context.Open(null);
+            }
         }
     }
 }

@@ -77,8 +77,24 @@ namespace FFXIV_TexTools2.Material
             }
             else if (itemType.Equals("accessory"))
             {
-                MDLFolder = string.Format(Strings.AccMDLFolder, selectedItem.PrimaryModelID);
-                MDLFile = string.Format(Strings.AccMDLFile, selectedRace, selectedItem.PrimaryModelID, Info.slotAbr[selectedCategory]);
+                if (selectedCategory == Strings.Rings)
+                {
+                    MDLFolder = string.Format(Strings.AccMDLFolder, selectedItem.PrimaryModelID);
+                    if (selectedPart == Strings.Left)
+                    {
+                        MDLFile = string.Format(Strings.AccMDLFile, selectedRace, selectedItem.PrimaryModelID, Info.slotAbr[Strings.RingsLeft]);
+                    } else
+                    {
+                        MDLFile = string.Format(Strings.AccMDLFile, selectedRace, selectedItem.PrimaryModelID, Info.slotAbr[Strings.Rings]);
+
+                    }
+
+                }
+                else
+                {
+                    MDLFolder = string.Format(Strings.AccMDLFolder, selectedItem.PrimaryModelID);
+                    MDLFile = string.Format(Strings.AccMDLFile, selectedRace, selectedItem.PrimaryModelID, Info.slotAbr[selectedCategory]);
+                }
             }
             else if (itemType.Equals("character"))
             {
@@ -992,10 +1008,10 @@ namespace FFXIV_TexTools2.Material
                             {
                                 br1.BaseStream.Seek(j * mesh.MeshInfo.VertexSizes[meshDataInfoList[colors].VertexDataBlock] + meshDataInfoList[colors].Offset, SeekOrigin.Begin);
 
-                                int a = br1.ReadByte();
                                 int r = br1.ReadByte();
                                 int g = br1.ReadByte();
                                 int b = br1.ReadByte();
+                                int a = br1.ReadByte();
 
                                 colorsList.Add(new Color4(r, g, b, a));
                             }

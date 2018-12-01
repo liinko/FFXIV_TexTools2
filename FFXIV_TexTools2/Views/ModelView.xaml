@@ -53,6 +53,7 @@
                         Color="{Binding Light1Color}" />
                     <hx:ItemsModel3D ItemsSource="{Binding ModelCollection}"  />
                 </hx:Viewport3DX>
+                <Label x:Name="StatusLabel" Content="{Binding StatusText, FallbackValue=Status Text}" Margin="0" Height="50" Panel.ZIndex="10" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Bottom" FontStyle="Italic" Foreground="#FF151515"/>
             </Grid>
         </GroupBox>
         <Grid Margin="10,0,10,46" VerticalAlignment="Bottom">

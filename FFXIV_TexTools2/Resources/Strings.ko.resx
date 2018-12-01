@@ -225,6 +225,9 @@
   <data name="Language" xml:space="preserve">
     <value>ko</value>
   </data>
+  <data name="Left" xml:space="preserve">
+    <value>왼쪽</value>
+  </data>
   <data name="Legs" xml:space="preserve">
     <value>다리</value>
   </data>
@@ -270,8 +273,14 @@
   <data name="Ramuh_Egi" xml:space="preserve">
     <value>Ramuh Egi</value>
   </data>
+  <data name="Right" xml:space="preserve">
+    <value>권리</value>
+  </data>
   <data name="Rings" xml:space="preserve">
     <value>손가락</value>
+  </data>
+  <data name="RingsLeft" xml:space="preserve">
+    <value>손가락왼쪽</value>
   </data>
   <data name="Roegadyn" xml:space="preserve">
     <value>루가딘</value>

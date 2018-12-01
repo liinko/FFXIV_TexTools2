@@ -190,5 +190,17 @@ namespace FFXIV_TexTools2.Properties {
                 this["BG_Color"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Open Collada")]
+        public string DAE_Plugin_Target {
+            get {
+                return ((string)(this["DAE_Plugin_Target"]));
+            }
+            set {
+                this["DAE_Plugin_Target"] = value;
+            }
+        }
     }
 }

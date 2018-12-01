@@ -1030,7 +1030,7 @@ namespace FFXIV_TexTools2.Material
                     //}
 
 
-                    if (fileName.Contains("_s.tex") || fileName.Contains("skin"))
+                    if (fileName.Contains("_s.tex") || fileName.Contains("skin_m"))
                     {
                         mtrlInfo.SpecularPath = fullPath.Substring(0, fullPath.LastIndexOf("/")) + "/" + fileName;
                         mtrlInfo.TextureMaps.Add(new ComboBoxInfo() { Name = mapName, ID = "", IsNum = false });
@@ -1246,8 +1246,17 @@ namespace FFXIV_TexTools2.Material
                 {
                     cbi.Add(new ComboBoxInfo() { Name = "Icon", ID = "Icon", IsNum = false });
                 }
-            }
-            else if (item.ItemCategory.Equals("HUD"))
+            } else if(item.ItemCategory.Equals(Strings.Other))
+            {
+                mtrlData.UIPath = item.UIPath + "/" + item.ItemName;
+                mtrlData.UIOffset = Helper.GetDataOffset(FFCRC.GetHash(item.UIPath), FFCRC.GetHash(item.ItemName), Strings.UIDat);
+
+                if (mtrlData.UIOffset != 0)
+                {
+                    cbi.Add(new ComboBoxInfo() { Name = "Icon", ID = "Icon", IsNum = false });
+                }
+
+            } else if (item.ItemCategory.Equals("HUD"))
             {
                 mtrlData.UIPath = item.UIPath;
                 var HUDFolder = "ui/uld";
@@ -1348,7 +1357,7 @@ namespace FFXIV_TexTools2.Material
         /// <returns>The texture map name</returns>
         private static string GetMapName(string fileName)
         {
-            if (fileName.Contains("_s.tex"))
+            if (fileName.Contains("_s.tex") || fileName.Contains("skin_m"))
             {
                 return Strings.Specular;
             }
@@ -1362,14 +1371,7 @@ namespace FFXIV_TexTools2.Material
             }
             else if (fileName.Contains("_m.tex"))
             {
-                if (fileName.Contains("skin"))
-                {
-                    return Strings.Skin;
-                }
-                else
-                {
-                    return Strings.Mask;
-                }
+                return Strings.Mask;
             }
             else
             {

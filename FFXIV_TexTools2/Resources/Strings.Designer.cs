@@ -187,6 +187,15 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Autodesk Collada.
+        /// </summary>
+        internal static string AutodeskCollada {
+            get {
+                return ResourceManager.GetString("AutodeskCollada", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Bahamut-Egi.
         /// </summary>
         internal static string Bahamut_Egi {
@@ -1105,6 +1114,15 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Left.
+        /// </summary>
+        internal static string Left {
+            get {
+                return ResourceManager.GetString("Left", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Legs.
         /// </summary>
         internal static string Legs {
@@ -1447,6 +1465,15 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to OpenCOLLADA.
+        /// </summary>
+        internal static string OpenCollada {
+            get {
+                return ResourceManager.GetString("OpenCollada", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Other.
         /// </summary>
         internal static string Other {
@@ -1501,11 +1528,29 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Right.
+        /// </summary>
+        internal static string Right {
+            get {
+                return ResourceManager.GetString("Right", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Rings.
         /// </summary>
         internal static string Rings {
             get {
                 return ResourceManager.GetString("Rings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Rings_Left.
+        /// </summary>
+        internal static string RingsLeft {
+            get {
+                return ResourceManager.GetString("RingsLeft", resourceCulture);
             }
         }
         
