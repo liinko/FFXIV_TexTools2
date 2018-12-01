@@ -18,6 +18,8 @@ Application:
 - Added Human Readable Error Messages for common start-up errors.
 - Broken TexTools config files will now be automatically reset.
 - XIV Mod Archive added to Repos menu.
+- Added Icon ID Search Menu
+- Added Export Settings Menu
 - Version Number updated to 1.9.9.0
 
 3D:
@@ -39,6 +41,7 @@ Bugfixes:
 - Fixed a bug with Model Importing that would cause model indices to be thrown off if there was extraneous unused UV/Normal/Vertex Color/etc. data.
 - Fixed a bug with DAE imports that would cause a crash if the meshes had extra data channels in them (ex. extra UV channels).
 - Fixed a bug that would cause the 3D Model display to revert back to the default item after using import/enable/disable.
+- Autodesk Collada exported DAE files can now be imported.
 
 
 
