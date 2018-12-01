@@ -193,7 +193,7 @@ namespace FFXIV_TexTools2.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Open Collada")]
+        [global::System.Configuration.DefaultSettingValueAttribute("OpenCOLLADA")]
         public string DAE_Plugin_Target {
             get {
                 return ((string)(this["DAE_Plugin_Target"]));
