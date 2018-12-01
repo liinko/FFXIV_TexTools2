@@ -570,5 +570,12 @@ namespace FFXIV_TexTools2
             customize.Owner = this;
             customize.Show();
         }
+
+        private void Menu_ExportSettings_Click(object sender, RoutedEventArgs e)
+        {
+            ExportSettings settings = new ExportSettings();
+            settings.Owner = this;
+            settings.Show();
+        }
     }
 }

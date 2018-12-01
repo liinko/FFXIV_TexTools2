@@ -711,4 +711,10 @@
   <data name="Right" xml:space="preserve">
     <value>Right</value>
   </data>
+  <data name="AutodeskCollada" xml:space="preserve">
+    <value>Autodesk Collada</value>
+  </data>
+  <data name="OpenCollada" xml:space="preserve">
+    <value>OpenCOLLADA</value>
+  </data>
 </root>

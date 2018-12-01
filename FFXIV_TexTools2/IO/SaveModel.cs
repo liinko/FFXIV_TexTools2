@@ -774,6 +774,12 @@ namespace FFXIV_TexTools2.IO
             xmlWriter.WriteStartElement("authoring_tool");
             xmlWriter.WriteString("FFXIV TexTools2");
             xmlWriter.WriteEndElement();
+            xmlWriter.WriteStartElement("tool_settings");
+            xmlWriter.WriteString(Properties.Settings.Default.DAE_Plugin_Target);
+            xmlWriter.WriteEndElement();
+            xmlWriter.WriteStartElement("tool_version");
+            xmlWriter.WriteString(Info.appVersion);
+            xmlWriter.WriteEndElement();
             //</authoring_tool>
             xmlWriter.WriteEndElement();
             //</contributor>
@@ -1136,9 +1142,13 @@ namespace FFXIV_TexTools2.IO
                     //</texture>
                     xmlWriter.WriteEndElement();
                     //</specular>
+
                     //<transparent>
                     xmlWriter.WriteStartElement("transparent");
-                    xmlWriter.WriteAttributeString("opaque", "A_ONE");
+
+                    xmlWriter.WriteAttributeString("opaque", "RGB_ZERO");
+
+
                     //<texture>
                     xmlWriter.WriteStartElement("texture");
                     xmlWriter.WriteAttributeString("texture", modelName + "_" + i + "_Alpha_bmp-sampler");
@@ -1223,6 +1233,8 @@ namespace FFXIV_TexTools2.IO
 
         private static void XMLgeometries(XmlWriter xmlWriter, string modelName, List<ModelMeshData> meshList, ModelData modelData)
         {
+            var pluginTarget = Properties.Settings.Default.DAE_Plugin_Target;
+
             //<library_geometries>
             xmlWriter.WriteStartElement("library_geometries");
 
@@ -1796,7 +1808,14 @@ namespace FFXIV_TexTools2.IO
                             xmlWriter.WriteAttributeString("semantic", "TEXCOORD");
                             xmlWriter.WriteAttributeString("source", "#geom-" + modelName + "_" + i + partString + "-map0");
                             xmlWriter.WriteAttributeString("offset", "2");
-                            xmlWriter.WriteAttributeString("set", "1");
+                            if(pluginTarget == Strings.AutodeskCollada)
+                            {
+                                xmlWriter.WriteAttributeString("set", "0");
+
+                            } else
+                            {
+                                xmlWriter.WriteAttributeString("set", "1");
+                            }
                             xmlWriter.WriteEndElement();
                             //</input>
 
@@ -1805,7 +1824,15 @@ namespace FFXIV_TexTools2.IO
                             xmlWriter.WriteAttributeString("semantic", "TEXCOORD");
                             xmlWriter.WriteAttributeString("source", "#geom-" + modelName + "_" + i + partString + "-map1");
                             xmlWriter.WriteAttributeString("offset", "2");
-                            xmlWriter.WriteAttributeString("set", "2");
+                            if (pluginTarget == Strings.AutodeskCollada)
+                            {
+                                xmlWriter.WriteAttributeString("set", "1");
+
+                            }
+                            else
+                            {
+                                xmlWriter.WriteAttributeString("set", "2");
+                            }
                             xmlWriter.WriteEndElement();
                             //</input>
 
@@ -1814,7 +1841,15 @@ namespace FFXIV_TexTools2.IO
                             xmlWriter.WriteAttributeString("semantic", "TEXCOORD");
                             xmlWriter.WriteAttributeString("source", "#geom-" + modelName + "_" + i + partString + "-map2");
                             xmlWriter.WriteAttributeString("offset", "2");
-                            xmlWriter.WriteAttributeString("set", "3");
+                            if (pluginTarget == Strings.AutodeskCollada)
+                            {
+                                xmlWriter.WriteAttributeString("set", "2");
+
+                            }
+                            else
+                            {
+                                xmlWriter.WriteAttributeString("set", "3");
+                            }
                             xmlWriter.WriteEndElement();
                             //</input>
 
@@ -1945,9 +1980,9 @@ namespace FFXIV_TexTools2.IO
                             xmlWriter.WriteAttributeString("id", "geom-" + modelName + "_" + i + partString + "-skin1-joints-array");
                             xmlWriter.WriteAttributeString("count", meshDataList[i].BoneStrings.Count.ToString());
 
-                            foreach (var b in meshDataList[i].BoneStrings)
+                            foreach (var b in skelDict)
                             {
-                                xmlWriter.WriteString(b + " ");
+                                xmlWriter.WriteString(b.Key + " ");
                             }
                             xmlWriter.WriteEndElement();
                             //</Name_array>
@@ -1957,7 +1992,7 @@ namespace FFXIV_TexTools2.IO
                             //<accessor>
                             xmlWriter.WriteStartElement("accessor");
                             xmlWriter.WriteAttributeString("source", "#geom-" + modelName + "_" + i + partString + "-skin1-joints-array");
-                            xmlWriter.WriteAttributeString("count", meshDataList[i].BoneStrings.Count.ToString());
+                            xmlWriter.WriteAttributeString("count", skelDict.Count.ToString());
                             xmlWriter.WriteAttributeString("stride", "1");
                             //<param>
                             xmlWriter.WriteStartElement("param");
@@ -1981,11 +2016,11 @@ namespace FFXIV_TexTools2.IO
                             xmlWriter.WriteAttributeString("id", "geom-" + modelName + "_" + i + partString + "-skin1-bind_poses-array");
                             xmlWriter.WriteAttributeString("count", (16 * meshDataList[i].BoneStrings.Count).ToString());
 
-                            for (int m = 0; m < meshDataList[i].BoneStrings.Count; m++)
+                            foreach (var bone in skelDict)
                             {
                                 try
                                 {
-                                    Matrix matrix = new Matrix(skelDict[meshDataList[i].BoneStrings[m]].InversePoseMatrix);
+                                    Matrix matrix = new Matrix(bone.Value.InversePoseMatrix);
 
                                     xmlWriter.WriteString(matrix.Column1.X + " " + matrix.Column1.Y + " " + matrix.Column1.Z + " " + (matrix.Column1.W * Info.modelMultiplier) + " ");
                                     xmlWriter.WriteString(matrix.Column2.X + " " + matrix.Column2.Y + " " + matrix.Column2.Z + " " + (matrix.Column2.W * Info.modelMultiplier) + " ");
@@ -1994,7 +2029,7 @@ namespace FFXIV_TexTools2.IO
                                 }
                                 catch
                                 {
-                                    Debug.WriteLine("Error at " + meshDataList[i].BoneStrings[m]);
+                                    Debug.WriteLine("Error at " + bone.Key);
                                 }
 
                             }

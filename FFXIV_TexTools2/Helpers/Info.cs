@@ -50,6 +50,12 @@ namespace FFXIV_TexTools2.Helpers
             {Strings.UIDat, 2 }
         };
 
+        public static List<string> DAEPluginTargets = new List<string>
+        {
+            Strings.OpenCollada,
+            Strings.AutodeskCollada
+        };
+
         public static List<string> GearCategories = new List<string>
         {
             Strings.Main_Hand,

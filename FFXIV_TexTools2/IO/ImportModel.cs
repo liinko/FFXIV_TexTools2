@@ -102,6 +102,7 @@ namespace FFXIV_TexTools2.IO
 		public static void ImportDAE(string category, string itemName, string modelName, string selectedMesh, string internalPath, ModelData modelData, Dictionary<string, ImportSettings> settings)
 		{
             bool isGearModel = Info.GearCategories.Contains(category);
+            string tool = "";
 
             importSettings = settings;
             var numMeshes = modelData.LoD[0].MeshCount;
@@ -274,9 +275,10 @@ namespace FFXIV_TexTools2.IO
 						{
 							if (reader.IsStartElement())
 							{
-								if (reader.Name.Contains("authoring_tool"))
+
+                                if (reader.Name.Contains("authoring_tool"))
 								{
-									var tool = reader.ReadElementContentAsString();
+									tool = reader.ReadElementContentAsString();
 
 									if (tool.Contains("OpenCOLLADA"))
                                     {
@@ -300,11 +302,15 @@ namespace FFXIV_TexTools2.IO
                                         // Do we even actually support blender/FBX at this point?
 										pos = "-position-array";
 										norm = "-normal0-array";
-										texc = "-uv0-array";
+                                        vcol = "vertex_color0-array";
+                                        texc = "-uv0-array";
 										texc2 = "-uv1-array";
+                                        valpha = "-uv2-array";
 
+                                        vcolBase = "vertex_color0";
                                         texcBase = "uv0";
                                         texc2Base = "uv1";
+                                        valphaBase = "-uv2";
                                     }
 									else if (tool.Contains("Exporter for Blender"))
 									{
@@ -326,10 +332,22 @@ namespace FFXIV_TexTools2.IO
 											"If you'd like to get another tool supported, submit a request.", "Unsupported File " + Info.appVersion, MessageBoxButtons.OK, MessageBoxIcon.Error);
 										return;
 									}
-								}
+                                }
+                                if (reader.Name.Contains("tool_settings") && tool.Contains("TexTools"))
+                                {
+                                    var daeTarget = reader.ReadElementContentAsString();
+                                    if(daeTarget == Strings.AutodeskCollada)
+                                    {
+                                        // Don't actually need to do anything here, but it's good to have
+                                        // the code path available in case we do later.
+                                    } else
+                                    {
 
-								//go to geometry element
-								if (reader.Name.Equals("geometry"))
+                                    }
+                                }
+
+                                    //go to geometry element
+                                    if (reader.Name.Equals("geometry"))
 								{
 									var atr = reader["name"];
 									var id = reader["id"];
@@ -401,11 +419,6 @@ namespace FFXIV_TexTools2.IO
                                                 else if (reader["id"].ToLower().Contains(texc2) && cData.vertex.Count > 0)
                                                 {
                                                     cData.texCoord2.AddRange((float[])reader.ReadElementContentAs(typeof(float[]), null));
-                                                }
-                                                //Tangents
-                                                else if (reader["id"].ToLower().Contains(tang) && cData.vertex.Count > 0)
-                                                {
-                                                    cData.tangent.AddRange((float[])reader.ReadElementContentAs(typeof(float[]), null));
                                                 }
                                                 //Vertex Color
                                                 else if (reader["id"].ToLower().Contains(vcol) && cData.vertex.Count > 0)
@@ -714,6 +727,13 @@ namespace FFXIV_TexTools2.IO
 									if (atr.Contains("."))
 									{
 										var num = atr.Substring(atr.LastIndexOf(".") + 1);
+
+                                        if(tool.Contains("FBX"))
+                                        {
+                                            // FBX Geometry is exported as '<name>Mesh';
+                                            num = num.Substring(0, num.Length - 4);
+                                        }
+                                        
 									    try
 									    {
                                             if (pDict[meshNum].ContainsKey(int.Parse(num)))
@@ -819,7 +839,14 @@ namespace FFXIV_TexTools2.IO
 
 									if (atr.Contains("."))
 									{
-										meshNumPart = int.Parse(atr.Substring((atr.LastIndexOf(".") + 1), atr.LastIndexOf("-") - (atr.LastIndexOf(".") + 1)));
+                                        if (tool.Contains("FBX"))
+                                        {
+                                            meshNumPart = int.Parse(atr.Substring((atr.LastIndexOf(".") + 1), atr.LastIndexOf("C") - (atr.LastIndexOf(".")) - 1));
+                                        }
+                                        else
+                                        {
+                                            meshNumPart = int.Parse(atr.Substring((atr.LastIndexOf(".") + 1), atr.LastIndexOf("-") - (atr.LastIndexOf(".") + 1)));
+                                        }
 										cData = mDict[meshNumPart];
 									}
 									else

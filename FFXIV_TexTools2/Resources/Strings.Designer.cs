@@ -187,6 +187,15 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Autodesk Collada.
+        /// </summary>
+        internal static string AutodeskCollada {
+            get {
+                return ResourceManager.GetString("AutodeskCollada", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Bahamut-Egi.
         /// </summary>
         internal static string Bahamut_Egi {
@@ -1452,6 +1461,15 @@ namespace FFXIV_TexTools2.Resources {
         internal static string OnlineStatusEXD {
             get {
                 return ResourceManager.GetString("OnlineStatusEXD", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to OpenCOLLADA.
+        /// </summary>
+        internal static string OpenCollada {
+            get {
+                return ResourceManager.GetString("OpenCollada", resourceCulture);
             }
         }
         

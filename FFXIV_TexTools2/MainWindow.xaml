@@ -60,9 +60,10 @@
             </MenuItem>
             <MenuItem Header="Options" StaysOpenOnClick="True" Height="22">
                 <MenuItem x:Name="Menu_Directories" Header="Directories" Click="Menu_Directories_Click"/>
-                <MenuItem x:Name="Save_All_DDS" Header="Save All DDS" Click="Save_All_DDS_Click" IsEnabled="False"/>
                 <MenuItem x:Name="Menu_Customize" Header="Customize" Click="Menu_Customize_Click"/>
-                
+                <MenuItem x:Name="Menu_ExportSettings" Header="Export Settings" Click="Menu_ExportSettings_Click"/>
+                <MenuItem x:Name="Save_All_DDS" Header="Save All DDS" Click="Save_All_DDS_Click" IsEnabled="False"/>
+
             </MenuItem>
             <MenuItem Header="Help">
                 <MenuItem x:Name="Menu_ProblemCheck" Header="Check For Problems" Click="Menu_ProblemCheck_Click"/>
