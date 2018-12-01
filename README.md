@@ -2,7 +2,7 @@
 # FFXIV TexTools 2 by Liinko
 This is a more feature rich WPF implementation of FFXIV TexTools and replaced FFXIV TexTools.
 
-# Current Version: 1.9.9.0
+# Current Version: 1.9.9.1
 ChangeLog:
 
 For previous ChangeLogs visit http://ffxivtextools.dualwield.net/change_log.html

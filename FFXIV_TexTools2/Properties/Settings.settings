@@ -45,7 +45,7 @@
       <Value Profile="(Default)">#FF777777</Value>
     </Setting>
     <Setting Name="DAE_Plugin_Target" Type="System.String" Scope="User">
-      <Value Profile="(Default)">Open Collada</Value>
+      <Value Profile="(Default)">OpenCOLLADA</Value>
     </Setting>
   </Settings>
 </SettingsFile>
