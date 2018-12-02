@@ -1405,71 +1405,73 @@ namespace FFXIV_TexTools2.IO
                              * --------------------
                              */
 
-                            //<source>
-                            xmlWriter.WriteStartElement("source");
-                            xmlWriter.WriteAttributeString("id", "geom-" + modelName + "_" + i + partString + "-col0");
-                            //<float_array>
-                            xmlWriter.WriteStartElement("float_array");
-                            xmlWriter.WriteAttributeString("id", "geom-" + modelName + "_" + i + partString + "-col0-array");
-                            xmlWriter.WriteAttributeString("count", (totalCount * 3).ToString());
-                            
                             var vertexColors = meshList[i].VertexColors.GetRange(totalVertices, totalCount);
+                            if (!(indexCount <= 3 && pluginTarget == Strings.AutodeskCollada)) {
+                                //<source>
+                                xmlWriter.WriteStartElement("source");
+                                xmlWriter.WriteAttributeString("id", "geom-" + modelName + "_" + i + partString + "-col0");
+                                //<float_array>
+                                xmlWriter.WriteStartElement("float_array");
+                                xmlWriter.WriteAttributeString("id", "geom-" + modelName + "_" + i + partString + "-col0-array");
+                                xmlWriter.WriteAttributeString("count", (totalCount * 3).ToString());
+                            
 
-                            foreach (var vc in vertexColors)
-                            {
-                                float r = vc.Red / 255.0f;
-                                float g = vc.Green / 255.0f;
-                                float b = vc.Blue / 255.0f;
-                                //float a = vc.Alpha / 255.0f;
+                                foreach (var vc in vertexColors)
+                                {
+                                    float r = vc.Red / 255.0f;
+                                    float g = vc.Green / 255.0f;
+                                    float b = vc.Blue / 255.0f;
+                                    //float a = vc.Alpha / 255.0f;
 
-                                xmlWriter.WriteString(r.ToString() + " " + g.ToString() + " " + b.ToString() + " ");
+                                    xmlWriter.WriteString(r.ToString() + " " + g.ToString() + " " + b.ToString() + " ");
+                                }
+
+                                xmlWriter.WriteEndElement();
+                                //</float_array>
+
+                                //<technique_common>
+                                xmlWriter.WriteStartElement("technique_common");
+                                //<accessor>
+                                xmlWriter.WriteStartElement("accessor");
+                                xmlWriter.WriteAttributeString("source", "#geom-" + modelName + "_" + i + partString + "-col0-array");
+                                xmlWriter.WriteAttributeString("count", totalCount.ToString());
+                                xmlWriter.WriteAttributeString("stride", "3");
+
+                                //<param>
+                                xmlWriter.WriteStartElement("param");
+                                xmlWriter.WriteAttributeString("name", "R");
+                                xmlWriter.WriteAttributeString("type", "float");
+                                xmlWriter.WriteEndElement();
+                                //</param>
+
+                                //<param>
+                                xmlWriter.WriteStartElement("param");
+                                xmlWriter.WriteAttributeString("name", "G");
+                                xmlWriter.WriteAttributeString("type", "float");
+                                xmlWriter.WriteEndElement();
+                                //</param>
+
+                                //<param>
+                                xmlWriter.WriteStartElement("param");
+                                xmlWriter.WriteAttributeString("name", "B");
+                                xmlWriter.WriteAttributeString("type", "float");
+                                xmlWriter.WriteEndElement();
+                                //</param>
+
+                                //<param>
+                                /*xmlWriter.WriteStartElement("param");
+                                xmlWriter.WriteAttributeString("name", "A");
+                                xmlWriter.WriteAttributeString("type", "float");
+                                xmlWriter.WriteEndElement();*/
+                                //</param>
+
+                                xmlWriter.WriteEndElement();
+                                //</accessor>
+                                xmlWriter.WriteEndElement();
+                                //</technique_common>
+                                xmlWriter.WriteEndElement();
+                                //</source>
                             }
-
-                            xmlWriter.WriteEndElement();
-                            //</float_array>
-
-                            //<technique_common>
-                            xmlWriter.WriteStartElement("technique_common");
-                            //<accessor>
-                            xmlWriter.WriteStartElement("accessor");
-                            xmlWriter.WriteAttributeString("source", "#geom-" + modelName + "_" + i + partString + "-col0-array");
-                            xmlWriter.WriteAttributeString("count", totalCount.ToString());
-                            xmlWriter.WriteAttributeString("stride", "3");
-
-                            //<param>
-                            xmlWriter.WriteStartElement("param");
-                            xmlWriter.WriteAttributeString("name", "R");
-                            xmlWriter.WriteAttributeString("type", "float");
-                            xmlWriter.WriteEndElement();
-                            //</param>
-
-                            //<param>
-                            xmlWriter.WriteStartElement("param");
-                            xmlWriter.WriteAttributeString("name", "G");
-                            xmlWriter.WriteAttributeString("type", "float");
-                            xmlWriter.WriteEndElement();
-                            //</param>
-
-                            //<param>
-                            xmlWriter.WriteStartElement("param");
-                            xmlWriter.WriteAttributeString("name", "B");
-                            xmlWriter.WriteAttributeString("type", "float");
-                            xmlWriter.WriteEndElement();
-                            //</param>
-
-                            //<param>
-                            /*xmlWriter.WriteStartElement("param");
-                            xmlWriter.WriteAttributeString("name", "A");
-                            xmlWriter.WriteAttributeString("type", "float");
-                            xmlWriter.WriteEndElement();*/
-                            //</param>
-
-                            xmlWriter.WriteEndElement();
-                            //</accessor>
-                            xmlWriter.WriteEndElement();
-                            //</technique_common>
-                            xmlWriter.WriteEndElement();
-                            //</source>
 
                             /*
                              * --------------------
@@ -1587,55 +1589,58 @@ namespace FFXIV_TexTools2.IO
                              * --------------------
                              */
 
-                            //<source>
-                            xmlWriter.WriteStartElement("source");
-                            xmlWriter.WriteAttributeString("id", "geom-" + modelName + "_" + i + partString + "-map2");
-                            //<float_array>
-                            xmlWriter.WriteStartElement("float_array");
-                            xmlWriter.WriteAttributeString("id", "geom-" + modelName + "_" + i + partString + "-map2-array");
-                            xmlWriter.WriteAttributeString("count", (totalCount * 2).ToString());
-
-                            vertexColors = meshList[i].VertexColors.GetRange(totalVertices, totalCount);
-
-                            foreach (var vc in vertexColors)
+                            if (!(indexCount <= 3 && pluginTarget == Strings.AutodeskCollada))
                             {
-                                float a = vc.Alpha / 255.0f;
+                                //<source>
+                                xmlWriter.WriteStartElement("source");
+                                xmlWriter.WriteAttributeString("id", "geom-" + modelName + "_" + i + partString + "-map2");
+                                //<float_array>
+                                xmlWriter.WriteStartElement("float_array");
+                                xmlWriter.WriteAttributeString("id", "geom-" + modelName + "_" + i + partString + "-map2-array");
+                                xmlWriter.WriteAttributeString("count", (totalCount * 2).ToString());
 
-                                // Use the UV S channel for the Alpha data, since OpenCollada doesn't play with it nicely.
-                                xmlWriter.WriteString(a.ToString() + " 0 ");
+                                vertexColors = meshList[i].VertexColors.GetRange(totalVertices, totalCount);
+
+                                foreach (var vc in vertexColors)
+                                {
+                                    float a = vc.Alpha / 255.0f;
+
+                                    // Use the UV S channel for the Alpha data, since OpenCollada doesn't play with it nicely.
+                                    xmlWriter.WriteString(a.ToString() + " 0 ");
+                                }
+
+                                xmlWriter.WriteEndElement();
+                                //</float_array>
+
+                                //<technique_common>
+                                xmlWriter.WriteStartElement("technique_common");
+                                //<accessor>
+                                xmlWriter.WriteStartElement("accessor");
+                                xmlWriter.WriteAttributeString("source", "#geom-" + modelName + "_" + i + partString + "-map2-array");
+                                xmlWriter.WriteAttributeString("count", totalCount.ToString());
+                                xmlWriter.WriteAttributeString("stride", "2");
+
+                                //<param>
+                                xmlWriter.WriteStartElement("param");
+                                xmlWriter.WriteAttributeString("name", "S");
+                                xmlWriter.WriteAttributeString("type", "float");
+                                xmlWriter.WriteEndElement();
+                                //</param>
+
+                                //<param>
+                                xmlWriter.WriteStartElement("param");
+                                xmlWriter.WriteAttributeString("name", "T");
+                                xmlWriter.WriteAttributeString("type", "float");
+                                xmlWriter.WriteEndElement();
+                                //</param>
+
+                                xmlWriter.WriteEndElement();
+                                //</accessor>
+                                xmlWriter.WriteEndElement();
+                                //</technique_common>
+                                xmlWriter.WriteEndElement();
+                                //</source>
                             }
-
-                            xmlWriter.WriteEndElement();
-                            //</float_array>
-
-                            //<technique_common>
-                            xmlWriter.WriteStartElement("technique_common");
-                            //<accessor>
-                            xmlWriter.WriteStartElement("accessor");
-                            xmlWriter.WriteAttributeString("source", "#geom-" + modelName + "_" + i + partString + "-map2-array");
-                            xmlWriter.WriteAttributeString("count", totalCount.ToString());
-                            xmlWriter.WriteAttributeString("stride", "2");
-
-                            //<param>
-                            xmlWriter.WriteStartElement("param");
-                            xmlWriter.WriteAttributeString("name", "S");
-                            xmlWriter.WriteAttributeString("type", "float");
-                            xmlWriter.WriteEndElement();
-                            //</param>
-
-                            //<param>
-                            xmlWriter.WriteStartElement("param");
-                            xmlWriter.WriteAttributeString("name", "T");
-                            xmlWriter.WriteAttributeString("type", "float");
-                            xmlWriter.WriteEndElement();
-                            //</param>
-
-                            xmlWriter.WriteEndElement();
-                            //</accessor>
-                            xmlWriter.WriteEndElement();
-                            //</technique_common>
-                            xmlWriter.WriteEndElement();
-                            //</source>
 
                             /*
                              * --------------------
@@ -1794,14 +1799,17 @@ namespace FFXIV_TexTools2.IO
                             xmlWriter.WriteEndElement();
                             //</input>
 
-                            //<input>
-                            xmlWriter.WriteStartElement("input");
-                            xmlWriter.WriteAttributeString("semantic", "COLOR");
-                            xmlWriter.WriteAttributeString("source", "#geom-" + modelName + "_" + i + partString + "-col0");
-                            xmlWriter.WriteAttributeString("offset", "2");
-                            xmlWriter.WriteAttributeString("set", "0");
-                            xmlWriter.WriteEndElement();
-                            //</input>
+                            if (!(indexCount <= 3 && pluginTarget == Strings.AutodeskCollada))
+                            {
+                                //<input>
+                                xmlWriter.WriteStartElement("input");
+                                xmlWriter.WriteAttributeString("semantic", "COLOR");
+                                xmlWriter.WriteAttributeString("source", "#geom-" + modelName + "_" + i + partString + "-col0");
+                                xmlWriter.WriteAttributeString("offset", "2");
+                                xmlWriter.WriteAttributeString("set", "0");
+                                xmlWriter.WriteEndElement();
+                                //</input>
+                            }
 
                             //<input>
                             xmlWriter.WriteStartElement("input");
@@ -1836,22 +1844,25 @@ namespace FFXIV_TexTools2.IO
                             xmlWriter.WriteEndElement();
                             //</input>
 
-                            //<input>
-                            xmlWriter.WriteStartElement("input");
-                            xmlWriter.WriteAttributeString("semantic", "TEXCOORD");
-                            xmlWriter.WriteAttributeString("source", "#geom-" + modelName + "_" + i + partString + "-map2");
-                            xmlWriter.WriteAttributeString("offset", "2");
-                            if (pluginTarget == Strings.AutodeskCollada)
+                            if (!(indexCount <= 3 && pluginTarget == Strings.AutodeskCollada))
                             {
-                                xmlWriter.WriteAttributeString("set", "2");
+                                //<input>
+                                xmlWriter.WriteStartElement("input");
+                                xmlWriter.WriteAttributeString("semantic", "TEXCOORD");
+                                xmlWriter.WriteAttributeString("source", "#geom-" + modelName + "_" + i + partString + "-map2");
+                                xmlWriter.WriteAttributeString("offset", "2");
+                                if (pluginTarget == Strings.AutodeskCollada)
+                                {
+                                    xmlWriter.WriteAttributeString("set", "2");
 
+                                }
+                                else
+                                {
+                                    xmlWriter.WriteAttributeString("set", "3");
+                                }
+                                xmlWriter.WriteEndElement();
+                                //</input>
                             }
-                            else
-                            {
-                                xmlWriter.WriteAttributeString("set", "3");
-                            }
-                            xmlWriter.WriteEndElement();
-                            //</input>
 
                             //<input>
                             xmlWriter.WriteStartElement("input");

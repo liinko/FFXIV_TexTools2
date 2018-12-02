@@ -461,7 +461,7 @@ namespace FFXIV_TexTools2.IO
                                                         cData.texCoord.Add(0.0f);
                                                     }
 
-                                                } else if(isGearModel || category == Strings.Character)
+                                                } else if(isGearModel || (category == Strings.Character && itemName != Strings.Face))
                                                 {
                                                     // Skipped for monsters/etc. since it's possible some of those may use
                                                     // unique shaders which use other UV quadrants.
