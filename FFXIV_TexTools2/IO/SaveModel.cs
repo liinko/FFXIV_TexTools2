@@ -1146,7 +1146,13 @@ namespace FFXIV_TexTools2.IO
                     //<transparent>
                     xmlWriter.WriteStartElement("transparent");
 
-                    xmlWriter.WriteAttributeString("opaque", "RGB_ZERO");
+                    if (Properties.Settings.Default.DAE_Plugin_Target == Strings.AutodeskCollada)
+                    {
+                        xmlWriter.WriteAttributeString("opaque", "RGB_ZERO");
+                    } else
+                    {
+                        xmlWriter.WriteAttributeString("opaque", "A_ONE");
+                    }
 
 
                     //<texture>
