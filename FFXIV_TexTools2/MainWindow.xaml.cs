@@ -105,7 +105,7 @@ namespace FFXIV_TexTools2
 
         private void Menu_BugReport_Click(object sender, RoutedEventArgs e)
         {
-            System.Diagnostics.Process.Start("https://bitbucket.org/liinko/ffxiv-textools/issues");
+            System.Diagnostics.Process.Start("https://github.com/liinko/FFXIV_TexTools2/issues");
         }
 
         private void Menu_About_Click(object sender, RoutedEventArgs e)
