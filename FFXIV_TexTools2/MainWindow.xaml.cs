@@ -94,9 +94,6 @@ namespace FFXIV_TexTools2
             }
 
             DXVerButton.Content = "DX Version: " + dxver.Substring(2);
-
-
-            //HavokInterop.InitializeSTA();
         }
 
         private void Menu_ProblemCheck_Click(object sender, RoutedEventArgs e)

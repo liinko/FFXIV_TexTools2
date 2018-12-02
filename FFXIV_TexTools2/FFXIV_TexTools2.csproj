@@ -146,9 +146,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Custom\Interop\HavokInterop.cs" />
-    <Compile Include="Custom\Interop\InterlopVector4.cs" />
-    <Compile Include="Custom\Interop\InteropTransform.cs" />
     <Compile Include="FileTypes\ModelContainers\ExtraIndex.cs" />
     <Compile Include="FileTypes\ModelContainers\ExtraIndexData.cs" />
     <Compile Include="FileTypes\ModelContainers\JsonSkeleton.cs" />
