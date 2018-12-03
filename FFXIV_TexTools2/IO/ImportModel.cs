@@ -333,6 +333,18 @@ namespace FFXIV_TexTools2.IO
 										return;
 									}
                                 }
+                                if (reader.Name.Contains("comments") && tool.Contains("OpenCOLLADA"))
+                                {
+                                    var comments = reader.ReadElementContentAsString().ToLower();
+                                    if(comments.Contains("colladamaya"))
+                                    {
+                                        tool = "OpenCOLLADA-Maya";
+                                    } else if(comments.Contains("colladamax")) 
+                                    {
+                                        tool = "OpenCOLLADA-Max";
+                                    }
+                                }
+
                                 if (reader.Name.Contains("tool_settings") && tool.Contains("TexTools"))
                                 {
                                     var daeTarget = reader.ReadElementContentAsString();
@@ -347,10 +359,17 @@ namespace FFXIV_TexTools2.IO
                                 }
 
                                     //go to geometry element
-                                    if (reader.Name.Equals("geometry"))
+                                if (reader.Name.Equals("geometry"))
 								{
-									var atr = reader["name"];
-									var id = reader["id"];
+									var atr = reader["id"];
+
+
+                                    if (tool.Contains("OpenCOLLADA-Maya"))
+                                    {
+                                        atr = reader["id"];
+                                    }
+
+                                    var id = reader["id"];
 
 								    try
 								    {
@@ -1431,12 +1450,18 @@ namespace FFXIV_TexTools2.IO
                             for(var z = 0; z < uniqueCount; z++)
                             {
                                 var targetEntry = uniquesList[z];
+                                var normId = listEntry[1];
+                                var uv1Id = listEntry[2];
+                                var uv2Id = listEntry[3];
+
+                                var normValue = Normals[listEntry[1]];
+
 
                                 // We only really care about matching on position, normal, and UV1/2
                                 if(listEntry[0] == targetEntry[0]
-                                    && listEntry[1] == targetEntry[1]
-                                    && listEntry[2] == targetEntry[2]
-                                    && listEntry[3] == targetEntry[3])
+                                    && Normals[listEntry[1]] == Normals[targetEntry[1]]
+                                    && TexCoord[listEntry[2]] == TexCoord[targetEntry[2]]
+                                    && TexCoord2[listEntry[3]] == TexCoord2[targetEntry[3]])
                                 {
                                     targetIndex = z;
                                     break;
