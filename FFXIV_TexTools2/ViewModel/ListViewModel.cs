@@ -134,6 +134,14 @@ namespace FFXIV_TexTools2.ViewModel
 
             mlm.Race = race;
 
+            if(entry.fullPath.Contains("--"))
+            {
+                mlm.DXType = Strings.DX11;
+            } else
+            {
+                mlm.DXType = Strings.DX9;
+            }
+
 
             if (entry.fullPath.Contains("_d."))
             {
