@@ -361,14 +361,7 @@ namespace FFXIV_TexTools2.IO
                                     //go to geometry element
                                 if (reader.Name.Equals("geometry"))
 								{
-									var atr = reader["id"];
-
-
-                                    if (tool.Contains("OpenCOLLADA-Maya"))
-                                    {
-                                        atr = reader["id"];
-                                    }
-
+									var atr = reader["name"];
                                     var id = reader["id"];
 
 								    try
