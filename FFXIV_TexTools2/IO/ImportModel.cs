@@ -913,9 +913,33 @@ namespace FFXIV_TexTools2.IO
 
 
                                                     var bString = blendBoneName;
+
+                                                    // Hair bones *sometimes* end in numbers.
                                                     if (!blendBoneName.Contains("h0"))
                                                     {
                                                         bString = Regex.Replace(blendBoneName, @"[\d]", string.Empty);
+                                                    } else
+                                                    {
+                                                        // For hair bones, see if we have any subset matches.
+                                                        foreach (var bone in CustomBoneSet)
+                                                        {
+                                                            if(bString.Contains(bone.Key))
+                                                            {
+                                                                // The Key is the correct one, assume it's name.
+                                                                bString = bone.Key;
+                                                                break;
+
+                                                            } else if (bone.Key.Contains(bString))
+                                                            {
+                                                                // The bString is correct, adjust the hair key..?
+                                                                var val = bone.Value;
+                                                                var key = bone.Key;
+                                                                CustomBoneSet.Remove(key);
+                                                                CustomBoneSet.Add(bString, val);
+                                                                break;
+                                                            }
+                                                        }
+                                                        
                                                     }
 
 
