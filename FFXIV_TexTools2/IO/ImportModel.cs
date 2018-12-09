@@ -387,7 +387,11 @@ namespace FFXIV_TexTools2.IO
                                     var vColorOffset = -1;
                                     var vAlphaOffset = -1;
                                     var totalStride = -1;
+
+                                    // Vars that control if we should dump the Vertex data that came in,
+                                    // if it looked invalid.
                                     var scrubVertexAlphas = false;
+                                    var scrubVertexColors = false;
 
 
 
@@ -531,9 +535,15 @@ namespace FFXIV_TexTools2.IO
                                                 }
 
                                                 // Vertex Color
-                                                if (cData.vertexColors.Count == 0)
+                                                if (cData.vertexColors.Count == 0 || cData.vertexColors.Any(x => x < 0f || x > 1.0f))
                                                 {
-                                                    // If we have no VertexColor data, just add a 1.0 value for everything.
+                                                    // If it was bad data, mark it for scrubbing.
+                                                    if (cData.vertexColors.Count > 0)
+                                                    {
+                                                        scrubVertexColors = true;
+                                                    }
+
+                                                    // Full color used for missing/bad data.
                                                     cData.vertexColors.Add(1.0f);
                                                     cData.vertexColors.Add(1.0f);
                                                     cData.vertexColors.Add(1.0f);
@@ -661,7 +671,7 @@ namespace FFXIV_TexTools2.IO
 														cData.tc2IndexList.Add(cData.index[i + texCoord2Offset]);
 													}
 
-                                                    if(vColorOffset != -1)
+                                                    if(vColorOffset != -1 && !scrubVertexColors)
                                                     {
                                                         cData.vcIndexList.Add(cData.index[i + vColorOffset]);
                                                     }
@@ -1799,10 +1809,10 @@ namespace FFXIV_TexTools2.IO
 					id.dataSet2.Add(tw);
 
                     //Color
-                    byte r = Convert.ToByte(Math.Round(cmd.vertexColors[i].X * 255));
-                    byte g = Convert.ToByte(Math.Round(cmd.vertexColors[i].Y * 255));
-                    byte b = Convert.ToByte(Math.Round(cmd.vertexColors[i].Z * 255));
-                    byte a = Convert.ToByte(Math.Round(cmd.vertexAlphas[i] * 255));
+                    byte r = Convert.ToByte(Helper.Clamp((int)Math.Round(cmd.vertexColors[i].X * 255), 0, 255));
+                    byte g = Convert.ToByte(Helper.Clamp((int)Math.Round(cmd.vertexColors[i].Y * 255), 0, 255));
+                    byte b = Convert.ToByte(Helper.Clamp((int)Math.Round(cmd.vertexColors[i].Z * 255), 0, 255));
+                    byte a = Convert.ToByte(Math.Round(cmd.vertexAlphas[i] * 255)); // Alpha was clamped earlier.
                     id.dataSet2.Add(r);
                     id.dataSet2.Add(g);
                     id.dataSet2.Add(b);
