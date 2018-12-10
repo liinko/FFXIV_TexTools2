@@ -923,7 +923,7 @@ namespace FFXIV_TexTools2.IO
 
 
                                                     // Strip trailing numbers - No bones actually *end* in numbers, even if they contain numbers.
-                                                    var bString = Regex.Replace(blendBoneName, "^.*([0-9])+$", string.Empty);
+                                                    var bString = Regex.Replace(blendBoneName, "[0-9]+$", string.Empty);
 
 
                                                     if (importSettings[Strings.All].UseOriginalBones)
