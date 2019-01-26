@@ -333,6 +333,18 @@ namespace FFXIV_TexTools2.IO
 										return;
 									}
                                 }
+                                if (reader.Name.Contains("comments") && tool.Contains("OpenCOLLADA"))
+                                {
+                                    var comments = reader.ReadElementContentAsString().ToLower();
+                                    if(comments.Contains("colladamaya"))
+                                    {
+                                        tool = "OpenCOLLADA-Maya";
+                                    } else if(comments.Contains("colladamax")) 
+                                    {
+                                        tool = "OpenCOLLADA-Max";
+                                    }
+                                }
+
                                 if (reader.Name.Contains("tool_settings") && tool.Contains("TexTools"))
                                 {
                                     var daeTarget = reader.ReadElementContentAsString();
@@ -347,10 +359,10 @@ namespace FFXIV_TexTools2.IO
                                 }
 
                                     //go to geometry element
-                                    if (reader.Name.Equals("geometry"))
+                                if (reader.Name.Equals("geometry"))
 								{
 									var atr = reader["name"];
-									var id = reader["id"];
+                                    var id = reader["id"];
 
 								    try
 								    {
@@ -375,7 +387,11 @@ namespace FFXIV_TexTools2.IO
                                     var vColorOffset = -1;
                                     var vAlphaOffset = -1;
                                     var totalStride = -1;
+
+                                    // Vars that control if we should dump the Vertex data that came in,
+                                    // if it looked invalid.
                                     var scrubVertexAlphas = false;
+                                    var scrubVertexColors = false;
 
 
 
@@ -461,7 +477,7 @@ namespace FFXIV_TexTools2.IO
                                                         cData.texCoord.Add(0.0f);
                                                     }
 
-                                                } else if(isGearModel || category == Strings.Character)
+                                                } else if(isGearModel || (category == Strings.Character && itemName != Strings.Face))
                                                 {
                                                     // Skipped for monsters/etc. since it's possible some of those may use
                                                     // unique shaders which use other UV quadrants.
@@ -519,9 +535,15 @@ namespace FFXIV_TexTools2.IO
                                                 }
 
                                                 // Vertex Color
-                                                if (cData.vertexColors.Count == 0)
+                                                if (cData.vertexColors.Count == 0 || cData.vertexColors.Any(x => x < 0f || x > 1.0f))
                                                 {
-                                                    // If we have no VertexColor data, just add a 1.0 value for everything.
+                                                    // If it was bad data, mark it for scrubbing.
+                                                    if (cData.vertexColors.Count > 0)
+                                                    {
+                                                        scrubVertexColors = true;
+                                                    }
+
+                                                    // Full color used for missing/bad data.
                                                     cData.vertexColors.Add(1.0f);
                                                     cData.vertexColors.Add(1.0f);
                                                     cData.vertexColors.Add(1.0f);
@@ -649,7 +671,7 @@ namespace FFXIV_TexTools2.IO
 														cData.tc2IndexList.Add(cData.index[i + texCoord2Offset]);
 													}
 
-                                                    if(vColorOffset != -1)
+                                                    if(vColorOffset != -1 && !scrubVertexColors)
                                                     {
                                                         cData.vcIndexList.Add(cData.index[i + vColorOffset]);
                                                     }
@@ -900,11 +922,8 @@ namespace FFXIV_TexTools2.IO
                                                     }
 
 
-                                                    var bString = blendBoneName;
-                                                    if (!blendBoneName.Contains("h0"))
-                                                    {
-                                                        bString = Regex.Replace(blendBoneName, @"[\d]", string.Empty);
-                                                    }
+                                                    // Strip trailing numbers - No bones actually *end* in numbers, even if they contain numbers.
+                                                    var bString = Regex.Replace(blendBoneName, "[0-9]+$", string.Empty);
 
 
                                                     if (importSettings[Strings.All].UseOriginalBones)
@@ -1431,12 +1450,18 @@ namespace FFXIV_TexTools2.IO
                             for(var z = 0; z < uniqueCount; z++)
                             {
                                 var targetEntry = uniquesList[z];
+                                var normId = listEntry[1];
+                                var uv1Id = listEntry[2];
+                                var uv2Id = listEntry[3];
+
+                                var normValue = Normals[listEntry[1]];
+
 
                                 // We only really care about matching on position, normal, and UV1/2
                                 if(listEntry[0] == targetEntry[0]
-                                    && listEntry[1] == targetEntry[1]
-                                    && listEntry[2] == targetEntry[2]
-                                    && listEntry[3] == targetEntry[3])
+                                    && Normals[listEntry[1]] == Normals[targetEntry[1]]
+                                    && TexCoord[listEntry[2]] == TexCoord[targetEntry[2]]
+                                    && TexCoord2[listEntry[3]] == TexCoord2[targetEntry[3]])
                                 {
                                     targetIndex = z;
                                     break;
@@ -1784,10 +1809,10 @@ namespace FFXIV_TexTools2.IO
 					id.dataSet2.Add(tw);
 
                     //Color
-                    byte r = Convert.ToByte(Math.Round(cmd.vertexColors[i].X * 255));
-                    byte g = Convert.ToByte(Math.Round(cmd.vertexColors[i].Y * 255));
-                    byte b = Convert.ToByte(Math.Round(cmd.vertexColors[i].Z * 255));
-                    byte a = Convert.ToByte(Math.Round(cmd.vertexAlphas[i] * 255));
+                    byte r = Convert.ToByte(Helper.Clamp((int)Math.Round(cmd.vertexColors[i].X * 255), 0, 255));
+                    byte g = Convert.ToByte(Helper.Clamp((int)Math.Round(cmd.vertexColors[i].Y * 255), 0, 255));
+                    byte b = Convert.ToByte(Helper.Clamp((int)Math.Round(cmd.vertexColors[i].Z * 255), 0, 255));
+                    byte a = Convert.ToByte(Math.Round(cmd.vertexAlphas[i] * 255)); // Alpha was clamped earlier.
                     id.dataSet2.Add(r);
                     id.dataSet2.Add(g);
                     id.dataSet2.Add(b);

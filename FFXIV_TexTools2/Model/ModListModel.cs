@@ -30,6 +30,8 @@ namespace FFXIV_TexTools2.Model
         public string Map { get; set; }
         public string Part { get; set; }
         public string Type { get; set; }
+        public string DXType { get; set; }
+
         public SolidColorBrush Active
         {
             get { return _active; }
