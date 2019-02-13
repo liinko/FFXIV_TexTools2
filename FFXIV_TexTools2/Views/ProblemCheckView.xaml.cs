@@ -202,7 +202,7 @@ namespace FFXIV_TexTools2.Views
                                 }
                                 else if (indexFile.Key.Equals(Strings.UIDat))
                                 {
-                                    if(datNum > 0)
+                                    if(datNum > 1)
                                     {
                                         AddText("\u2716\n", "Red");
                                         problem = true;
@@ -258,7 +258,7 @@ namespace FFXIV_TexTools2.Views
                                 }
                                 else if (indexFile.Key.Equals(Strings.UIDat))
                                 {
-                                    if (datNum > 0)
+                                    if (datNum > 1)
                                     {
                                         AddText("\t" + i + "\u2716\n", "Red");
                                         problem = true;
@@ -371,7 +371,7 @@ namespace FFXIV_TexTools2.Views
                                 }
                                 else if (modEntry.datFile.Equals(Strings.UIDat))
                                 {
-                                    if (datNum > 0 || originalOffset == 0)
+                                    if (datNum > 1 || originalOffset == 0)
                                     {
                                         AddText("\t\u2716\n", "Red");
                                         check = true;
@@ -451,7 +451,7 @@ namespace FFXIV_TexTools2.Views
                             }
                             else if (indexFile.Key.Equals(Strings.UIDat))
                             {
-                                if (datNum >= 1)
+                                if (datNum >= 2)
                                 {
                                     if (!modOffsetList.Contains(offset * 8))
                                     {
@@ -513,7 +513,7 @@ namespace FFXIV_TexTools2.Views
                             }
                             else if (indexFile.Key.Equals(Strings.UIDat))
                             {
-                                if (datNum >= 1)
+                                if (datNum >= 2)
                                 {
                                     if (!modOffsetList.Contains(offset * 8))
                                     {

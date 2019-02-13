@@ -41,13 +41,13 @@ namespace FFXIV_TexTools2.Helpers
         public static Dictionary<string, string> ModDatDict = new Dictionary<string, string>
         {
             {Strings.ItemsDat, "4" },
-            {Strings.UIDat, "1" }
+            {Strings.UIDat, "2" }
         };
 
         public static Dictionary<string, int> ModIndexDict = new Dictionary<string, int>
         {
             {Strings.ItemsDat, 5 },
-            {Strings.UIDat, 2 }
+            {Strings.UIDat, 3 }
         };
 
         public static List<string> DAEPluginTargets = new List<string>

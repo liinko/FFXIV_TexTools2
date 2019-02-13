@@ -608,7 +608,7 @@ namespace FFXIV_TexTools2.Helpers
             {
                 return true;
             }
-            else if (indexName.Equals(Strings.UIDat) && datNum >= 1)
+            else if (indexName.Equals(Strings.UIDat) && datNum >= 2)
             {
                 return true;
             }
