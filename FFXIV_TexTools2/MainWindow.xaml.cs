@@ -371,7 +371,7 @@ namespace FFXIV_TexTools2
                         }
                         else if (datName.Key.Equals(Strings.UIDat))
                         {
-                            for (int i = 1; i < 5; i++)
+                            for (int i = 2; i < 5; i++)
                             {
                                 var datPath = string.Format(Info.datDir, datName.Key, i);
 
