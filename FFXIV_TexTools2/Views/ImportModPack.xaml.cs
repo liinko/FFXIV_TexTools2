@@ -80,7 +80,7 @@ namespace FFXIV_TexTools2.Views
                 Debug.WriteLine(ex.StackTrace);
             }
 
-            float totalModSize = 0;
+            double totalModSize = 0;
 
             foreach(var mpi in mpjList)
             {
