@@ -608,7 +608,8 @@ namespace FFXIV_TexTools2.Views
         private void MeshComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             var selectedItem = -1;
-
+            if (MeshComboBox.SelectedItem == null)
+                MeshComboBox.SelectedIndex = 0;
 
             if (!MeshComboBox.SelectedItem.ToString().Equals(Strings.All))
             {

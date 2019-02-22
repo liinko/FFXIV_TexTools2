@@ -720,8 +720,44 @@
   <data name="About" xml:space="preserve">
     <value>About</value>
   </data>
+  <data name="AddMesh" xml:space="preserve">
+    <value>Add Mesh</value>
+  </data>
+  <data name="AddPart" xml:space="preserve">
+    <value>Add Part</value>
+  </data>
+  <data name="Add_Remove" xml:space="preserve">
+    <value>Add/Remove:</value>
+  </data>
+  <data name="AdvImportNote" xml:space="preserve">
+    <value>*Note: These options are still in development and may not work properly.</value>
+  </data>
+  <data name="AttemptFixText" xml:space="preserve">
+    <value>Use these options if the item has holes appear when combined with other items.</value>
+  </data>
+  <data name="Attempt_Fix" xml:space="preserve">
+    <value>Attempt Fix</value>
+  </data>
+  <data name="Attributes" xml:space="preserve">
+    <value>Attributes:</value>
+  </data>
+  <data name="Bones" xml:space="preserve">
+    <value>Bones:</value>
+  </data>
+  <data name="Bone_addition_is_automatic" xml:space="preserve">
+    <value>Bone addition is automatic</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="CreateXML" xml:space="preserve">
+    <value>Make XML</value>
+  </data>
   <data name="Disable" xml:space="preserve">
     <value>Disable</value>
+  </data>
+  <data name="Disable_Extra_Data" xml:space="preserve">
+    <value>Disable Extra Data</value>
   </data>
   <data name="DX_Version" xml:space="preserve">
     <value>DX Version</value>
@@ -738,6 +774,9 @@
   <data name="Export_as_Image" xml:space="preserve">
     <value>Export as Image</value>
   </data>
+  <data name="ExtraMeshData" xml:space="preserve">
+    <value>Extra Mesh Data:</value>
+  </data>
   <data name="Help" xml:space="preserve">
     <value>Help</value>
   </data>
@@ -747,6 +786,9 @@
   <data name="Import" xml:space="preserve">
     <value>Import</value>
   </data>
+  <data name="Importing_File" xml:space="preserve">
+    <value>Importing File</value>
+  </data>
   <data name="Item_List" xml:space="preserve">
     <value>Item List</value>
   </data>
@@ -755,6 +797,12 @@
   </data>
   <data name="Lighting" xml:space="preserve">
     <value>Lighting</value>
+  </data>
+  <data name="Material" xml:space="preserve">
+    <value>Material:</value>
+  </data>
+  <data name="Materials" xml:space="preserve">
+    <value>Materials:</value>
   </data>
   <data name="Menu_About" xml:space="preserve">
     <value>FFXIV TexTools</value>
@@ -810,6 +858,12 @@
   <data name="Menu_Tutorials" xml:space="preserve">
     <value>Tutorials</value>
   </data>
+  <data name="Mesh" xml:space="preserve">
+    <value>Mesh:</value>
+  </data>
+  <data name="MeshCount" xml:space="preserve">
+    <value>Meshes:</value>
+  </data>
   <data name="Model_ID" xml:space="preserve">
     <value>Model ID</value>
   </data>
@@ -828,6 +882,15 @@
   <data name="Options" xml:space="preserve">
     <value>Options</value>
   </data>
+  <data name="Part" xml:space="preserve">
+    <value>Part:</value>
+  </data>
+  <data name="Parts" xml:space="preserve">
+    <value>Parts:</value>
+  </data>
+  <data name="Part_Attributes" xml:space="preserve">
+    <value>Part Attributes:</value>
+  </data>
   <data name="PKEmporium" xml:space="preserve">
     <value>PrettyKitty Emporium</value>
   </data>
@@ -839,6 +902,9 @@
   </data>
   <data name="Search" xml:space="preserve">
     <value>Search</value>
+  </data>
+  <data name="TD_Import_Options" xml:space="preserve">
+    <value>3D Import Options</value>
   </data>
   <data name="TD_Model" xml:space="preserve">
     <value>3D Model</value>
@@ -857,6 +923,9 @@
   </data>
   <data name="Update_TEX" xml:space="preserve">
     <value>Update TEX</value>
+  </data>
+  <data name="UseOrignalBones" xml:space="preserve">
+    <value>Use Original Bones</value>
   </data>
   <data name="Viewer" xml:space="preserve">
     <value>Viewer</value>

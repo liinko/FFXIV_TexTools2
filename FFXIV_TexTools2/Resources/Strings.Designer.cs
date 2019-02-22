@@ -160,11 +160,74 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Add/Remove: 的本地化字符串。
+        /// </summary>
+        public static string Add_Remove {
+            get {
+                return ResourceManager.GetString("Add_Remove", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Add Mesh 的本地化字符串。
+        /// </summary>
+        public static string AddMesh {
+            get {
+                return ResourceManager.GetString("AddMesh", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Add Part 的本地化字符串。
+        /// </summary>
+        public static string AddPart {
+            get {
+                return ResourceManager.GetString("AddPart", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 *Note: These options are still in development and may not work properly. 的本地化字符串。
+        /// </summary>
+        public static string AdvImportNote {
+            get {
+                return ResourceManager.GetString("AdvImportNote", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 ALL 的本地化字符串。
         /// </summary>
         public static string All {
             get {
                 return ResourceManager.GetString("All", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Attempt Fix 的本地化字符串。
+        /// </summary>
+        public static string Attempt_Fix {
+            get {
+                return ResourceManager.GetString("Attempt_Fix", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Use these options if the item has holes appear when combined with other items. 的本地化字符串。
+        /// </summary>
+        public static string AttemptFixText {
+            get {
+                return ResourceManager.GetString("AttemptFixText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Attributes: 的本地化字符串。
+        /// </summary>
+        public static string Attributes {
+            get {
+                return ResourceManager.GetString("Attributes", resourceCulture);
             }
         }
         
@@ -313,6 +376,24 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Bone addition is automatic 的本地化字符串。
+        /// </summary>
+        public static string Bone_addition_is_automatic {
+            get {
+                return ResourceManager.GetString("Bone_addition_is_automatic", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Bones: 的本地化字符串。
+        /// </summary>
+        public static string Bones {
+            get {
+                return ResourceManager.GetString("Bones", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Buddy 的本地化字符串。
         /// </summary>
         public static string Buddy {
@@ -327,6 +408,15 @@ namespace FFXIV_TexTools2.Resources {
         public static string BuddyAction {
             get {
                 return ResourceManager.GetString("BuddyAction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Cancel 的本地化字符串。
+        /// </summary>
+        public static string Cancel {
+            get {
+                return ResourceManager.GetString("Cancel", resourceCulture);
             }
         }
         
@@ -399,6 +489,15 @@ namespace FFXIV_TexTools2.Resources {
         public static string CraftAction {
             get {
                 return ResourceManager.GetString("CraftAction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Make XML 的本地化字符串。
+        /// </summary>
+        public static string CreateXML {
+            get {
+                return ResourceManager.GetString("CreateXML", resourceCulture);
             }
         }
         
@@ -507,6 +606,15 @@ namespace FFXIV_TexTools2.Resources {
         public static string Disable {
             get {
                 return ResourceManager.GetString("Disable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Disable Extra Data 的本地化字符串。
+        /// </summary>
+        public static string Disable_Extra_Data {
+            get {
+                return ResourceManager.GetString("Disable_Extra_Data", resourceCulture);
             }
         }
         
@@ -804,6 +912,15 @@ namespace FFXIV_TexTools2.Resources {
         public static string exportObjButton {
             get {
                 return ResourceManager.GetString("exportObjButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Extra Mesh Data: 的本地化字符串。
+        /// </summary>
+        public static string ExtraMeshData {
+            get {
+                return ResourceManager.GetString("ExtraMeshData", resourceCulture);
             }
         }
         
@@ -1114,6 +1231,15 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Importing File 的本地化字符串。
+        /// </summary>
+        public static string Importing_File {
+            get {
+                return ResourceManager.GetString("Importing_File", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 No index file backups detected. \nWould you like to create a backup now? \n\nWarning: This will disable any active modifications in order to create a backup. They will have to be manually re-enabled. 的本地化字符串。
         /// </summary>
         public static string Index_Backup {
@@ -1384,6 +1510,24 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Material: 的本地化字符串。
+        /// </summary>
+        public static string Material {
+            get {
+                return ResourceManager.GetString("Material", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Materials: 的本地化字符串。
+        /// </summary>
+        public static string Materials {
+            get {
+                return ResourceManager.GetString("Materials", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 FFXIV TexTools 的本地化字符串。
         /// </summary>
         public static string Menu_About {
@@ -1542,6 +1686,24 @@ namespace FFXIV_TexTools2.Resources {
         public static string Menu_Tutorials {
             get {
                 return ResourceManager.GetString("Menu_Tutorials", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Mesh: 的本地化字符串。
+        /// </summary>
+        public static string Mesh {
+            get {
+                return ResourceManager.GetString("Mesh", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Meshes: 的本地化字符串。
+        /// </summary>
+        public static string MeshCount {
+            get {
+                return ResourceManager.GetString("MeshCount", resourceCulture);
             }
         }
         
@@ -1816,6 +1978,33 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Part: 的本地化字符串。
+        /// </summary>
+        public static string Part {
+            get {
+                return ResourceManager.GetString("Part", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Part Attributes: 的本地化字符串。
+        /// </summary>
+        public static string Part_Attributes {
+            get {
+                return ResourceManager.GetString("Part_Attributes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Parts: 的本地化字符串。
+        /// </summary>
+        public static string Parts {
+            get {
+                return ResourceManager.GetString("Parts", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 pet_0_{0}.exd 的本地化字符串。
         /// </summary>
         public static string PetEXD {
@@ -2059,6 +2248,15 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   查找类似 3D Import Options 的本地化字符串。
+        /// </summary>
+        public static string TD_Import_Options {
+            get {
+                return ResourceManager.GetString("TD_Import_Options", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 3D Model 的本地化字符串。
         /// </summary>
         public static string TD_Model {
@@ -2145,6 +2343,15 @@ namespace FFXIV_TexTools2.Resources {
         public static string Update_TEX {
             get {
                 return ResourceManager.GetString("Update_TEX", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Use Original Bones 的本地化字符串。
+        /// </summary>
+        public static string UseOrignalBones {
+            get {
+                return ResourceManager.GetString("UseOrignalBones", resourceCulture);
             }
         }
         

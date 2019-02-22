@@ -123,8 +123,29 @@
   <data name="Accessory" xml:space="preserve">
     <value>Accessory</value>
   </data>
+  <data name="AddMesh" xml:space="preserve">
+    <value>添加网格</value>
+  </data>
+  <data name="AddPart" xml:space="preserve">
+    <value>添加部件</value>
+  </data>
+  <data name="Add_Remove" xml:space="preserve">
+    <value>添加/移除:</value>
+  </data>
+  <data name="AdvImportNote" xml:space="preserve">
+    <value>*注意:这些选项仍在开发中，可能无法正常工作。</value>
+  </data>
   <data name="All" xml:space="preserve">
-    <value>All</value>
+    <value>ALL</value>
+  </data>
+  <data name="AttemptFixText" xml:space="preserve">
+    <value>如果道具与其他道具组合时出现镂空，请使用这些选项。</value>
+  </data>
+  <data name="Attempt_Fix" xml:space="preserve">
+    <value>尝试修复</value>
+  </data>
+  <data name="Attributes" xml:space="preserve">
+    <value>属性:</value>
   </data>
   <data name="Au_Ra" xml:space="preserve">
     <value>敖龙族</value>
@@ -147,6 +168,15 @@
   <data name="Body_Legs_Feet" xml:space="preserve">
     <value>身体 + 腿部 + 脚部</value>
   </data>
+  <data name="Bones" xml:space="preserve">
+    <value>骨骼:</value>
+  </data>
+  <data name="Bone_addition_is_automatic" xml:space="preserve">
+    <value>骨骼添加是自动的</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>取消</value>
+  </data>
   <data name="Carbuncle" xml:space="preserve">
     <value>石兽</value>
   </data>
@@ -156,11 +186,17 @@
   <data name="ColorSet" xml:space="preserve">
     <value>ColorSet</value>
   </data>
+  <data name="CreateXML" xml:space="preserve">
+    <value>生成XML</value>
+  </data>
   <data name="Diffuse" xml:space="preserve">
     <value>Diffuse</value>
   </data>
   <data name="Disable" xml:space="preserve">
     <value>禁用</value>
+  </data>
+  <data name="Disable_Extra_Data" xml:space="preserve">
+    <value>禁用网格额外数据</value>
   </data>
   <data name="DX_Version" xml:space="preserve">
     <value>DX版本</value>
@@ -197,6 +233,9 @@
   </data>
   <data name="Export_as_Image" xml:space="preserve">
     <value>导出为图像</value>
+  </data>
+  <data name="ExtraMeshData" xml:space="preserve">
+    <value>网格额外数据:</value>
   </data>
   <data name="Face" xml:space="preserve">
     <value>面对</value>
@@ -246,6 +285,9 @@
   <data name="Import" xml:space="preserve">
     <value>导入</value>
   </data>
+  <data name="Importing_File" xml:space="preserve">
+    <value>导入文件</value>
+  </data>
   <data name="Iris" xml:space="preserve">
     <value>眼</value>
   </data>
@@ -281,6 +323,12 @@
   </data>
   <data name="Mask" xml:space="preserve">
     <value>Mask</value>
+  </data>
+  <data name="Material" xml:space="preserve">
+    <value>材质:</value>
+  </data>
+  <data name="Materials" xml:space="preserve">
+    <value>材质:</value>
   </data>
   <data name="Menu_About" xml:space="preserve">
     <value>FFXIV TexTools</value>
@@ -336,6 +384,12 @@
   <data name="Menu_Tutorials" xml:space="preserve">
     <value>指南</value>
   </data>
+  <data name="Mesh" xml:space="preserve">
+    <value>网格:</value>
+  </data>
+  <data name="MeshCount" xml:space="preserve">
+    <value>网格数:</value>
+  </data>
   <data name="Minions" xml:space="preserve">
     <value>宠物</value>
   </data>
@@ -374,6 +428,15 @@
   </data>
   <data name="Options" xml:space="preserve">
     <value>设置</value>
+  </data>
+  <data name="Part" xml:space="preserve">
+    <value>部件:</value>
+  </data>
+  <data name="Parts" xml:space="preserve">
+    <value>部件:</value>
+  </data>
+  <data name="Part_Attributes" xml:space="preserve">
+    <value>部件属性:</value>
   </data>
   <data name="Pets" xml:space="preserve">
     <value>召唤兽</value>
@@ -417,6 +480,9 @@
   <data name="Tail" xml:space="preserve">
     <value>尾巴</value>
   </data>
+  <data name="TD_Import_Options" xml:space="preserve">
+    <value>高级导入</value>
+  </data>
   <data name="TD_Model" xml:space="preserve">
     <value>3D模型</value>
   </data>
@@ -440,6 +506,9 @@
   </data>
   <data name="Update_TEX" xml:space="preserve">
     <value>更新纹理</value>
+  </data>
+  <data name="UseOrignalBones" xml:space="preserve">
+    <value>使用原始骨骼</value>
   </data>
   <data name="Viewer" xml:space="preserve">
     <value>视图</value>
