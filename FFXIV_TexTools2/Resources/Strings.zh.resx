@@ -123,6 +123,9 @@
   <data name="Accessory" xml:space="preserve">
     <value>Accessory</value>
   </data>
+  <data name="Active" xml:space="preserve">
+    <value>已激活</value>
+  </data>
   <data name="AddMesh" xml:space="preserve">
     <value>添加网格</value>
   </data>
@@ -183,8 +186,20 @@
   <data name="Character" xml:space="preserve">
     <value>Character</value>
   </data>
+  <data name="Clear_Selected" xml:space="preserve">
+    <value>清除选择</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>关闭</value>
+  </data>
   <data name="ColorSet" xml:space="preserve">
     <value>ColorSet</value>
+  </data>
+  <data name="Count_colon" xml:space="preserve">
+    <value>数量:</value>
+  </data>
+  <data name="Create" xml:space="preserve">
+    <value>创建</value>
   </data>
   <data name="CreateXML" xml:space="preserve">
     <value>生成XML</value>
@@ -327,6 +342,9 @@
   <data name="Male" xml:space="preserve">
     <value>男性</value>
   </data>
+  <data name="Map" xml:space="preserve">
+    <value>纹理</value>
+  </data>
   <data name="Mask" xml:space="preserve">
     <value>Mask</value>
   </data>
@@ -408,6 +426,15 @@
   <data name="ModList" xml:space="preserve">
     <value>Mod列表</value>
   </data>
+  <data name="ModpackCreatorInfo" xml:space="preserve">
+    <value>此工具将在以下目录中创建选定mod的mod包文件(*.ttmp):</value>
+  </data>
+  <data name="Modpack_Creator" xml:space="preserve">
+    <value>Mod包创建器</value>
+  </data>
+  <data name="ModPack_Name_colon" xml:space="preserve">
+    <value>Mod包名称:</value>
+  </data>
   <data name="Mod_Repos" xml:space="preserve">
     <value>Mod在线</value>
   </data>
@@ -417,6 +444,9 @@
   <data name="Mounts" xml:space="preserve">
     <value>坐骑</value>
   </data>
+  <data name="Name" xml:space="preserve">
+    <value>名称</value>
+  </data>
   <data name="Neck" xml:space="preserve">
     <value>颈部</value>
   </data>
@@ -425,6 +455,9 @@
   </data>
   <data name="Normal" xml:space="preserve">
     <value>Normal</value>
+  </data>
+  <data name="Num" xml:space="preserve">
+    <value>编号</value>
   </data>
   <data name="OFF" xml:space="preserve">
     <value>关闭</value>
@@ -441,6 +474,9 @@
   <data name="Part" xml:space="preserve">
     <value>部件:</value>
   </data>
+  <data name="Part2" xml:space="preserve">
+    <value>部件</value>
+  </data>
   <data name="Parts" xml:space="preserve">
     <value>部件:</value>
   </data>
@@ -452,6 +488,9 @@
   </data>
   <data name="PKEmporium" xml:space="preserve">
     <value>PrettyKitty Emporium</value>
+  </data>
+  <data name="Race" xml:space="preserve">
+    <value>种族</value>
   </data>
   <data name="Ramuh_Egi" xml:space="preserve">
     <value>Ramuh Egi</value>
@@ -477,8 +516,20 @@
   <data name="SearchBox" xml:space="preserve">
     <value>搜索 Textures</value>
   </data>
+  <data name="Search_colon" xml:space="preserve">
+    <value>搜索:</value>
+  </data>
+  <data name="Select_Active" xml:space="preserve">
+    <value>选择已激活</value>
+  </data>
+  <data name="Select_All" xml:space="preserve">
+    <value>选择所有</value>
+  </data>
   <data name="Selene" xml:space="preserve">
     <value>Selene</value>
+  </data>
+  <data name="Size_colon" xml:space="preserve">
+    <value>大小:</value>
   </data>
   <data name="Soul_Crystal" xml:space="preserve">
     <value>灵魂水晶</value>

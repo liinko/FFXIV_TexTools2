@@ -720,6 +720,9 @@
   <data name="About" xml:space="preserve">
     <value>About</value>
   </data>
+  <data name="Active" xml:space="preserve">
+    <value>Active</value>
+  </data>
   <data name="AddMesh" xml:space="preserve">
     <value>Add Mesh</value>
   </data>
@@ -749,6 +752,18 @@
   </data>
   <data name="Cancel" xml:space="preserve">
     <value>Cancel</value>
+  </data>
+  <data name="Clear_Selected" xml:space="preserve">
+    <value>Clear Selected</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="Count_colon" xml:space="preserve">
+    <value>Count:</value>
+  </data>
+  <data name="Create" xml:space="preserve">
+    <value>Create</value>
   </data>
   <data name="CreateXML" xml:space="preserve">
     <value>Make XML</value>
@@ -803,6 +818,9 @@
   </data>
   <data name="Lighting" xml:space="preserve">
     <value>Lighting</value>
+  </data>
+  <data name="Map" xml:space="preserve">
+    <value>Map</value>
   </data>
   <data name="Material" xml:space="preserve">
     <value>Material:</value>
@@ -876,11 +894,26 @@
   <data name="ModList" xml:space="preserve">
     <value>ModList</value>
   </data>
+  <data name="ModpackCreatorInfo" xml:space="preserve">
+    <value>This tool will create a zipped TexTools Mod Pack (*.ttmp) file of the selected mods in the following directory:</value>
+  </data>
+  <data name="Modpack_Creator" xml:space="preserve">
+    <value>Modpack Creator</value>
+  </data>
+  <data name="ModPack_Name_colon" xml:space="preserve">
+    <value>ModPack Name:</value>
+  </data>
   <data name="Mod_Repos" xml:space="preserve">
     <value>Mod Repos</value>
   </data>
+  <data name="Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
   <data name="NexusMods" xml:space="preserve">
     <value>Nexus Mods</value>
+  </data>
+  <data name="Num" xml:space="preserve">
+    <value>Num</value>
   </data>
   <data name="OFF" xml:space="preserve">
     <value>OFF</value>
@@ -894,6 +927,9 @@
   <data name="Part" xml:space="preserve">
     <value>Part:</value>
   </data>
+  <data name="Part2" xml:space="preserve">
+    <value>Part</value>
+  </data>
   <data name="Parts" xml:space="preserve">
     <value>Parts:</value>
   </data>
@@ -903,6 +939,9 @@
   <data name="PKEmporium" xml:space="preserve">
     <value>PrettyKitty Emporium</value>
   </data>
+  <data name="Race" xml:space="preserve">
+    <value>Race</value>
+  </data>
   <data name="Reflection" xml:space="preserve">
     <value>Reflection</value>
   </data>
@@ -911,6 +950,18 @@
   </data>
   <data name="Search" xml:space="preserve">
     <value>Search</value>
+  </data>
+  <data name="Search_colon" xml:space="preserve">
+    <value>Search:</value>
+  </data>
+  <data name="Select_Active" xml:space="preserve">
+    <value>Select Active</value>
+  </data>
+  <data name="Select_All" xml:space="preserve">
+    <value>Select All</value>
+  </data>
+  <data name="Size_colon" xml:space="preserve">
+    <value>Size:</value>
   </data>
   <data name="TD_Import_Options" xml:space="preserve">
     <value>3D Import Options</value>
