@@ -502,6 +502,15 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Delete 的本地化字符串。
+        /// </summary>
+        public static string Delete {
+            get {
+                return ResourceManager.GetString("Delete", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 DemiHuman 的本地化字符串。
         /// </summary>
         public static string DemiHuman {
@@ -687,6 +696,15 @@ namespace FFXIV_TexTools2.Resources {
         public static string Enable {
             get {
                 return ResourceManager.GetString("Enable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Enable/Disable 的本地化字符串。
+        /// </summary>
+        public static string Enable_Disable {
+            get {
+                return ResourceManager.GetString("Enable_Disable", resourceCulture);
             }
         }
         
@@ -1767,6 +1785,15 @@ namespace FFXIV_TexTools2.Resources {
         public static string ModelCharaFile {
             get {
                 return ResourceManager.GetString("ModelCharaFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 ModList 的本地化字符串。
+        /// </summary>
+        public static string ModList {
+            get {
+                return ResourceManager.GetString("ModList", resourceCulture);
             }
         }
         

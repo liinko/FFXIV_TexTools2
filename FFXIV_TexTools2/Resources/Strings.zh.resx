@@ -189,6 +189,9 @@
   <data name="CreateXML" xml:space="preserve">
     <value>生成XML</value>
   </data>
+  <data name="Delete" xml:space="preserve">
+    <value>删除</value>
+  </data>
   <data name="Diffuse" xml:space="preserve">
     <value>Diffuse</value>
   </data>
@@ -209,6 +212,9 @@
   </data>
   <data name="Enable" xml:space="preserve">
     <value>启用</value>
+  </data>
+  <data name="Enable_Disable" xml:space="preserve">
+    <value>启用/禁用</value>
   </data>
   <data name="Eos" xml:space="preserve">
     <value>Eos</value>
@@ -398,6 +404,9 @@
   </data>
   <data name="Model_ID" xml:space="preserve">
     <value>模型ID</value>
+  </data>
+  <data name="ModList" xml:space="preserve">
+    <value>Mod列表</value>
   </data>
   <data name="Mod_Repos" xml:space="preserve">
     <value>Mod在线</value>

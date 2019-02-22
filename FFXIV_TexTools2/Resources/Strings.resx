@@ -753,6 +753,9 @@
   <data name="CreateXML" xml:space="preserve">
     <value>Make XML</value>
   </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
   <data name="Disable" xml:space="preserve">
     <value>Disable</value>
   </data>
@@ -764,6 +767,9 @@
   </data>
   <data name="Enable" xml:space="preserve">
     <value>Enable</value>
+  </data>
+  <data name="Enable_Disable" xml:space="preserve">
+    <value>Enable/Disable</value>
   </data>
   <data name="exportObjButton" xml:space="preserve">
     <value>Export Model + Materials</value>
@@ -866,6 +872,9 @@
   </data>
   <data name="Model_ID" xml:space="preserve">
     <value>Model ID</value>
+  </data>
+  <data name="ModList" xml:space="preserve">
+    <value>ModList</value>
   </data>
   <data name="Mod_Repos" xml:space="preserve">
     <value>Mod Repos</value>

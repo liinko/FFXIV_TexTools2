@@ -72,7 +72,7 @@ namespace FFXIV_TexTools2.Views
                     s.Active = Brushes.Gray;
                     s.ActiveOpacity = 0.5f;
                     s.ActiveBorder = Brushes.Red;
-                    modToggleButton.Content = "Enable";
+                    modToggleButton.Content = FFXIV_TexTools2.Resources.Strings.Enable;
                 }
                 else
                 {
@@ -80,7 +80,7 @@ namespace FFXIV_TexTools2.Views
                     s.Active = Brushes.Transparent;
                     s.ActiveOpacity = 1;
                     s.ActiveBorder = Brushes.Green;
-                    modToggleButton.Content = "Disable";
+                    modToggleButton.Content = FFXIV_TexTools2.Resources.Strings.Disable;
                 }
 
                 Helper.UpdateIndex(offset, s.Entry.fullPath, s.Entry.datFile);
@@ -96,11 +96,11 @@ namespace FFXIV_TexTools2.Views
                 {
                     if (selected.Active == Brushes.Transparent)
                     {
-                        modToggleButton.Content = "Disable";
+                        modToggleButton.Content = FFXIV_TexTools2.Resources.Strings.Disable;
                     }
                     else
                     {
-                        modToggleButton.Content = "Enable";
+                        modToggleButton.Content = FFXIV_TexTools2.Resources.Strings.Enable;
                     }
 
                     //goToButton.IsEnabled = true;

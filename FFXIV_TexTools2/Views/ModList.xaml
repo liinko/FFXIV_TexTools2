@@ -3,9 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:resx ="clr-namespace:FFXIV_TexTools2.Resources"
         xmlns:src="clr-namespace:FFXIV_TexTools2.Model"
         mc:Ignorable="d"
-        Title="ModList" Height="500" Width="800" WindowStartupLocation="CenterOwner" Closed="Window_Closed">
+        Title="{x:Static resx:Strings.ModList}" Height="500" Width="800" WindowStartupLocation="CenterOwner" Closed="Window_Closed">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
@@ -128,8 +129,8 @@
                     <ColumnDefinition/>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
-                <Button x:Name="modToggleButton" Content="Enable/Disable" Margin="10,0" Click="ModToggleButton_Click" IsEnabled="False"/>
-                <Button x:Name="deleteButton" Content="Delete" Grid.Column="1" Margin="10,0" IsEnabled="False" Click="DeleteButton_Click"/>
+                <Button x:Name="modToggleButton" Content="{x:Static resx:Strings.Enable_Disable}" Margin="10,0" Click="ModToggleButton_Click" IsEnabled="False"/>
+                <Button x:Name="deleteButton" Content="{x:Static resx:Strings.Delete}" Grid.Column="1" Margin="10,0" IsEnabled="False" Click="DeleteButton_Click"/>
             </Grid>
         </Grid>
     </Grid>
