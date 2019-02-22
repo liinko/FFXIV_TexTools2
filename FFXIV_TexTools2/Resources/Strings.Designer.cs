@@ -655,6 +655,15 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Directories 的本地化字符串。
+        /// </summary>
+        public static string Directories {
+            get {
+                return ResourceManager.GetString("Directories", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Disable 的本地化字符串。
         /// </summary>
         public static string Disable {
@@ -1087,6 +1096,15 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   查找类似 FFXIV Directory 的本地化字符串。
+        /// </summary>
+        public static string FFXIV_Directory {
+            get {
+                return ResourceManager.GetString("FFXIV_Directory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Field Marker 的本地化字符串。
         /// </summary>
         public static string FieldMarker {
@@ -1317,6 +1335,15 @@ namespace FFXIV_TexTools2.Resources {
         public static string Index_Backup {
             get {
                 return ResourceManager.GetString("Index_Backup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Index Backups Directory 的本地化字符串。
+        /// </summary>
+        public static string Index_Backups_Directory {
+            get {
+                return ResourceManager.GetString("Index_Backups_Directory", resourceCulture);
             }
         }
         
@@ -1879,11 +1906,29 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Modlist Directory 的本地化字符串。
+        /// </summary>
+        public static string Modlist_Directory {
+            get {
+                return ResourceManager.GetString("Modlist_Directory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Modpack Creator 的本地化字符串。
         /// </summary>
         public static string Modpack_Creator {
             get {
                 return ResourceManager.GetString("Modpack_Creator", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 ModPack Directory 的本地化字符串。
+        /// </summary>
+        public static string ModPack_Directory {
+            get {
+                return ResourceManager.GetString("ModPack_Directory", resourceCulture);
             }
         }
         
@@ -2320,6 +2365,15 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Save Directory 的本地化字符串。
+        /// </summary>
+        public static string Save_Directory {
+            get {
+                return ResourceManager.GetString("Save_Directory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Search 的本地化字符串。
         /// </summary>
         public static string Search {
@@ -2568,6 +2622,15 @@ namespace FFXIV_TexTools2.Resources {
         public static string Two_Handed {
             get {
                 return ResourceManager.GetString("Two_Handed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 UI Icon Search 的本地化字符串。
+        /// </summary>
+        public static string UI_Icon_Search {
+            get {
+                return ResourceManager.GetString("UI_Icon_Search", resourceCulture);
             }
         }
         
