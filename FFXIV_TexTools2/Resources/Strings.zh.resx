@@ -121,7 +121,7 @@
     <value>Accessory</value>
   </data>
   <data name="All" xml:space="preserve">
-    <value>全部</value>
+    <value>All</value>
   </data>
   <data name="Au_Ra" xml:space="preserve">
     <value>敖龙族</value>
@@ -148,7 +148,7 @@
     <value>石兽</value>
   </data>
   <data name="Character" xml:space="preserve">
-    <value>角色</value>
+    <value>Character</value>
   </data>
   <data name="ColorSet" xml:space="preserve">
     <value>ColorSet</value>
