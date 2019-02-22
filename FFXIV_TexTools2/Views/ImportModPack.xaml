@@ -3,8 +3,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:resx ="clr-namespace:FFXIV_TexTools2.Resources"
         mc:Ignorable="d"
-        Title="ModPack Importer" Height="500" Width="700" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner">
+        Title="{x:Static resx:Strings.ModPack_Importer}" Height="500" Width="700" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="12*"/>
@@ -20,8 +21,8 @@
                 <Label x:Name="InfoHeader" BorderBrush="Black" BorderThickness="0,1,0,0" />
             </Grid>
             <StackPanel Orientation="Horizontal" Grid.Row="1">
-                <Button x:Name="SelectAllButton" HorizontalAlignment="Left" VerticalAlignment="Center" Content="Select All" Margin="10,0,0,0" Click="SelectAllButton_Click" />
-                <Button x:Name="DeselectAllButton" HorizontalAlignment="Left" VerticalAlignment="Center" Content="Deselect All" Margin="10,0,0,0" Click="DeselectAllButton_Click" />
+                <Button x:Name="SelectAllButton" HorizontalAlignment="Left" VerticalAlignment="Center" Content="{x:Static resx:Strings.Select_All}" Margin="10,0,0,0" Click="SelectAllButton_Click" />
+                <Button x:Name="DeselectAllButton" HorizontalAlignment="Left" VerticalAlignment="Center" Content="{x:Static resx:Strings.Clear_Selected}" Margin="10,0,0,0" Click="DeselectAllButton_Click" />
             </StackPanel>
             <ListView x:Name="listView" Grid.Row="2" SelectionChanged="listView_SelectionChanged" SelectionMode="Multiple" 
                       BorderBrush="Black" BorderThickness="0,1" GridViewColumnHeader.Click="Header_Click">
@@ -39,12 +40,12 @@
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
-                        <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}"/>
-                        <GridViewColumn Header="Map" DisplayMemberBinding="{Binding Map}"/>
-                        <GridViewColumn Header="Race" DisplayMemberBinding="{Binding Race}"/>
-                        <GridViewColumn Header="Part" DisplayMemberBinding="{Binding Part}"/>
-                        <GridViewColumn Header="Num" DisplayMemberBinding="{Binding Num}"/>
-                        <GridViewColumn Header="Existing" DisplayMemberBinding="{Binding Active}"/>
+                        <GridViewColumn Header="{x:Static resx:Strings.Name}" DisplayMemberBinding="{Binding Name}"/>
+                        <GridViewColumn Header="{x:Static resx:Strings.Map}" DisplayMemberBinding="{Binding Map}"/>
+                        <GridViewColumn Header="{x:Static resx:Strings.Race}" DisplayMemberBinding="{Binding Race}"/>
+                        <GridViewColumn Header="{x:Static resx:Strings.Part}" DisplayMemberBinding="{Binding Part}"/>
+                        <GridViewColumn Header="{x:Static resx:Strings.Num}" DisplayMemberBinding="{Binding Num}"/>
+                        <GridViewColumn Header="{x:Static resx:Strings.Existing}" DisplayMemberBinding="{Binding Active}"/>
                     </GridView>
                 </ListView.View>
             </ListView>
@@ -59,8 +60,8 @@
                     <ColumnDefinition/>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
-                <Button x:Name="CancelButton" Content="Cancel" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Click="CancelButton_Click" Padding="3,1"/>
-                <Button x:Name="ImportButton" Content="Import" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Click="ImportButton_Click" Padding="3,1" />
+                <Button x:Name="CancelButton" Content="{x:Static resx:Strings.Cancel}" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Click="CancelButton_Click" Padding="3,1"/>
+                <Button x:Name="ImportButton" Content="{x:Static resx:Strings.Import}" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Click="ImportButton_Click" Padding="3,1" />
 
             </Grid>
             <Grid Grid.Column="0">
@@ -70,9 +71,9 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
-                <Label Content="Mod Count: " Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                <Label Content="{x:Static resx:Strings.Mod_Count_colon}" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" />
                 <Label x:Name="modCount" Grid.Column="1" VerticalAlignment="Center"/>
-                <Label Content="Total Size: " Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                <Label Content="{x:Static resx:Strings.Total_Size_colon}" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" />
                 <Label x:Name="modSize" Grid.Column="3" VerticalAlignment="Center"/>
             </Grid>
         </Grid>

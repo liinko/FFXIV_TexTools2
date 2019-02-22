@@ -246,6 +246,9 @@
   <data name="Etc" xml:space="preserve">
     <value>Etc</value>
   </data>
+  <data name="Existing" xml:space="preserve">
+    <value>已存在</value>
+  </data>
   <data name="exportObjButton" xml:space="preserve">
     <value>导出模型和材质</value>
   </data>
@@ -429,11 +432,20 @@
   <data name="ModpackCreatorInfo" xml:space="preserve">
     <value>此工具将在以下目录中创建选定mod的mod包文件(*.ttmp):</value>
   </data>
+  <data name="ModpackImporterInfo" xml:space="preserve">
+    <value>下列Mod将被安装。</value>
+  </data>
   <data name="Modpack_Creator" xml:space="preserve">
     <value>Mod包创建器</value>
   </data>
+  <data name="ModPack_Importer" xml:space="preserve">
+    <value>Mod包导入器</value>
+  </data>
   <data name="ModPack_Name_colon" xml:space="preserve">
     <value>Mod包名称:</value>
+  </data>
+  <data name="Mod_Count_colon" xml:space="preserve">
+    <value>Mod数: </value>
   </data>
   <data name="Mod_Repos" xml:space="preserve">
     <value>Mod在线</value>
@@ -551,6 +563,9 @@
   </data>
   <data name="Titan_Egi" xml:space="preserve">
     <value>Titan-Egi</value>
+  </data>
+  <data name="Total_Size_colon" xml:space="preserve">
+    <value>总大小: </value>
   </data>
   <data name="Translucency_OFF" xml:space="preserve">
     <value>半透明化关闭</value>

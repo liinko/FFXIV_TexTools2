@@ -952,6 +952,15 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Existing 的本地化字符串。
+        /// </summary>
+        public static string Existing {
+            get {
+                return ResourceManager.GetString("Existing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Export as DDS 的本地化字符串。
         /// </summary>
         public static string Export_as_DDS {
@@ -1816,6 +1825,15 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Mod Count:  的本地化字符串。
+        /// </summary>
+        public static string Mod_Count_colon {
+            get {
+                return ResourceManager.GetString("Mod_Count_colon", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Mod Repos 的本地化字符串。
         /// </summary>
         public static string Mod_Repos {
@@ -1861,6 +1879,15 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   查找类似 ModPack Importer 的本地化字符串。
+        /// </summary>
+        public static string ModPack_Importer {
+            get {
+                return ResourceManager.GetString("ModPack_Importer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 ModPack Name: 的本地化字符串。
         /// </summary>
         public static string ModPack_Name_colon {
@@ -1875,6 +1902,15 @@ namespace FFXIV_TexTools2.Resources {
         public static string ModpackCreatorInfo {
             get {
                 return ResourceManager.GetString("ModpackCreatorInfo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 The following Mods will be installed. 的本地化字符串。
+        /// </summary>
+        public static string ModpackImporterInfo {
+            get {
+                return ResourceManager.GetString("ModpackImporterInfo", resourceCulture);
             }
         }
         
@@ -2460,6 +2496,15 @@ namespace FFXIV_TexTools2.Resources {
         public static string Titan_Egi {
             get {
                 return ResourceManager.GetString("Titan_Egi", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Total Size:  的本地化字符串。
+        /// </summary>
+        public static string Total_Size_colon {
+            get {
+                return ResourceManager.GetString("Total_Size_colon", resourceCulture);
             }
         }
         

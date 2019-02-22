@@ -786,6 +786,9 @@
   <data name="Enable_Disable" xml:space="preserve">
     <value>Enable/Disable</value>
   </data>
+  <data name="Existing" xml:space="preserve">
+    <value>Existing</value>
+  </data>
   <data name="exportObjButton" xml:space="preserve">
     <value>Export Model + Materials</value>
   </data>
@@ -897,11 +900,20 @@
   <data name="ModpackCreatorInfo" xml:space="preserve">
     <value>This tool will create a zipped TexTools Mod Pack (*.ttmp) file of the selected mods in the following directory:</value>
   </data>
+  <data name="ModpackImporterInfo" xml:space="preserve">
+    <value>The following Mods will be installed.</value>
+  </data>
   <data name="Modpack_Creator" xml:space="preserve">
     <value>Modpack Creator</value>
   </data>
+  <data name="ModPack_Importer" xml:space="preserve">
+    <value>ModPack Importer</value>
+  </data>
   <data name="ModPack_Name_colon" xml:space="preserve">
     <value>ModPack Name:</value>
+  </data>
+  <data name="Mod_Count_colon" xml:space="preserve">
+    <value>Mod Count: </value>
   </data>
   <data name="Mod_Repos" xml:space="preserve">
     <value>Mod Repos</value>
@@ -971,6 +983,9 @@
   </data>
   <data name="Texture" xml:space="preserve">
     <value>Texture</value>
+  </data>
+  <data name="Total_Size_colon" xml:space="preserve">
+    <value>Total Size: </value>
   </data>
   <data name="Translucency_OFF" xml:space="preserve">
     <value>Translucency OFF</value>
