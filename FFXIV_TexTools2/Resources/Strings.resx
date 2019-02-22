@@ -1047,6 +1047,9 @@
   <data name="Viewer" xml:space="preserve">
     <value>Viewer</value>
   </data>
+  <data name="Visit_Website" xml:space="preserve">
+    <value>Visit Website</value>
+  </data>
   <data name="XMArchive" xml:space="preserve">
     <value>XIV Mod Archive</value>
   </data>

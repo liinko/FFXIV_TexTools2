@@ -636,6 +636,9 @@
   <data name="Viewer" xml:space="preserve">
     <value>视图</value>
   </data>
+  <data name="Visit_Website" xml:space="preserve">
+    <value>官网</value>
+  </data>
   <data name="Waist" xml:space="preserve">
     <value>腰带</value>
   </data>

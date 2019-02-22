@@ -2716,6 +2716,15 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Visit Website 的本地化字符串。
+        /// </summary>
+        public static string Visit_Website {
+            get {
+                return ResourceManager.GetString("Visit_Website", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Waist 的本地化字符串。
         /// </summary>
         public static string Waist {
