@@ -795,6 +795,9 @@
   <data name="exportObjButton" xml:space="preserve">
     <value>Export Model + Materials</value>
   </data>
+  <data name="ExportSettings" xml:space="preserve">
+    <value>ExportSettings</value>
+  </data>
   <data name="Export_as_DDS" xml:space="preserve">
     <value>Export as DDS</value>
   </data>
@@ -1001,6 +1004,12 @@
   </data>
   <data name="Slot" xml:space="preserve">
     <value>Slot</value>
+  </data>
+  <data name="StartOverInfo" xml:space="preserve">
+    <value>Starting over will:1.Restore index files to their original state.  2.Delete all mods and create new .dat files.  3.Delete all .modlist file entries.  Do you want to start over?</value>
+  </data>
+  <data name="Target_DAE_Importer" xml:space="preserve">
+    <value>Target DAE Importer</value>
   </data>
   <data name="TD_Import_Options" xml:space="preserve">
     <value>3D Import Options</value>

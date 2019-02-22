@@ -997,6 +997,15 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   查找类似 ExportSettings 的本地化字符串。
+        /// </summary>
+        public static string ExportSettings {
+            get {
+                return ResourceManager.GetString("ExportSettings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Extra Mesh Data: 的本地化字符串。
         /// </summary>
         public static string ExtraMeshData {
@@ -2482,6 +2491,15 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Starting over will:1.Restore index files to their original state.  2.Delete all mods and create new .dat files.  3.Delete all .modlist file entries.  Do you want to start over? 的本地化字符串。
+        /// </summary>
+        public static string StartOverInfo {
+            get {
+                return ResourceManager.GetString("StartOverInfo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Status 的本地化字符串。
         /// </summary>
         public static string Status {
@@ -2541,6 +2559,15 @@ namespace FFXIV_TexTools2.Resources {
         public static string TailMtrlFolder {
             get {
                 return ResourceManager.GetString("TailMtrlFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Target DAE Importer 的本地化字符串。
+        /// </summary>
+        public static string Target_DAE_Importer {
+            get {
+                return ResourceManager.GetString("Target_DAE_Importer", resourceCulture);
             }
         }
         

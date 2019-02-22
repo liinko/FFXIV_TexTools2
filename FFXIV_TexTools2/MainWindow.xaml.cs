@@ -323,11 +323,7 @@ namespace FFXIV_TexTools2
 
             if (!Helper.IsIndexLocked(true))
             {
-                var result = FlexibleMessageBox.Show("Starting over will:\n\n" +
-                    "Restore index files to their original state.\n" +
-                    "Delete all mods and create new .dat files.\n" +
-                    "Delete all .modlist file entries.\n\n" +
-                    "Do you want to start over?", "Start Over", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+                var result = FlexibleMessageBox.Show(Strings.StartOverInfo, Strings.Menu_StartOver, MessageBoxButtons.YesNo, MessageBoxIcon.Information);
 
                 if (result == System.Windows.Forms.DialogResult.Yes)
                 {
