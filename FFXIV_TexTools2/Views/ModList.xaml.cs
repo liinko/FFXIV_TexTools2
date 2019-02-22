@@ -50,7 +50,7 @@ namespace FFXIV_TexTools2.Views
         {
             var selected = modListTreeView.SelectedItem as ModListTVViewModel;
 
-            if(selected.Parent != null)
+            if(selected!=null&&selected.Parent != null)
             {
                 ListViewModel vm = new ListViewModel(selected.Name);
 
