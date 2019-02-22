@@ -406,7 +406,7 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Resources\Strings.ko.resx" />
     <EmbeddedResource Include="Resources\Strings.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
+      <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>

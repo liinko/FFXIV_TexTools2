@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="About" xml:space="preserve">
+    <value>关于</value>
+  </data>
   <data name="Accessory" xml:space="preserve">
     <value>Accessory</value>
   </data>
@@ -156,11 +159,20 @@
   <data name="Diffuse" xml:space="preserve">
     <value>Diffuse</value>
   </data>
+  <data name="Disable" xml:space="preserve">
+    <value>禁用</value>
+  </data>
+  <data name="DX_Version" xml:space="preserve">
+    <value>DX版本</value>
+  </data>
   <data name="Ears" xml:space="preserve">
     <value>耳部</value>
   </data>
   <data name="Elezen" xml:space="preserve">
     <value>精灵族</value>
+  </data>
+  <data name="Enable" xml:space="preserve">
+    <value>启用</value>
   </data>
   <data name="Eos" xml:space="preserve">
     <value>Eos</value>
@@ -176,6 +188,15 @@
   </data>
   <data name="Etc" xml:space="preserve">
     <value>Etc</value>
+  </data>
+  <data name="exportObjButton" xml:space="preserve">
+    <value>导出模型和材质</value>
+  </data>
+  <data name="Export_as_DDS" xml:space="preserve">
+    <value>导出为DDS</value>
+  </data>
+  <data name="Export_as_Image" xml:space="preserve">
+    <value>导出为图像</value>
   </data>
   <data name="Face" xml:space="preserve">
     <value>面对</value>
@@ -207,17 +228,32 @@
   <data name="Head_Body" xml:space="preserve">
     <value>头部 + 身体</value>
   </data>
+  <data name="Help" xml:space="preserve">
+    <value>帮助</value>
+  </data>
   <data name="Hyur_H" xml:space="preserve">
     <value>人族 高地之民</value>
   </data>
   <data name="Hyur_M" xml:space="preserve">
     <value>人族 中原之民</value>
   </data>
+  <data name="Icon_ID" xml:space="preserve">
+    <value>图标ID</value>
+  </data>
   <data name="Ifrit_Egi" xml:space="preserve">
     <value>Ifrit-Egi</value>
   </data>
+  <data name="Import" xml:space="preserve">
+    <value>导入</value>
+  </data>
   <data name="Iris" xml:space="preserve">
     <value>眼</value>
+  </data>
+  <data name="Item_List" xml:space="preserve">
+    <value>道具列表</value>
+  </data>
+  <data name="Join_us_on_Discord" xml:space="preserve">
+    <value>加入我们的Discord交流群</value>
   </data>
   <data name="Lalafell" xml:space="preserve">
     <value>拉拉菲尔族</value>
@@ -231,6 +267,9 @@
   <data name="Legs_Feet" xml:space="preserve">
     <value>腿部 + 脚部</value>
   </data>
+  <data name="Lighting" xml:space="preserve">
+    <value>灯光</value>
+  </data>
   <data name="Main_Hand" xml:space="preserve">
     <value>主手</value>
   </data>
@@ -243,11 +282,71 @@
   <data name="Mask" xml:space="preserve">
     <value>Mask</value>
   </data>
+  <data name="Menu_About" xml:space="preserve">
+    <value>FFXIV TexTools</value>
+  </data>
+  <data name="Menu_BugReport" xml:space="preserve">
+    <value>报告Bug</value>
+  </data>
+  <data name="Menu_Customize" xml:space="preserve">
+    <value>界面表现</value>
+  </data>
+  <data name="Menu_Directories" xml:space="preserve">
+    <value>配置路径</value>
+  </data>
+  <data name="Menu_English" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="Menu_ExportSettings" xml:space="preserve">
+    <value>导出格式</value>
+  </data>
+  <data name="Menu_French" xml:space="preserve">
+    <value>French</value>
+  </data>
+  <data name="Menu_German" xml:space="preserve">
+    <value>German</value>
+  </data>
+  <data name="Menu_ImportModpack" xml:space="preserve">
+    <value>导入Mod包</value>
+  </data>
+  <data name="Menu_Japanese" xml:space="preserve">
+    <value>Japanese</value>
+  </data>
+  <data name="Menu_Language" xml:space="preserve">
+    <value>语言</value>
+  </data>
+  <data name="Menu_MakeModpack" xml:space="preserve">
+    <value>制作Mod包</value>
+  </data>
+  <data name="Menu_ModList" xml:space="preserve">
+    <value>Mod列表</value>
+  </data>
+  <data name="Menu_ProblemCheck" xml:space="preserve">
+    <value>数据检查</value>
+  </data>
+  <data name="Menu_ReapplyAll" xml:space="preserve">
+    <value>重新启用所有Mod</value>
+  </data>
+  <data name="Menu_RevertAll" xml:space="preserve">
+    <value>禁用所有Mod</value>
+  </data>
+  <data name="Menu_StartOver" xml:space="preserve">
+    <value>初始化</value>
+  </data>
+  <data name="Menu_Tutorials" xml:space="preserve">
+    <value>指南</value>
+  </data>
   <data name="Minions" xml:space="preserve">
     <value>宠物</value>
   </data>
   <data name="Miqote" xml:space="preserve">
     <value>猫魅族</value>
+  </data>
+  <data name="Model_ID" xml:space="preserve">
+    <value>模型ID</value>
+  </data>
+  <data name="Mod_Repos" xml:space="preserve">
+    <value>Mod在线</value>
   </data>
   <data name="Monster" xml:space="preserve">
     <value>魔物</value>
@@ -258,17 +357,35 @@
   <data name="Neck" xml:space="preserve">
     <value>颈部</value>
   </data>
+  <data name="NexusMods" xml:space="preserve">
+    <value>Nexus Mods</value>
+  </data>
   <data name="Normal" xml:space="preserve">
     <value>Normal</value>
+  </data>
+  <data name="OFF" xml:space="preserve">
+    <value>关闭</value>
   </data>
   <data name="Off_Hand" xml:space="preserve">
     <value>副手</value>
   </data>
+  <data name="ON" xml:space="preserve">
+    <value>开启</value>
+  </data>
+  <data name="Options" xml:space="preserve">
+    <value>设置</value>
+  </data>
   <data name="Pets" xml:space="preserve">
     <value>召唤兽</value>
   </data>
+  <data name="PKEmporium" xml:space="preserve">
+    <value>PrettyKitty Emporium</value>
+  </data>
   <data name="Ramuh_Egi" xml:space="preserve">
     <value>Ramuh Egi</value>
+  </data>
+  <data name="Reflection" xml:space="preserve">
+    <value>反射光</value>
   </data>
   <data name="Rings" xml:space="preserve">
     <value>戒指</value>
@@ -278,6 +395,12 @@
   </data>
   <data name="Rook_Autoturret" xml:space="preserve">
     <value>Rook Autoturret</value>
+  </data>
+  <data name="Save_All_DDS" xml:space="preserve">
+    <value>保存所有DDS</value>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>搜索</value>
   </data>
   <data name="SearchBox" xml:space="preserve">
     <value>搜索 Textures</value>
@@ -294,11 +417,32 @@
   <data name="Tail" xml:space="preserve">
     <value>尾巴</value>
   </data>
+  <data name="TD_Model" xml:space="preserve">
+    <value>3D模型</value>
+  </data>
+  <data name="Texture" xml:space="preserve">
+    <value>纹理</value>
+  </data>
   <data name="Titan_Egi" xml:space="preserve">
     <value>Titan-Egi</value>
   </data>
+  <data name="Translucency_OFF" xml:space="preserve">
+    <value>半透明化关闭</value>
+  </data>
+  <data name="Translucency_ON" xml:space="preserve">
+    <value>半透明化开启</value>
+  </data>
+  <data name="Transparency" xml:space="preserve">
+    <value>半透明化</value>
+  </data>
   <data name="Two_Handed" xml:space="preserve">
     <value>双手</value>
+  </data>
+  <data name="Update_TEX" xml:space="preserve">
+    <value>更新纹理</value>
+  </data>
+  <data name="Viewer" xml:space="preserve">
+    <value>视图</value>
   </data>
   <data name="Waist" xml:space="preserve">
     <value>腰带</value>
@@ -308,5 +452,8 @@
   </data>
   <data name="Wrists" xml:space="preserve">
     <value>腕部</value>
+  </data>
+  <data name="XMArchive" xml:space="preserve">
+    <value>XIV Mod Archive</value>
   </data>
 </root>

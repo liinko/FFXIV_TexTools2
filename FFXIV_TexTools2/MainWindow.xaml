@@ -4,6 +4,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:local1 ="clr-namespace:FFXIV_TexTools2.ViewModel"
+    xmlns:resx ="clr-namespace:FFXIV_TexTools2.Resources"
     xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
     xmlns:hx="http://helix-toolkit.org/wpf/SharpDX"
     xmlns:shader="clr-namespace:FFXIV_TexTools2.Shader"
@@ -48,45 +49,45 @@
         </StatusBar>
         <Menu x:Name="menu" Height="22" VerticalAlignment="Top">
             <MenuItem Header="Mods">
-                <MenuItem x:Name="Menu_ModList" Header="Mod List" BorderThickness="1" Click="Menu_ModList_Click"/>
-                <MenuItem x:Name="Menu_MakeModpack" Header="Make ModPack" Click="Menu_MakeModpack_Click" />
-                <MenuItem x:Name="Menu_ImportModpack" Header="Import ModPack" Click="Menu_ImportModpack_Click" />
-                <MenuItem x:Name="Menu_RevertAll" Header="Disable All Mods" Click="Menu_RevertAll_Click"/>
-                <MenuItem x:Name="Menu_ReapplyAll" Header="Re-enable All Mods" Click="Menu_ReapplyAll_Click"/>
+                <MenuItem x:Name="Menu_ModList" Header="{x:Static resx:Strings.Menu_ModList}" BorderThickness="1" Click="Menu_ModList_Click"/>
+                <MenuItem x:Name="Menu_MakeModpack" Header="{x:Static resx:Strings.Menu_MakeModpack}" Click="Menu_MakeModpack_Click" />
+                <MenuItem x:Name="Menu_ImportModpack" Header="{x:Static resx:Strings.Menu_ImportModpack}" Click="Menu_ImportModpack_Click" />
+                <MenuItem x:Name="Menu_RevertAll" Header="{x:Static resx:Strings.Menu_RevertAll}" Click="Menu_RevertAll_Click"/>
+                <MenuItem x:Name="Menu_ReapplyAll" Header="{x:Static resx:Strings.Menu_ReapplyAll}" Click="Menu_ReapplyAll_Click"/>
             </MenuItem>
-            <MenuItem Header="Search" StaysOpenOnClick="True">
-                <MenuItem Header="Model ID" Command="{Binding IDSearchCommand}"/>
-                <MenuItem Header="Icon ID" Command="{Binding UISearchCommand}"/>
+            <MenuItem Header="{x:Static resx:Strings.Search}" StaysOpenOnClick="True">
+                <MenuItem Header="{x:Static resx:Strings.Model_ID}" Command="{Binding IDSearchCommand}"/>
+                <MenuItem Header="{x:Static resx:Strings.Icon_ID}" Command="{Binding UISearchCommand}"/>
             </MenuItem>
-            <MenuItem Header="Options" StaysOpenOnClick="True" Height="22">
-                <MenuItem x:Name="Menu_Directories" Header="Directories" Click="Menu_Directories_Click"/>
-                <MenuItem x:Name="Menu_Customize" Header="Customize" Click="Menu_Customize_Click"/>
-                <MenuItem x:Name="Menu_ExportSettings" Header="Export Settings" Click="Menu_ExportSettings_Click"/>
-                <MenuItem x:Name="Save_All_DDS" Header="Save All DDS" Click="Save_All_DDS_Click" IsEnabled="False"/>
+            <MenuItem Header="{x:Static resx:Strings.Options}" StaysOpenOnClick="True" Height="22">
+                <MenuItem x:Name="Menu_Directories" Header="{x:Static resx:Strings.Menu_Directories}" Click="Menu_Directories_Click"/>
+                <MenuItem x:Name="Menu_Customize" Header="{x:Static resx:Strings.Menu_Customize}" Click="Menu_Customize_Click"/>
+                <MenuItem x:Name="Menu_ExportSettings" Header="{x:Static resx:Strings.Menu_ExportSettings}" Click="Menu_ExportSettings_Click"/>
+                <MenuItem x:Name="Save_All_DDS" Header="{x:Static resx:Strings.Save_All_DDS}" Click="Save_All_DDS_Click" IsEnabled="False"/>
 
             </MenuItem>
-            <MenuItem Header="Help">
-                <MenuItem x:Name="Menu_ProblemCheck" Header="Check For Problems" Click="Menu_ProblemCheck_Click"/>
-                <MenuItem x:Name="Menu_StartOver" Header="Start Over" Click="Menu_StartOver_Click" />
-                <MenuItem x:Name="Menu_BugReport" Header="Report Bug" Click="Menu_BugReport_Click"/>
-                <MenuItem x:Name="Menu_Tutorials" Header="Tutorials" Click="Menu_Tutorials_Click"/>
+            <MenuItem Header="{x:Static resx:Strings.Help}">
+                <MenuItem x:Name="Menu_ProblemCheck" Header="{x:Static resx:Strings.Menu_ProblemCheck}" Click="Menu_ProblemCheck_Click"/>
+                <MenuItem x:Name="Menu_StartOver" Header="{x:Static resx:Strings.Menu_StartOver}" Click="Menu_StartOver_Click" />
+                <MenuItem x:Name="Menu_BugReport" Header="{x:Static resx:Strings.Menu_BugReport}" Click="Menu_BugReport_Click"/>
+                <MenuItem x:Name="Menu_Tutorials" Header="{x:Static resx:Strings.Menu_Tutorials}" Click="Menu_Tutorials_Click"/>
             </MenuItem>
-            <MenuItem Header="About">
-                <MenuItem x:Name="Menu_About" Header="FFXIV TexTools" Click="Menu_About_Click"/>
+            <MenuItem Header="{x:Static resx:Strings.About}">
+                <MenuItem x:Name="Menu_About" Header="{x:Static resx:Strings.Menu_About}" Click="Menu_About_Click"/>
             </MenuItem>
-            <MenuItem Header="Language">
-                <MenuItem x:Name="Menu_English" Header="English" IsCheckable="True" Click="Menu_English_Click" IsEnabled="{Binding EnglishEnabled}" IsChecked="{Binding IsEnglish, Mode=OneWay}"/>
-                <MenuItem x:Name="Menu_Japanese" Header="Japanese" IsCheckable="True" Click="Menu_Japanese_Click" IsEnabled="{Binding JapaneseEnabled}" IsChecked="{Binding IsJapanese, Mode=OneWay}"/>
-                <MenuItem x:Name="Menu_French" Header="French" IsCheckable="True" Click="Menu_French_Click" IsEnabled="{Binding FrenchEnabled}" IsChecked="{Binding IsFrench, Mode=OneWay}"/>
-                <MenuItem x:Name="Menu_German" Header="German" IsCheckable="True" Click="Menu_German_Click" IsEnabled="{Binding GermanEnabled}" IsChecked="{Binding IsGerman, Mode=OneWay}"/>
+            <MenuItem Header="{x:Static resx:Strings.Menu_Language}">
+                <MenuItem x:Name="Menu_English" Header="{x:Static resx:Strings.Menu_English}" IsCheckable="True" Click="Menu_English_Click" IsEnabled="{Binding EnglishEnabled}" IsChecked="{Binding IsEnglish, Mode=OneWay}"/>
+                <MenuItem x:Name="Menu_Japanese" Header="{x:Static resx:Strings.Menu_Japanese}" IsCheckable="True" Click="Menu_Japanese_Click" IsEnabled="{Binding JapaneseEnabled}" IsChecked="{Binding IsJapanese, Mode=OneWay}"/>
+                <MenuItem x:Name="Menu_French" Header="{x:Static resx:Strings.Menu_French}" IsCheckable="True" Click="Menu_French_Click" IsEnabled="{Binding FrenchEnabled}" IsChecked="{Binding IsFrench, Mode=OneWay}"/>
+                <MenuItem x:Name="Menu_German" Header="{x:Static resx:Strings.Menu_German}" IsCheckable="True" Click="Menu_German_Click" IsEnabled="{Binding GermanEnabled}" IsChecked="{Binding IsGerman, Mode=OneWay}"/>
             </MenuItem>
-            <MenuItem Header="Mod Repos">
-                <MenuItem x:Name="PKEmporium" Header="PrettyKitty Emporium" Click="PKEmporium_Click"/>
-                <MenuItem x:Name="NexusMods" Header="Nexus Mods" Click="NexusMods_Click"/>
-                <MenuItem x:Name="XMArchive" Header="XIV Mod Archive" Click="XMArchive_Click"/>
+            <MenuItem Header="{x:Static resx:Strings.Mod_Repos}">
+                <MenuItem x:Name="PKEmporium" Header="{x:Static resx:Strings.PKEmporium}" Click="PKEmporium_Click"/>
+                <MenuItem x:Name="NexusMods" Header="{x:Static resx:Strings.NexusMods}" Click="NexusMods_Click"/>
+                <MenuItem x:Name="XMArchive" Header="{x:Static resx:Strings.XMArchive}" Click="XMArchive_Click"/>
             </MenuItem>
         </Menu>
-        <Button Content="Join us on Discord!" VerticalAlignment="Top" HorizontalAlignment="Right" BorderBrush="{x:Null}" Background="{x:Null}" Click="Menu_Discord_Click">
+        <Button Content="{x:Static resx:Strings.Join_us_on_Discord}" VerticalAlignment="Top" HorizontalAlignment="Right" BorderBrush="{x:Null}" Background="{x:Null}" Click="Menu_Discord_Click">
         </Button>
         <Grid Margin="0,22,0,21">
             <Grid.ColumnDefinitions>
@@ -94,7 +95,7 @@
                 <ColumnDefinition Width="5"/>
                 <ColumnDefinition Width="272*"/>
             </Grid.ColumnDefinitions>
-            <GroupBox x:Name="TexturesGroup" Header="Item List" Margin="5">
+            <GroupBox x:Name="TexturesGroup" Header="{x:Static resx:Strings.Item_List}" Margin="5">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="30"/>
@@ -136,10 +137,10 @@
             </GroupBox>
             <GridSplitter x:Name="gridSplitter" Grid.Column="1" Width="5" HorizontalAlignment="Center" Margin="0,52,0,49"/>
             <TabControl x:Name="tabControl" Grid.Column="2" Margin="10">
-                <TabItem Header="Texture" Width="100" Margin="-6,-2,-2,0" DataContext="{Binding TextureVM}" >
+                <TabItem Header="{x:Static resx:Strings.Texture}" Width="100" Margin="-6,-2,-2,0" DataContext="{Binding TextureVM}" >
                     <views:TextureView/>
                 </TabItem>
-                <TabItem Header="3D Model" Width="100" Margin="-6,-2,-2,0" IsEnabled="{Binding ModelTabEnabled, FallbackValue=false}" DataContext="{Binding ModelVM}">
+                <TabItem Header="{x:Static resx:Strings.TD_Model}" Width="100" Margin="-6,-2,-2,0" IsEnabled="{Binding ModelTabEnabled, FallbackValue=false}" DataContext="{Binding ModelVM}">
                     <views:ModelView/>
                 </TabItem>
             </TabControl>
