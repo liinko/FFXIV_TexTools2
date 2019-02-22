@@ -1861,6 +1861,15 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   查找类似 ModelSearch 的本地化字符串。
+        /// </summary>
+        public static string ModelSearch {
+            get {
+                return ResourceManager.GetString("ModelSearch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 ModList 的本地化字符串。
         /// </summary>
         public static string ModList {
@@ -2109,6 +2118,15 @@ namespace FFXIV_TexTools2.Resources {
         public static string OnlineStatusEXD {
             get {
                 return ResourceManager.GetString("OnlineStatusEXD", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Open 的本地化字符串。
+        /// </summary>
+        public static string Open {
+            get {
+                return ResourceManager.GetString("Open", resourceCulture);
             }
         }
         
@@ -2383,6 +2401,15 @@ namespace FFXIV_TexTools2.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Slot 的本地化字符串。
+        /// </summary>
+        public static string Slot {
+            get {
+                return ResourceManager.GetString("Slot", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Soul Crystal 的本地化字符串。
         /// </summary>
         public static string Soul_Crystal {
@@ -2577,6 +2604,15 @@ namespace FFXIV_TexTools2.Resources {
         public static string UseOrignalBones {
             get {
                 return ResourceManager.GetString("UseOrignalBones", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Variant 的本地化字符串。
+        /// </summary>
+        public static string Variant {
+            get {
+                return ResourceManager.GetString("Variant", resourceCulture);
             }
         }
         

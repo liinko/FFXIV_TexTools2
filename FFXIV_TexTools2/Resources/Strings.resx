@@ -891,6 +891,9 @@
   <data name="MeshCount" xml:space="preserve">
     <value>Meshes:</value>
   </data>
+  <data name="ModelSearch" xml:space="preserve">
+    <value>ModelSearch</value>
+  </data>
   <data name="Model_ID" xml:space="preserve">
     <value>Model ID</value>
   </data>
@@ -932,6 +935,9 @@
   </data>
   <data name="ON" xml:space="preserve">
     <value>ON</value>
+  </data>
+  <data name="Open" xml:space="preserve">
+    <value>Open</value>
   </data>
   <data name="Options" xml:space="preserve">
     <value>Options</value>
@@ -975,6 +981,9 @@
   <data name="Size_colon" xml:space="preserve">
     <value>Size:</value>
   </data>
+  <data name="Slot" xml:space="preserve">
+    <value>Slot</value>
+  </data>
   <data name="TD_Import_Options" xml:space="preserve">
     <value>3D Import Options</value>
   </data>
@@ -1001,6 +1010,9 @@
   </data>
   <data name="UseOrignalBones" xml:space="preserve">
     <value>Use Original Bones</value>
+  </data>
+  <data name="Variant" xml:space="preserve">
+    <value>Variant</value>
   </data>
   <data name="Viewer" xml:space="preserve">
     <value>Viewer</value>
