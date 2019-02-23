@@ -48,8 +48,8 @@ namespace FFXIV_TexTools2.ViewModel
         MTRLData mtrlData;
         ColorChannels imageEffect;
 
-        string activeToggle = "Enable/Disable";
-        string translucencyToggle = "Translucency OFF";
+        string activeToggle = FFXIV_TexTools2.Resources.Strings.Enable+"/"+FFXIV_TexTools2.Resources.Strings.Disable;
+        string translucencyToggle = FFXIV_TexTools2.Resources.Strings.Translucency_OFF;
         string selectedCategory, imcVersion, fullPath, textureType, textureDimensions, fullPathString, VFXVersion;
 
         int raceIndex, mapIndex, typeIndex, partIndex, currMap;
@@ -235,16 +235,16 @@ namespace FFXIV_TexTools2.ViewModel
         private void Translucency(object obj)
         {
             var newOffset = 0;
-            if (TranslucencyToggle.Contains("OFF"))
+            if (TranslucencyToggle.Contains(FFXIV_TexTools2.Resources.Strings.OFF))
             {
                 newOffset = ChangeMTRL.TranslucencyToggle(mtrlData, selectedCategory, selectedItem.ItemName, true);
-                TranslucencyToggle = "Translucency ON";
+                TranslucencyToggle = FFXIV_TexTools2.Resources.Strings.Translucency_ON;
                 mtrlData.ShaderNum = 0x1D;
             }
-            else if (TranslucencyToggle.Contains("ON"))
+            else if (TranslucencyToggle.Contains(FFXIV_TexTools2.Resources.Strings.ON))
             {
                 newOffset = ChangeMTRL.TranslucencyToggle(mtrlData, selectedCategory, selectedItem.ItemName, false);
-                TranslucencyToggle = "Translucency OFF";
+                TranslucencyToggle = FFXIV_TexTools2.Resources.Strings.Translucency_OFF;
                 mtrlData.ShaderNum = 0x0D;
             }
 
@@ -447,7 +447,7 @@ namespace FFXIV_TexTools2.ViewModel
                     if (newData.Item1 != 0)
                     {
                         UpdateImage(newData.Item1, true);
-                        ActiveToggle = "Disable";
+                        ActiveToggle = FFXIV_TexTools2.Resources.Strings.Disable;
                         ActiveEnabled = true;
                         mtrlData.ColorData = newData.Item2;
                     }
@@ -458,7 +458,7 @@ namespace FFXIV_TexTools2.ViewModel
                     if (newOffset != 0)
                     {
                         UpdateImage(newOffset, false);
-                        ActiveToggle = "Disable";
+                        ActiveToggle = FFXIV_TexTools2.Resources.Strings.Disable;
                         ActiveEnabled = true;
                     }
                 }
@@ -468,7 +468,7 @@ namespace FFXIV_TexTools2.ViewModel
                     if (newOffset != 0)
                     {
                         UpdateImage(newOffset, false);
-                        ActiveToggle = "Disable";
+                        ActiveToggle = FFXIV_TexTools2.Resources.Strings.Disable;
                         ActiveEnabled = true;
 
                         if (selectedMap.Name.Equals(Strings.Normal))
@@ -538,15 +538,15 @@ namespace FFXIV_TexTools2.ViewModel
                     int offset = 0;
                     string toggle = "";
 
-                    if (ActiveToggle.Equals("Enable"))
+                    if (ActiveToggle.Equals(FFXIV_TexTools2.Resources.Strings.Enable))
                     {
                         offset = modEntry.modOffset;
-                        toggle = "Disable";
+                        toggle = FFXIV_TexTools2.Resources.Strings.Disable;
                     }
-                    else if (ActiveToggle.Equals("Disable"))
+                    else if (ActiveToggle.Equals(FFXIV_TexTools2.Resources.Strings.Disable))
                     {
                         offset = modEntry.originalOffset;
-                        toggle = "Enable";
+                        toggle = FFXIV_TexTools2.Resources.Strings.Enable;
                     }
 
                     if(offset != 0)
@@ -1070,11 +1070,11 @@ namespace FFXIV_TexTools2.ViewModel
 
                 if (currOffset == modEntry.modOffset)
                 {
-                    ActiveToggle = "Disable";
+                    ActiveToggle = FFXIV_TexTools2.Resources.Strings.Disable;
                 }
                 else if (currOffset == modEntry.originalOffset)
                 {
-                    ActiveToggle = "Enable";
+                    ActiveToggle = FFXIV_TexTools2.Resources.Strings.Enable;
                 }
                 else
                 {
@@ -1086,7 +1086,7 @@ namespace FFXIV_TexTools2.ViewModel
             else
             {
                 ActiveEnabled = false;
-                ActiveToggle = "Enable/Disable";
+                ActiveToggle = FFXIV_TexTools2.Resources.Strings.Enable+"/"+FFXIV_TexTools2.Resources.Strings.Disable;
             }
 
             if (offset == 0 && colorBmp != null)
@@ -1235,12 +1235,12 @@ namespace FFXIV_TexTools2.ViewModel
 
             if (shaderNum == 0x0D)
             {
-                TranslucencyToggle = "Translucency OFF";
+                TranslucencyToggle = FFXIV_TexTools2.Resources.Strings.Translucency_OFF;
                 TranslucencyEnabled = true;
             }
             else if (shaderNum == 0x1D)
             {
-                TranslucencyToggle = "Translucency ON";
+                TranslucencyToggle = FFXIV_TexTools2.Resources.Strings.Translucency_ON;
                 TranslucencyEnabled = true;
             }
             else
@@ -1337,11 +1337,11 @@ namespace FFXIV_TexTools2.ViewModel
 
                     if (colorBMP.Item3 == 0x0D)
                     {
-                        TranslucencyToggle = "Translucency OFF";
+                        TranslucencyToggle = FFXIV_TexTools2.Resources.Strings.Translucency_OFF;
                     }
                     else if (colorBMP.Item3 == 0x1D)
                     {
-                        TranslucencyToggle = "Translucency ON";
+                        TranslucencyToggle = FFXIV_TexTools2.Resources.Strings.Translucency_ON;
                     }
                 }
                 else

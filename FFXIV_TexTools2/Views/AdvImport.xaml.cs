@@ -69,8 +69,11 @@ namespace FFXIV_TexTools2.Views
             FixCheckbox.IsEnabled = false;
             DisableCheckbox.IsEnabled = false;
 
-            MeshCountLabel.Content = "Meshes: " + modelData.LoD[0].MeshCount;
-            ExtraMeshDataLabel.Content = string.Format("Extra Mesh Data: {0}", modelData.ExtraData.totalExtraCounts);
+            MeshCountLabel.Content = FFXIV_TexTools2.Resources.Strings.MeshCount + modelData.LoD[0].MeshCount;
+            if(modelData.ExtraData.totalExtraCounts==null)
+                ExtraMeshDataLabel.Content = string.Format(FFXIV_TexTools2.Resources.Strings.ExtraMeshData + " {0}", 0);
+            else
+                ExtraMeshDataLabel.Content = string.Format(FFXIV_TexTools2.Resources.Strings.ExtraMeshData+" {0}", modelData.ExtraData.totalExtraCounts.Count);
 
             foreach (var bone in modelData.Bones)
             {
@@ -597,7 +600,7 @@ namespace FFXIV_TexTools2.Views
             MeshComboBox.ItemsSource = meshCounts;
             MeshComboBox.SelectedIndex = 0;
 
-            MeshCountLabel.Content = "Meshes: " + modelData.LoD[0].MeshCount;
+            MeshCountLabel.Content = FFXIV_TexTools2.Resources.Strings.MeshCount + modelData.LoD[0].MeshCount;
         }
 
         private void DisableCheckbox_Unchecked(object sender, RoutedEventArgs e)
@@ -608,7 +611,8 @@ namespace FFXIV_TexTools2.Views
         private void MeshComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             var selectedItem = -1;
-
+            if (MeshComboBox.SelectedItem == null)
+                MeshComboBox.SelectedIndex = 0;
 
             if (!MeshComboBox.SelectedItem.ToString().Equals(Strings.All))
             {

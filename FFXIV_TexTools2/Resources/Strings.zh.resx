@@ -117,11 +117,38 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="About" xml:space="preserve">
+    <value>关于</value>
+  </data>
   <data name="Accessory" xml:space="preserve">
     <value>Accessory</value>
   </data>
+  <data name="Active" xml:space="preserve">
+    <value>已激活</value>
+  </data>
+  <data name="AddMesh" xml:space="preserve">
+    <value>添加网格</value>
+  </data>
+  <data name="AddPart" xml:space="preserve">
+    <value>添加部件</value>
+  </data>
+  <data name="Add_Remove" xml:space="preserve">
+    <value>添加/移除:</value>
+  </data>
+  <data name="AdvImportNote" xml:space="preserve">
+    <value>*注意:这些选项仍在开发中，可能无法正常工作。</value>
+  </data>
   <data name="All" xml:space="preserve">
-    <value>全部</value>
+    <value>ALL</value>
+  </data>
+  <data name="AttemptFixText" xml:space="preserve">
+    <value>如果道具与其他道具组合时出现镂空，请使用这些选项。</value>
+  </data>
+  <data name="Attempt_Fix" xml:space="preserve">
+    <value>尝试修复</value>
+  </data>
+  <data name="Attributes" xml:space="preserve">
+    <value>属性:</value>
   </data>
   <data name="Au_Ra" xml:space="preserve">
     <value>敖龙族</value>
@@ -144,17 +171,59 @@
   <data name="Body_Legs_Feet" xml:space="preserve">
     <value>身体 + 腿部 + 脚部</value>
   </data>
+  <data name="Bones" xml:space="preserve">
+    <value>骨骼:</value>
+  </data>
+  <data name="Bone_addition_is_automatic" xml:space="preserve">
+    <value>骨骼添加是自动的</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>取消</value>
+  </data>
   <data name="Carbuncle" xml:space="preserve">
     <value>石兽</value>
   </data>
   <data name="Character" xml:space="preserve">
-    <value>角色</value>
+    <value>Character</value>
+  </data>
+  <data name="Clear_Selected" xml:space="preserve">
+    <value>清除选择</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>关闭</value>
   </data>
   <data name="ColorSet" xml:space="preserve">
     <value>ColorSet</value>
   </data>
+  <data name="Count_colon" xml:space="preserve">
+    <value>数量:</value>
+  </data>
+  <data name="Create" xml:space="preserve">
+    <value>创建</value>
+  </data>
+  <data name="CreateXML" xml:space="preserve">
+    <value>生成XML</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>删除</value>
+  </data>
+  <data name="DemiHuman" xml:space="preserve">
+    <value>DemiHuman</value>
+  </data>
   <data name="Diffuse" xml:space="preserve">
     <value>Diffuse</value>
+  </data>
+  <data name="Directories" xml:space="preserve">
+    <value>配置路径</value>
+  </data>
+  <data name="Disable" xml:space="preserve">
+    <value>禁用</value>
+  </data>
+  <data name="Disable_Extra_Data" xml:space="preserve">
+    <value>禁用网格额外数据</value>
+  </data>
+  <data name="DX_Version" xml:space="preserve">
+    <value>DX版本</value>
   </data>
   <data name="Ears" xml:space="preserve">
     <value>耳部</value>
@@ -162,8 +231,17 @@
   <data name="Elezen" xml:space="preserve">
     <value>精灵族</value>
   </data>
+  <data name="Enable" xml:space="preserve">
+    <value>启用</value>
+  </data>
+  <data name="Enable_Disable" xml:space="preserve">
+    <value>启用/禁用</value>
+  </data>
   <data name="Eos" xml:space="preserve">
     <value>Eos</value>
+  </data>
+  <data name="Equipment" xml:space="preserve">
+    <value>装备</value>
   </data>
   <data name="Equipment_Decals" xml:space="preserve">
     <value>Equipment Decals</value>
@@ -177,6 +255,24 @@
   <data name="Etc" xml:space="preserve">
     <value>Etc</value>
   </data>
+  <data name="Existing" xml:space="preserve">
+    <value>已存在</value>
+  </data>
+  <data name="exportObjButton" xml:space="preserve">
+    <value>导出模型和材质</value>
+  </data>
+  <data name="ExportSettings" xml:space="preserve">
+    <value>导出设置</value>
+  </data>
+  <data name="Export_as_DDS" xml:space="preserve">
+    <value>导出为DDS</value>
+  </data>
+  <data name="Export_as_Image" xml:space="preserve">
+    <value>导出为图像</value>
+  </data>
+  <data name="ExtraMeshData" xml:space="preserve">
+    <value>网格额外数据:</value>
+  </data>
   <data name="Face" xml:space="preserve">
     <value>面对</value>
   </data>
@@ -188,6 +284,9 @@
   </data>
   <data name="Female" xml:space="preserve">
     <value>女性</value>
+  </data>
+  <data name="FFXIV_Directory" xml:space="preserve">
+    <value>FFXIV目录</value>
   </data>
   <data name="Food" xml:space="preserve">
     <value>食品</value>
@@ -207,17 +306,38 @@
   <data name="Head_Body" xml:space="preserve">
     <value>头部 + 身体</value>
   </data>
+  <data name="Help" xml:space="preserve">
+    <value>帮助</value>
+  </data>
   <data name="Hyur_H" xml:space="preserve">
     <value>人族 高地之民</value>
   </data>
   <data name="Hyur_M" xml:space="preserve">
     <value>人族 中原之民</value>
   </data>
+  <data name="Icon_ID" xml:space="preserve">
+    <value>图标ID</value>
+  </data>
   <data name="Ifrit_Egi" xml:space="preserve">
     <value>Ifrit-Egi</value>
   </data>
+  <data name="Import" xml:space="preserve">
+    <value>导入</value>
+  </data>
+  <data name="Importing_File" xml:space="preserve">
+    <value>导入文件</value>
+  </data>
+  <data name="Index_Backups_Directory" xml:space="preserve">
+    <value>游戏索引文件备份目录</value>
+  </data>
   <data name="Iris" xml:space="preserve">
     <value>眼</value>
+  </data>
+  <data name="Item_List" xml:space="preserve">
+    <value>道具列表</value>
+  </data>
+  <data name="Join_us_on_Discord" xml:space="preserve">
+    <value>加入我们的Discord交流群</value>
   </data>
   <data name="Lalafell" xml:space="preserve">
     <value>拉拉菲尔族</value>
@@ -231,6 +351,9 @@
   <data name="Legs_Feet" xml:space="preserve">
     <value>腿部 + 脚部</value>
   </data>
+  <data name="Lighting" xml:space="preserve">
+    <value>灯光</value>
+  </data>
   <data name="Main_Hand" xml:space="preserve">
     <value>主手</value>
   </data>
@@ -240,8 +363,77 @@
   <data name="Male" xml:space="preserve">
     <value>男性</value>
   </data>
+  <data name="Map" xml:space="preserve">
+    <value>纹理</value>
+  </data>
   <data name="Mask" xml:space="preserve">
     <value>Mask</value>
+  </data>
+  <data name="Material" xml:space="preserve">
+    <value>材质:</value>
+  </data>
+  <data name="Materials" xml:space="preserve">
+    <value>材质:</value>
+  </data>
+  <data name="Menu_About" xml:space="preserve">
+    <value>FFXIV TexTools</value>
+  </data>
+  <data name="Menu_BugReport" xml:space="preserve">
+    <value>报告Bug</value>
+  </data>
+  <data name="Menu_Customize" xml:space="preserve">
+    <value>界面表现</value>
+  </data>
+  <data name="Menu_Directories" xml:space="preserve">
+    <value>配置路径</value>
+  </data>
+  <data name="Menu_English" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="Menu_ExportSettings" xml:space="preserve">
+    <value>模型导出设置</value>
+  </data>
+  <data name="Menu_French" xml:space="preserve">
+    <value>French</value>
+  </data>
+  <data name="Menu_German" xml:space="preserve">
+    <value>German</value>
+  </data>
+  <data name="Menu_ImportModpack" xml:space="preserve">
+    <value>导入Mod包</value>
+  </data>
+  <data name="Menu_Japanese" xml:space="preserve">
+    <value>Japanese</value>
+  </data>
+  <data name="Menu_Language" xml:space="preserve">
+    <value>语言</value>
+  </data>
+  <data name="Menu_MakeModpack" xml:space="preserve">
+    <value>制作Mod包</value>
+  </data>
+  <data name="Menu_ModList" xml:space="preserve">
+    <value>Mod列表</value>
+  </data>
+  <data name="Menu_ProblemCheck" xml:space="preserve">
+    <value>数据检查</value>
+  </data>
+  <data name="Menu_ReapplyAll" xml:space="preserve">
+    <value>重新启用所有Mod</value>
+  </data>
+  <data name="Menu_RevertAll" xml:space="preserve">
+    <value>禁用所有Mod</value>
+  </data>
+  <data name="Menu_StartOver" xml:space="preserve">
+    <value>初始化</value>
+  </data>
+  <data name="Menu_Tutorials" xml:space="preserve">
+    <value>指南</value>
+  </data>
+  <data name="Mesh" xml:space="preserve">
+    <value>网格:</value>
+  </data>
+  <data name="MeshCount" xml:space="preserve">
+    <value>网格数:</value>
   </data>
   <data name="Minions" xml:space="preserve">
     <value>宠物</value>
@@ -249,26 +441,104 @@
   <data name="Miqote" xml:space="preserve">
     <value>猫魅族</value>
   </data>
+  <data name="ModelSearch" xml:space="preserve">
+    <value>模型搜索</value>
+  </data>
+  <data name="Model_ID" xml:space="preserve">
+    <value>模型ID</value>
+  </data>
+  <data name="ModList" xml:space="preserve">
+    <value>Mod列表</value>
+  </data>
+  <data name="Modlist_Directory" xml:space="preserve">
+    <value>Mod列表路径</value>
+  </data>
+  <data name="ModpackCreatorInfo" xml:space="preserve">
+    <value>此工具将在以下目录中创建选定mod的mod包文件(*.ttmp):</value>
+  </data>
+  <data name="ModpackImporterInfo" xml:space="preserve">
+    <value>下列Mod将被安装。</value>
+  </data>
+  <data name="Modpack_Creator" xml:space="preserve">
+    <value>Mod包创建器</value>
+  </data>
+  <data name="ModPack_Directory" xml:space="preserve">
+    <value>Mod包目录</value>
+  </data>
+  <data name="ModPack_Importer" xml:space="preserve">
+    <value>Mod包导入器</value>
+  </data>
+  <data name="ModPack_Name_colon" xml:space="preserve">
+    <value>Mod包名称:</value>
+  </data>
+  <data name="Mod_Count_colon" xml:space="preserve">
+    <value>Mod数: </value>
+  </data>
+  <data name="Mod_Repos" xml:space="preserve">
+    <value>Mod在线</value>
+  </data>
   <data name="Monster" xml:space="preserve">
     <value>魔物</value>
   </data>
   <data name="Mounts" xml:space="preserve">
     <value>坐骑</value>
   </data>
+  <data name="Name" xml:space="preserve">
+    <value>名称</value>
+  </data>
   <data name="Neck" xml:space="preserve">
     <value>颈部</value>
+  </data>
+  <data name="NexusMods" xml:space="preserve">
+    <value>Nexus Mods</value>
   </data>
   <data name="Normal" xml:space="preserve">
     <value>Normal</value>
   </data>
+  <data name="Num" xml:space="preserve">
+    <value>编号</value>
+  </data>
+  <data name="OFF" xml:space="preserve">
+    <value>关闭</value>
+  </data>
   <data name="Off_Hand" xml:space="preserve">
     <value>副手</value>
+  </data>
+  <data name="ON" xml:space="preserve">
+    <value>开启</value>
+  </data>
+  <data name="Open" xml:space="preserve">
+    <value>打开</value>
+  </data>
+  <data name="Options" xml:space="preserve">
+    <value>设置</value>
+  </data>
+  <data name="Part" xml:space="preserve">
+    <value>部件:</value>
+  </data>
+  <data name="Part2" xml:space="preserve">
+    <value>部件</value>
+  </data>
+  <data name="Parts" xml:space="preserve">
+    <value>部件:</value>
+  </data>
+  <data name="Part_Attributes" xml:space="preserve">
+    <value>部件属性:</value>
   </data>
   <data name="Pets" xml:space="preserve">
     <value>召唤兽</value>
   </data>
+  <data name="PKEmporium" xml:space="preserve">
+    <value>PrettyKitty Emporium</value>
+  </data>
+  <data name="Race" xml:space="preserve">
+    <value>种族</value>
+  </data>
   <data name="Ramuh_Egi" xml:space="preserve">
     <value>Ramuh Egi</value>
+  </data>
+  <data name="Reflection" xml:space="preserve">
+    <value>反射光</value>
   </data>
   <data name="Rings" xml:space="preserve">
     <value>戒指</value>
@@ -279,11 +549,35 @@
   <data name="Rook_Autoturret" xml:space="preserve">
     <value>Rook Autoturret</value>
   </data>
+  <data name="Save_All_DDS" xml:space="preserve">
+    <value>保存所有DDS</value>
+  </data>
+  <data name="Save_Directory" xml:space="preserve">
+    <value>Mod导出资源保存目录</value>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>搜索</value>
+  </data>
   <data name="SearchBox" xml:space="preserve">
     <value>搜索 Textures</value>
   </data>
+  <data name="Search_colon" xml:space="preserve">
+    <value>搜索:</value>
+  </data>
+  <data name="Select_Active" xml:space="preserve">
+    <value>选择已激活</value>
+  </data>
+  <data name="Select_All" xml:space="preserve">
+    <value>选择所有</value>
+  </data>
   <data name="Selene" xml:space="preserve">
     <value>Selene</value>
+  </data>
+  <data name="Size_colon" xml:space="preserve">
+    <value>大小:</value>
+  </data>
+  <data name="Slot" xml:space="preserve">
+    <value>部位</value>
   </data>
   <data name="Soul_Crystal" xml:space="preserve">
     <value>灵魂水晶</value>
@@ -291,14 +585,59 @@
   <data name="Specular" xml:space="preserve">
     <value>Specular</value>
   </data>
+  <data name="StartOverInfo" xml:space="preserve">
+    <value>初始化将：1.将游戏文件还原。2.删除所有mod及数据。3.清除所有mod记录。是否初始化？</value>
+  </data>
   <data name="Tail" xml:space="preserve">
     <value>尾巴</value>
+  </data>
+  <data name="Target_DAE_Importer" xml:space="preserve">
+    <value>目标DAE处理器</value>
+  </data>
+  <data name="TD_Import_Options" xml:space="preserve">
+    <value>高级导入</value>
+  </data>
+  <data name="TD_Model" xml:space="preserve">
+    <value>3D模型</value>
+  </data>
+  <data name="Texture" xml:space="preserve">
+    <value>纹理</value>
   </data>
   <data name="Titan_Egi" xml:space="preserve">
     <value>Titan-Egi</value>
   </data>
+  <data name="Total_Size_colon" xml:space="preserve">
+    <value>总大小: </value>
+  </data>
+  <data name="Translucency_OFF" xml:space="preserve">
+    <value>半透明化关闭</value>
+  </data>
+  <data name="Translucency_ON" xml:space="preserve">
+    <value>半透明化开启</value>
+  </data>
+  <data name="Transparency" xml:space="preserve">
+    <value>半透明化</value>
+  </data>
   <data name="Two_Handed" xml:space="preserve">
     <value>双手</value>
+  </data>
+  <data name="UI_Icon_Search" xml:space="preserve">
+    <value>UI图标搜索</value>
+  </data>
+  <data name="Update_TEX" xml:space="preserve">
+    <value>更新纹理</value>
+  </data>
+  <data name="UseOrignalBones" xml:space="preserve">
+    <value>使用原始骨骼</value>
+  </data>
+  <data name="Variant" xml:space="preserve">
+    <value>变量</value>
+  </data>
+  <data name="Viewer" xml:space="preserve">
+    <value>视图</value>
+  </data>
+  <data name="Visit_Website" xml:space="preserve">
+    <value>官网</value>
   </data>
   <data name="Waist" xml:space="preserve">
     <value>腰带</value>
@@ -308,5 +647,8 @@
   </data>
   <data name="Wrists" xml:space="preserve">
     <value>腕部</value>
+  </data>
+  <data name="XMArchive" xml:space="preserve">
+    <value>XIV Mod Archive</value>
   </data>
 </root>

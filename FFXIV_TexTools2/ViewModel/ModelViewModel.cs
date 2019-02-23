@@ -48,7 +48,7 @@ namespace FFXIV_TexTools2.ViewModel
         bool raceEnabled, meshEnabled, bodyEnabled, partEnabled, modelRendering, secondModelRendering, thirdModelRendering, is3DLoaded, disposing, modelTabEnabled;
         bool import3dEnabled, activeEnabled, openEnabled, newCat, advImport3dEnabled;
         string selectedCategory, modelName, fullPath, prevCat, reflectionContent;
-        string activeToggle = "Enable/Disable";
+        string activeToggle = FFXIV_TexTools2.Resources.Strings.Enable+"/"+FFXIV_TexTools2.Resources.Strings.Disable;
         string statusText = "";
 
         private ObservableCollection<ComboBoxInfo> raceComboInfo = new ObservableCollection<ComboBoxInfo>();
@@ -341,7 +341,7 @@ namespace FFXIV_TexTools2.ViewModel
         {
             CompositeVM.Reflections(selectedItem.ItemName);
 
-            ReflectionContent = "Reflection " + string.Format("{0:0.##}", CompositeVM.CurrentSS);
+            ReflectionContent = FFXIV_TexTools2.Resources.Strings.Reflection+" " + string.Format("{0:0.##}", CompositeVM.CurrentSS);
         }
 
         /// <summary>
@@ -509,19 +509,19 @@ namespace FFXIV_TexTools2.ViewModel
                 {
                     int offset = 0;
 
-                    if (ActiveToggle.Equals("Enable"))
+                    if (ActiveToggle.Equals(FFXIV_TexTools2.Resources.Strings.Enable))
                     {
                         offset = modEntry.modOffset;
                         Helper.UpdateIndex(offset, fullPath, Strings.ItemsDat);
                         Helper.UpdateIndex2(offset, fullPath, Strings.ItemsDat);
-                        ActiveToggle = "Disable";
+                        ActiveToggle = FFXIV_TexTools2.Resources.Strings.Disable;
                     }
-                    else if (ActiveToggle.Equals("Disable"))
+                    else if (ActiveToggle.Equals(FFXIV_TexTools2.Resources.Strings.Disable))
                     {
                         offset = modEntry.originalOffset;
                         Helper.UpdateIndex(offset, fullPath, Strings.ItemsDat);
                         Helper.UpdateIndex2(offset, fullPath, Strings.ItemsDat);
-                        ActiveToggle = "Enable";
+                        ActiveToggle = FFXIV_TexTools2.Resources.Strings.Enable;
                     }
                 }
 
@@ -1286,11 +1286,11 @@ namespace FFXIV_TexTools2.ViewModel
 
                         if (currOffset == modEntry.modOffset)
                         {
-                            ActiveToggle = "Disable";
+                            ActiveToggle = FFXIV_TexTools2.Resources.Strings.Disable;
                         }
                         else if (currOffset == modEntry.originalOffset)
                         {
-                            ActiveToggle = "Enable";
+                            ActiveToggle = FFXIV_TexTools2.Resources.Strings.Enable;
                         }
                         else
                         {
@@ -1302,10 +1302,10 @@ namespace FFXIV_TexTools2.ViewModel
                     else
                     {
                         ActiveEnabled = false;
-                        ActiveToggle = "Enable/Disable";
+                        ActiveToggle = FFXIV_TexTools2.Resources.Strings.Enable+"/"+FFXIV_TexTools2.Resources.Strings.Disable;
                     }
 
-                    ReflectionContent = "Reflection " + string.Format("{0:0.##}", CompositeVM.CurrentSS);
+                    ReflectionContent = FFXIV_TexTools2.Resources.Strings.Reflection+" " + string.Format("{0:0.##}", CompositeVM.CurrentSS);
 
                 }
                 else

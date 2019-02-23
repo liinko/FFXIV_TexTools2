@@ -4,13 +4,14 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:hx="http://helix-toolkit.org/wpf/SharpDX"
+             xmlns:resx ="clr-namespace:FFXIV_TexTools2.Resources"
              mc:Ignorable="d" 
              d:DesignHeight="500" d:DesignWidth="500">
     <Grid Background="White">
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <GroupBox x:Name="groupBox1" Header="Viewer" Margin="10,50,10,70">
+        <GroupBox x:Name="groupBox1" Header="{x:Static resx:Strings.Viewer}" Margin="10,50,10,70">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="10*" />
@@ -64,10 +65,10 @@
                 <ColumnDefinition/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Button Content="Transparency" Margin="5,0" Command="{Binding TransparencyCommand}"/>
+            <Button Content="{x:Static resx:Strings.Transparency}" Margin="5,0" Command="{Binding TransparencyCommand}"/>
             <Button Content="{Binding ReflectionContent, FallbackValue=Reflection}" Grid.Column="1" Margin="5,0" Command="{Binding ReflectionCommand}"/>
-            <Button Content="Lighting" Grid.Column="2" Margin="5,0" Command="{Binding LightingCommand}"/>
-            <Button Content="Update TEX" Grid.Column="3" Margin="5,0" Command="{Binding UpdateCommand}"/>
+            <Button Content="{x:Static resx:Strings.Lighting}" Grid.Column="2" Margin="5,0" Command="{Binding LightingCommand}"/>
+            <Button Content="{x:Static resx:Strings.Update_TEX}" Grid.Column="3" Margin="5,0" Command="{Binding UpdateCommand}"/>
             <Button Grid.Column="4" Margin="0" Command="{Binding OpenFolderCommand}" IsEnabled="{Binding Open3DEnabled, FallbackValue=false}" MinHeight="20" MinWidth="20" MaxWidth="20" MaxHeight="20">
                 <Button.Background>
                     <ImageBrush ImageSource="/FFXIV TexTools 2;component/Resources/FolderOpen_16x.png" Stretch="Uniform"/>
@@ -82,8 +83,8 @@
                 <ColumnDefinition />
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Button x:Name="exportObjButton" Content="Export Model + Materials" Margin="5" Command="{Binding ExportOBJCommand}"/>
-            <Button x:Name="import3DButton" Content="Import" Grid.Column="2" Margin="5" Command="{Binding ImportOBJCommand}" IsEnabled="{Binding Import3DEnabled, FallbackValue=false}"/>
+            <Button x:Name="exportObjButton" Content="{x:Static resx:Strings.exportObjButton}" Margin="5" Command="{Binding ExportOBJCommand}"/>
+            <Button x:Name="import3DButton" Content="{x:Static resx:Strings.Import}" Grid.Column="2" Margin="5" Command="{Binding ImportOBJCommand}" IsEnabled="{Binding Import3DEnabled, FallbackValue=false}"/>
             <Button x:Name="advImport3DButton" Content="Import (Advanced)" Grid.Column="1" Margin="5" Command="{Binding AdvImportOBJCommand}" IsEnabled="{Binding AdvImport3DEnabled, FallbackValue=false}" Visibility="Collapsed"/>
             <Button x:Name="revert3DButton" Content="{Binding ActiveToggle, FallbackValue='Enable/Disable'}" Grid.Column="3" Margin="5,5,4.5,5" Command="{Binding RevertOBJCommand}" IsEnabled="{Binding ActiveEnabled, FallbackValue=false}"/>
             <Button Grid.Column="4" Margin="0" Command="{Binding AdvImportOBJCommand}" IsEnabled="{Binding AdvImport3DEnabled, FallbackValue=false}" MinHeight="20" MinWidth="20" MaxWidth="20" MaxHeight="20">

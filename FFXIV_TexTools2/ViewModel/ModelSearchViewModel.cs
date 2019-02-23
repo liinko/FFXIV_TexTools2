@@ -68,11 +68,11 @@ namespace FFXIV_TexTools2.ViewModel
         public ModelSearchViewModel(MainViewModel parent)
         {
             parentVM = parent;
-            typeComboInfo.Add(new ComboBoxInfo() { Name = "Equipment", ID = "Equipment" });
-            typeComboInfo.Add(new ComboBoxInfo() { Name = "Weapon", ID = "Weapon" });
-            typeComboInfo.Add(new ComboBoxInfo() { Name = "Accessory", ID = "Accessory" });
-            typeComboInfo.Add(new ComboBoxInfo() { Name = "Monster", ID = "Monster" });
-            typeComboInfo.Add(new ComboBoxInfo() { Name = "DemiHuman", ID = "DemiHuman" });
+            typeComboInfo.Add(new ComboBoxInfo() { Name = Strings.Equipment, ID = "Equipment" });
+            typeComboInfo.Add(new ComboBoxInfo() { Name = Strings.Weapon, ID = "Weapon" });
+            typeComboInfo.Add(new ComboBoxInfo() { Name = Strings.Accessory, ID = "Accessory" });
+            typeComboInfo.Add(new ComboBoxInfo() { Name = Strings.Monster, ID = "Monster" });
+            typeComboInfo.Add(new ComboBoxInfo() { Name = Strings.DemiHuman, ID = "DemiHuman" });
 
 
             TypeIndex = 0;

@@ -47,7 +47,7 @@ namespace FFXIV_TexTools2.Views
             var mpiList = new List<ModPackItems>();
             dt.Tick += new EventHandler(dt_Tick);
 
-            InfoHeader.Content = "This tool will create a zipped TexTools Mod Pack (*.ttmp) file of the selected mods in the following directory:\n" + mpDir;
+            InfoHeader.Content = Strings.ModpackCreatorInfo+"\n" + mpDir;
             try
             {
                 using (StreamReader sr = new StreamReader(Properties.Settings.Default.Modlist_Directory))

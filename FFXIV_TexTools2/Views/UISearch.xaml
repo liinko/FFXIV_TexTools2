@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FFXIV_TexTools2.Views"
         mc:Ignorable="d"
-        Title="UI Icon Search" Height="83.928" Width="461.606" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" MinWidth="450" MinHeight="75">
+        xmlns:resx ="clr-namespace:FFXIV_TexTools2.Resources"
+        Title="{x:Static resx:Strings.UI_Icon_Search}" Height="83.928" Width="461.606" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" MinWidth="450" MinHeight="75">
     <Window.Resources>
         <DataTemplate x:Key="SlotBorderTemplate">
             <Border BorderBrush="#FF000000" BorderThickness="0,0,1,1" Margin="-6,-2,-6,-2">
@@ -42,7 +43,7 @@
         </Style>
     </Window.Resources>
     <Canvas Margin="0" Height="50" Width="450" HorizontalAlignment="Left" VerticalAlignment="Top">
-        <Button x:Name="OpenButton" Content="Open" Margin="0" VerticalAlignment="Top" Width="80" Height="26" Canvas.Left="354" Canvas.Top="9.5" HorizontalAlignment="Left" Command="{Binding OpenAction}"/>
+        <Button x:Name="OpenButton" Content="{x:Static resx:Strings.Open}" Margin="0" VerticalAlignment="Top" Width="80" Height="26" Canvas.Left="354" Canvas.Top="9.5" HorizontalAlignment="Left" Command="{Binding OpenAction}"/>
         <TextBox x:Name="IdTexBox" Text="{Binding IdText}" Height="26" Canvas.Left="10" TextWrapping="Wrap" Canvas.Top="10" Width="339" HorizontalAlignment="Left" VerticalAlignment="Top" KeyDown="IdTexBox_KeyDown"/>
     </Canvas>
 </Window>

@@ -4,8 +4,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FFXIV_TexTools2.Views"
+        xmlns:resx ="clr-namespace:FFXIV_TexTools2.Resources"
         mc:Ignorable="d"
-        Title="ExportSettings" Width="437.295" ResizeMode="NoResize" Height="89.981">
+        Title="{x:Static resx:Strings.ExportSettings}" Width="437.295" ResizeMode="NoResize" Height="89.981">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition MaxWidth="150" MinWidth="150" Width="150*"/>
@@ -15,7 +16,7 @@
             <RowDefinition Height="50*" MaxHeight="50" MinHeight="50"/>
         </Grid.RowDefinitions>
         <ComboBox x:Name="DAETargetComboBox" HorizontalAlignment="Left" Margin="10,0" VerticalAlignment="Center" Width="247" Grid.Column="1" SelectionChanged="DAETargetComboBox_SelectionChanged"/>
-        <Label Content="Target DAE Importer" HorizontalAlignment="Left" Margin="10,0" VerticalAlignment="Center" RenderTransformOrigin="0.481,0.291"/>
+        <Label Content="{x:Static resx:Strings.Target_DAE_Importer}" HorizontalAlignment="Left" Margin="10,0" VerticalAlignment="Center" RenderTransformOrigin="0.481,0.291"/>
 
     </Grid>
 </Window>

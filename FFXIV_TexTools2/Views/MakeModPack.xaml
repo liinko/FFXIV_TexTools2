@@ -4,8 +4,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FFXIV_TexTools2.Views"
+        xmlns:resx ="clr-namespace:FFXIV_TexTools2.Resources"
         mc:Ignorable="d"
-        Title="Modpack Creator" Height="500" Width="700" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner">
+        Title="{x:Static resx:Strings.Modpack_Creator}" Height="500" Width="700" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="369*"/>
@@ -37,9 +38,9 @@
                 <Label x:Name="InfoHeader" BorderBrush="Black" BorderThickness="0,1,0,0" />
             </Grid>
             <StackPanel Orientation="Horizontal" Grid.Row="1" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" Margin="0,5">
-                <Button x:Name="SelectAllButton" Content="Select All" Margin="0,0,20,0" Click="SelectAllButton_Click"/>
-                <Button x:Name="SelectActiveButton" Content="Select Active" Margin="0,0,20,0" Click="SelectActiveButton_Click"/>
-                <Button x:Name="ClearSelectedButton" Content="Clear Selected" Margin="0,0,20,0" Click="ClearSelectedButton_Click"/>
+                <Button x:Name="SelectAllButton" Content="{x:Static resx:Strings.Select_All}" Margin="0,0,20,0" Click="SelectAllButton_Click"/>
+                <Button x:Name="SelectActiveButton" Content="{x:Static resx:Strings.Select_Active}" Margin="0,0,20,0" Click="SelectActiveButton_Click"/>
+                <Button x:Name="ClearSelectedButton" Content="{x:Static resx:Strings.Clear_Selected}" Margin="0,0,20,0" Click="ClearSelectedButton_Click"/>
             </StackPanel>
             <ListView x:Name="listView" Grid.Row="2" SelectionChanged="listView_SelectionChanged" SelectionMode="Multiple"
                       BorderBrush="Black" BorderThickness="0,1" AlternationCount="2" GridViewColumnHeader.Click="Header_Click">
@@ -57,12 +58,12 @@
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
-                        <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}"/>
-                        <GridViewColumn Header="Map" DisplayMemberBinding="{Binding Map}"/>
-                        <GridViewColumn Header="Race" DisplayMemberBinding="{Binding Race}"/>
-                        <GridViewColumn Header="Num" DisplayMemberBinding="{Binding Num}"/>
-                        <GridViewColumn Header="Part" DisplayMemberBinding="{Binding Part}"/>
-                        <GridViewColumn Header="Active" DisplayMemberBinding="{Binding Active}"/>
+                        <GridViewColumn Header="{x:Static resx:Strings.Name}" DisplayMemberBinding="{Binding Name}"/>
+                        <GridViewColumn Header="{x:Static resx:Strings.Map}" DisplayMemberBinding="{Binding Map}"/>
+                        <GridViewColumn Header="{x:Static resx:Strings.Race}" DisplayMemberBinding="{Binding Race}"/>
+                        <GridViewColumn Header="{x:Static resx:Strings.Num}" DisplayMemberBinding="{Binding Num}"/>
+                        <GridViewColumn Header="{x:Static resx:Strings.Part2}" DisplayMemberBinding="{Binding Part}"/>
+                        <GridViewColumn Header="{x:Static resx:Strings.Active}" DisplayMemberBinding="{Binding Active}"/>
                     </GridView>
                 </ListView.View>
             </ListView>
@@ -73,7 +74,7 @@
                 <ColumnDefinition Width="1*"/>
             </Grid.ColumnDefinitions>
             <Grid Grid.Column="1">
-                <Button x:Name="CancelButton" Content="Close" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Click="CancelButton_Click" Margin="0,0,10,0" Padding="3,1"/>
+                <Button x:Name="CancelButton" Content="{x:Static resx:Strings.Close}" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Center" Click="CancelButton_Click" Margin="0,0,10,0" Padding="3,1"/>
             </Grid>
             <Grid Grid.Column="0">
                 <Grid.ColumnDefinitions>
@@ -81,15 +82,15 @@
                     <ColumnDefinition/>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
-                <Label Content="ModPack Name:" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                <Label Content="{x:Static resx:Strings.ModPack_Name_colon}" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" />
                 <TextBox x:Name="modPackName" Grid.Column="1"  VerticalAlignment="Center" Margin="5,0"/>
-                <Button x:Name="CreateButton" Content="Create" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Left" Click="CreateButton_Click" IsEnabled="False" Padding="3,1"/>
+                <Button x:Name="CreateButton" Content="{x:Static resx:Strings.Create}" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Left" Click="CreateButton_Click" IsEnabled="False" Padding="3,1"/>
             </Grid>
         </Grid>
         <StatusBar x:Name="StatusBar" Grid.Row="3" >
-            <Label Content="Count: " Padding="0" />
+            <Label Content="{x:Static resx:Strings.Count_colon}" Padding="0" />
             <Label x:Name="ModCountLabel" Content="0 " Padding="0"/>
-            <Label Content=" Size: " Padding="0" />
+            <Label Content="{x:Static resx:Strings.Size_colon}" Padding="0" />
             <Label x:Name="ModSizeLabel" Content="0" Padding="0"/>
         </StatusBar>
         <Grid Grid.Row="1">
@@ -97,7 +98,7 @@
                 <ColumnDefinition Width="3*"/>
                 <ColumnDefinition Width="1*"/>
             </Grid.ColumnDefinitions>
-            <Label Content="Search:" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0" />
+            <Label Content="{x:Static resx:Strings.Search_colon}" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0" />
             <TextBox x:Name="SearchBox" Margin="53,5,147,5" KeyDown="SearchBox_KeyDown"/>
         </Grid>
     </Grid>

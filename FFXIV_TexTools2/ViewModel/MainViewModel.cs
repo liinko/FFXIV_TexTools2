@@ -649,7 +649,12 @@ namespace FFXIV_TexTools2.ViewModel
         /// </summary>
         private void SearchTextChanged()
         {
-            if (SearchText.Length > 2)
+            var len = 2;
+            if (Strings.Language == "chs")
+            {
+                len = 0;
+            }
+            if (SearchText.Length > len)
             {
                 Dictionary<string, TreeNode> catDict = new Dictionary<string, TreeNode>();
 

@@ -4,8 +4,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FFXIV_TexTools2.Views"
+        xmlns:resx ="clr-namespace:FFXIV_TexTools2.Resources"
         mc:Ignorable="d"
-        Title="About" Height="299" Width="550" WindowStyle="ToolWindow" ResizeMode="NoResize" WindowStartupLocation="CenterOwner">
+        Title="{x:Static resx:Strings.About}" Height="299" Width="550" WindowStyle="ToolWindow" ResizeMode="NoResize" WindowStartupLocation="CenterOwner">
     <Grid>
         <Grid>
             <Grid.ColumnDefinitions>
@@ -32,8 +33,8 @@
                         <ColumnDefinition/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
-                    <Button x:Name="WebsiteButton" Grid.Column="0" Content="Visit Website" Click="WebsiteButton_Click"/>
-                    <Button x:Name="CloseButton" Grid.Column="1" Content="Close" Click="CloseButton_Click"/>
+                    <Button x:Name="WebsiteButton" Grid.Column="0" Content="{x:Static resx:Strings.Visit_Website}" Click="WebsiteButton_Click"/>
+                    <Button x:Name="CloseButton" Grid.Column="1" Content="{x:Static resx:Strings.Close}" Click="CloseButton_Click"/>
                 </Grid>
             </Grid>
         </Grid>

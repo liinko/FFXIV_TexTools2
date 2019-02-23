@@ -4,6 +4,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+             xmlns:resx ="clr-namespace:FFXIV_TexTools2.Resources"
              mc:Ignorable="d" 
              d:DesignHeight="387" d:DesignWidth="506">
     <UserControl.Resources>
@@ -35,7 +36,7 @@
         </Style>
     </UserControl.Resources>
     <Grid Background="White">
-        <GroupBox x:Name="groupBox" Header="Viewer" Margin="10,47,10,63">
+        <GroupBox x:Name="groupBox" Header="{x:Static resx:Strings.Viewer}" Margin="10,47,10,63">
             <Border>
                 <Border.Background>
                     <DrawingBrush Viewport="0,0,20,20" ViewportUnits="Absolute" Stretch="None" TileMode="Tile">
@@ -114,11 +115,11 @@
                 <ColumnDefinition/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <Button Content="Export as Image" Margin="5" Command="{Binding SavePNGCommand}" IsEnabled="{Binding SaveEnabled, FallbackValue=false}"/>
-            <Button Content="Export as DDS" Grid.Column="1" Margin="5" Command="{Binding SaveDDSCommand}" IsEnabled="{Binding SaveEnabled, FallbackValue=false}"/>
-            <Button Content="Import" Grid.Column="2" Margin="5" Command="{Binding ImportCommand}" IsEnabled="{Binding ImportEnabled, FallbackValue=false}"/>
+            <Button Content="{x:Static resx:Strings.Export_as_Image}" Margin="5" Command="{Binding SavePNGCommand}" IsEnabled="{Binding SaveEnabled, FallbackValue=false}"/>
+            <Button Content="{x:Static resx:Strings.Export_as_DDS}" Grid.Column="1" Margin="5" Command="{Binding SaveDDSCommand}" IsEnabled="{Binding SaveEnabled, FallbackValue=false}"/>
+            <Button Content="{x:Static resx:Strings.Import}" Grid.Column="2" Margin="5" Command="{Binding ImportCommand}" IsEnabled="{Binding ImportEnabled, FallbackValue=false}"/>
             <Button Content="{Binding ActiveToggle, FallbackValue='Enable/Disable' }" Grid.Column="3" Margin="5" Command="{Binding ActiveCommand}" IsEnabled="{Binding ActiveEnabled, FallbackValue=false}"/>
-            <Button Content="{Binding TranslucencyToggle, FallbackValue='Translucency Off' }" Grid.Column="4" Margin="5" Command="{Binding TranslucencyCommand}" IsEnabled="{Binding TranslucencyEnabled, FallbackValue=false}"/>
+            <Button Content="{Binding TranslucencyToggle, FallbackValue='{x:Static resx:Strings.Translucency_OFF}' }" Grid.Column="4" Margin="5" Command="{Binding TranslucencyCommand}" IsEnabled="{Binding TranslucencyEnabled, FallbackValue=false}"/>
         </Grid>
     </Grid>
 </UserControl>

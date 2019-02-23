@@ -4,8 +4,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FFXIV_TexTools2.Views"
+        xmlns:resx ="clr-namespace:FFXIV_TexTools2.Resources"
         mc:Ignorable="d"
-        Title="Directories" WindowStartupLocation="CenterOwner" WindowStyle="ToolWindow" Height="210" Width="400" SizeToContent="WidthAndHeight" ResizeMode="NoResize">
+        Title="{x:Static resx:Strings.Directories}" WindowStartupLocation="CenterOwner" WindowStyle="ToolWindow" Height="210" Width="400" SizeToContent="WidthAndHeight" ResizeMode="NoResize">
     <Grid Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
         <Grid.RowDefinitions>
             <RowDefinition/>
@@ -15,35 +16,36 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="10*" />
-            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="15*" />
+            <ColumnDefinition Width="343*"/>
+            <ColumnDefinition Width="36*"/>
         </Grid.ColumnDefinitions>
-        <Grid Grid.Column="0" Grid.Row="0" Height="23" Margin="10,15,10,5" VerticalAlignment="Top">
+        <Grid Grid.Column="0" Grid.Row="0" Height="23" Margin="10,15,10,0" VerticalAlignment="Top" Grid.ColumnSpan="2" Grid.RowSpan="2">
             <TextBox x:Name="FFXIVDir" TextWrapping="Wrap" IsReadOnly="True" Margin="0"/>
         </Grid>
-        <Grid Grid.Column="0" Grid.Row="1" Height="23" Margin="10,15,10,5" VerticalAlignment="Top">
+        <Grid Grid.Column="0" Grid.Row="1" Height="23" Margin="10,15,10,0" VerticalAlignment="Top" Grid.ColumnSpan="2" Grid.RowSpan="2">
             <TextBox x:Name="saveDir" TextWrapping="Wrap" IsReadOnly="True" Margin="0"/>
         </Grid>
-        <Grid Grid.Column="0" Grid.Row="2" Height="23" Margin="10,15,10,5" VerticalAlignment="Top">
+        <Grid Grid.Column="0" Grid.Row="2" Height="23" Margin="10,15,10,0" VerticalAlignment="Top" Grid.ColumnSpan="2" Grid.RowSpan="2">
             <TextBox x:Name="modListDir" TextWrapping="Wrap" IsReadOnly="True" Margin="0"/>
         </Grid>
-        <Grid Grid.Column="0" Grid.Row="3" Height="23" Margin="10,15,10,5" VerticalAlignment="Top">
+        <Grid Grid.Column="0" Grid.Row="3" Height="23" Margin="10,15,10,0" VerticalAlignment="Top" Grid.ColumnSpan="2" Grid.RowSpan="2">
             <TextBox x:Name="indexBackupsDir" TextWrapping="Wrap" IsReadOnly="True" Margin="0"/>
         </Grid>
-        <Grid Grid.Column="0" Grid.Row="4" Height="23" Margin="10,15,10,5" VerticalAlignment="Top">
+        <Grid Grid.Column="0" Grid.Row="4" Height="23" Margin="10,15,10,-1" VerticalAlignment="Top" Grid.ColumnSpan="2">
             <TextBox x:Name="ModPackDir" TextWrapping="Wrap" IsReadOnly="True" Margin="0"/>
         </Grid>
 
-        <Button Content="..." Grid.Row="0" Grid.Column="1" Margin="5" Click="FFXIVDirButton_Click" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="25" MinHeight="25" HorizontalContentAlignment="Center" VerticalContentAlignment="Top"/>
-        <Button Content="..." Grid.Row="1" Grid.Column="1" Margin="5" Click="SaveDirButton_Click" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="25" MinHeight="25" VerticalContentAlignment="Top" HorizontalContentAlignment="Center"/>
-        <Button Content="..." Grid.Row="2" Grid.Column="1" Margin="5" Click="modlistDirButton_Click" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="25" MinHeight="25" VerticalContentAlignment="Top" HorizontalContentAlignment="Center"/>
-        <Button Content="..." Grid.Row="3" Grid.Column="1" Margin="5" Click="indexbackupDirButton_Click" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="25" MinHeight="25" VerticalContentAlignment="Top" HorizontalContentAlignment="Center"/>
-        <Button Content="..." Grid.Row="4" Grid.Column="1" Margin="5" Click="ModPackButton_Click" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="25" MinHeight="25" VerticalContentAlignment="Top" HorizontalContentAlignment="Center"/>
-        
-        <Label Grid.Row="0" Content="FFXIV Directory" VerticalAlignment="Top"  Height="15" Padding="0" Margin="5,0,0,0"/>
-        <Label Grid.Row="1"  Content="Save Directory" VerticalAlignment="Top" Height="15" Padding="0" Margin="5,0,0,0"/>
-        <Label Grid.Row="2"  Content="Modlist Directory" VerticalAlignment="Top" Height="15" Padding="0" Margin="5,0,0,0"/>
-        <Label Grid.Row="3"  Content="Index Backups Directory" VerticalAlignment="Top" Height="15" Padding="0" Margin="5,0,0,0"/>
-        <Label Grid.Row="4"  Content="ModPack Directory" VerticalAlignment="Top" Height="15" Padding="0" Margin="5,0,0,0"/>
+        <Button Content="..." Grid.Row="0" Grid.Column="2" Margin="6" Click="FFXIVDirButton_Click" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="25" MinHeight="25" HorizontalContentAlignment="Center" VerticalContentAlignment="Top"/>
+        <Button Content="..." Grid.Row="1" Grid.Column="2" Margin="6" Click="SaveDirButton_Click" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="25" MinHeight="25" VerticalContentAlignment="Top" HorizontalContentAlignment="Center"/>
+        <Button Content="..." Grid.Row="2" Grid.Column="2" Margin="6" Click="modlistDirButton_Click" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="25" MinHeight="25" VerticalContentAlignment="Top" HorizontalContentAlignment="Center"/>
+        <Button Content="..." Grid.Row="3" Grid.Column="2" Margin="6,5" Click="indexbackupDirButton_Click" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="25" MinHeight="25" VerticalContentAlignment="Top" HorizontalContentAlignment="Center"/>
+        <Button Content="..." Grid.Row="4" Grid.Column="2" Margin="6" Click="ModPackButton_Click" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="25" MinHeight="25" VerticalContentAlignment="Top" HorizontalContentAlignment="Center"/>
+
+        <Label Grid.Row="0" Content="{x:Static resx:Strings.FFXIV_Directory}" VerticalAlignment="Top"  Height="15" Padding="0" Margin="5,0,0,0" Grid.ColumnSpan="2"/>
+        <Label Grid.Row="1"  Content="{x:Static resx:Strings.Save_Directory}" VerticalAlignment="Top" Height="15" Padding="0" Margin="5,0,0,0" Grid.ColumnSpan="2"/>
+        <Label Grid.Row="2"  Content="{x:Static resx:Strings.Modlist_Directory}" VerticalAlignment="Top" Height="15" Padding="0" Margin="5,0,0,0" Grid.ColumnSpan="2"/>
+        <Label Grid.Row="3"  Content="{x:Static resx:Strings.Index_Backups_Directory}" VerticalAlignment="Top" Height="15" Padding="0" Margin="5,0,0,0" Grid.ColumnSpan="2"/>
+        <Label Grid.Row="4"  Content="{x:Static resx:Strings.ModPack_Directory}" VerticalAlignment="Top" Height="15" Padding="0" Margin="5,0,0,0" Grid.ColumnSpan="2"/>
     </Grid>
 </Window>

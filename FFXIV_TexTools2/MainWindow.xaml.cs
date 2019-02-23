@@ -93,7 +93,7 @@ namespace FFXIV_TexTools2
                 Properties.Settings.Default.Save();
             }
 
-            DXVerButton.Content = "DX Version: " + dxver.Substring(2);
+            DXVerButton.Content = FFXIV_TexTools2.Resources.Strings.DX_Version+": " + dxver.Substring(2);
         }
 
         private void Menu_ProblemCheck_Click(object sender, RoutedEventArgs e)
@@ -323,11 +323,7 @@ namespace FFXIV_TexTools2
 
             if (!Helper.IsIndexLocked(true))
             {
-                var result = FlexibleMessageBox.Show("Starting over will:\n\n" +
-                    "Restore index files to their original state.\n" +
-                    "Delete all mods and create new .dat files.\n" +
-                    "Delete all .modlist file entries.\n\n" +
-                    "Do you want to start over?", "Start Over", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+                var result = FlexibleMessageBox.Show(Strings.StartOverInfo, Strings.Menu_StartOver, MessageBoxButtons.YesNo, MessageBoxIcon.Information);
 
                 if (result == System.Windows.Forms.DialogResult.Yes)
                 {
@@ -494,18 +490,18 @@ namespace FFXIV_TexTools2
                 Properties.Settings.Default.DX_Ver = Strings.DX9;
                 Properties.Settings.Default.Save();
 
-                DXVerButton.Content = "DX Version: 9";
+                DXVerButton.Content = FFXIV_TexTools2.Resources.Strings.DX_Version+": 9";
             }
             else if (dxver.Equals(Strings.DX9))
             {
                 Properties.Settings.Default.DX_Ver = Strings.DX11;
                 Properties.Settings.Default.Save();
 
-                DXVerButton.Content = "DX Version: 11";
+                DXVerButton.Content = FFXIV_TexTools2.Resources.Strings.DX_Version+": 11";
             }
             else
             {
-                DXVerButton.Content = "DX Version: ERROR";
+                DXVerButton.Content = FFXIV_TexTools2.Resources.Strings.DX_Version+": ERROR";
             }
 
             if ((CategoryViewModel)textureTreeView.SelectedItem != null)

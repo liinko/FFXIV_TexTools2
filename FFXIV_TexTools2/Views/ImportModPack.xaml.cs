@@ -37,7 +37,7 @@ namespace FFXIV_TexTools2.Views
             dt.Tick += new EventHandler(dt_Tick);
             packPath = modPackPath;
 
-            InfoHeader.Content = "The following Mods will be installed.";
+            InfoHeader.Content = Strings.ModpackImporterInfo;
 
             List<ModPackItems> mpiList = new List<ModPackItems>();
             List<ModPackJson> mpjList = new List<ModPackJson>();
