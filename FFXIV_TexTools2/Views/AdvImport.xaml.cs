@@ -70,7 +70,10 @@ namespace FFXIV_TexTools2.Views
             DisableCheckbox.IsEnabled = false;
 
             MeshCountLabel.Content = FFXIV_TexTools2.Resources.Strings.MeshCount + modelData.LoD[0].MeshCount;
-            ExtraMeshDataLabel.Content = string.Format(FFXIV_TexTools2.Resources.Strings.ExtraMeshData+" {0}", modelData.ExtraData.totalExtraCounts.Count);
+            if(modelData.ExtraData.totalExtraCounts==null)
+                ExtraMeshDataLabel.Content = string.Format(FFXIV_TexTools2.Resources.Strings.ExtraMeshData + " {0}", 0);
+            else
+                ExtraMeshDataLabel.Content = string.Format(FFXIV_TexTools2.Resources.Strings.ExtraMeshData+" {0}", modelData.ExtraData.totalExtraCounts.Count);
 
             foreach (var bone in modelData.Bones)
             {
